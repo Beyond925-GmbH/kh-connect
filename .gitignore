@@ -33,3 +33,6 @@ dev-dist
 
 # Netlify-CLI
 .netlify/
+
+# Screenshots aus Abnahmelaeufen, wo Playwright sie ablegt
+/*.png
