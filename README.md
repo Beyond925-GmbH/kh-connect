@@ -6,6 +6,14 @@ React + Vite + TypeScript, Tailwind v4, shadcn-style components on **Base UI**
 **The page is intentionally blank.** What this repo holds right now is the design
 system in code — theme tokens, style primitives and brand assets. Content comes later.
 
+## Specs
+
+- [`khpl-flow.md`](./khpl-flow.md) — **what** is told: the M1–M10 main line, the
+  Abstecher branches and every sticky from the Miro board.
+- [`khpl-ui-shell.md`](./khpl-ui-shell.md) — the **shell** around it: splash, in-fiction
+  intro, progress rail, "Dein Weg" sheet, the discreet career skip, and the
+  localStorage resume model. Read before building any screen.
+
 ## Run
 
 ```bash
