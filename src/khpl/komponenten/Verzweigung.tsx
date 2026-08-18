@@ -2,7 +2,7 @@ import { ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import type { StepId } from '@/khpl/flow/steps'
-import { einladung, weiterText } from '@/khpl/flow/uebergaenge'
+import { beschreibung, einladung, weiterText } from '@/khpl/flow/uebergaenge'
 
 /**
  * Der Fuß eines Step-Screens (khpl-ui-shell.md 5): Abstecher-Angebot **und**
@@ -18,8 +18,8 @@ export function Verzweigung({
   weiterVon,
   onAbstecher,
   onWeiter,
-  /** M10 hat kein „Weiter“ mehr. */
   ohneWeiter = false,
+  gedaempft = false,
 }: {
   /** Noch nicht genommene Abstecher, in Anzeigereihenfolge. */
   offen: StepId[]
@@ -28,6 +28,12 @@ export function Verzweigung({
   onAbstecher: (id: StepId) => void
   onWeiter: () => void
   ohneWeiter?: boolean
+  /**
+   * Solange eine Übung offen ist, tritt *Weiter* optisch zurück: sonst stehen
+   * zwei orange Flächen nebeneinander und konkurrieren um denselben Daumen.
+   * Freigeschaltet bleibt es trotzdem — niemand wird blockiert (flow 6.6).
+   */
+  gedaempft?: boolean
 }) {
   const hatAngebot = offen.length > 0
 
@@ -40,22 +46,33 @@ export function Verzweigung({
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col gap-2"
         >
-          <p className="text-[15px] font-normal text-kh-grey">
+          <p className="text-[16px] font-normal text-kh-ink">
             {/* Eine Einladung klingt anders als eine Auswahl — deshalb zwei
                 Überschriften, beide aus der Spec (ui-shell 5 / flow 6.7). */}
             {offen.length === 1 ? 'Noch eine Minute?' : 'Wie tief willst du rein?'}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {offen.map((id) => (
-              <Button
-                key={id}
-                variant="outline"
-                onClick={() => onAbstecher(id)}
-                className="h-[60px] max-w-full flex-1 justify-start px-6 text-left text-[16px] whitespace-normal"
-              >
-                {einladung(id)}
-              </Button>
-            ))}
+          <div className="flex flex-col gap-2 landscape:flex-row">
+            {offen.map((id) => {
+              const zeile = beschreibung(id)
+              return (
+                <Button
+                  key={id}
+                  variant="outline"
+                  onClick={() => onAbstecher(id)}
+                  data-testid={`abstecher-${id}`}
+                  className="h-auto min-h-[60px] flex-1 flex-col items-start justify-center gap-0.5 px-5 py-3 text-left whitespace-normal"
+                >
+                  <span className="text-[16px] leading-tight font-normal">
+                    {einladung(id)}
+                  </span>
+                  {zeile && (
+                    <span className="text-[14px] leading-snug font-light text-kh-grey">
+                      {zeile}
+                    </span>
+                  )}
+                </Button>
+              )
+            })}
           </div>
         </motion.div>
       )}
@@ -65,7 +82,12 @@ export function Verzweigung({
           <Button
             onClick={onWeiter}
             size="lg"
-            className="h-[60px] min-w-[9rem] px-8 text-[17px]"
+            variant={gedaempft ? 'ghost' : 'default'}
+            className={
+              gedaempft
+                ? 'h-[60px] min-w-[9rem] px-6 text-[16px]'
+                : 'h-[60px] min-w-[9rem] px-8 text-[17px]'
+            }
             data-testid="weiter"
           >
             {weiterText(weiterVon)}

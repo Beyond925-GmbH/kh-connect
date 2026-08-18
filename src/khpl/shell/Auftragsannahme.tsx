@@ -25,7 +25,7 @@ export function Auftragsannahme() {
   return (
     <div
       data-testid="auftragsannahme"
-      className="fixed inset-0 flex flex-col overflow-hidden bg-kh-ink"
+      className="kh-screen flex flex-col overflow-hidden bg-kh-ink"
     >
       <img
         src={BILD}
@@ -35,6 +35,9 @@ export function Auftragsannahme() {
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/55 to-black/30" />
 
+      {/* „klein, textuell, in Grau, nicht als Button“ (ui-shell 6). Auf einem
+          dunklen Foto heißt Grau nicht `text-kh-grey`, sondern gedämpftes Weiß —
+          er darf hier auf keinen Fall mit „Auftrag annehmen“ konkurrieren. */}
       <div className="relative flex justify-end p-3 landscape:p-4">
         <button
           type="button"
@@ -43,7 +46,7 @@ export function Auftragsannahme() {
             nimmAuftragAn()
             starteKarriereSkip()
           }}
-          className="flex h-11 items-center gap-0.5 rounded-kh px-3 text-[15px] text-white/70 transition-colors hover:text-white"
+          className="flex h-[60px] items-center gap-0.5 rounded-kh px-3 text-[15px] font-light text-white/45 transition-colors hover:text-white/80"
         >
           Karriere-Wege
           <ChevronRight className="size-4" strokeWidth={1.5} />
@@ -60,10 +63,12 @@ export function Auftragsannahme() {
           <p className="text-[clamp(1.6rem,1.2rem+1.9vw,2.6rem)] leading-[1.1] font-bold text-white">
             Du bist Azubi in einer Zimmerei.
           </p>
+          {/* Bindet die Werkstattaufnahme an den Anruf, statt ein Haus zu
+              versprechen, das nicht im Bild ist: im Bestand gibt es kein
+              einziges Ortstermin-Motiv (flow 13). */}
           <p className="text-[clamp(1.05rem,0.98rem+0.5vw,1.35rem)] leading-[1.5] font-light text-white/90">
-            Gerade kam eine Anfrage rein. Ein altes Dach, eine Familie, die noch nicht
-            weiß, was auf sie zukommt. Vom ersten Anruf bis zu dem Moment, in dem der
-            Dachstuhl steht — ab jetzt ist das dein Auftrag.
+            Der Chef legt das Telefon weg und dreht sich zu dir um. Altes Haus, das Dach
+            muss neu. Er fragt, ob du mitkommst.
           </p>
         </div>
 

@@ -3,6 +3,11 @@ import { Auftragsannahme } from '@/khpl/shell/Auftragsannahme'
 import { KioskGuard } from '@/khpl/shell/KioskGuard'
 import { Splash } from '@/khpl/shell/Splash'
 import { Platzhalter } from '@/khpl/steps/Platzhalter'
+import { M1 } from '@/khpl/steps/M1'
+import { M2 } from '@/khpl/steps/M2'
+import { M3 } from '@/khpl/steps/M3'
+import { B31 } from '@/khpl/steps/B31'
+import { B32 } from '@/khpl/steps/B32'
 import { useBildschirm, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
@@ -14,7 +19,13 @@ import { useBildschirm, useFortschritt } from '@/khpl/store/fortschritt'
  */
 
 /** Steps, die schon gebaut sind. Der Rest läuft über den Platzhalter. */
-const GEBAUT: Partial<Record<StepId, () => React.ReactNode>> = {}
+const GEBAUT: Partial<Record<StepId, () => React.ReactNode>> = {
+  M1: () => <M1 />,
+  M2: () => <M2 />,
+  M3: () => <M3 />,
+  'B3.1': () => <B31 />,
+  'B3.2': () => <B32 />,
+}
 
 export function KhplApp() {
   const bildschirm = useBildschirm()

@@ -223,6 +223,94 @@
 }
 
 /* ------------------------------------------------------------------
+   Vollbild-Screen mit sicheren Rändern.
+
+   `index.html` setzt `viewport-fit=cover` und eine schwarz-transluzente
+   Statusleiste — genau die Kombination, die das Kiosk-iPad im Homescreen-Modus
+   braucht. Ohne `env(safe-area-inset-*)` liegt die Statusleiste dann über der
+   Navigationsleiste: der Zurück-Button und der linke Rand der Rail
+   verschwinden unter der Uhr.
+
+   `100dvh` statt `100vh`, damit im Browserbetrieb die einfahrende Adressleiste
+   den Fuß nicht abschneidet.
+------------------------------------------------------------------ */
+@utility kh-screen {
+  position: fixed;
+  inset: 0;
+  height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Die persistente Leiste. 60-px-Ziele brauchen 68 px Höhe (flow 8.5). */
+@utility kh-leiste {
+  height: 68px;
+}
+
+/* ------------------------------------------------------------------
+   Der Schätz-Regler aus M2.
+
+   Ein natives `input[type=range]`, nur neu eingekleidet: auf iPad-Safari ist
+   das die einzige Variante, die zuverlässig zieht, ohne dass man
+   Pointer-Capture von Hand nachbauen muss. Der Griff ist 44 px, die Bahn 14 px
+   — anfassbar mit ausgestrecktem Arm (flow 8.5).
+------------------------------------------------------------------ */
+@utility kh-regler {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 44px;
+  background: transparent;
+  touch-action: none;
+  cursor: pointer;
+
+  &::-webkit-slider-runnable-track {
+    height: 14px;
+    border-radius: 999px;
+    background: var(--color-kh-band);
+  }
+  &::-moz-range-track {
+    height: 14px;
+    border-radius: 999px;
+    background: var(--color-kh-band);
+  }
+
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 44px;
+    height: 44px;
+    margin-top: -15px;
+    border-radius: 999px;
+    border: 3px solid var(--color-kh-page);
+    background: var(--color-kh-orange);
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.22);
+  }
+  &::-moz-range-thumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 3px solid var(--color-kh-page);
+    background: var(--color-kh-orange);
+    box-shadow: 0 2px 10px rgb(0 0 0 / 0.22);
+  }
+
+  /* Nach der Auflösung steht der Griff still, bleibt aber sichtbar: er ist
+     dann die Marke „das hast du geschätzt“. */
+  &:disabled {
+    cursor: default;
+    opacity: 1;
+  }
+  &:disabled::-webkit-slider-thumb {
+    background: var(--color-kh-grey);
+  }
+  &:disabled::-moz-range-thumb {
+    background: var(--color-kh-grey);
+  }
+}
+
+/* ------------------------------------------------------------------
    Kiosk-Verhalten (khpl-ui-shell.md 8).
 
    Kein Zoom, kein Bounce, keine Textauswahl. Pinch-Zoom hängt zusätzlich an

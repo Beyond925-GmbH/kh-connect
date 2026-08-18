@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { STEPS, type StepId } from '@/khpl/flow/steps'
 import { DeinWeg } from './DeinWeg'
 import { Rail } from './Rail'
+import { WeiterKontext } from './WeiterKontext'
 import { useWisch } from './useWisch'
 import {
   beendeKarriereSkip,
@@ -46,7 +47,7 @@ export function StepShell({
   aha,
   fuss,
   aufteilung = 'bild',
-  interaktionOffen = false,
+  interaktionOffen,
   wischen = true,
   titelZusatz,
   onWeiter,
@@ -58,13 +59,21 @@ export function StepShell({
   aha?: React.ReactNode
   fuss?: React.ReactNode
   aufteilung?: Aufteilung
-  /** Solange `true`: kein Karriere-Link. */
+  /**
+   * Solange `true`: kein Karriere-Link. Ohne Angabe gilt jeder Step mit
+   * Interaktion als offen — der sichere Zustand muss der Standard sein, sonst
+   * ist ui-shell 6 („während eine Interaktion noch offen ist nie“) eine Regel,
+   * an die sich jeder Step einzeln erinnern muss.
+   */
   interaktionOffen?: boolean
   /** Auf Drag-&-Drop-Screens abschalten (flow 6.1). */
   wischen?: boolean
   /** Kleine Zeile über dem Titel, z. B. „Abstecher“. */
   titelZusatz?: string
-  /** Derselbe Weg wie der Weiter-Button — der Wisch nach links löst ihn aus. */
+  /**
+   * Der eine Weg nach vorn. Button und Wisch nach links benutzen ihn beide —
+   * siehe `WeiterKontext`.
+   */
   onWeiter?: () => void
 }) {
   const fortschritt = useFortschritt()
@@ -74,15 +83,23 @@ export function StepShell({
   const def = STEPS[id]
   const imSkip = fortschritt.detourReturnTo !== null
   const kannZurueck = fortschritt.visited.length > 1
-  const skipSichtbar = !imSkip && !interaktionOffen && SKIP_AUF.includes(id)
+  const offen = interaktionOffen ?? interaktion != null
+  const skipSichtbar = !imSkip && !offen && SKIP_AUF.includes(id)
+
+  const zurueck = useCallback(() => {
+    // Im Skip führt jeder Rückweg aus dem Abstecher heraus, nicht durch die
+    // Historie: „ein Tap rein, ein Tap raus, exakt an dieselbe Stelle“
+    // (ui-shell 6). Ohne das landet ein Wisch nach rechts auf dem Rückkehrziel,
+    // während die Skip-Leiste stehen bleibt.
+    if (imSkip) beendeKarriereSkip()
+    else if (kannZurueck) geheZurueck()
+  }, [imSkip, kannZurueck])
 
   useWisch({
     ziel: flaeche,
     aktiv: wischen && !wegOffen,
     onLinks: () => onWeiter?.(),
-    onRechts: () => {
-      if (kannZurueck) geheZurueck()
-    },
+    onRechts: zurueck,
   })
 
   const titel = (
@@ -96,110 +113,128 @@ export function StepShell({
     </header>
   )
 
+  /**
+   * Der Fuß bekommt in den Bild-Layouts eine eigene deckende Fläche.
+   * flow 6.2 begründet das ausführlich: Fließtext in Barlow 200 über einem Foto
+   * ist aus Armlänge unter Hallenlicht nicht lesbar — und das Abstecher-Angebot
+   * ist Fließtext mit Umriss-Buttons, nicht nur ein oranger Block.
+   */
+  const fussFlaeche = fuss && (
+    <div className="rounded-kh bg-kh-page p-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:p-5">
+      {fuss}
+    </div>
+  )
+
   return (
-    <div
-      className="fixed inset-0 flex flex-col overflow-hidden bg-kh-page"
-      data-step={id}
-      data-testid="step"
-    >
-      {/* Reihenfolge im DOM: Inhalt vor Navigation (flow 8.5). Die Leiste sitzt
-          per `order` optisch oben, Screenreader und Tastatur beginnen aber
-          nicht mit „zurück“. */}
-      <main ref={flaeche} className="relative order-2 min-h-0 flex-1">
-        {aufteilung === 'bild' && (
-          <>
-            {buehne && <div className="absolute inset-0 overflow-hidden">{buehne}</div>}
-            <div className="absolute inset-0 flex flex-col justify-end gap-3 p-4 landscape:p-6">
-              <div className="flex w-full flex-col gap-3 rounded-kh bg-kh-page p-5 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:max-w-[42rem] landscape:p-7">
+    <WeiterKontext.Provider value={onWeiter ?? null}>
+      <div
+        className="kh-screen flex flex-col overflow-hidden bg-kh-page"
+        data-step={id}
+        data-testid="step"
+      >
+        {/* Reihenfolge im DOM: Inhalt vor Navigation (flow 8.5). Die Leiste sitzt
+            per `order` optisch oben, Screenreader und Tastatur beginnen aber
+            nicht mit „zurück“. */}
+        <main ref={flaeche} className="relative order-2 min-h-0 flex-1">
+          {aufteilung === 'bild' && (
+            <>
+              {buehne && <div className="absolute inset-0 overflow-hidden">{buehne}</div>}
+              <div className="absolute inset-0 flex flex-col justify-end gap-3 p-4 landscape:p-6">
+                <div className="flex w-full flex-col gap-3 rounded-kh bg-kh-page p-5 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:max-w-[42rem] landscape:p-7">
+                  {titel}
+                  {fachtext && <div className="kh-fachtext">{fachtext}</div>}
+                  {interaktion}
+                  {aha}
+                </div>
+                {fussFlaeche}
+              </div>
+            </>
+          )}
+
+          {aufteilung === 'uebung' && (
+            <div className="flex h-full flex-col landscape:flex-row">
+              {buehne && (
+                <div className="relative h-[18vh] shrink-0 overflow-hidden landscape:h-full landscape:w-[34%]">
+                  {buehne}
+                </div>
+              )}
+              <div className="flex min-h-0 flex-1 flex-col gap-3 p-4 landscape:gap-4 landscape:p-6">
                 {titel}
                 {fachtext && <div className="kh-fachtext">{fachtext}</div>}
-                {interaktion}
-                {aha}
-              </div>
-              {fuss}
-            </div>
-          </>
-        )}
-
-        {aufteilung === 'uebung' && (
-          <div className="flex h-full flex-col landscape:flex-row">
-            {buehne && (
-              <div className="relative h-[18vh] shrink-0 overflow-hidden landscape:h-full landscape:w-[34%]">
-                {buehne}
-              </div>
-            )}
-            <div className="flex min-h-0 flex-1 flex-col gap-3 p-4 landscape:gap-4 landscape:p-6">
-              {titel}
-              {fachtext && <div className="kh-fachtext">{fachtext}</div>}
-              {/* Immer da, auch leer: der Fuß gehört an den unteren Rand, und
-                  der Weiter-Button soll auf jedem Screen an derselben Stelle
-                  liegen (flow 6.1 — Button unten rechts). */}
-              <div className="min-h-0 flex-1">{interaktion}</div>
-              {aha}
-              {fuss}
-            </div>
-          </div>
-        )}
-
-        {aufteilung === 'buehne' && (
-          <>
-            {buehne && <div className="absolute inset-0 overflow-hidden">{buehne}</div>}
-            <div className="pointer-events-none absolute inset-0 flex flex-col justify-between gap-3 p-4 landscape:p-6">
-              <div className="pointer-events-auto w-full max-w-[30rem] rounded-kh bg-kh-page p-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:p-5">
-                {titel}
-                {fachtext && <div className="kh-fachtext mt-2">{fachtext}</div>}
-              </div>
-              <div className="pointer-events-auto flex flex-col gap-3 landscape:ml-auto landscape:w-[min(42rem,60%)]">
-                {interaktion}
+                {/* Immer da, auch leer: der Fuß gehört an den unteren Rand, und
+                    der Weiter-Button soll auf jedem Screen an derselben Stelle
+                    liegen (flow 6.1 — Button unten rechts). */}
+                <div className="min-h-0 flex-1">{interaktion}</div>
                 {aha}
                 {fuss}
               </div>
             </div>
-          </>
-        )}
-      </main>
+          )}
 
-      {imSkip ? (
-        <RueckkehrLeiste ziel={fortschritt.detourReturnTo as StepId} />
-      ) : (
-        <header className="order-1 flex h-14 shrink-0 items-center gap-1 border-b border-kh-rule px-2 landscape:px-3">
-          <button
-            type="button"
-            onClick={geheZurueck}
-            data-testid="zurueck"
-            aria-label="Einen Schritt zurück"
-            className={`grid size-11 shrink-0 place-items-center rounded-kh text-kh-grey transition-colors hover:bg-kh-band-soft hover:text-kh-ink ${
-              kannZurueck ? '' : 'invisible'
-            }`}
-          >
-            <ArrowLeft className="size-5" strokeWidth={1.75} />
-          </button>
+          {aufteilung === 'buehne' && (
+            <>
+              {buehne && <div className="absolute inset-0 overflow-hidden">{buehne}</div>}
+              <div className="pointer-events-none absolute inset-0 flex flex-col justify-between gap-3 p-4 landscape:p-6">
+                <div className="pointer-events-auto w-full max-w-[30rem] rounded-kh bg-kh-page p-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:p-5">
+                  {titel}
+                  {fachtext && <div className="kh-fachtext mt-2">{fachtext}</div>}
+                </div>
+                <div className="pointer-events-auto flex flex-col gap-3 landscape:ml-auto landscape:w-[min(42rem,62%)]">
+                  {interaktion}
+                  {aha}
+                  {fussFlaeche}
+                </div>
+              </div>
+            </>
+          )}
+        </main>
 
-          <Rail fortschritt={fortschritt} onOeffnen={() => setWegOffen(true)} />
-
-          <span className="min-w-0 flex-1" />
-
-          {skipSichtbar && (
+        {imSkip ? (
+          <RueckkehrLeiste ziel={fortschritt.detourReturnTo as StepId} />
+        ) : (
+          // 60 px Ziele mit 12 px Abstand (flow 8.5 — „entschieden: 60×60 pt,
+          // nicht 44×44“, Mindestabstand 12 pt). Das kostet Höhe und ist es
+          // wert: hier tippt jemand im Stehen, mit ausgestrecktem Arm, auf ein
+          // festgeschraubtes iPad.
+          <header className="kh-leiste order-1 flex shrink-0 items-center gap-3 border-b border-kh-rule px-3">
             <button
               type="button"
-              onClick={starteKarriereSkip}
-              data-testid="karriere-skip"
-              className="flex h-11 shrink-0 items-center gap-0.5 rounded-kh px-3 text-[15px] text-kh-grey/80 transition-colors hover:text-kh-orange"
+              onClick={zurueck}
+              data-testid="zurueck"
+              aria-label="Einen Schritt zurück"
+              className={`grid size-[60px] shrink-0 place-items-center rounded-kh text-kh-grey transition-colors hover:bg-kh-band-soft hover:text-kh-ink ${
+                kannZurueck ? '' : 'invisible'
+              }`}
             >
-              Karriere-Wege
-              <ChevronRight className="size-4" strokeWidth={1.5} />
+              <ArrowLeft className="size-6" strokeWidth={1.75} />
             </button>
-          )}
-        </header>
-      )}
 
-      <DeinWeg
-        offen={wegOffen}
-        fortschritt={fortschritt}
-        onSchliessen={() => setWegOffen(false)}
-        onSpringe={springeZuBesuchtem}
-      />
-    </div>
+            <Rail fortschritt={fortschritt} onOeffnen={() => setWegOffen(true)} />
+
+            <span className="min-w-0 flex-1" />
+
+            {skipSichtbar && (
+              <button
+                type="button"
+                onClick={starteKarriereSkip}
+                data-testid="karriere-skip"
+                className="flex h-[60px] shrink-0 items-center gap-0.5 rounded-kh px-3 text-[15px] text-kh-grey/80 transition-colors hover:text-kh-orange"
+              >
+                Karriere-Wege
+                <ChevronRight className="size-4" strokeWidth={1.5} />
+              </button>
+            )}
+          </header>
+        )}
+
+        <DeinWeg
+          offen={wegOffen}
+          fortschritt={fortschritt}
+          onSchliessen={() => setWegOffen(false)}
+          onSpringe={springeZuBesuchtem}
+        />
+      </div>
+    </WeiterKontext.Provider>
   )
 }
 
@@ -211,17 +246,17 @@ export function StepShell({
  */
 function RueckkehrLeiste({ ziel }: { ziel: StepId }) {
   return (
-    <header className="order-1 shrink-0 border-b border-kh-rule bg-kh-band-soft">
+    <header className="kh-leiste order-1 shrink-0 border-b border-kh-rule bg-kh-band-soft">
       <button
         type="button"
         onClick={beendeKarriereSkip}
         data-testid="zurueck-zum-tag"
-        className="flex h-14 w-full items-center gap-1 px-3 text-left text-[16px] text-kh-grey transition-colors hover:text-kh-orange"
+        className="flex h-full w-full items-center gap-1 px-3 text-left text-[16px] text-kh-grey transition-colors hover:text-kh-orange"
       >
-        <ChevronLeft className="size-5 shrink-0" strokeWidth={1.75} />
+        <ChevronLeft className="size-6 shrink-0" strokeWidth={1.75} />
         <span className="truncate">
           Zurück zu deinem Tag
-          <span className="text-kh-grey/60"> — {STEPS[ziel].titel}</span>
+          <span className="text-kh-grey/60"> — {STEPS[ziel].kurz}</span>
         </span>
       </button>
     </header>

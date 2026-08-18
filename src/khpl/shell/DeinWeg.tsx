@@ -109,7 +109,10 @@ function Zeile({
           <span className="size-2.5 rounded-full border border-kh-rule" />
         )}
       </span>
-      <span className="min-w-0 flex-1 truncate text-left">{def.titel}</span>
+      {/* `kurz`, nicht `titel`: das Sheet ist eine Liste von Stationen, keine
+          Sammlung von Überschriften. „Jetzt du“ sagt als gesperrte Zukunftszeile
+          nichts, „Dach aufrichten II“ sagt alles. */}
+      <span className="min-w-0 flex-1 truncate text-left">{def.kurz}</span>
       {zustand === 'aktuell' && (
         <span className="shrink-0 text-[13px] whitespace-nowrap text-kh-orange">
           du bist hier

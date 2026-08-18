@@ -34,10 +34,25 @@ export const BEGRIFFE = {
     erklaerung:
       'Ein waagerechter Balken, der quer unter den Sparren liegt und sie stützt. Nach ihrer Lage heißen sie Fußpfette, Mittelpfette und Firstpfette.',
   },
+  /**
+   * ⚠️ **Abweichung von flow 12, mit Absicht.** Der Glossarentwurf sagt „auf
+   * halber Höhe … bildet nebenbei die **Decke** des Spitzbodens“. Beides passt
+   * nicht: der Spitzboden ist der Raum **über** dem Kehlbalken, der Balken ist
+   * also dessen Boden, nicht dessen Decke. Und das Modell setzt ihn nach
+   * `parameter.ts` (`fKB = 1/3`) ins obere Drittel, nicht auf halbe Höhe.
+   *
+   * Der Text steht in flow 12 als `ENTWURF – UNGEPRÜFT` mit dem ausdrücklichen
+   * Hinweis, ihn gegenlesen zu lassen — „hier ist eine falsche Definition
+   * peinlicher als anderswo, weil der Besucher sie für die Antwort hält“.
+   * Zusätzlich stand dieselbe Erklärung zweimal im Code, einmal hier und
+   * einmal an den Bauteilen des 3D-Modells, mit unterschiedlichem Inhalt: wer
+   * das Wort antippte, bekam eine andere Antwort als wer den Balken antippte.
+   * Jetzt gilt eine Fassung, und `bauteil-texte.ts` verweist darauf.
+   */
   kehlbalken: {
     label: 'Kehlbalken',
     erklaerung:
-      'Ein waagerechter Balken, der ein Sparrenpaar auf halber Höhe verbindet. Er verhindert, dass die Sparren sich durchbiegen — und bildet nebenbei die Decke des Spitzbodens.',
+      'Ein waagerechter Balken, der ein Sparrenpaar im oberen Drittel verbindet. Er verhindert, dass die Sparren sich durchbiegen — und bildet nebenbei den Boden des Spitzbodens.',
   },
   first: {
     label: 'First',

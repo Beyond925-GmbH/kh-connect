@@ -4,6 +4,13 @@
  * ENTWURF – UNGEPRUEFT: die Erklaertexte gehoeren vor der Messe der Innung zum
  * Gegenlesen vorgelegt, genau wie das uebrige Glossar.
  *
+ * ⚠️ ZWEITE FASSUNG DERSELBEN BEGRIFFE. `src/khpl/glossar/begriffe.ts` erklaert
+ * Sparren, Pfette, Kehlbalken, First und Traufe ebenfalls — dort fuer ein Wort
+ * im Fliesstext, hier fuer ein angetipptes Bauteil am Modell. Zwei Fassungen
+ * sind Absicht (der Ton ist ein anderer), zwei *Aussagen* sind es nicht: wer
+ * das Wort antippt, muss dieselbe Auskunft bekommen wie jemand, der den Balken
+ * antippt. Beim Aendern immer beide Dateien pruefen.
+ *
  * Die Farben stehen bewusst hier und nicht als Tailwind-Token: innerhalb des
  * <Canvas> gibt es kein Tailwind. Theme-abhaengig sind nur Hintergrund, Boden
  * und Lichtstaerken — das Holz bleibt Holz.

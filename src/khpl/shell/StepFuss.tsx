@@ -3,6 +3,7 @@ import { STEPS, type StepId } from '@/khpl/flow/steps'
 import { offeneAbstecher } from '@/khpl/flow/uebergaenge'
 import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
 import { geheZu, useFortschritt } from '@/khpl/store/fortschritt'
+import { useWeiter } from './WeiterKontext'
 
 /**
  * Verdrahtet den Fuß eines Steps mit dem Store. Jeder Step benutzt dieselben
@@ -25,23 +26,30 @@ export function useStepNavigation(id: StepId) {
 
 export function StepFuss({
   id,
-  onWeiter,
   ohneWeiter,
+  gedaempft,
 }: {
   id: StepId
-  /** Überschreibt den Standardweg — für Steps, die vorher etwas merken. */
-  onWeiter?: () => void
+  /**
+   * Ohne Angabe aus dem Graphen abgeleitet: M10 hat kein `weiter`, und ein
+   * Button, der nichts tut, ist schlimmer als keiner.
+   */
   ohneWeiter?: boolean
+  /** Solange die Übung dieses Steps offen ist. */
+  gedaempft?: boolean
 }) {
   const { offen, weiter, zumAbstecher } = useStepNavigation(id)
+  // Denselben Weg wie der Wisch nach links — nie einen zweiten.
+  const nachVorn = useWeiter(weiter)
 
   return (
     <Verzweigung
       offen={offen}
       weiterVon={id}
       onAbstecher={zumAbstecher}
-      onWeiter={onWeiter ?? weiter}
-      ohneWeiter={ohneWeiter}
+      onWeiter={nachVorn}
+      ohneWeiter={ohneWeiter ?? STEPS[id].weiter === null}
+      gedaempft={gedaempft}
     />
   )
 }
