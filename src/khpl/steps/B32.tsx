@@ -8,7 +8,7 @@ import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { merkeAntwort } from '@/khpl/store/fortschritt'
+import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
  * B3.2 — Vom Plan in den Kopf. Abstecher von M3, mündet in M4.
@@ -32,8 +32,9 @@ const AHA_AB = 2
 
 export function B32() {
   const { weiter } = useStepNavigation('B3.2')
+  const gespeichert = useFortschritt().answers.b32
   const [auswahl, setAuswahl] = useState<Auswahl | null>(null)
-  const [angetippt, setAngetippt] = useState<string[]>([])
+  const [angetippt, setAngetippt] = useState<string[]>(() => gespeichert?.angetippt ?? [])
 
   const tippen = (typ: string, index: number | null) => {
     setAuswahl({ typ: typ as Auswahl['typ'], index })
@@ -61,8 +62,10 @@ export function B32() {
         <Suspense fallback={<Dachstuhl3DFallback />}>
           <Dachstuhl3D
             zielT={1}
-            attraktor
-            kameraAbstand={1.3}
+            // Nur solange nichts ausgewählt ist: sonst dreht das hervorgehobene
+            // Bauteil aus dem Bild, während man den Text dazu liest.
+            attraktor={auswahl === null}
+            kameraAbstand={1.45}
             auswahl={auswahl}
             onBauteil={(teil) => tippen(teil.typ, teil.auswahlIndex)}
             onDaneben={() => setAuswahl(null)}
@@ -115,14 +118,17 @@ function Aufforderung({ gefunden }: { gefunden: number }) {
       className="flex items-center gap-3 rounded-kh bg-kh-page px-5 py-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)]"
     >
       <RotateCw
-        className="size-5 shrink-0 text-kh-orange"
+        className="size-5 shrink-0 text-kh-orange-text"
         strokeWidth={1.75}
         aria-hidden
       />
       <p className="text-[16px] text-kh-ink">
         Dreh das Dach. Tipp an, was du wissen willst.
         {gefunden > 0 && (
-          <span className="text-kh-grey/70"> — {gefunden} Bauteile hast du schon.</span>
+          <span className="text-kh-grey/70">
+            {' '}
+            — {gefunden} {gefunden === 1 ? 'Bauteil' : 'Bauteile'} hast du schon.
+          </span>
         )}
       </p>
     </motion.div>
@@ -154,7 +160,7 @@ function BauteilKarte({
       >
         <X className="size-5" strokeWidth={1.5} />
       </button>
-      <h2 className="kh-h3 pr-12 text-kh-orange">{text.label}</h2>
+      <h2 className="kh-h3 pr-12 text-kh-orange-text">{text.label}</h2>
       <p className="mt-1.5 text-[16px] leading-[1.5] text-kh-grey">{text.text}</p>
     </motion.div>
   )

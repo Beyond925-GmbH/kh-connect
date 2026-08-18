@@ -398,14 +398,24 @@ export function starteKarriereSkip() {
   }))
 }
 
-/** „Zurück zu deinem Tag“ — exakt an dieselbe Stelle, ein Tap raus. */
+/**
+ * „Zurück zu deinem Tag“ — exakt an dieselbe Stelle, ein Tap raus.
+ *
+ * Die Historie wird dabei **auf den Einstiegspunkt zurückgeschnitten**, nicht
+ * fortgeschrieben. Sonst endet sie auf `[…, M2, M9, B9.3, M10, M2]`, und ein
+ * einziger Druck auf ← nach der Rückkehr wirft den Besucher auf den
+ * CTA-Screen — mit voller Rail und ohne Rückkehr-Leiste. Der Skip ist ein
+ * Abstecher: danach soll alles aussehen wie davor (ui-shell 6).
+ */
 export function beendeKarriereSkip() {
   aendere((alt) => {
     if (!alt.detourReturnTo) return alt
+    const ziel = alt.detourReturnTo
+    const index = alt.visited.lastIndexOf(ziel)
     return {
       ...alt,
-      currentStepId: alt.detourReturnTo,
-      visited: [...alt.visited, alt.detourReturnTo],
+      currentStepId: ziel,
+      visited: index >= 0 ? alt.visited.slice(0, index + 1) : [...alt.visited, ziel],
       detourReturnTo: null,
     }
   })

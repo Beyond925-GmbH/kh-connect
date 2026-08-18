@@ -12,7 +12,7 @@ import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { merkeAntwort } from '@/khpl/store/fortschritt'
+import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
  * M2 — Was kostet dieses Dach?
@@ -51,8 +51,9 @@ const euro = (n: number) => n.toLocaleString('de-DE') + ' €'
 
 export function M2() {
   const { weiter } = useStepNavigation('M2')
-  const [wert, setWert] = useState(START)
-  const [aufgeloest, setAufgeloest] = useState(false)
+  const gespeichert = useFortschritt().answers.m2
+  const [wert, setWert] = useState(() => gespeichert?.schaetzung ?? START)
+  const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
 
   const aufloesen = () => {
     setAufgeloest(true)
@@ -201,7 +202,7 @@ function Schaetzung({
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             data-testid="m2-zahl"
-            className="text-[clamp(2.2rem,1.5rem+2.6vw,3.6rem)] leading-none font-bold text-kh-orange tabular-nums"
+            className="text-[clamp(2.2rem,1.5rem+2.6vw,3.6rem)] leading-none font-bold text-kh-orange-text tabular-nums"
           >
             {euro(aufgeloest ? ECHT : wert)}
           </motion.span>
@@ -272,6 +273,17 @@ function Schaetzung({
               <span className="shrink-0 text-kh-grey tabular-nums">{euro(p.betrag)}</span>
             </motion.div>
           ))}
+          {/* Die Summenzeile stand vorher nirgends — die vier Posten mussten im
+              Kopf addiert werden, um auf die Zahl darüber zu kommen. */}
+          <motion.div
+            variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
+            className="mt-1 flex items-baseline justify-between gap-3 border-t-2 border-kh-ink/15 pt-2 text-[16px]"
+          >
+            <span className="font-normal text-kh-ink">Dachstuhl gesamt</span>
+            <span className="font-bold text-kh-orange-text tabular-nums">
+              {euro(ECHT)}
+            </span>
+          </motion.div>
           <div className="pt-2">
             <Mathe />
           </div>
@@ -295,7 +307,7 @@ function Schaetzung({
 function Mathe() {
   return (
     <Dialog>
-      <DialogTrigger className="text-[14px] text-kh-orange underline decoration-kh-orange/40 underline-offset-4">
+      <DialogTrigger className="text-[15px] text-kh-orange-text underline decoration-kh-orange-text/40 underline-offset-4">
         Woher kommen die 120 Quadratmeter?
       </DialogTrigger>
       <DialogContent>

@@ -8,11 +8,12 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core'
-import { AnimatePresence, motion } from 'motion/react'
+import { motion } from 'motion/react'
 import { Check, Truck, X } from 'lucide-react'
+import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { merkeAntwort } from '@/khpl/store/fortschritt'
+import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
  * B4.1 — Beladen. Abstecher von M4, mündet in M5.
@@ -83,7 +84,7 @@ const TEILE: Teil[] = [
     id: 'mischer',
     text: 'Betonmischer',
     mit: false,
-    grund: 'Nicht euer Gewerk. Der steht beim Maurer.',
+    grund: 'Nicht euer Gewerk — der steht beim Maurer.',
   },
   {
     id: 'leiter',
@@ -94,11 +95,31 @@ const TEILE: Teil[] = [
 ]
 
 const NOETIG = TEILE.filter((t) => t.mit).length
+
+/**
+ * Anzeigereihenfolge. In der Datenreihenfolge wechseln sich richtig und falsch
+ * exakt ab (1, 3, 5, 7, 9 gehören mit) — im Raster war die Aufgabe damit ohne
+ * Lesen lösbar. Fest verdrahtet, nicht gewürfelt: der Screen ist über „Dein
+ * Weg“ wieder erreichbar und soll dann gleich aussehen.
+ */
+const ANZEIGE = [
+  'sparren',
+  'ziegel',
+  'anker',
+  'psa',
+  'daemmung',
+  'werkzeug',
+  'fenster',
+  'leiter',
+  'mischer',
+]
+const ANGEZEIGT = ANZEIGE.map((id) => TEILE.find((t) => t.id === id)!).filter(Boolean)
 const LADEFLAECHE = 'b41-fahrzeug'
 
 export function B41() {
   const { weiter } = useStepNavigation('B4.1')
-  const [geladen, setGeladen] = useState<string[]>([])
+  const gespeichert = useFortschritt().answers.b41
+  const [geladen, setGeladen] = useState<string[]>(() => gespeichert?.geladen ?? [])
   const [abgelehnt, setAbgelehnt] = useState<string[]>([])
   const [letzte, setLetzte] = useState<{ teil: Teil; ok: boolean } | null>(null)
 
@@ -147,36 +168,14 @@ export function B41() {
           <div className="flex h-full min-h-0 flex-col gap-3" data-wisch="aus">
             <Fahrzeug geladen={geladen} fertig={fertig} />
 
-            <AnimatePresence mode="wait" initial={false}>
-              {letzte && (
-                <motion.p
-                  key={letzte.teil.id + String(letzte.ok)}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  data-testid="b41-feedback"
-                  className={`flex items-start gap-2 rounded-kh px-4 py-2.5 text-[15px] ${
-                    letzte.ok
-                      ? 'bg-kh-orange/12 text-kh-ink'
-                      : 'bg-kh-band-soft text-kh-grey'
-                  }`}
-                >
-                  {letzte.ok ? (
-                    <Check
-                      className="mt-0.5 size-4 shrink-0 text-kh-orange"
-                      strokeWidth={2.5}
-                    />
-                  ) : (
-                    <X className="mt-0.5 size-4 shrink-0" strokeWidth={2.5} />
-                  )}
-                  <span>{letzte.teil.grund}</span>
-                </motion.p>
-              )}
-            </AnimatePresence>
+            <Rueckmeldung
+              ok={letzte ? letzte.ok : null}
+              text={letzte ? letzte.teil.grund : null}
+              testid="b41-feedback"
+            />
 
             <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2 landscape:grid-cols-3">
-              {TEILE.map((t) => (
+              {ANGEZEIGT.map((t) => (
                 <li key={t.id}>
                   <Hallenteil
                     teil={t}
@@ -215,17 +214,15 @@ function Fahrzeug({ geladen, fertig }: { geladen: string[]; fertig: boolean }) {
             {geladen.length}/{NOETIG}
           </span>
         </p>
-        <div className="mt-1.5 flex flex-wrap gap-1.5">
-          {geladen.map((id) => (
-            <motion.span
-              key={id}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="rounded-[3px] bg-kh-orange/20 px-2 py-1 text-[13px] text-kh-ink"
-            >
-              {TEILE.find((t) => t.id === id)?.text}
-            </motion.span>
-          ))}
+        {/* Bewusst ohne Liste der geladenen Teile: die stehen abgehakt im Raster
+            darunter, und zweimal dasselbe kostet nur Platz. */}
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-kh-band">
+          <motion.div
+            className="h-full rounded-full bg-kh-orange"
+            initial={false}
+            animate={{ width: `${(geladen.length / NOETIG) * 100}%` }}
+            transition={{ type: 'spring', stiffness: 220, damping: 26 }}
+          />
         </div>
       </div>
     </div>
@@ -271,7 +268,9 @@ function Hallenteil({
             : 'cursor-grab border-kh-rule bg-kh-surface text-kh-ink active:cursor-grabbing'
       }`}
     >
-      {geladen && <Check className="size-4 shrink-0 text-kh-orange" strokeWidth={2.5} />}
+      {geladen && (
+        <Check className="size-4 shrink-0 text-kh-orange-text" strokeWidth={2.5} />
+      )}
       {abgelehnt && <X className="size-4 shrink-0" strokeWidth={2.5} />}
       <span className="min-w-0">{teil.text}</span>
     </div>

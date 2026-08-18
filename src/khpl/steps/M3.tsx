@@ -35,9 +35,9 @@ export function M3() {
       fachtext={
         // Wortlaut aus flow 11 (M3), um einen Satz ergänzt: die beiden losen
         // Board-Stickies `CAD` und `Abbund` sind laut 6.3 hier einzulösen,
-        // kommen im Entwurfstext aber nicht vor. Damit steht der Fachtext bei
-        // rund 260 statt 209 Zeichen — vertretbar, weil M3 der einzige
-        // Hauptschritt ohne Übung ist und den Platz hat.
+        // kommen im Entwurfstext aber nicht vor. Dafür ist „Parallel stimmst du
+        // Termine ab“ zu „Dann die Termine“ gekürzt — so bleibt der Fachtext
+        // trotz der beiden zusätzlichen Begriffe im 250-Zeichen-Budget (6.2).
         <p>
           Unterschrieben. Jetzt entsteht aus der <Begriff id="statik">Statik</Begriff> der{' '}
           <Begriff id="abbundplan">Abbundplan</Begriff>: jedes Holz mit Länge, Winkel und

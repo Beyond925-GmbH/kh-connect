@@ -35,7 +35,7 @@ export function DeinWeg({
           data-testid="dein-weg"
           className="fixed inset-y-0 left-0 z-50 flex w-[min(30rem,92vw)] flex-col bg-kh-surface shadow-2xl outline-none transition-transform duration-250 data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full"
         >
-          <header className="flex shrink-0 items-center justify-between border-b border-kh-rule px-6 py-4">
+          <header className="flex shrink-0 items-center justify-between border-b border-kh-rule px-6 py-3">
             <BaseDialog.Title className="kh-h3 text-kh-ink">Dein Weg</BaseDialog.Title>
             <BaseDialog.Close
               aria-label="Schließen"
@@ -45,7 +45,7 @@ export function DeinWeg({
             </BaseDialog.Close>
           </header>
 
-          <ol className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3">
+          <ol className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-2">
             {HAUPTSCHRITTE.map((haupt) => (
               <li key={haupt.id}>
                 <Zeile
@@ -55,7 +55,7 @@ export function DeinWeg({
                   onSchliessen={onSchliessen}
                 />
                 {haupt.abstecher.length > 0 && (
-                  <ol className="mb-1 ml-7 border-l border-kh-rule pl-3">
+                  <ol className="mb-0.5 ml-7 border-l border-kh-rule pl-3">
                     {haupt.abstecher.map((id) => (
                       <li key={id}>
                         <Zeile
@@ -102,19 +102,30 @@ function Zeile({
         {eingerueckt && zustand === 'offen' ? (
           <CornerDownRight className="size-4 text-kh-grey/40" strokeWidth={1.5} />
         ) : zustand === 'besucht' ? (
-          <Check className="size-5 text-kh-orange" strokeWidth={2.5} />
+          <Check className="size-5 text-kh-orange-text" strokeWidth={2.5} />
         ) : zustand === 'aktuell' ? (
           <span className="size-3 rounded-full bg-kh-orange ring-4 ring-kh-orange/25" />
         ) : (
           <span className="size-2.5 rounded-full border border-kh-rule" />
         )}
       </span>
-      {/* `kurz`, nicht `titel`: das Sheet ist eine Liste von Stationen, keine
-          Sammlung von Überschriften. „Jetzt du“ sagt als gesperrte Zukunftszeile
-          nichts, „Dach aufrichten II“ sagt alles. */}
-      <span className="min-w-0 flex-1 truncate text-left">{def.kurz}</span>
+      {/*
+        Zwei Beschriftungen, je nach Zustand — und das ist der Punkt, an dem sich
+        die beiden Abnahmen widersprochen haben.
+
+        Wer den Screen gesehen hat, erinnert sich an seine Überschrift: „Was
+        kostet dieses Dach?“. Ihm „Angebots-Kalkulation, Vertrag“ vorzusetzen,
+        ist eine zweite Sprache, die er nie gelesen hat. Wer den Screen noch
+        nicht gesehen hat, kann mit „Jetzt du“ dagegen nichts anfangen — da ist
+        der beschreibende Board-Name richtig.
+
+        Also: besucht und aktuell zeigen `titel`, gesperrt zeigt `kurz`.
+      */}
+      <span className="min-w-0 flex-1 truncate text-left">
+        {zustand === 'offen' ? def.kurz : def.titel}
+      </span>
       {zustand === 'aktuell' && (
-        <span className="shrink-0 text-[13px] whitespace-nowrap text-kh-orange">
+        <span className="shrink-0 text-[13px] whitespace-nowrap text-kh-orange-text">
           du bist hier
         </span>
       )}
@@ -127,7 +138,7 @@ function Zeile({
   )
 
   const basis =
-    'flex w-full items-center gap-3 rounded-kh px-3 py-3 text-[16px] min-h-[52px] transition-colors'
+    'flex w-full items-center gap-3 rounded-kh px-3 py-1.5 text-[15px] min-h-[42px] transition-colors'
 
   if (!antippbar) {
     return (

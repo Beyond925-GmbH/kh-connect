@@ -39,7 +39,7 @@ export function AhaKarte({
           )}
         >
           {eyebrow !== null && (
-            <p className="mb-1 text-[13px] font-normal tracking-[0.14em] text-kh-orange uppercase">
+            <p className="mb-1 text-[13px] font-normal tracking-[0.14em] text-kh-orange-text uppercase">
               {eyebrow}
             </p>
           )}

@@ -67,7 +67,14 @@ export const M7_SCHRITTE: Bauschritt[] = [
   {
     label: 'Sparrenpaare',
     name: 'Sparrenpaare',
-    richtig: 'Sitzt. Der Kran hebt sie als fertiges Dreieck ein.',
+    // Kein „fertiges Dreieck vom Kran“: das Modell ist ein **Pfettendach**, und
+    // dort wird jeder Sparren einzeln auf Fuß-, Mittel- und Firstpfette
+    // aufgeklaut. Als vormontiertes Dreieck eingehoben werden Sparren- und
+    // Kehlbalkendächer oder Nagelbinder — nicht diese Konstruktion.
+    // (Korrektur aus `dachstuhl/bauteil-texte.ts`; der Board-Fachtext in M5
+    // spricht weiterhin vom Kran, der die Sparrenpaare einhebt — das gehört
+    // beim Gegenlesen durch die Innung mit auf den Tisch.)
+    richtig: 'Sitzt. Jeder Sparren liegt jetzt auf drei Pfetten auf: Fuß, Mitte, First.',
     zufrueh:
       'Die Sparren brauchen etwas zum Aufliegen. Die Pfetten stehen — die kommen zuerst.',
     zielT: phase('Sparrenpaare').bis - HAARBREIT,

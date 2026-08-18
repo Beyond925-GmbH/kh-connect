@@ -45,7 +45,7 @@ export function B9({ id }: { id: StepId }) {
                 transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
                 className="border-l-2 border-kh-orange/40 pl-4"
               >
-                <dt className="text-[13px] tracking-[0.12em] text-kh-orange uppercase">
+                <dt className="text-[13px] tracking-[0.12em] text-kh-orange-text uppercase">
                   {a.frage}
                 </dt>
                 <dd className="mt-0.5 text-[16px] leading-[1.5] text-kh-ink">

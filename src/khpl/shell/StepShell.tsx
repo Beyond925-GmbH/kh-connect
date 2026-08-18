@@ -4,6 +4,7 @@ import { STEPS, type StepId } from '@/khpl/flow/steps'
 import { DeinWeg } from './DeinWeg'
 import { Rail } from './Rail'
 import { WeiterKontext } from './WeiterKontext'
+import { useStaffAusgang } from './staffAusgang'
 import { useWisch } from './useWisch'
 import {
   beendeKarriereSkip,
@@ -36,8 +37,13 @@ export type Aufteilung =
  * Der Karriere-Link taucht auf S1 und danach auf jedem zweiten Hauptschritt auf
  * (khpl-ui-shell.md 6). Nie auf Abstecher-Screens, nie während eine Interaktion
  * offen ist. So begegnet er jedem Besucher mehrfach, ohne je zu drängen.
+ *
+ * **M8 fehlt hier bewusst**, obwohl ui-shell 6 ihn aufzählt: M9 *ist* der
+ * nächste Schritt nach M8. Ein Abstecher, der einen Schritt vor sein Ziel
+ * abkürzt, schickt den Besucher über M9 → M10 → zurück auf M8 → weiter zu M9 —
+ * derselbe Bereich zweimal, mit einer Rückkehr-Leiste dazwischen.
  */
-const SKIP_AUF: readonly StepId[] = ['M2', 'M4', 'M6', 'M8']
+const SKIP_AUF: readonly StepId[] = ['M2', 'M4', 'M6']
 
 export function StepShell({
   id,
@@ -77,6 +83,7 @@ export function StepShell({
   onWeiter?: () => void
 }) {
   const fortschritt = useFortschritt()
+  const staffTap = useStaffAusgang()
   const [wegOffen, setWegOffen] = useState(false)
   const flaeche = useRef<HTMLElement>(null)
 
@@ -211,7 +218,17 @@ export function StepShell({
 
             <Rail fortschritt={fortschritt} onOeffnen={() => setWegOffen(true)} />
 
-            <span className="min-w-0 flex-1" />
+            {/* Die Dehnfuge zwischen Rail und Skip-Slot ist auf jedem Step leer
+                und traegt deshalb die Staff-Geste (fuenf schnelle Taps). Vorher
+                lag dafuer eine unsichtbare Flaeche ueber dem Zurueck-Button —
+                die frass dessen linke Haelfte und oeffnete Besuchern das
+                Personalmenue. */}
+            <span
+              className="min-w-0 flex-1 self-stretch"
+              onClick={staffTap}
+              data-testid="staff-flaeche"
+              aria-hidden
+            />
 
             {skipSichtbar && (
               <button
@@ -256,7 +273,7 @@ function RueckkehrLeiste({ ziel }: { ziel: StepId }) {
         <ChevronLeft className="size-6 shrink-0" strokeWidth={1.75} />
         <span className="truncate">
           Zurück zu deinem Tag
-          <span className="text-kh-grey/60"> — {STEPS[ziel].kurz}</span>
+          <span className="text-kh-grey/60"> — {STEPS[ziel].titel}</span>
         </span>
       </button>
     </header>

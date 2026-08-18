@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { STEPS } from '@/khpl/flow/steps'
 import { machWeiter, starteNeu, useWiedereinstieg } from '@/khpl/store/fortschritt'
+import { useStaffAusgang } from './staffAusgang'
 
 /**
  * S0 — Splash / Attract (khpl-ui-shell.md 2). Der Ruhezustand des Standes.
@@ -33,6 +34,7 @@ export function Splash() {
   const wiedereinstieg = useWiedereinstieg()
   const [videoBereit, setVideoBereit] = useState(false)
   const video = useRef<HTMLVideoElement>(null)
+  const staffTap = useStaffAusgang()
 
   // Erst nachladen, wenn der Screen steht — sonst zählt das Video zum Erststart.
   const [ladeVideo, setLadeVideo] = useState(false)
@@ -96,10 +98,21 @@ export function Splash() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
 
       <div className="relative flex min-h-0 flex-1 flex-col justify-between p-6 landscape:p-10">
-        {/* `self-start`, sonst zieht die Flex-Spalte das Bild auf volle Breite. */}
-        <div className="w-fit self-start rounded-kh bg-white/90 px-3 py-2">
+        {/* `self-start`, sonst zieht die Flex-Spalte das Bild auf volle Breite.
+            Auf dem Logo liegt der Staff-Ausgang — fünf schnelle Taps, wie in
+            ui-shell 8 beschrieben. `stopPropagation`, sonst startet der Tap
+            zugleich eine neue Sitzung. */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            staffTap()
+          }}
+          aria-label="Kreishandwerkerschaft Paderborn-Lippe"
+          className="w-fit self-start rounded-kh bg-white/90 px-3 py-2"
+        >
           <Logo className="h-8 w-auto landscape:h-10" />
-        </div>
+        </button>
 
         <div className="flex flex-col items-start gap-5">
           <motion.h1
@@ -136,7 +149,7 @@ export function Splash() {
                 data-testid="weitermachen"
                 className="h-[60px] border-white/70 px-7 text-[16px] text-white hover:bg-white hover:text-kh-ink"
               >
-                Weitermachen bei „{STEPS[wiedereinstieg.currentStepId].kurz}“
+                Weitermachen bei „{STEPS[wiedereinstieg.currentStepId].titel}“
               </Button>
             </div>
           )}

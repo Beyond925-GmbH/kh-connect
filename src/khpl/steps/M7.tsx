@@ -8,15 +8,14 @@ import {
   useSensors,
   type DragEndEvent,
 } from '@dnd-kit/core'
-import { AnimatePresence, motion } from 'motion/react'
-import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { M7_SCHRITTE, M7_START, type Bauschritt } from '@/khpl/buehne/aufbauabschnitte'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
+import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { merkeAntwort } from '@/khpl/store/fortschritt'
+import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
  * M7 — Jetzt du.
@@ -45,9 +44,30 @@ const Dachstuhl3D = lazy(() => import('@/khpl/buehne/Dachstuhl3D'))
 const ABLAGE = 'm7-ablage'
 const HILFE_AB = 2
 
+/**
+ * Anzeigereihenfolge der Zieh-Karten, einmal je Besuch gewürfelt.
+ *
+ * Ohne das standen sie in der Lösungsreihenfolge — die Frage „Was kommt als
+ * Nächstes aufs Dach?“ war dann fünfmal hintereinander damit beantwortet, die
+ * linke Karte zu nehmen, ohne sie zu lesen. Das ist die einzige `Abfrage:` des
+ * ganzen Boards; sie muss nach dem Inhalt fragen, nicht nach der Position.
+ *
+ * Einmal beim Mounten, nicht bei jedem Rendern: sonst springen die Karten unter
+ * dem Finger weg.
+ */
+function mische<T>(liste: T[]): T[] {
+  const a = [...liste]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
+
 export function M7() {
   const { weiter } = useStepNavigation('M7')
-  const [gesetzt, setGesetzt] = useState<string[]>([])
+  const gespeichert = useFortschritt().answers.m7
+  const [gesetzt, setGesetzt] = useState<string[]>(() => gespeichert?.gesetzt ?? [])
   const [fehler, setFehler] = useState(0)
   const [meldung, setMeldung] = useState<{ text: string; ok: boolean } | null>(null)
 
@@ -55,9 +75,14 @@ export function M7() {
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
   )
 
-  const offen = M7_SCHRITTE.filter((s) => !gesetzt.includes(s.label))
-  const dran = offen[0]
-  const fertig = offen.length === 0
+  const [reihenfolge] = useState(() => mische(M7_SCHRITTE.map((s) => s.label)))
+
+  // `dran` folgt der Bauordnung, die Anzeige der gewürfelten Reihenfolge.
+  const dran = M7_SCHRITTE.find((s) => !gesetzt.includes(s.label))
+  const offen = reihenfolge
+    .map((label) => M7_SCHRITTE.find((s) => s.label === label))
+    .filter((s): s is Bauschritt => !!s && !gesetzt.includes(s.label))
+  const fertig = dran === undefined
   const zielT = fertig
     ? M7_SCHRITTE[M7_SCHRITTE.length - 1].zielT
     : gesetzt.length === 0
@@ -128,33 +153,11 @@ export function M7() {
           >
             <Ablage fertig={fertig} anzahl={gesetzt.length} gesamt={M7_SCHRITTE.length} />
 
-            <AnimatePresence mode="wait" initial={false}>
-              {meldung && (
-                <motion.p
-                  key={meldung.text}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  data-testid="m7-meldung"
-                  className={`flex items-start gap-2 rounded-kh px-4 py-2.5 text-[15px] ${
-                    meldung.ok
-                      ? 'bg-kh-orange/15 text-kh-ink'
-                      : 'bg-kh-band-soft text-kh-grey'
-                  }`}
-                >
-                  {meldung.ok ? (
-                    <Check
-                      className="mt-0.5 size-4 shrink-0 text-kh-orange"
-                      strokeWidth={2.5}
-                    />
-                  ) : (
-                    <X className="mt-0.5 size-4 shrink-0" strokeWidth={2.5} />
-                  )}
-                  <span>{meldung.text}</span>
-                </motion.p>
-              )}
-            </AnimatePresence>
+            <Rueckmeldung
+              ok={meldung ? meldung.ok : null}
+              text={meldung ? meldung.text : null}
+              testid="m7-meldung"
+            />
 
             {!fertig && (
               <>
@@ -183,7 +186,8 @@ export function M7() {
       aha={
         <AhaKarte sichtbar={fertig} eyebrow={null}>
           Steht. Was du gerade in der richtigen Reihenfolge gebaut hast, heißt im Betrieb
-          Aufrichten — und dauert bei einem Einfamilienhaus etwa einen Tag.
+          Aufrichten. Der Kran, der die Sparrenpaare einhebt, steht dafür einen Tag auf
+          der Baustelle — den hast du in der Kalkulation schon bezahlt.
         </AhaKarte>
       }
       fuss={<StepFuss id="M7" gedaempft={!fertig} />}

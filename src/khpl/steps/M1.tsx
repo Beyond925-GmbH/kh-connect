@@ -6,7 +6,7 @@ import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { merkeAntwort } from '@/khpl/store/fortschritt'
+import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
  * M1 — Der erste Termin.
@@ -116,20 +116,25 @@ const RICHTIGE = PUNKTE.filter((p) => p.richtig).length
  * Zweispalter wären die Fallen dann die letzten beiden Zeilen, und die Übung
  * ließe sich an der Position lösen statt am Inhalt.
  *
+ * Der erste Anlauf verschränkte nur streng abwechselnd — im Zweispalter, der
+ * zeilenweise füllt, landeten damit alle richtigen Antworten in der **linken
+ * Spalte**. Die Übung war an der Position lösbar statt am Inhalt. Diese
+ * Reihenfolge verteilt beide Sorten über beide Spalten.
+ *
  * Fest verdrahtet statt zufällig: eine Reihenfolge, die sich bei jedem Rendern
  * ändert, macht das Zurückspringen aus „Dein Weg“ unbrauchbar.
  */
 const REIHENFOLGE = [
   'aufmass',
   'material',
-  'fotos',
   'preis',
+  'fotos',
   'balken',
-  'statik',
   'kran',
+  'statik',
+  'anschluesse',
   'termin',
   'budget',
-  'anschluesse',
 ]
 
 const ANGEZEIGT = REIHENFOLGE.map((id) => PUNKTE.find((p) => p.id === id)!).filter(
@@ -146,8 +151,11 @@ const BILD = '/medien/media/zimmerer/quiz-abbund.webp'
 
 export function M1() {
   const { weiter } = useStepNavigation('M1')
-  const [gewaehlt, setGewaehlt] = useState<string[]>([])
-  const [ausgewertet, setAusgewertet] = useState(false)
+  // Aus dem Store vorbelegt: wer über „Dein Weg“ zurückspringt, soll seine
+  // Auswertung wiederfinden und nicht von vorn anfangen müssen.
+  const gespeichert = useFortschritt().answers.m1
+  const [gewaehlt, setGewaehlt] = useState<string[]>(() => gespeichert?.gewaehlt ?? [])
+  const [ausgewertet, setAusgewertet] = useState(() => !!gespeichert?.ausgewertet)
 
   const umschalten = (id: string) =>
     setGewaehlt((alt) => (alt.includes(id) ? alt.filter((x) => x !== id) : [...alt, id]))
@@ -339,7 +347,7 @@ function Auswertung({
                     className="flex w-full items-start gap-2 rounded-kh px-2 py-2 text-left text-[14px] text-kh-grey transition-colors hover:bg-kh-band-soft"
                   >
                     <Check
-                      className="mt-0.5 size-4 shrink-0 text-kh-orange"
+                      className="mt-0.5 size-4 shrink-0 text-kh-orange-text-text"
                       strokeWidth={2.5}
                       aria-hidden
                     />

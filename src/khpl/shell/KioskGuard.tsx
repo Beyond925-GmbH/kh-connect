@@ -9,6 +9,7 @@ import {
   useFortschritt,
   zumSplash,
 } from '@/khpl/store/fortschritt'
+import { useStaffDialogAnmeldung } from './staffAusgang'
 
 /**
  * Kiosk-Verhalten nach khpl-flow.md 5 und khpl-ui-shell.md 7 + 8.
@@ -33,13 +34,23 @@ const IDLE_HINWEIS_MS = 60_000
 const IDLE_RESET_MS = 15_000
 
 /**
- * M6 ist die Mittagspause. Der Regiehinweis vom Board lautet „Schau einmal vom
- * iPad hoch“, und die Umsetzung sagt ausdrücklich: kein Drängen, kein
- * Fortschrittsdruck (flow 7 M6). Ein Overlay, das nach einer Minute fragt, ob
- * man noch da ist, wäre genau das — deshalb bekommt dieser eine Screen die
- * dreifache Geduld.
+ * Screens, auf denen eine Minute Stillstand normal ist — dort wäre die Frage
+ * „Bist du noch da?“ eine Unterbrechung, keine Hilfe.
+ *
+ * M6 ist die Mittagspause: der Regiehinweis vom Board lautet „Schau einmal vom
+ * iPad hoch“, und die Umsetzung verlangt ausdrücklich kein Drängen (flow 7 M6).
+ * M5 ist eine halbe Minute Zuschauen plus eine Karte, die gelesen werden will.
+ * M8 ist der Rückblick, und B9.1–B9.3 sind vier Faktenblöcke am Stück — genau
+ * die Stellen, an denen jemand liest, statt zu tippen.
  */
-const GEDULD: Partial<Record<string, number>> = { M6: 3 }
+const GEDULD: Partial<Record<string, number>> = {
+  M6: 3,
+  M5: 3,
+  M8: 3,
+  'B9.1': 3,
+  'B9.2': 3,
+  'B9.3': 3,
+}
 
 /** Wie oft der Splash prüft, ob der gespeicherte Stand abgelaufen ist. */
 const VERFALL_TAKT_MS = 20_000
@@ -54,7 +65,11 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
   const [hinweis, setHinweis] = useState(false)
   const [staff, setStaff] = useState(false)
   const uhr = useRef(0)
-  const staffTap = useStaffAusgang(() => setStaff(true))
+
+  // Die Geste selbst haengt an den Screens (leere Dehnfuge in der Leiste, Logo
+  // auf dem Splash) — hier liegt nur das Fenster, das sie oeffnet.
+  const oeffnen = useCallback(() => setStaff(true), [])
+  useStaffDialogAnmeldung(oeffnen)
 
   useEffect(() => {
     if (!istWebModus()) setTheme('light')
@@ -99,28 +114,16 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
     <MotionConfig reducedMotion="user">
       {children}
 
-      {/* Der Staff-Ausgang muss dort erreichbar sein, wo etwas hängt — also auf
-          jedem Screen, nicht nur auf S0. flow 5: „Manueller Reset: jederzeit
-          erreichbar für das Standpersonal“. Eine unbeschriftete Ecke oben
-          links, fünf schnelle Taps; für Besucher unsichtbar, für eingewiesenes
-          Personal in zwei Sekunden gemacht. */}
-      <button
-        type="button"
-        aria-hidden
-        tabIndex={-1}
-        onClick={staffTap}
-        data-testid="staff-ecke"
-        className="fixed top-0 left-0 z-[65] size-12 cursor-default opacity-0"
-      />
-
       {hinweis && (
         <div
           data-testid="idle-hinweis"
-          className="fixed inset-0 z-[60] grid animate-fade-up place-items-center bg-kh-page/92 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[60] grid animate-fade-up place-items-center bg-kh-ink/70 backdrop-blur-[3px]"
         >
           <div className="flex flex-col items-center gap-6 px-6 text-center">
-            <p className="kh-step-titel">Bist du noch da?</p>
-            <p className="kh-fachtext">Tipp irgendwo hin, dann geht es weiter.</p>
+            <p className="kh-step-titel text-white">Bist du noch da?</p>
+            <p className="kh-fachtext text-white/85">
+              Tipp irgendwo hin, dann geht es weiter.
+            </p>
             <Button onClick={zuruecksetzen} size="lg" className="h-[60px]">
               Ja, weiter
             </Button>
@@ -131,23 +134,6 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
       <StaffDialog offen={staff} onSchliessen={() => setStaff(false)} />
     </MotionConfig>
   )
-}
-
-/**
- * Der Staff-Ausgang (khpl-ui-shell.md 8): fünf schnelle Taps. Für den Fall,
- * dass etwas hängt und der nächste Besucher schon wartet.
- */
-export function useStaffAusgang(onOeffnen: () => void) {
-  const taps = useRef<number[]>([])
-
-  return useCallback(() => {
-    const jetzt = Date.now()
-    taps.current = [...taps.current, jetzt].filter((t) => jetzt - t < 2500)
-    if (taps.current.length >= 5) {
-      taps.current = []
-      onOeffnen()
-    }
-  }, [onOeffnen])
 }
 
 /** Das Menü hinter dem Staff-Ausgang. Zwei Ausgänge, mehr braucht es nicht. */

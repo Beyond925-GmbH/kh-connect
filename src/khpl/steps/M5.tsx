@@ -105,7 +105,7 @@ function Phasenanzeige({ label }: { label: string }) {
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.22 }}
           data-testid="m5-phase"
-          className="kh-h3 text-kh-orange"
+          className="kh-h3 text-kh-orange-text"
         >
           {label}
         </motion.p>

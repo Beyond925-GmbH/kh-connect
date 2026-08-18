@@ -37,9 +37,9 @@ export interface Dachstuhl3DProps {
   /** Nach 8 s ohne Eingabe dreht das Modell von selbst weiter. */
   attraktor?: boolean
   /**
-   * Faktor auf den Kameraabstand. Die Presets in `kamera.ts` sind fuer den
-   * Vollbild-Prototyp gesetzt; in einem Step liegen Textkarte und Fuss ueber
-   * der Szene, und das Modell braucht mehr Luft.
+   * Faktor auf den Kameraabstand. Die Presets in `kamera.ts` sind für den
+   * Vollbild-Prototyp gesetzt; in einem Step liegen Textkarte und Fuß über der
+   * Szene, und das Modell braucht mehr Luft.
    */
   kameraAbstand?: number
   /** Warmes Abendlicht statt Tageslicht — für M8. */

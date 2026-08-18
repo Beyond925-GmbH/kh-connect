@@ -7,13 +7,13 @@ import {
   useSensors,
   type DragMoveEvent,
 } from '@dnd-kit/core'
-import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
+import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { merkeAntwort } from '@/khpl/store/fortschritt'
+import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
  * M4 — Ein Balken, ein Maß.
@@ -56,11 +56,15 @@ const mm = (n: number) => `${(n / 1000).toFixed(2).replace('.', ',')} m`
 
 export function M4() {
   const { weiter } = useStepNavigation('M4')
-  const [laenge, setLaenge] = useState(START_MM)
-  const [winkel, setWinkel] = useState<Winkel | null>(null)
-  const [versuche, setVersuche] = useState(0)
-  const [ergebnis, setErgebnis] = useState<Rueckmeldung | null>(null)
-  const [geloest, setGeloest] = useState(false)
+  const gespeichert = useFortschritt().answers.m4
+  const fertig = !!gespeichert?.getroffen
+  const [laenge, setLaenge] = useState(() => (fertig ? ZIEL_MM : START_MM))
+  const [winkel, setWinkel] = useState<Winkel | null>(() => (fertig ? ZIEL_WINKEL : null))
+  const [versuche, setVersuche] = useState(() => gespeichert?.versuche ?? 0)
+  const [ergebnis, setErgebnis] = useState<Rueckmeldung | null>(() =>
+    fertig ? { treffer: true, text: 'Passt. Nummer drauf — Teil 14 von 68.' } : null,
+  )
+  const [geloest, setGeloest] = useState(fertig)
 
   const pruefen = () => {
     const r = bewerte(laenge, winkel)
@@ -274,8 +278,14 @@ function Zuschnitt({
     [onLaenge],
   )
 
+  // `justify-start` + `shrink-0` statt `justify-center`: bei zentrierter
+  // Ausrichtung überlappen die Kinder, sobald der Fuß wächst (Abstecher-Angebot
+  // plus Aha-Karte) — der Balken lief dann quer durch die Winkelknöpfe.
   return (
-    <div className="flex h-full min-h-0 flex-col justify-center gap-4" data-wisch="aus">
+    <div
+      className="flex h-full min-h-0 flex-col justify-start gap-3 overflow-hidden"
+      data-wisch="aus"
+    >
       <div className="flex items-baseline gap-3">
         <span
           data-testid="m4-laenge"
@@ -295,9 +305,9 @@ function Zuschnitt({
         }}
         onDragMove={ziehen}
       >
-        <div ref={bahn} className="relative h-[104px] w-full select-none">
+        <div ref={bahn} className="relative h-[92px] w-full shrink-0 select-none">
           {/* Der Balken. Der Teil rechts der Schnittlinie ist Verschnitt. */}
-          <div className="absolute inset-x-0 top-[26px] h-[52px] overflow-hidden rounded-[3px] bg-[#C08A50]">
+          <div className="absolute inset-x-0 top-[22px] h-[48px] overflow-hidden rounded-[3px] bg-[#C08A50]">
             <div
               className="absolute inset-y-0 left-0 bg-[#A9743F]"
               style={{ width: `${anteil * 100}%` }}
@@ -313,7 +323,7 @@ function Zuschnitt({
         </div>
       </DndContext>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex shrink-0 flex-col gap-2">
         <p className="text-[15px] text-kh-grey">Und der Winkel am First:</p>
         <div className="flex gap-2">
           {WINKEL.map((w) => (
@@ -338,25 +348,11 @@ function Zuschnitt({
         </div>
       </div>
 
-      <AnimatePresence mode="wait" initial={false}>
-        {ergebnis && (
-          <motion.p
-            key={ergebnis.text}
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.22 }}
-            data-testid="m4-rueckmeldung"
-            className={`rounded-kh px-4 py-3 text-[15px] ${
-              ergebnis.treffer
-                ? 'bg-kh-orange/12 text-kh-ink'
-                : 'bg-kh-band-soft text-kh-grey'
-            }`}
-          >
-            {ergebnis.text}
-          </motion.p>
-        )}
-      </AnimatePresence>
+      <Rueckmeldung
+        ok={ergebnis ? ergebnis.treffer : null}
+        text={ergebnis ? ergebnis.text : null}
+        testid="m4-rueckmeldung"
+      />
 
       {!gesperrt && (
         <div className="flex items-center justify-between gap-3">

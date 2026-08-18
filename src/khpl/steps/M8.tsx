@@ -1,4 +1,5 @@
 import { Suspense, lazy } from 'react'
+import { Check } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
@@ -166,9 +167,11 @@ export function M8() {
                 variants={{ aus: { opacity: 0, x: -8 }, an: { opacity: 1, x: 0 } }}
                 className="flex items-baseline gap-2 text-[16px] leading-snug text-kh-ink"
               >
-                <span className="text-kh-orange" aria-hidden>
-                  ·
-                </span>
+                <Check
+                  className="mt-0.5 size-4 shrink-0 text-kh-orange-text"
+                  strokeWidth={2.5}
+                  aria-hidden
+                />
                 {zeile}
               </motion.li>
             ))}

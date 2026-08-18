@@ -48,6 +48,13 @@
   --color-kh-ink: #000000;
   --color-kh-orange: #ff9f2a;
   --color-kh-orange-hover: #f28c0c;
+  /* Oranger *Text* auf hellem Grund. Die Markenfarbe selbst kommt auf Weiß nur
+     auf 2,05:1 — in einer hell ausgeleuchteten Messehalle, aus Armlänge, ist
+     das der Unterschied zwischen lesbar und nicht. Dieser Ton hält 4,88:1 und
+     bleibt erkennbar dieselbe Familie. Flächen, Buttons und Grafik behalten
+     `--color-kh-orange`: die sind aus dem Design-System der Website gemessen
+     und keine Textfarbe. */
+  --color-kh-orange-text: #a85f05;
   --color-kh-grey: #585858;
   --color-kh-band: #e3e3e3;
   --color-kh-band-soft: #f1f1f1;
@@ -90,6 +97,8 @@
   --color-kh-rule: rgba(255, 255, 255, 0.12);
   /* On a dark ground a hover should brighten, not darken. */
   --color-kh-orange-hover: #ffb659;
+  /* Auf dunklem Grund trägt die helle Markenfarbe von selbst. */
+  --color-kh-orange-text: #ffb659;
   /* The closing orange slab stays orange, dimmed so it doesn't glare. */
   --color-kh-footer: #d1811b;
   color-scheme: dark;
@@ -208,7 +217,7 @@
   font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2.35rem);
   font-weight: 700;
   line-height: 1.12;
-  color: var(--color-kh-orange);
+  color: var(--color-kh-orange-text);
   text-wrap: balance;
 }
 

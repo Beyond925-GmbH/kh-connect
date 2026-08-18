@@ -54,12 +54,12 @@ export function M9() {
                   data-testid={`m9-${weg.id}`}
                   className="flex size-full min-h-[104px] flex-col justify-between gap-2 rounded-kh border border-kh-rule bg-kh-surface p-5 text-left transition-colors hover:border-kh-orange hover:bg-kh-orange/5"
                 >
-                  <span className="kh-h3 text-kh-orange">{weg.titel}</span>
+                  <span className="kh-h3 text-kh-orange-text">{weg.titel}</span>
                   <span className="text-[15px] leading-snug text-kh-grey">
                     {weg.koeder}
                   </span>
                   <ArrowRight
-                    className="size-5 text-kh-orange"
+                    className="size-5 text-kh-orange-text"
                     strokeWidth={1.75}
                     aria-hidden
                   />

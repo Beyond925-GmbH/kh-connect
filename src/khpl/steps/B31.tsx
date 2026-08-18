@@ -9,6 +9,17 @@ import { StepShell } from '@/khpl/shell/StepShell'
  *
  * Kurzer Info-Abstecher ohne Übung (khpl-flow.md 7 B3.1).
  *
+ * Der stärkste Inhalt steht nach flow 7 B3.1 nicht im Einkauf selbst, sondern
+ * daneben: **Planen und Materialauswahl sind offiziell Teil des
+ * Ausbildungsberufs** — „das überrascht, weil kaum jemand Zimmerei mit Einkauf
+ * verbindet“. Die Spec nennt die Neuordnung ausdrücklich „ein besserer
+ * Aufhänger als der Einkauf“. Deshalb trägt die erste Aha-Karte genau das.
+ *
+ * Wortwahl `GEPRÜFT`: „Bedarfsplanung“ ist **kein** Begriff der
+ * Ausbildungsordnung — belastbar ist der Wortlaut des amtlichen Berufsprofils
+ * („Arbeiten planen“, „Baustoffe auswählen“). Und seit dem 1. August 2026 gilt
+ * die AusbauBAusbV, nicht mehr die BauWiAusbV von 1999.
+ *
  * ⚠️ Die zweite Aha-Karte trägt eine **Korrektur am Board**. Der grüne Sticky
  * sagt, Holz sei „der einzige Baustoff, der nachwächst“ — das ist falsch:
  * Stroh, Hanf, Flachs, Schilf, Kork und Bambus wachsen ebenfalls nach. Der
@@ -49,15 +60,16 @@ export function B31() {
           Fichte für die <Begriff id="sparren">Sparren</Begriff>,{' '}
           <Begriff id="brettschichtholz">Brettschichtholz</Begriff> für die weiten
           Spannweiten. Du bestellst, koordinierst die Liefertermine und prüfst jeden
-          Balken, wenn er ankommt.
+          Balken, wenn er ankommt — Holz ist ein Naturprodukt, keiner ist wie der andere.
         </p>
       }
       aha={
         <div className="flex flex-col gap-2">
           <AhaKarte sichtbar={aha} eyebrow="Nicht auf dem Schirm">
-            Holz ist ein Naturprodukt. Kein Balken ist wie der andere — jeder wird auf
-            Verwerfung, Äste und Feuchte geprüft. Falsch gelagert wird aus teurem Bauholz
-            Brennholz.
+            Einkaufen gehört zum Beruf. „Arbeiten planen“ und „Baustoffe auswählen“ stehen
+            wörtlich im Ausbildungsberufsbild — und seit dem 1. August 2026 gilt dafür
+            eine neue Ausbildungsordnung. Wer diesen Sommer anfängt, ist der erste
+            Jahrgang danach.
           </AhaKarte>
           <AhaKarte sichtbar={aha} eyebrow={null} verzoegerung={1.8}>
             In dem Dachstuhl von eben stecken rund fünf Kubikmeter Holz — und damit etwa
