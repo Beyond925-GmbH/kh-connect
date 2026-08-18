@@ -3,8 +3,9 @@
 React + Vite + TypeScript, Tailwind v4, shadcn-style components on **Base UI**
 (`@base-ui/react`).
 
-**The page is intentionally blank.** What this repo holds right now is the design
-system in code — theme tokens, style primitives and brand assets. Content comes later.
+**The app is implemented.** `src/khpl/` holds the KHPL Connect flow — splash,
+in-fiction intro and all seventeen steps (M1–M10 plus the seven Abstecher) — built
+on the design system below. See [Der Flow](#der-flow-srckhpl).
 
 ## Specs
 
@@ -19,23 +20,87 @@ system in code — theme tokens, style primitives and brand assets. Content come
 ```bash
 pnpm install
 pnpm dev        # http://localhost:5173
+pnpm build      # prueft nebenbei die Buendel-Budgets, s. u.
 pnpm check      # typecheck + lint + format:check
 pnpm format     # prettier --write .
 ```
 
-## Installed for the KHPL Connect flow, not yet used
+## Der Flow (`src/khpl/`)
 
-The packages the flow spec calls for are installed so implementation can start
-without a dependency detour. **Nothing imports them yet.**
+Kommentare und Bezeichner in `src/khpl/` und `src/dachstuhl/` sind auf Deutsch —
+dieselbe Sprache wie die Spec, dieselbe wie das Board. Das Design-System darunter
+(`src/components/ui/`, `src/lib/`) bleibt englisch, wie es ist.
+
+```
+flow/steps.ts        Der Step-Graph. Einzige Quelle für Reihenfolge, Abstecher
+                     und Rail-Segmentzahl — nichts davon steht als Konstante
+                     irgendwo sonst.
+flow/uebergaenge.ts  Buttontexte je Abstecher, plus `wegzustand` (✓ ● ○).
+store/fortschritt.ts localStorage v1, 30-Minuten-Verfall, Zurück-Historie,
+                     Hochwassermarke, Antworten, Karriere-Skip.
+shell/               StepShell (Bühne · Fachtext · Interaktion · Aha · Fuß in
+                     drei Aufteilungen), Rail, DeinWeg (S3), Splash (S0),
+                     Auftragsannahme (S1), KioskGuard, Wisch-Navigation.
+komponenten/         Begriff (Glossar-Popover), AhaKarte, Verzweigung.
+glossar/begriffe.ts  Alle 20 Begriffe aus flow 12, plus `Stundensatz`.
+buehne/              Dachstuhl3D (die Lazy-Grenze um `three`), Abbundplan und
+                     Brotzeit als Zeichnungen, aufbauabschnitte.ts.
+steps/               Ein Modul je Step. Der Text steht gebündelt oben in der
+                     Datei (flow 8.4).
+```
+
+**Zwei Regeln, an denen viel hängt.**
+
+1. `three` darf **nie** statisch importiert werden — auch nicht ein Hilfsexport
+   aus demselben Modul. Ein Modul, das irgendwo statisch importiert wird, zieht
+   Rollup ganz ins Hauptbündel, und dann liegt `three` im Erststart (flow 8.5).
+   Deshalb steht der Ladezustand in `buehne/Dachstuhl3DFallback.tsx` allein.
+   Kontrolle: `pnpm build` — `Szene-*.js` muss ein eigener Chunk sein, und der
+   Build darf **kein** `INEFFECTIVE_DYNAMIC_IMPORT` melden.
+2. Wo M5 aufhört und M7 anfängt, steht in `buehne/aufbauabschnitte.ts` und wird
+   über das **Phasenlabel** aus `dachstuhl/zeitachse.ts` gesucht, nie als Zahl.
+   Die Zeitachse ist Animationsparameter, kein Vertragswert.
+
+### Am Messetag zu füllen
+
+`public/stand.json` trägt den Namen für „Sprich jetzt mit … am Stand“:
+
+```json
+{ "name": "Maria Musterfrau", "rolle": "Ausbildungsberatung" }
+```
+
+Kein Rebuild, kein Deploy — die Datei wird von Hand geändert. Ist der Name leer,
+sagt der Screen „Sprich jetzt mit uns am Stand“, nie `[Name]`.
+
+### Kiosk-Bedienung
+
+- **Staff-Ausgang:** fünf schnelle Taps in die Ecke **oben links**, auf jedem
+  Screen. Öffnet „Neu starten / App neu laden“.
+- **Idle:** 60 s → „Bist du noch da?“, weitere 15 s → zurück auf den Splash.
+  Der Fortschritt wird dabei **nicht** gelöscht; das erledigt die
+  30-Minuten-Frist. Die Mittagspause (M6) bekommt die dreifache Geduld.
+- **`?web=1`** gibt den Theme-Schalter frei (Kiosk ist auf Light gepinnt).
+- **`?demo=dachstuhl`** öffnet weiterhin den 3D-Prototyp.
+
+## Abhängigkeiten für den Flow
+
 
 | Paket | Wofür (flow spec 8.2) |
 | --- | --- |
 | `motion` | Ein-/Ausgänge, animierter Dachaufbau (M5), Aha-Karten |
 | `@dnd-kit/core` | Zieh-Interaktionen: M4 Schnitt, M7 Bauteile, B4.1 Auswahl |
-| `three`, `@react-three/fiber`, `@react-three/drei` | 3D-Modell in B3.2 |
+| `three`, `@react-three/fiber`, `@react-three/drei` | 3D-Modell in B3.2, M5, M7, M8 |
 
-`three` must stay behind a lazy boundary — it is budgeted at ≤ 500 KB gzip and
-must never land in the first load (flow spec 8.5).
+Gemessen nach `pnpm build`, gegen die Budgets aus flow 8.5:
+
+| Teil | Budget | Ist |
+| --- | --- | --- |
+| App-Shell (React, Tailwind, Base UI, motion) | ≤ 250 KB gzip | 191 KB |
+| `three` + fiber + drei, nur lazy | ≤ 500 KB gzip | 243 KB, eigener Chunk |
+| Erststart bis „Tippen zum Starten“ | ≤ 1,5 MB | rund 700 KB |
+
+Der 1,4-MB-Attract-Loop lädt erst 400 ms **nach** dem ersten Frame und zählt
+deshalb nicht zum Weg bis „Tippen zum Starten“.
 
 ## Offline / PWA
 
