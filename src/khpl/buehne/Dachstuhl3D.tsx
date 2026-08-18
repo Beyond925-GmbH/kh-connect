@@ -36,6 +36,12 @@ export interface Dachstuhl3DProps {
   ansicht?: Ansicht | null
   /** Nach 8 s ohne Eingabe dreht das Modell von selbst weiter. */
   attraktor?: boolean
+  /**
+   * Faktor auf den Kameraabstand. Die Presets in `kamera.ts` sind fuer den
+   * Vollbild-Prototyp gesetzt; in einem Step liegen Textkarte und Fuss ueber
+   * der Szene, und das Modell braucht mehr Luft.
+   */
+  kameraAbstand?: number
   /** Warmes Abendlicht statt Tageslicht — für M8. */
   abendlicht?: boolean
   /** Angetipptes Bauteil. Der Step hält die Auswahl, damit er sie merken kann. */
@@ -54,6 +60,7 @@ export default function Dachstuhl3D({
   dauer = 16,
   ansicht = null,
   attraktor = false,
+  kameraAbstand = 1,
   abendlicht = false,
   auswahl = null,
   onBauteil,
@@ -155,6 +162,7 @@ export default function Dachstuhl3D({
         auswahl={auswahl}
         ansicht={ansicht}
         attraktor={attraktor}
+        kameraAbstand={kameraAbstand}
         dpr={null}
         // Die Szene kennt nur „hell“ und „dunkel“. Das Abendlicht von M8 fährt
         // über den Dunkel-Zweig: warmer Himmel, tief stehende Sonne.

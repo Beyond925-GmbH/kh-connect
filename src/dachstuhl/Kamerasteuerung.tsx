@@ -17,9 +17,16 @@ import { KAMERA, START_KAMERA } from './kamera'
 export function Kamerasteuerung({
   ansicht,
   attraktor,
+  abstand = 1,
 }: {
   ansicht: Ansicht | null
   attraktor: boolean
+  /**
+   * Faktor auf den Kameraabstand. Die Presets sind fuer den Vollbild-Prototyp
+   * gesetzt; in einem Step liegen Textkarte und Fuss ueber der Szene, und das
+   * Modell braucht mehr Luft, damit First und Traufe nicht angeschnitten sind.
+   */
+  abstand?: number
 }) {
   const kamera = useThree((zustand) => zustand.camera)
   const steuerung = useRef<ComponentRef<typeof OrbitControls>>(null)
@@ -27,8 +34,14 @@ export function Kamerasteuerung({
 
   useEffect(() => {
     const preset = ansicht ? KAMERA[ansicht] : START_KAMERA
-    kamera.position.set(...preset.position)
     const ziel = new THREE.Vector3(...preset.ziel)
+    // Vom Ziel aus skalieren, nicht vom Ursprung: sonst wandert mit dem Abstand
+    // auch der Blickwinkel.
+    kamera.position
+      .set(...preset.position)
+      .sub(ziel)
+      .multiplyScalar(abstand)
+      .add(ziel)
     kamera.lookAt(ziel)
     kamera.updateProjectionMatrix()
     const s = steuerung.current
@@ -36,7 +49,7 @@ export function Kamerasteuerung({
       s.target.copy(ziel)
       s.update()
     }
-  }, [ansicht, kamera])
+  }, [ansicht, kamera, abstand])
 
   // Attraktor-Modus: nach 8 s ohne Eingabe dreht das Modell von selbst weiter.
   useEffect(() => {
@@ -67,8 +80,8 @@ export function Kamerasteuerung({
       dampingFactor={0.08}
       enablePan={false}
       rotateSpeed={0.6}
-      minDistance={9}
-      maxDistance={22}
+      minDistance={9 * abstand}
+      maxDistance={22 * abstand}
       minPolarAngle={Math.PI * 0.2}
       maxPolarAngle={Math.PI * 0.48}
       autoRotate={ansicht === null && autoDrehen}

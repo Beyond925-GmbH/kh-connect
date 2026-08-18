@@ -35,6 +35,7 @@ export function Szene({
   auswahl,
   ansicht,
   attraktor,
+  kameraAbstand,
   dpr,
   dunkel,
   reduziert,
@@ -50,6 +51,8 @@ export function Szene({
   auswahl: Auswahl | null
   ansicht: Ansicht | null
   attraktor: boolean
+  /** Faktor auf den Kameraabstand — s. Kamerasteuerung. */
+  kameraAbstand?: number
   dpr: number | null
   dunkel: boolean
   reduziert: boolean
@@ -75,7 +78,7 @@ export function Szene({
     >
       <color attach="background" args={[hintergrund]} />
       <Beleuchtung dunkel={dunkel} />
-      <Kamerasteuerung ansicht={ansicht} attraktor={attraktor} />
+      <Kamerasteuerung ansicht={ansicht} attraktor={attraktor} abstand={kameraAbstand} />
       <Dachstuhl
         masse={masse}
         einheiten={einheiten}

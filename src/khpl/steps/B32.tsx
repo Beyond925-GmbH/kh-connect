@@ -37,12 +37,12 @@ export function B32() {
 
   const tippen = (typ: string, index: number | null) => {
     setAuswahl({ typ: typ as Auswahl['typ'], index })
-    setAngetippt((alt) => {
-      if (alt.includes(typ)) return alt
-      const neu = [...alt, typ]
-      merkeAntwort('b32', { angetippt: neu })
-      return neu
-    })
+    if (angetippt.includes(typ)) return
+    // Außerhalb des Updaters: React darf einen Updater beim Rendern ausführen,
+    // und `merkeAntwort` schreibt in den Store.
+    const neu = [...angetippt, typ]
+    setAngetippt(neu)
+    merkeAntwort('b32', { angetippt: neu })
   }
 
   const genug = angetippt.length >= AHA_AB
@@ -62,6 +62,7 @@ export function B32() {
           <Dachstuhl3D
             zielT={1}
             attraktor
+            kameraAbstand={1.3}
             auswahl={auswahl}
             onBauteil={(teil) => tippen(teil.typ, teil.auswahlIndex)}
             onDaneben={() => setAuswahl(null)}
