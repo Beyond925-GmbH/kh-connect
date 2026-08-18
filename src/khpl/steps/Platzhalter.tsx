@@ -17,7 +17,6 @@ export function Platzhalter({ id }: { id: StepId }) {
   return (
     <StepShell
       id={id}
-      aufteilung="uebung"
       titelZusatz={def.art === 'abstecher' ? 'Abstecher' : undefined}
       onWeiter={weiter}
       buehne={<div className="size-full bg-kh-band" />}

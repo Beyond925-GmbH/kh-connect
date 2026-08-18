@@ -44,7 +44,7 @@ export function Rueckmeldung({
           }
           data-testid={testid}
           data-ok={ok}
-          className={`flex items-start gap-2.5 rounded-kh px-4 py-3 text-[15px] leading-snug ${
+          className={`flex items-start gap-2.5 rounded-kh px-4 py-3 text-[1.0625rem] leading-snug ${
             ok
               ? 'bg-kh-orange text-white'
               : 'border border-kh-rule bg-kh-band-soft text-kh-grey'

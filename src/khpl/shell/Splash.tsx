@@ -140,14 +140,14 @@ export function Splash() {
               className="mt-1 flex flex-col items-start gap-2"
               onClick={(e) => e.stopPropagation()}
             >
-              <p className="text-[15px] text-white/60">
+              <p className="text-[1.0625rem] text-white/60">
                 Oder da weiter, wo jemand aufgehört hat:
               </p>
               <Button
                 variant="outline"
                 onClick={machWeiter}
                 data-testid="weitermachen"
-                className="h-[60px] border-white/70 px-7 text-[16px] text-white hover:bg-white hover:text-kh-ink"
+                className="h-[60px] border-white/70 px-7 text-[1.125rem] text-white hover:bg-white hover:text-kh-ink"
               >
                 Weitermachen bei „{STEPS[wiedereinstieg.currentStepId].titel}“
               </Button>

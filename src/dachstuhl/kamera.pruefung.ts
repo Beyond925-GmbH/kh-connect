@@ -51,6 +51,12 @@ for (const ansicht of ['iso', 'front', 'seite', 'oben', 'traufe'] as Ansicht[]) 
   for (const [aspect, wie] of [
     [1024 / 768, 'quer'],
     [768 / 1024, 'hoch'],
+    // Die Masse, die am Stand wirklich anliegen: iPad quer abzueglich der
+    // 68-px-Leiste, und ein Handy hochkant fuer die QR-Besucher. Beide sind
+    // deutlich schlanker als 4:3 — und genau bei schlankem Bild wird die
+    // waagerechte Oeffnung zur engeren.
+    [1194 / 766, 'ipad'],
+    [390 / 776, 'handy'],
   ] as [number, string][]) {
     faelle.push({ ansicht, aspect, name: `${ansicht}/${wie}/voll` })
     faelle.push({
@@ -74,6 +80,16 @@ for (const ansicht of ['iso', 'front', 'seite', 'oben', 'traufe'] as Ansicht[]) 
       aspect,
       sf: { links: 0.48 },
       name: `${ansicht}/${wie}/karte-breit`,
+    })
+    // Der gemessene Ist-Wert des Ein-Karten-Layouts: die Karte ist quer auf
+    // 40rem gedeckelt und steht mit ihrem Rand bei 56 % der Flaeche. Vorher
+    // ging die Pruefung nur bis 0,48 — der reale Screen lag darueber und war
+    // damit ungeprueft.
+    faelle.push({
+      ansicht,
+      aspect,
+      sf: { links: 0.56, rechts: 0.18, oben: 0.18, unten: 0.18 },
+      name: `${ansicht}/${wie}/karte-56`,
     })
     faelle.push({
       ansicht,

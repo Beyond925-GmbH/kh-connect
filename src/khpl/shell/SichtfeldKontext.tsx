@@ -12,14 +12,13 @@ import type { Sichtfeld } from '@/dachstuhl/kamera'
 /**
  * Was die Bühne von ihrer Fläche wirklich sehen darf.
  *
- * Im Layout `buehne` liegt das 3D-Modell unter der ganzen Fläche, und darüber
- * liegen zwei deckende Kästen: die Textkarte oben (links, `max-w-[30rem]`) und
- * der Block mit Interaktion, Aha-Karte und Fuß unten (rechts, bis 62 %). Ohne
- * Angabe passt die Kamera den Dachstuhl mittig in die *ganze* Fläche ein — und
+ * Auf den 3D-Steps liegt das Modell unter der ganzen Fläche, und darüber liegt
+ * die deckende Inhaltskarte — unten links, quer auf 40rem gedeckelt. Ohne
+ * Angabe passt die Kamera den Dachstuhl mittig in die *ganze* Fläche ein und
  * damit zur Hälfte unter die Karte.
  *
- * Gemessen statt geschätzt: die Kästen sind unterschiedlich hoch, je nachdem
- * wie lang der Fachtext ist und ob eine Aha-Karte offen steht. Ein von Hand
+ * Gemessen statt geschätzt: die Karte ist unterschiedlich hoch, je nachdem wie
+ * lang der Fachtext ist und ob eine Aha-Karte offen steht. Ein von Hand
  * gesetzter Wert je Step wäre schon beim ersten Textlauf falsch — und quer
  * gegen hoch sowieso.
  */
@@ -35,6 +34,28 @@ function grob(x: number): number {
   return Math.round(Math.max(0, Math.min(1, x)) * 100) / 100
 }
 
+/**
+ * Luft an den Kanten, die keine Karte verdeckt.
+ *
+ * `passeEin` rechnet mit einem eigenen `RAND`, der aber nur die *Größe* des
+ * Fensters betrifft; wohin es rückt, macht danach ein Versatz, und der landet
+ * bei stark außermittigem Fenster ein paar Prozent neben dem Ziel. Gemessen
+ * lag die rechte Modellkante dadurch bei 0,989 von 1,0 — rechnerisch im Bild,
+ * optisch am Rand angeschnitten.
+ *
+ * Statt an der geprüften Kameramathematik zu drehen, bekommt das Fenster hier
+ * einen Sicherheitsstreifen.
+ *
+ * **Der Wert ist gemessen, nicht hergeleitet.** Die Einpassung rechnet gegen
+ * `huelle` aus `berechneMasse`; auf dem Schirm ragt das fertig gelattete Dach
+ * sichtbar darüber hinaus. Mit 5 % und mit 10 % stand der Dachstuhl weiter an
+ * der rechten Kante an, erst ab knapp 18 % steht er frei. Wer die Hülle in
+ * `mass.ts` einmal an die tatsächlich gezeichnete Geometrie angleicht, kann
+ * diesen Wert wieder senken — bis dahin ist er der Preis dafür, dass auf keinem
+ * der vier 3D-Screens ein angeschnittenes Dach steht.
+ */
+const LUFT = 0.18
+
 function gleich(a: Sichtfeld, b: Sichtfeld): boolean {
   return (
     a.links === b.links &&
@@ -45,25 +66,30 @@ function gleich(a: Sichtfeld, b: Sichtfeld): boolean {
 }
 
 /**
- * Misst zwei Kästen gegen ihre gemeinsame Fläche und stellt das Ergebnis der
- * Bühne bereit.
+ * Misst die Inhaltskarte gegen ihre Fläche und stellt das Ergebnis der Bühne
+ * bereit.
  *
- * Die Kästen liegen an gegenüberliegenden Ecken, deshalb wird je Achse nur die
- * Kante verdeckt, an der ein Kasten klebt: der obere Kasten nimmt oben weg, der
- * untere unten. Waagerecht zählt nur, was durchgehend verdeckt ist — der obere
- * Kasten reicht nicht bis zum unteren Rand, also gibt es links immer noch einen
- * Streifen freie Fläche. Er wird trotzdem als verdeckt gerechnet: ein Modell,
- * das in einen L-förmigen Rest hineinragt, sieht aus wie ein Fehler.
+ * Die Karte klebt unten links. Welche Kante sie dem Modell wegnimmt, hängt
+ * davon ab, wie breit sie ist:
+ *
+ * - Füllt sie die Breite (hochkant, Handy), nimmt sie **unten** weg. Das Modell
+ *   rückt in den freien Streifen darüber.
+ * - Bleibt sie schmal (quer, auf 40rem gedeckelt), nimmt sie **links** weg und
+ *   das Modell bekommt die volle Höhe der rechten Hälfte. Senkrecht Platz zu
+ *   nehmen wäre hier falsch: dann bliebe dem Dachstuhl nur ein flacher Streifen
+ *   über der Karte, obwohl rechts daneben die halbe Fläche frei steht.
+ *
+ * Der Streifen links *über* der Karte wird dabei als verdeckt gerechnet, obwohl
+ * er frei ist — ein Modell, das in einen L-förmigen Rest hineinragt, sieht aus
+ * wie ein Fehler.
  */
 export function SichtfeldMesser({
   flaeche,
-  oben,
-  unten,
+  karte,
   children,
 }: {
   flaeche: RefObject<HTMLElement | null>
-  oben: RefObject<HTMLElement | null>
-  unten: RefObject<HTMLElement | null>
+  karte: RefObject<HTMLElement | null>
   children: ReactNode
 }) {
   const [sichtfeld, setSichtfeld] = useState<Sichtfeld>({})
@@ -72,29 +98,24 @@ export function SichtfeldMesser({
   const messen = useCallback(() => {
     const f = flaeche.current?.getBoundingClientRect()
     if (!f || f.width <= 0 || f.height <= 0) return
-    const o = oben.current?.getBoundingClientRect()
-    const u = unten.current?.getBoundingClientRect()
+    const k = karte.current?.getBoundingClientRect()
 
-    const neu: Sichtfeld = {
-      oben: o ? grob((o.bottom - f.top) / f.height) : 0,
-      unten: u ? grob((f.bottom - u.top) / f.height) : 0,
-      links: 0,
-      rechts: 0,
-    }
+    const neu: Sichtfeld = { oben: 0, unten: 0, links: 0, rechts: 0 }
 
-    // Quer stehen die Kästen nebeneinander versetzt: der obere links, der
-    // untere rechts. Dann ist es besser, waagerecht Platz zu nehmen statt
-    // senkrecht — sonst bleibt dem Modell nur ein flacher Streifen in der
-    // Mitte. Hochkant füllen beide die Breite, dort bleibt es bei oben/unten.
-    const quer = f.width > f.height
-    if (quer && o && u) {
-      const obenBreit = o.width / f.width > 0.9
-      const untenBreit = u.width / f.width > 0.9
-      if (!obenBreit && !untenBreit) {
-        neu.links = grob((o.right - f.left) / f.width)
-        neu.oben = 0
-        neu.rechts = 0
-        neu.unten = grob((f.bottom - u.top) / f.height)
+    if (k) {
+      const quer = f.width > f.height
+      const karteBreit = k.width / f.width > 0.9
+      if (quer && !karteBreit) {
+        neu.links = grob((k.right - f.left) / f.width)
+        // Rechts steht keine Karte, aber der Bildrand — dort dieselbe Luft.
+        neu.rechts = LUFT
+        neu.oben = LUFT
+        neu.unten = LUFT
+      } else {
+        neu.unten = grob((f.bottom - k.top) / f.height)
+        neu.oben = LUFT
+        neu.links = LUFT
+        neu.rechts = LUFT
       }
     }
 
@@ -102,7 +123,7 @@ export function SichtfeldMesser({
       letztes.current = neu
       setSichtfeld(neu)
     }
-  }, [flaeche, oben, unten])
+  }, [flaeche, karte])
 
   /**
    * Bewusst `useEffect` und nicht `useLayoutEffect`.
@@ -119,11 +140,11 @@ export function SichtfeldMesser({
   useEffect(() => {
     messen()
     const beobachter = new ResizeObserver(messen)
-    for (const r of [flaeche.current, oben.current, unten.current]) {
+    for (const r of [flaeche.current, karte.current]) {
       if (r) beobachter.observe(r)
     }
     return () => beobachter.disconnect()
-  }, [messen, flaeche, oben, unten])
+  }, [messen, flaeche, karte])
 
   return (
     <SichtfeldKontext.Provider value={sichtfeld}>{children}</SichtfeldKontext.Provider>

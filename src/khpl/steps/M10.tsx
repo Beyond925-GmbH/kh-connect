@@ -2,6 +2,7 @@ import { ChevronLeft, RotateCcw } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
+import { SCHRITT_BILDER } from '@/khpl/buehne/Foto'
 import { useStand } from '@/khpl/stand'
 import { StepShell } from '@/khpl/shell/StepShell'
 import {
@@ -50,7 +51,6 @@ export function M10() {
   return (
     <StepShell
       id="M10"
-      aufteilung="bild"
       interaktionOffen={false}
       buehne={<Abschlussfeld />}
       interaktion={
@@ -100,7 +100,7 @@ export function M10() {
               variant="outline"
               onClick={beendeKarriereSkip}
               data-testid="m10-zurueck-zum-tag"
-              className="h-[60px] px-6 text-[16px]"
+              className="h-[60px] px-6 text-[1.0625rem]"
             >
               <ChevronLeft className="size-5" strokeWidth={1.75} />
               Zurück zu deinem Tag
@@ -114,7 +114,7 @@ export function M10() {
             variant="outline"
             onClick={setzeZurueck}
             data-testid="m10-neu-starten"
-            className="h-[60px] px-7 text-[16px]"
+            className="h-[60px] px-7 text-[1.0625rem]"
           >
             <RotateCcw className="size-5" strokeWidth={1.5} />
             Von vorn
@@ -126,15 +126,36 @@ export function M10() {
 }
 
 /**
- * Das orange Abschlussfeld mit der Paderborner Silhouette.
+ * Das Abschlussfeld: ein Foto, über das die Marke gelegt ist.
  *
- * Die Grafik aus dem Markenbestand ist orange auf Transparenz — auf orangem
- * Grund wäre sie unsichtbar, deshalb `brightness-0` und niedrige Deckkraft:
- * sie liegt als Schattenriss im Feld statt als aufgeklebtes Asset in der Ecke.
+ * Vorher war dieses Feld eine leere orange Fläche mit der Paderborner
+ * Silhouette. Der Gedanke dahinter bleibt richtig — die Website schließt jede
+ * Seite mit einer vollflächigen orangen Zone ab, und hier endet die Rolle und
+ * spricht wieder die Kreishandwerkerschaft. Nur trug der Screen damit als
+ * einziger im ganzen Ablauf **kein Motiv**, ausgerechnet der, der jemanden vom
+ * iPad weg und an den Stand bringen soll. Eine leere Farbfläche fordert
+ * niemanden auf, mit einem Menschen zu sprechen.
+ *
+ * Jetzt liegt das Orange als Farbschicht über zwei lachenden Zimmerleuten:
+ * dieselbe Markenzone, aber mit Gesichtern darin. `mix-blend-multiply` behält
+ * die Zeichnung des Fotos, statt es zuzukleistern.
  */
 function Abschlussfeld() {
+  const bild = SCHRITT_BILDER.M10
+
   return (
     <div className="relative size-full overflow-hidden bg-kh-orange">
+      <img
+        src={bild.src}
+        alt=""
+        aria-hidden
+        style={{ objectPosition: bild.pos }}
+        className="size-full object-cover"
+      />
+      {/* Zwei Schichten: `multiply` färbt ein, die halbdeckende darüber nimmt
+          dem Foto so viel Detail, dass die weiße Karte davor ruhig steht. */}
+      <div className="absolute inset-0 bg-kh-orange mix-blend-multiply" aria-hidden />
+      <div className="absolute inset-0 bg-kh-orange/45" aria-hidden />
       <motion.img
         src="/brand/kh-pb-lippe.png"
         alt=""
@@ -142,7 +163,7 @@ function Abschlussfeld() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 0.22, y: 0 }}
         transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute inset-x-0 top-[8%] mx-auto h-[46%] w-auto max-w-none object-contain brightness-0"
+        className="absolute inset-x-0 top-[6%] mx-auto h-[40%] w-auto max-w-none object-contain brightness-0"
       />
     </div>
   )

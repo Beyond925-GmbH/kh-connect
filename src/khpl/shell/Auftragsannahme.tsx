@@ -46,7 +46,7 @@ export function Auftragsannahme() {
             nimmAuftragAn()
             starteKarriereSkip()
           }}
-          className="flex h-[60px] items-center gap-0.5 rounded-kh px-3 text-[15px] font-light text-white/45 transition-colors hover:text-white/80"
+          className="flex h-[60px] items-center gap-0.5 rounded-kh px-3 text-[1.0625rem] font-light text-white/45 transition-colors hover:text-white/80"
         >
           Karriere-Wege
           <ChevronRight className="size-4" strokeWidth={1.5} />
@@ -64,9 +64,9 @@ export function Auftragsannahme() {
             Du bist Azubi in einer Zimmerei.
           </p>
           {/* Bindet die Werkstattaufnahme an den Anruf, statt ein Haus zu
-              versprechen, das nicht im Bild ist: im Bestand gibt es kein
-              einziges Ortstermin-Motiv (flow 13). */}
-          <p className="text-[clamp(1.05rem,0.98rem+0.5vw,1.35rem)] leading-[1.5] font-light text-white/90">
+              versprechen, das nicht im Bild ist. Der Ortstermin selbst hat
+              inzwischen ein eigenes Motiv — es steht in M1, wo er stattfindet. */}
+          <p className="text-[clamp(1.1875rem,1.05rem+0.6vw,1.5rem)] leading-[1.5] font-light text-white/90">
             Der Chef legt das Telefon weg und dreht sich zu dir um. Altes Haus, das Dach
             muss neu. Er fragt, ob du mitkommst.
           </p>
@@ -76,7 +76,7 @@ export function Auftragsannahme() {
           <Button
             onClick={nimmAuftragAn}
             data-testid="auftrag-annehmen"
-            className="h-[64px] px-9 text-[18px]"
+            className="h-[64px] px-9 text-[1.25rem]"
           >
             Auftrag annehmen
             <ArrowRight className="size-5" strokeWidth={1.75} />

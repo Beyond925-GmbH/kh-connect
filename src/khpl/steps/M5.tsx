@@ -36,7 +36,7 @@ export function M5() {
   return (
     <StepShell
       id="M5"
-      aufteilung="buehne"
+      buehneInteraktiv
       // Zuschauen, nicht lösen: hier ist nichts offen, was den Karriere-Link
       // verdrängen müsste.
       interaktionOffen={false}
@@ -91,9 +91,7 @@ function Phasenanzeige({ label }: { label: string }) {
       transition={{ duration: 0.25 }}
       className="w-fit rounded-kh bg-kh-page px-5 py-3 shadow-[0_2px_24px_rgba(0,0,0,0.12)]"
     >
-      <p className="text-[13px] tracking-[0.14em] text-kh-grey/70 uppercase">
-        Es fliegt ein
-      </p>
+      <p className="kh-eyebrow text-kh-grey/70">Es fliegt ein</p>
       <AnimatePresence mode="wait" initial={false}>
         <motion.p
           key={label}

@@ -125,12 +125,12 @@ function Zeile({
         {zustand === 'offen' ? def.kurz : def.titel}
       </span>
       {zustand === 'aktuell' && (
-        <span className="shrink-0 text-[13px] whitespace-nowrap text-kh-orange-text">
+        <span className="shrink-0 text-[0.9375rem] whitespace-nowrap text-kh-orange-text">
           du bist hier
         </span>
       )}
       {nichtGenommen && (
-        <span className="shrink-0 text-[13px] whitespace-nowrap text-kh-grey/50">
+        <span className="shrink-0 text-[0.9375rem] whitespace-nowrap text-kh-grey/50">
           nicht angeschaut
         </span>
       )}
@@ -138,7 +138,7 @@ function Zeile({
   )
 
   const basis =
-    'flex w-full items-center gap-3 rounded-kh px-3 py-1.5 text-[15px] min-h-[42px] transition-colors'
+    'flex w-full items-center gap-3 rounded-kh px-3 py-1.5 text-[1.0625rem] min-h-[48px] transition-colors'
 
   if (!antippbar) {
     return (

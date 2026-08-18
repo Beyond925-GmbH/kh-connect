@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Brotzeit } from '@/khpl/buehne/Brotzeit'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -39,10 +39,9 @@ export function M6() {
   return (
     <StepShell
       id="M6"
-      aufteilung="bild"
       interaktionOffen={false}
       onWeiter={weiter}
-      buehne={<Brotzeit />}
+      buehne={<StepFoto id="M6" />}
       fachtext={
         <>
           <p>
@@ -53,7 +52,7 @@ export function M6() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.2, delay: 1.2 }}
-            className="mt-3 text-[17px] font-normal text-kh-ink"
+            className="mt-3 text-[1.125rem] font-normal text-kh-ink sm:text-[1.25rem]"
           >
             Schau einmal vom iPad hoch.
           </motion.p>

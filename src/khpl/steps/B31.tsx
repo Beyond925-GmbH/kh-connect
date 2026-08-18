@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
@@ -31,13 +32,6 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * Rahmen, „genau fünf Tonnen“ wäre zu viel behauptet (flow 7 B3.1).
  */
 
-/**
- * Notbehelf: für Lager und Transport gibt es kein Motiv (flow 13). `gallery-1`
- * zeigt den maschinellen Abbund — Holz, das bearbeitet wird, nicht Holz, das
- * geliefert wird. Trägt den Step, ist aber auf der Fotoliste.
- */
-const BILD = '/medien/media/zimmerer/gallery-1.webp'
-
 export function B31() {
   const { weiter } = useStepNavigation('B3.1')
   const [aha, setAha] = useState(false)
@@ -50,10 +44,9 @@ export function B31() {
   return (
     <StepShell
       id="B3.1"
-      aufteilung="bild"
       titelZusatz="Abstecher"
       onWeiter={weiter}
-      buehne={<img src={BILD} alt="" aria-hidden className="size-full object-cover" />}
+      buehne={<StepFoto id="B3.1" />}
       fachtext={
         <p>
           Aus dem <Begriff id="abbundplan">Abbundplan</Begriff> wird eine Materialliste.
@@ -71,7 +64,9 @@ export function B31() {
             eine neue Ausbildungsordnung. Wer diesen Sommer anfängt, ist der erste
             Jahrgang danach.
           </AhaKarte>
-          <AhaKarte sichtbar={aha} eyebrow={null} verzoegerung={1.8}>
+          {/* Eigene Beschriftung statt `null`: die Karte klappt jetzt auf, und
+              ein Streifen braucht etwas, worauf man tippt. */}
+          <AhaKarte sichtbar={aha} eyebrow="Fünf Tonnen CO₂" verzoegerung={1.8}>
             In dem Dachstuhl von eben stecken rund fünf Kubikmeter Holz — und damit etwa
             fünf Tonnen CO₂, die dort die nächsten hundert Jahre bleiben. Holz ist einer
             der wenigen Baustoffe, die nachwachsen, und der einzige, aus dem man

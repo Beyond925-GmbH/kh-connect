@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { motion } from 'motion/react'
 import type { StepId } from '@/khpl/flow/steps'
+import { SCHRITT_BILDER, StepFoto } from '@/khpl/buehne/Foto'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeKarriereweg } from '@/khpl/store/fortschritt'
@@ -30,31 +31,34 @@ export function B9({ id }: { id: StepId }) {
   return (
     <StepShell
       id={id}
-      aufteilung="uebung"
       titelZusatz="Karriere-Weg"
       interaktionOffen={false}
       onWeiter={weiter}
+      // Die drei Karriere-Screens hatten vorher überhaupt kein Bild: weiße
+      // Fläche, eine Definitionsliste, ein Knopf. Genau die drei Screens, die
+      // den Ausschlag geben sollen, ob jemand am Stand stehen bleibt.
+      buehne={
+        id in SCHRITT_BILDER ? (
+          <StepFoto id={id as keyof typeof SCHRITT_BILDER} />
+        ) : undefined
+      }
       interaktion={
-        <div className="flex h-full min-h-0 flex-col justify-center">
-          <dl className="flex flex-col gap-3">
-            {weg.abschnitte.map((a, i) => (
-              <motion.div
-                key={a.frage}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-                className="border-l-2 border-kh-orange/40 pl-4"
-              >
-                <dt className="text-[13px] tracking-[0.12em] text-kh-orange-text uppercase">
-                  {a.frage}
-                </dt>
-                <dd className="mt-0.5 text-[16px] leading-[1.5] text-kh-ink">
-                  {a.antwort}
-                </dd>
-              </motion.div>
-            ))}
-          </dl>
-        </div>
+        <dl className="flex flex-col gap-3.5">
+          {weg.abschnitte.map((a, i) => (
+            <motion.div
+              key={a.frage}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+              className="border-l-2 border-kh-orange/40 pl-4"
+            >
+              <dt className="kh-eyebrow">{a.frage}</dt>
+              <dd className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-ink sm:text-[1.1875rem]">
+                {a.antwort}
+              </dd>
+            </motion.div>
+          ))}
+        </dl>
       }
       fuss={<StepFuss id={id} />}
     />

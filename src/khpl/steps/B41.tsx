@@ -10,6 +10,7 @@ import {
 } from '@dnd-kit/core'
 import { motion } from 'motion/react'
 import { Check, Truck, X } from 'lucide-react'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -151,11 +152,13 @@ export function B41() {
   return (
     <StepShell
       id="B4.1"
-      aufteilung="uebung"
       titelZusatz="Abstecher"
       interaktionOffen={!fertig}
       wischen={false}
       onWeiter={weiter}
+      // Vorher trug dieser Step ueberhaupt kein Bild — weisse Flaeche hinter
+      // einer Zieh-Uebung. Jetzt die Halle, aus der geladen wird.
+      buehne={<StepFoto id="B4.1" />}
       fachtext={
         <p>
           In der Halle liegt mehr, als du brauchst. Was für dieses Dach gebraucht wird,
@@ -165,7 +168,7 @@ export function B41() {
       }
       interaktion={
         <DndContext sensors={sensoren} onDragEnd={ablegen}>
-          <div className="flex h-full min-h-0 flex-col gap-3" data-wisch="aus">
+          <div className="flex flex-col gap-3" data-wisch="aus">
             <Fahrzeug geladen={geladen} fertig={fertig} />
 
             <Rueckmeldung
@@ -188,7 +191,13 @@ export function B41() {
           </div>
         </DndContext>
       }
-      fuss={<StepFuss id="B4.1" gedaempft={!fertig} />}
+      fuss={
+        <StepFuss
+          id="B4.1"
+          gedaempft={!fertig}
+          geschafft={fertig ? 'Alles geladen' : null}
+        />
+      }
     />
   )
 }
@@ -206,7 +215,7 @@ function Fahrzeug({ geladen, fertig }: { geladen: string[]; fertig: boolean }) {
     >
       <Truck className="size-9 shrink-0 text-kh-grey/60" strokeWidth={1.25} aria-hidden />
       <div className="min-w-0 flex-1">
-        <p className="text-[15px] font-normal text-kh-ink">
+        <p className="text-[1.0625rem] font-normal text-kh-ink">
           {fertig
             ? 'Vollständig. Alles drauf, was heute gebraucht wird.'
             : 'Zieh hierher, was mit muss.'}
@@ -258,7 +267,7 @@ function Hallenteil({
             }
           : undefined
       }
-      className={`flex min-h-[60px] touch-none items-center gap-2 rounded-kh border px-3 py-2 text-left text-[14px] transition-colors ${
+      className={`flex min-h-[60px] touch-none items-center gap-2 rounded-kh border px-3 py-2 text-left text-[1rem] transition-colors ${
         isDragging ? 'shadow-xl' : ''
       } ${
         geladen

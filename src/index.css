@@ -63,8 +63,14 @@
 
   --font-sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
 
-  --text-body: 1.0625rem;
-  --text-body--line-height: 1.6;
+  /* 20px statt der 17px des Website-Systems.
+     Die Website wird am Schreibtisch gelesen, diese App im Stehen: iPad auf
+     Brusthoehe am Messestand, oder Handy in der Hand eines 14-Jaehrigen in
+     einer lauten Halle. Beides ist eine schlechtere Leseumgebung als ein
+     Buerostuhl, und 17px Barlow 200 ist dort grenzwertig. Die Schriftfamilie
+     und das Gewichtspaar 200/700 bleiben, nur die Groesse waechst. */
+  --text-body: 1.25rem;
+  --text-body--line-height: 1.55;
 
   --radius-kh: 4px;
 
@@ -214,21 +220,63 @@
    hintereinander schreien damit. Bleibt: orange und 700 — linksbündig.
 ------------------------------------------------------------------ */
 @utility kh-step-titel {
-  font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2.35rem);
+  font-size: clamp(1.75rem, 1.25rem + 2.2vw, 3rem);
   font-weight: 700;
-  line-height: 1.12;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
   color: var(--color-kh-orange-text);
   text-wrap: balance;
 }
 
-/* Fachtext: max. ~250 Zeichen je Step (flow 6.2). 17px aus dem Design-System,
-   auf großen Screens etwas mehr — das iPad steht eine Armlänge entfernt. */
+/* Fachtext: max. ~250 Zeichen je Step (flow 6.2).
+   19px auf dem Handy, 24px auf dem iPad quer.
+
+   Zeilenlaenge 58ch, nicht 46: bei 46 lief der Fachtext auf den Uebungs-Steps
+   ueber sechs Zeilen, und die Uebung darunter rutschte aus dem sichtbaren Teil
+   der Karte. Zwei Zeilen weniger Text sind hier mehr wert als die etwas
+   kuerzere Zeile — gelesen wird ohnehin ein Absatz, keine Textspalte. */
 @utility kh-fachtext {
-  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.2rem);
+  font-size: clamp(1.1875rem, 1.05rem + 0.6vw, 1.5rem);
   font-weight: 200;
-  line-height: 1.55;
+  line-height: 1.5;
   color: var(--color-kh-grey);
-  max-width: 62ch;
+  max-width: 58ch;
+}
+
+/* Die Kleinzeile ueber dem Titel und ueber Aha-Karten. */
+@utility kh-eyebrow {
+  font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-kh-orange-text);
+}
+
+/* ------------------------------------------------------------------
+   Die Inhaltskarte.
+
+   Ein einziges Layout traegt jetzt alle siebzehn Steps: Buehne vollflaechig,
+   darueber genau diese Karte. Sie ist deckend, nicht transluzent — Barlow 200
+   ueber einem Foto ist unter Hallenlicht nicht lesbar (flow 6.2), und ein
+   Blur-Panel loest das nicht, es macht es nur teurer.
+------------------------------------------------------------------ */
+@utility kh-karte {
+  background-color: var(--color-kh-page);
+  border-radius: 10px;
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.08),
+    0 12px 40px rgb(0 0 0 / 0.18);
+}
+
+/* Verlauf ueber dem Foto: unten dunkler, damit die Karte nicht auf einer
+   zufaellig hellen Bildstelle klebt und der Rand ausfranst. */
+@utility kh-scrim {
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.5) 0%,
+    rgb(0 0 0 / 0.22) 32%,
+    rgb(0 0 0 / 0) 62%
+  );
 }
 
 /* ------------------------------------------------------------------

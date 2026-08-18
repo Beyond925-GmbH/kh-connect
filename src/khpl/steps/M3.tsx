@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Abbundplan } from '@/khpl/buehne/Abbundplan'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
@@ -29,9 +29,8 @@ export function M3() {
   return (
     <StepShell
       id="M3"
-      aufteilung="bild"
       onWeiter={weiter}
-      buehne={<Abbundplan />}
+      buehne={<StepFoto id="M3" />}
       fachtext={
         // Wortlaut aus flow 11 (M3), um einen Satz ergänzt: die beiden losen
         // Board-Stickies `CAD` und `Abbund` sind laut 6.3 hier einzulösen,

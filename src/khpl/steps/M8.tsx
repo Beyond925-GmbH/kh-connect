@@ -127,7 +127,7 @@ export function M8() {
   return (
     <StepShell
       id="M8"
-      aufteilung="buehne"
+      buehneInteraktiv
       interaktionOffen={false}
       wischen={false}
       onWeiter={weiter}
@@ -157,15 +157,13 @@ export function M8() {
           data-testid="m8-rueckblick"
           className="rounded-kh bg-kh-page p-5 shadow-[0_2px_24px_rgba(0,0,0,0.14)] landscape:p-6"
         >
-          <p className="text-[13px] tracking-[0.14em] text-kh-grey/70 uppercase">
-            Du hast heute
-          </p>
+          <p className="kh-eyebrow text-kh-grey/70">Du hast heute</p>
           <ul className="mt-2 flex flex-col gap-1.5">
             {liste.map((zeile) => (
               <motion.li
                 key={zeile}
                 variants={{ aus: { opacity: 0, x: -8 }, an: { opacity: 1, x: 0 } }}
-                className="flex items-baseline gap-2 text-[16px] leading-snug text-kh-ink"
+                className="flex items-baseline gap-2 text-[1.125rem] leading-snug text-kh-ink"
               >
                 <Check
                   className="mt-0.5 size-4 shrink-0 text-kh-orange-text"
@@ -179,7 +177,7 @@ export function M8() {
           <motion.p
             variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
             transition={{ duration: 0.8 }}
-            className="mt-4 border-t border-kh-rule pt-3 text-[17px] font-normal text-kh-grey"
+            className="mt-4 border-t border-kh-rule pt-3 text-[1.125rem] font-normal text-kh-grey"
           >
             Heute Morgen war da nur ein Grundriss.
           </motion.p>

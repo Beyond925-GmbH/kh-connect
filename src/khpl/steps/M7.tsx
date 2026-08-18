@@ -120,7 +120,7 @@ export function M7() {
   return (
     <StepShell
       id="M7"
-      aufteilung="buehne"
+      buehneInteraktiv
       interaktionOffen={!fertig}
       wischen={false}
       onWeiter={weiter}
@@ -178,7 +178,7 @@ export function M7() {
                         variant="ghost"
                         onClick={zeigMirWie}
                         data-testid="m7-zeig-mir-wie"
-                        className="h-[60px] px-4 text-[15px]"
+                        className="h-[60px] px-4 text-[1.0625rem]"
                       >
                         Zeig mir wie
                       </Button>
@@ -197,7 +197,9 @@ export function M7() {
           der Baustelle — den hast du in der Kalkulation schon bezahlt.
         </AhaKarte>
       }
-      fuss={<StepFuss id="M7" gedaempft={!fertig} />}
+      fuss={
+        <StepFuss id="M7" gedaempft={!fertig} geschafft={fertig ? 'Dach steht' : null} />
+      }
     />
   )
 }
@@ -223,10 +225,10 @@ function Ablage({
         isOver ? 'border-kh-orange bg-kh-orange/15' : 'border-kh-rule bg-kh-band-soft'
       }`}
     >
-      <p className="text-[16px] font-normal text-kh-ink">
+      <p className="text-[1.125rem] font-normal text-kh-ink">
         Was kommt als Nächstes aufs Dach?
       </p>
-      <span className="shrink-0 text-[14px] text-kh-grey/70 tabular-nums">
+      <span className="shrink-0 text-[1rem] text-kh-grey/70 tabular-nums">
         {anzahl}/{gesamt}
       </span>
     </div>
@@ -252,7 +254,7 @@ function Bauteilkarte({ schritt }: { schritt: Bauschritt }) {
             }
           : undefined
       }
-      className={`flex min-h-[60px] cursor-grab touch-none items-center rounded-kh border border-kh-rule bg-kh-surface px-4 py-2 text-[15px] text-kh-ink transition-shadow active:cursor-grabbing ${
+      className={`flex min-h-[60px] cursor-grab touch-none items-center rounded-kh border border-kh-rule bg-kh-surface px-4 py-2 text-[1.0625rem] text-kh-ink transition-shadow active:cursor-grabbing ${
         isDragging ? 'shadow-xl' : ''
       }`}
     >

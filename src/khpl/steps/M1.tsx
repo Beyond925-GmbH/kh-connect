@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
@@ -140,14 +141,6 @@ const ANGEZEIGT = REIHENFOLGE.map((id) => PUNKTE.find((p) => p.id === id)!).filt
   Boolean,
 )
 
-/**
- * Notbehelf: für den Ortstermin gibt es im Bestand kein Motiv (flow 13 —
- * „fehlt vollständig“, Priorität 2 auf der Fotoliste). `quiz-abbund.webp` zeigt
- * das Aufmaß am Sparren, mit Helm und Handschuh — es trägt das Messen, nicht
- * das Gespräch. Beim Fototermin gegen ein echtes Ortstermin-Motiv tauschen.
- */
-const BILD = '/medien/media/zimmerer/quiz-abbund.webp'
-
 export function M1() {
   const { weiter } = useStepNavigation('M1')
   // Aus dem Store vorbelegt: wer über „Dein Weg“ zurückspringt, soll seine
@@ -171,10 +164,12 @@ export function M1() {
   return (
     <StepShell
       id="M1"
-      aufteilung="uebung"
       interaktionOffen={!ausgewertet}
       onWeiter={weiter}
-      buehne={<img src={BILD} alt="" aria-hidden className="size-full object-cover" />}
+      // Endlich der Ortstermin selbst: zwei Leute im Gespräch auf der
+      // Baustelle, Klemmbrett in der Hand. Vorher lief hier das Aufmaß am
+      // Sparren als Notbehelf (flow 13, Priorität 2 der Fotoliste).
+      buehne={<StepFoto id="M1" />}
       fachtext={
         <p>
           Ein Anruf, eine Adresse, ein altes Dach. Du fährst hin, misst auf —{' '}
@@ -196,7 +191,19 @@ export function M1() {
           Ortstermin halbe Detektivarbeit — und deshalb fährst du als Azubi oft mit.
         </AhaKarte>
       }
-      fuss={<StepFuss id="M1" gedaempft={!ausgewertet} />}
+      fuss={
+        <StepFuss
+          id="M1"
+          gedaempft={!ausgewertet}
+          geschafft={
+            ausgewertet
+              ? verpasst.length === 0 && daneben.length === 0
+                ? 'Ortstermin sitzt'
+                : 'Ausgewertet'
+              : null
+          }
+        />
+      }
     />
   )
 }
@@ -211,15 +218,15 @@ function Liste({
   onAuswerten: () => void
 }) {
   return (
-    <div className="flex h-full flex-col gap-3">
-      <p className="text-[15px] font-normal text-kh-ink">
+    <div className="flex flex-col gap-3">
+      <p className="text-[1.0625rem] font-normal text-kh-ink sm:text-[1.125rem]">
         {FRAGE} <span className="text-kh-grey/70">Tipp alles an, was dazugehört.</span>
       </p>
 
       {/* Zwei Spalten in **beiden** Ausrichtungen. Zehn Punkte untereinander
           passen im Hochformat nicht auf einen Screen, und Scrollen ist
           ausgeschlossen (flow 5). */}
-      <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2">
+      <ul className="grid auto-rows-min grid-cols-1 content-start gap-2 sm:grid-cols-2">
         {ANGEZEIGT.map((p) => {
           const an = gewaehlt.includes(p.id)
           return (
@@ -229,7 +236,7 @@ function Liste({
                 onClick={() => onUmschalten(p.id)}
                 aria-pressed={an}
                 data-testid={`m1-${p.id}`}
-                className={`flex min-h-[60px] w-full items-center gap-3 rounded-kh border px-4 py-2 text-left text-[15px] transition-colors ${
+                className={`flex min-h-[62px] w-full items-center gap-3 rounded-kh border px-4 py-2 text-left text-[1.0625rem] transition-colors ${
                   an
                     ? 'border-kh-orange bg-kh-orange/10 text-kh-ink'
                     : 'border-kh-rule bg-kh-surface text-kh-grey hover:border-kh-orange/50'
@@ -251,14 +258,17 @@ function Liste({
       </ul>
 
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[14px] text-kh-grey/70 tabular-nums">
+        <span className="text-[1rem] text-kh-grey/70 tabular-nums">
           {gewaehlt.length} angetippt
         </span>
+        {/* Dunkel, nicht orange: auf diesem Screen gehört die eine gefüllte
+            orange Fläche dem Weiter-Knopf. Siehe `Verzweigung`. */}
         <Button
+          variant="dark"
           onClick={onAuswerten}
           disabled={gewaehlt.length === 0}
           data-testid="m1-auswerten"
-          className="h-[60px] px-7 text-[16px]"
+          className="h-[60px] px-7 text-[1.0625rem]"
         >
           Zurück in den Betrieb
         </Button>
@@ -292,8 +302,8 @@ function Auswertung({
   const zuKlaeren = [...verpasst, ...daneben]
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3">
-      <p className="text-[16px] font-normal text-kh-ink">
+    <div className="flex flex-col gap-3">
+      <p className="text-[1.0625rem] font-normal text-kh-ink sm:text-[1.125rem]">
         {alleGefunden
           ? `Alle ${RICHTIGE}. Der Ortstermin sitzt.`
           : `${treffer.length} von ${RICHTIGE} hast du. Das hier ist noch offen:`}
@@ -303,7 +313,7 @@ function Auswertung({
           Karten weder ins Hoch- noch ins Querformat — und ein `overflow-y-auto`
           macht daraus eine Scrollfläche, also genau das, was flow 5
           ausschließt, statt es zu lösen. */}
-      <ul className="grid shrink-0 auto-rows-min grid-cols-1 content-start gap-2 landscape:grid-cols-2">
+      <ul className="grid shrink-0 auto-rows-min grid-cols-1 content-start gap-2 sm:grid-cols-2">
         {zuKlaeren.slice(0, 4).map((p) => {
           const gefehlt = !daneben.includes(p)
           return (
@@ -326,8 +336,8 @@ function Auswertung({
                   )}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[14px] font-normal text-kh-ink">{p.text}</p>
-                  <p className="mt-0.5 text-[13px] leading-[1.35] text-kh-grey">
+                  <p className="text-[1rem] font-normal text-kh-ink">{p.text}</p>
+                  <p className="mt-0.5 text-[0.9375rem] leading-[1.35] text-kh-grey">
                     {p.grund}
                   </p>
                 </div>
@@ -345,9 +355,7 @@ function Auswertung({
           zehn Begründungen gleichzeitig auf dem Screen stehen. */}
       {treffer.length > 0 && (
         <div className="flex flex-col gap-1.5">
-          <p className="text-[13px] tracking-[0.12em] text-kh-grey/60 uppercase">
-            Hattest du
-          </p>
+          <p className="kh-eyebrow text-kh-grey/70">Hattest du</p>
           <div className="flex flex-wrap gap-1.5">
             {treffer.map((p) => (
               <button
@@ -355,7 +363,7 @@ function Auswertung({
                 type="button"
                 onClick={() => setOffen((o) => (o === p.id ? null : p.id))}
                 aria-pressed={offen === p.id}
-                className={`flex items-center gap-1.5 rounded-kh border px-2.5 py-1.5 text-left text-[13px] transition-colors ${
+                className={`flex items-center gap-1.5 rounded-kh border px-3 py-2 text-left text-[0.9375rem] transition-colors ${
                   offen === p.id
                     ? 'border-kh-orange bg-kh-orange/10 text-kh-ink'
                     : 'border-kh-rule bg-kh-surface text-kh-grey'
@@ -370,7 +378,7 @@ function Auswertung({
               </button>
             ))}
           </div>
-          <p className="min-h-[2.6em] text-[14px] leading-[1.35] text-kh-grey">
+          <p className="min-h-[2.6em] text-[1rem] leading-[1.35] text-kh-grey">
             {offen ? treffer.find((p) => p.id === offen)?.grund : ''}
           </p>
         </div>

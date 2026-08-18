@@ -28,6 +28,7 @@ export function StepFuss({
   id,
   ohneWeiter,
   gedaempft,
+  geschafft,
 }: {
   id: StepId
   /**
@@ -37,6 +38,8 @@ export function StepFuss({
   ohneWeiter?: boolean
   /** Solange die Übung dieses Steps offen ist. */
   gedaempft?: boolean
+  /** Kurze Bestätigung, sobald die Übung gelöst ist. Siehe `Verzweigung`. */
+  geschafft?: string | null
 }) {
   const { offen, weiter, zumAbstecher } = useStepNavigation(id)
   // Denselben Weg wie der Wisch nach links — nie einen zweiten.
@@ -50,6 +53,7 @@ export function StepFuss({
       onWeiter={nachVorn}
       ohneWeiter={ohneWeiter ?? STEPS[id].weiter === null}
       gedaempft={gedaempft}
+      geschafft={geschafft}
     />
   )
 }

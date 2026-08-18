@@ -1,3 +1,4 @@
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -21,25 +22,20 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * Zimmerermeister am Stand sofort auffällt.
  */
 
-/**
- * `gallery-2` zeigt ein Team im Sparrenwerk — inhaltlich der beste Treffer im
- * Bestand für diesen Step. Es ist eines der drei Motive **ohne Helm**
- * (flow 13): in M5 und M7 darf es deshalb nicht vorkommen, weil dort der
- * Aha-Moment auf PSA und Absturzsicherung aufbaut. Hier geht es um Zusammen-
- * arbeit, nicht um Sicherheit — trotzdem gehört es auf die Austauschliste.
- */
-const BILD = '/medien/media/zimmerer/gallery-2.webp'
-
 export function B51() {
   const { weiter } = useStepNavigation('B5.1')
 
   return (
     <StepShell
       id="B5.1"
-      aufteilung="bild"
       titelZusatz="Abstecher"
       onWeiter={weiter}
-      buehne={<img src={BILD} alt="" aria-hidden className="size-full object-cover" />}
+      // Zwei, die zusammen an einem Sparrenwerk arbeiten — inhaltlich genau
+      // dieser Step. ⚠️ Auch dieses Motiv zeigt Arbeit **ohne Helm** und steht
+      // damit weiter auf der Austauschliste (flow 13). Für M5 und M7 ist es
+      // deshalb gesperrt: dort baut der Aha-Moment auf PSA und Absturz-
+      // sicherung auf. Hier geht es um Zusammenarbeit, nicht um Sicherheit.
+      buehne={<StepFoto id="B5.1" />}
       fachtext={
         <p>
           Ein <Begriff id="sparrenpaar">Sparrenpaar</Begriff> wiegt mehr, als zwei Arme

@@ -1,3 +1,4 @@
+import { motion } from 'motion/react'
 import { HAUPTSCHRITTE, railIndex } from '@/khpl/flow/steps'
 import { wegzustand } from '@/khpl/flow/uebergaenge'
 import type { Fortschritt } from '@/khpl/store/fortschritt'
@@ -12,6 +13,13 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  * Die Zeile „Schritt 5 von 10“ steht hier statt eines zweiten Titels: den Titel
  * trägt die Textkarte des Steps (flow 6.2), die Leiste trägt die Ortsangabe
  * (flow 6.1). Zweimal derselbe Satz auf einem 10-Zoll-Screen liest sich falsch.
+ *
+ * **Der Fortschritt muss man sehen können.** Die Segmente waren 7 px hoch und
+ * die Zählzeile 13 px, auf schmalen Screens ganz ausgeblendet — damit war das
+ * einzige Element, das „du kommst voran“ sagt, das unauffälligste auf dem
+ * Screen. Jetzt sind die Balken 10 px hoch, der zurückgelegte Teil trägt volles
+ * Markenorange statt 55 % Deckkraft, das aktuelle Segment wächst beim Wechsel
+ * animiert auf seine Länge, und die Zählung steht immer da.
  */
 export function Rail({
   fortschritt,
@@ -28,28 +36,35 @@ export function Rail({
       onClick={onOeffnen}
       data-testid="rail"
       aria-label={`Dein Weg öffnen — Schritt ${jetzt + 1} von ${HAUPTSCHRITTE.length}`}
-      className="group flex h-11 min-w-0 shrink items-center gap-3 rounded-kh px-3 transition-colors hover:bg-kh-band-soft"
+      className="group flex h-12 min-w-0 shrink items-center gap-2.5 rounded-kh px-2 transition-colors hover:bg-kh-band-soft sm:gap-3 sm:px-3"
     >
       <span className="flex items-center gap-[3px]" aria-hidden>
         {HAUPTSCHRITTE.map((s, i) => {
           const zustand = i === jetzt ? 'aktuell' : wegzustand(s.id, fortschritt)
           return (
-            <span
+            <motion.span
               key={s.id}
               data-segment={zustand}
-              className={
+              // Nur die Breite animiert: das aktuelle Segment fährt beim
+              // Schrittwechsel aus, statt umzuspringen. Die Farbe wechselt
+              // sofort — ein Balken, der langsam die Farbe wechselt, sieht
+              // nach Ladezustand aus.
+              animate={{ width: zustand === 'aktuell' ? 30 : 14 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+              className={`h-[10px] rounded-full ${
                 zustand === 'aktuell'
-                  ? 'h-[7px] w-6 rounded-full bg-kh-orange'
+                  ? 'bg-kh-orange'
                   : zustand === 'besucht'
-                    ? 'h-[7px] w-3.5 rounded-full bg-kh-orange/55'
-                    : 'h-[7px] w-3.5 rounded-full bg-kh-rule'
-              }
+                    ? 'bg-kh-orange/70'
+                    : 'bg-kh-rule'
+              }`}
             />
           )
         })}
       </span>
-      <span className="hidden text-[13px] whitespace-nowrap text-kh-grey/80 tabular-nums sm:inline">
-        Schritt {jetzt + 1} von {HAUPTSCHRITTE.length}
+      <span className="text-[0.9375rem] whitespace-nowrap text-kh-grey tabular-nums sm:text-base">
+        <span className="font-normal text-kh-ink">{jetzt + 1}</span>
+        <span className="text-kh-grey/70"> / {HAUPTSCHRITTE.length}</span>
       </span>
     </button>
   )

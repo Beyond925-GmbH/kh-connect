@@ -51,7 +51,7 @@ export function B32() {
   return (
     <StepShell
       id="B3.2"
-      aufteilung="buehne"
+      buehneInteraktiv
       titelZusatz="Abstecher"
       // Das Modell will jede Geste selbst: Drehen darf nie den Step wechseln
       // (flow 6.1 — Drag-Gesten haben Vorrang vor Swipe-Navigation).
@@ -108,7 +108,7 @@ export function B32() {
           die lernt man dort systematisch.
         </AhaKarte>
       }
-      fuss={<StepFuss id="B3.2" />}
+      fuss={<StepFuss id="B3.2" geschafft={genug ? 'Bauteile erkundet' : null} />}
     />
   )
 }
@@ -127,7 +127,7 @@ function Aufforderung({ gefunden }: { gefunden: number }) {
         strokeWidth={1.75}
         aria-hidden
       />
-      <p className="text-[16px] text-kh-ink">
+      <p className="text-[1.125rem] text-kh-ink">
         Dreh das Dach. Tipp an, was du wissen willst.
         {gefunden > 0 && (
           <span className="text-kh-grey/70">
@@ -166,7 +166,7 @@ function BauteilKarte({
         <X className="size-5" strokeWidth={1.5} />
       </button>
       <h2 className="kh-h3 pr-12 text-kh-orange-text">{text.label}</h2>
-      <p className="mt-1.5 text-[16px] leading-[1.5] text-kh-grey">{text.text}</p>
+      <p className="mt-1.5 text-[1.125rem] leading-[1.5] text-kh-grey">{text.text}</p>
     </motion.div>
   )
 }

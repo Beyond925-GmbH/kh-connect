@@ -8,6 +8,7 @@ import {
   type DragMoveEvent,
 } from '@dnd-kit/core'
 import { Button } from '@/components/ui/button'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
@@ -88,12 +89,15 @@ export function M4() {
   return (
     <StepShell
       id="M4"
-      aufteilung="uebung"
       interaktionOffen={!geloest}
       // Ein Zieh-Vorgang darf nie versehentlich den Step wechseln (flow 6.1).
       wischen={false}
       onWeiter={weiter}
-      buehne={<Werkzeichnung />}
+      // Die Werkzeichnung ist von der Bühne in die Karte gewandert (siehe
+      // `interaktion`): sie trägt Sollmaß und Sollwinkel und ist damit die
+      // Aufgabenstellung, nicht die Kulisse. Auf der Bühne steht jetzt die
+      // Werkstatt selbst — jemand, der genau diesen Schnitt macht.
+      buehne={<StepFoto id="M4" />}
       fachtext={
         <p>
           <Begriff id="abbundplan">Abbundplan</Begriff> lesen, Hölzer anzeichnen, ablängen
@@ -102,24 +106,33 @@ export function M4() {
           Jedes Teil bekommt eine Nummer, damit es auf der Baustelle seinen Platz findet.
         </p>
       }
+      karteBreit
       interaktion={
-        <Zuschnitt
-          laenge={laenge}
-          onLaenge={(n) => {
-            setLaenge(n)
-            setErgebnis(null)
-          }}
-          winkel={winkel}
-          onWinkel={(w) => {
-            setWinkel(w)
-            setErgebnis(null)
-          }}
-          gesperrt={geloest}
-          ergebnis={ergebnis}
-          versuche={versuche}
-          onPruefen={pruefen}
-          onZeigMirWie={zeigMirWie}
-        />
+        // Quer nebeneinander: die Werkzeichnung ist Nachschlagewerk, der
+        // Zuschnitt die Handlung. Untereinander schob die Zeichnung die Übung
+        // unter die Kartenkante.
+        <div className="flex flex-col gap-3 landscape:flex-row landscape:items-start landscape:gap-5">
+          <div className="shrink-0 landscape:w-[38%]">
+            <Werkzeichnung />
+          </div>
+          <Zuschnitt
+            laenge={laenge}
+            onLaenge={(n) => {
+              setLaenge(n)
+              setErgebnis(null)
+            }}
+            winkel={winkel}
+            onWinkel={(w) => {
+              setWinkel(w)
+              setErgebnis(null)
+            }}
+            gesperrt={geloest}
+            ergebnis={ergebnis}
+            versuche={versuche}
+            onPruefen={pruefen}
+            onZeigMirWie={zeigMirWie}
+          />
+        </div>
       }
       aha={
         <AhaKarte sichtbar={geloest} eyebrow="Übrigens">
@@ -128,7 +141,13 @@ export function M4() {
           ist mehr, als man denkt.
         </AhaKarte>
       }
-      fuss={<StepFuss id="M4" gedaempft={!geloest} />}
+      fuss={
+        <StepFuss
+          id="M4"
+          gedaempft={!geloest}
+          geschafft={geloest ? 'Zuschnitt sitzt' : null}
+        />
+      }
     />
   )
 }
@@ -178,18 +197,23 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
 // Die Werkzeichnung — das Soll
 // ---------------------------------------------------------------------------
 
+/**
+ * Das Soll. Steht in der Karte, nicht auf der Bühne: hier stehen Länge und
+ * Winkel, die getroffen werden sollen — wer sie sucht, darf nicht am Bildrand
+ * danach schauen müssen, während er unten den Balken zieht.
+ *
+ * Quer steht sie links neben dem Zuschnitt, hochkant darüber. `viewBox` ohne
+ * die leere obere Hälfte, damit sie flach bleibt und die Übung nicht wegdrückt.
+ */
 function Werkzeichnung() {
   return (
-    <div className="grid size-full place-items-center bg-kh-band-soft p-3">
+    <div className="w-full rounded-kh border border-kh-rule bg-kh-band-soft px-3 py-2">
       <svg
-        viewBox="0 0 320 200"
-        className="h-full max-h-[150px] w-full max-w-[320px] landscape:max-h-none"
+        viewBox="10 60 310 125"
+        className="h-[56px] w-full"
         role="img"
         aria-label={`Werkzeichnung: Länge ${mm(ZIEL_MM)}, Winkel ${ZIEL_WINKEL} Grad`}
       >
-        <text x="14" y="26" fontSize="13" letterSpacing="2" fill="var(--color-kh-grey)">
-          WERKZEICHNUNG
-        </text>
         <path
           d="M20 96 L280 96 L262 130 L20 130 Z"
           fill="var(--color-kh-orange)"
@@ -282,18 +306,15 @@ function Zuschnitt({
   // Ausrichtung überlappen die Kinder, sobald der Fuß wächst (Abstecher-Angebot
   // plus Aha-Karte) — der Balken lief dann quer durch die Winkelknöpfe.
   return (
-    <div
-      className="flex h-full min-h-0 flex-col justify-start gap-3 overflow-hidden"
-      data-wisch="aus"
-    >
+    <div className="flex min-w-0 flex-1 flex-col gap-3" data-wisch="aus">
       <div className="flex items-baseline gap-3">
         <span
           data-testid="m4-laenge"
-          className="text-[clamp(1.8rem,1.3rem+1.8vw,2.8rem)] leading-none font-bold text-kh-orange tabular-nums"
+          className="text-[clamp(1.6rem,1.2rem+1.2vw,2.2rem)] leading-none font-bold text-kh-orange tabular-nums"
         >
           {mm(laenge)}
         </span>
-        <span className="text-[15px] text-kh-grey">
+        <span className="text-[1.0625rem] text-kh-grey">
           Zieh die Schnittlinie auf das Maß.
         </span>
       </div>
@@ -328,12 +349,12 @@ function Zuschnitt({
           Querformat schob genau das die Erfolgsmeldung aus der Spalte heraus,
           sodass „Passt. Nummer drauf“ überhaupt nicht mehr zu sehen war. */}
       {gesperrt ? (
-        <p className="shrink-0 text-[15px] text-kh-grey">
+        <p className="shrink-0 text-[1.0625rem] text-kh-grey">
           Winkel am First: <span className="font-normal text-kh-ink">{winkel}°</span>
         </p>
       ) : (
         <div className="flex shrink-0 flex-col gap-2">
-          <p className="text-[15px] text-kh-grey">Und der Winkel am First:</p>
+          <p className="text-[1.0625rem] text-kh-grey">Und der Winkel am First:</p>
           <div className="flex gap-2">
             {WINKEL.map((w) => (
               <Button
@@ -341,7 +362,7 @@ function Zuschnitt({
                 variant={winkel === w ? 'default' : 'outline'}
                 onClick={() => onWinkel(w)}
                 data-testid={`m4-winkel-${w}`}
-                className="h-[60px] flex-1 gap-2 text-[16px]"
+                className="h-[60px] flex-1 gap-2 text-[1.125rem]"
               >
                 <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
                   <path
@@ -372,7 +393,7 @@ function Zuschnitt({
               variant="ghost"
               onClick={onZeigMirWie}
               data-testid="m4-zeig-mir-wie"
-              className="h-[60px] px-4 text-[15px]"
+              className="h-[60px] px-4 text-[1.0625rem]"
             >
               Zeig mir wie
             </Button>

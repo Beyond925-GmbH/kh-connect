@@ -38,13 +38,15 @@ flow/steps.ts        Der Step-Graph. Einzige Quelle für Reihenfolge, Abstecher
 flow/uebergaenge.ts  Buttontexte je Abstecher, plus `wegzustand` (✓ ● ○).
 store/fortschritt.ts localStorage v1, 30-Minuten-Verfall, Zurück-Historie,
                      Hochwassermarke, Antworten, Karriere-Skip.
-shell/               StepShell (Bühne · Fachtext · Interaktion · Aha · Fuß in
-                     drei Aufteilungen), Rail, DeinWeg (S3), Splash (S0),
-                     Auftragsannahme (S1), KioskGuard, Wisch-Navigation.
+shell/               StepShell (Bühne · Fachtext · Interaktion · Aha · Fuß —
+                     ein Layout für alle Steps), Rail, DeinWeg (S3),
+                     Splash (S0), Auftragsannahme (S1), KioskGuard,
+                     Wisch-Navigation.
 komponenten/         Begriff (Glossar-Popover), AhaKarte, Verzweigung.
 glossar/begriffe.ts  Alle 20 Begriffe aus flow 12, plus `Stundensatz`.
-buehne/              Dachstuhl3D (die Lazy-Grenze um `three`), Abbundplan und
-                     Brotzeit als Zeichnungen, aufbauabschnitte.ts.
+buehne/              Foto + SCHRITT_BILDER (welcher Step welches Motiv trägt),
+                     Dachstuhl3D (die Lazy-Grenze um `three`),
+                     aufbauabschnitte.ts.
 steps/               Ein Modul je Step. Der Text steht gebündelt oben in der
                      Datei (flow 8.4).
 ```
@@ -60,6 +62,39 @@ steps/               Ein Modul je Step. Der Text steht gebündelt oben in der
 2. Wo M5 aufhört und M7 anfängt, steht in `buehne/aufbauabschnitte.ts` und wird
    über das **Phasenlabel** aus `dachstuhl/zeitachse.ts` gesucht, nie als Zahl.
    Die Zeitachse ist Animationsparameter, kein Vertragswert.
+
+### Ein Layout, nicht drei
+
+Jeder Step — Haupt wie Abstecher — rendert gleich: **Bühne vollflächig, darüber
+genau eine deckende Karte, unten links.** Der Weiter-Knopf sitzt auf jedem
+einzelnen Screen in derselben Ecke.
+
+Vorher gab es drei Aufteilungen (`bild`, `uebung`, `buehne`), und jede setzte
+Titel, Text und Knopf woandershin. Über fünfzehn Screens las sich das nicht wie
+ein Produkt, sondern wie drei — und auf `uebung` gab es überhaupt kein Bild.
+
+Was von der Unterscheidung bleibt, sind zwei Schalter an `StepShell`:
+
+- `buehneInteraktiv` — die Bühne **ist** die Interaktion (B3.2, M5, M7, M8). Die
+  Karte bleibt schmal, und `SichtfeldMesser` sagt der Kamera, wie viel Fläche
+  dem Modell wirklich bleibt.
+- `karteBreit` — für M4, den dichtesten Screen der Anwendung.
+
+**In der Karte scrollt nur der Inhalt, nie der Fuß.** M1 trägt zehn
+Checklistenpunkte, hochkant auf dem Handy passt das nicht auf einen Screen.
+Scrollte die ganze Karte, läge ausgerechnet der Weiter-Knopf unter der Kante —
+und dann sitzt jemand am Stand fest.
+
+### Fotos
+
+Jeder Screen, der kein 3D-Modell zeigt, trägt ein echtes Foto. Welcher Step
+welches Motiv bekommt, steht gebündelt in `SCHRITT_BILDER`
+(`buehne/Foto.tsx`) — zusammen mit dem Bildmittelpunkt, denn `object-fit: cover`
+schneidet quer und hoch verschieden zu. Herkunft und Urheber:innen aller Dateien
+stehen in [`MEDIEN.md`](./MEDIEN.md).
+
+Für eigene Fotos aus den Betrieben ist der Tausch eine Zeile je Motiv; die
+Dateinamen können bleiben.
 
 ### Am Messetag zu füllen
 
@@ -153,8 +188,10 @@ styles, not eyeballed:
 The system is left intact; these are the only departures:
 
 - H1 scales up (`clamp(34px → 56px)`) — the site sets it at a timid 35px
-- body 16 → 17px, for arm's-length reading on the iPad
-- buttons 50 → 54px tall with a 1px hover lift
+- body 16 → **20px**, and the Fachtext of a step runs 19 → 24px. The site is read
+  at a desk; this is read standing, at arm's length, in a loud hall, by someone
+  who is fourteen. 17px Barlow 200 was borderline there.
+- buttons 50 → 54px tall (the forward action 64px) with a 1px hover lift
 - teaser photos zoom ~4% on hover
 - two devices the campaign already uses are promoted to UI components: the rotated
   orange **sticker** and the **#hashtag** pill

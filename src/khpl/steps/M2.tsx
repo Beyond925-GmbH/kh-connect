@@ -8,6 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
@@ -63,10 +64,13 @@ export function M2() {
   return (
     <StepShell
       id="M2"
-      aufteilung="uebung"
       interaktionOffen={!aufgeloest}
       onWeiter={weiter}
-      buehne={<Vorgaben />}
+      // Statt der Skizze jetzt der Schreibtisch, an dem so ein Angebot
+      // entsteht: Grundriss, Maßstab, Taschenrechner. Die drei Zahlen, die
+      // die Skizze getragen hat — 45 Grad, 120 m², Satteldach —, stehen ohnehin
+      // wörtlich im Fachtext daneben; die Zeichnung hat sie nur wiederholt.
+      buehne={<StepFoto id="M2" />}
       fachtext={
         aufgeloest ? undefined : (
           <p>
@@ -89,85 +93,20 @@ export function M2() {
             Mehr als die Hälfte davon ist Arbeitszeit, nicht Holz. Bezahlt wird nicht das
             Material — bezahlt wird, dass jemand weiß, wie es zusammengehört.
           </AhaKarte>
-          <AhaKarte sichtbar={aufgeloest} eyebrow={null} verzoegerung={1.6}>
+          <AhaKarte sichtbar={aufgeloest} eyebrow="Und trotzdem" verzoegerung={1.6}>
             Und dann kommt der Satz, den jeder Betrieb kennt: Viele Angebote führen nie
             zum Auftrag. Gerechnet hast du trotzdem.
           </AhaKarte>
         </div>
       }
-      fuss={<StepFuss id="M2" />}
+      fuss={
+        <StepFuss
+          id="M2"
+          gedaempft={!aufgeloest}
+          geschafft={aufgeloest ? 'Kalkuliert' : null}
+        />
+      }
     />
-  )
-}
-
-/**
- * Die Vorgaben als Zeichnung statt als Aufzählung. Flow 13 hält für M2 fest:
- * „kein eigenes Motiv nötig — der Screen ist Übung“. Ein Foto von irgendeinem
- * Dach würde hier nichts erklären; die Skizze zeigt genau die drei Zahlen, mit
- * denen gleich gerechnet wird.
- */
-function Vorgaben() {
-  return (
-    <div className="grid size-full place-items-center bg-kh-band-soft p-4">
-      <svg
-        viewBox="0 0 300 210"
-        className="h-full max-h-[220px] w-full max-w-[320px] landscape:max-h-none"
-        role="img"
-        aria-label="Satteldach, 45 Grad, 120 Quadratmeter Dachfläche"
-      >
-        {/* Haus */}
-        <rect x="60" y="120" width="180" height="70" fill="var(--color-kh-band)" />
-        {/* Dach */}
-        <path
-          d="M50 122 L150 42 L250 122 Z"
-          fill="var(--color-kh-orange)"
-          opacity="0.9"
-        />
-        <path
-          d="M50 122 L150 42 L250 122"
-          fill="none"
-          stroke="var(--color-kh-ink)"
-          strokeWidth="2"
-          opacity="0.35"
-        />
-        {/* Winkelbogen am Traufpunkt */}
-        <path
-          d="M78 122 A 28 28 0 0 1 90 100"
-          fill="none"
-          stroke="var(--color-kh-ink)"
-          strokeWidth="1.5"
-        />
-        <text x="92" y="118" fontSize="14" fontWeight="700" fill="var(--color-kh-ink)">
-          45°
-        </text>
-        {/* Maßlinie über der Dachfläche */}
-        <path
-          d="M156 36 L256 116"
-          stroke="var(--color-kh-ink)"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-        />
-        <text
-          x="212"
-          y="66"
-          fontSize="13"
-          fontWeight="700"
-          fill="var(--color-kh-ink)"
-          transform="rotate(38 212 66)"
-        >
-          120 m²
-        </text>
-        <text
-          x="150"
-          y="207"
-          fontSize="13"
-          textAnchor="middle"
-          fill="var(--color-kh-grey)"
-        >
-          Satteldach · Fichte · keine Gaube
-        </text>
-      </svg>
-    </div>
   )
 }
 
@@ -185,9 +124,11 @@ function Schaetzung({
   const anteil = (n: number) => ((n - MIN) / (MAX - MIN)) * 100
 
   return (
-    <div className="flex h-full min-h-0 flex-col justify-center gap-4">
+    // Kein `h-full justify-center` mehr: die Übung hing dadurch in der Mitte
+    // einer hohen leeren Spalte, mit einem Loch über und unter sich.
+    <div className="flex flex-col gap-4">
       {!aufgeloest && (
-        <p className="text-[15px] font-normal text-kh-ink">
+        <p className="text-[1.0625rem] font-normal text-kh-ink sm:text-[1.125rem]">
           Zieh, bis du glaubst, es passt.
         </p>
       )}
@@ -212,7 +153,7 @@ function Schaetzung({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-[15px] text-kh-grey"
+            className="text-[1rem] text-kh-grey"
           >
             deine Schätzung: {euro(wert)}
           </motion.span>
@@ -244,7 +185,7 @@ function Schaetzung({
             aria-hidden
           />
         )}
-        <div className="mt-1 flex justify-between text-[13px] text-kh-grey/60 tabular-nums">
+        <div className="mt-1 flex justify-between text-[0.9375rem] text-kh-grey/60 tabular-nums">
           <span>{euro(MIN)}</span>
           <span>{euro(MAX)}</span>
         </div>
@@ -264,7 +205,7 @@ function Schaetzung({
             <motion.div
               key={p.was}
               variants={{ aus: { opacity: 0, x: -10 }, an: { opacity: 1, x: 0 } }}
-              className="flex items-baseline justify-between gap-3 border-b border-kh-rule py-2 text-[15px] last:border-0"
+              className="flex items-baseline justify-between gap-3 border-b border-kh-rule py-2.5 text-[1.0625rem] last:border-0"
             >
               <span className="min-w-0 text-kh-ink">
                 {p.was}
@@ -277,7 +218,7 @@ function Schaetzung({
               Kopf addiert werden, um auf die Zahl darüber zu kommen. */}
           <motion.div
             variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
-            className="mt-1 flex items-baseline justify-between gap-3 border-t-2 border-kh-ink/15 pt-2 text-[16px]"
+            className="mt-1 flex items-baseline justify-between gap-3 border-t-2 border-kh-ink/15 pt-2.5 text-[1.125rem]"
           >
             <span className="font-normal text-kh-ink">Dachstuhl gesamt</span>
             <span className="font-bold text-kh-orange-text tabular-nums">
@@ -291,9 +232,10 @@ function Schaetzung({
       ) : (
         <div className="flex justify-start">
           <Button
+            variant="dark"
             onClick={onAufloesen}
             data-testid="m2-aufloesen"
-            className="h-[60px] px-7 text-[16px]"
+            className="h-[60px] px-7 text-[1.0625rem]"
           >
             Und jetzt die echte Zahl
           </Button>
@@ -307,7 +249,7 @@ function Schaetzung({
 function Mathe() {
   return (
     <Dialog>
-      <DialogTrigger className="text-[15px] text-kh-orange-text underline decoration-kh-orange-text/40 underline-offset-4">
+      <DialogTrigger className="text-[1.0625rem] text-kh-orange-text underline decoration-kh-orange-text/40 underline-offset-4">
         Woher kommen die 120 Quadratmeter?
       </DialogTrigger>
       <DialogContent>
