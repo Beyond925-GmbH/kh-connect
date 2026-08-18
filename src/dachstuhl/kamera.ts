@@ -116,36 +116,33 @@ export interface Kameralage {
 }
 
 /**
- * Das Bildfenster, in das eingepasst wird — in Steigungen (Weltmass je Meter
- * Tiefe), nicht in Winkeln.
+ * Die halbe Oeffnung, in die eingepasst wird — in Steigungen (Weltmass je
+ * Meter Tiefe), nicht in Winkeln.
  *
- * Es ist ausdruecklich *nicht* mittig: liegt links eine Textkarte, reicht das
- * Fenster nur noch von der Kartenkante bis zum rechten Rand. Darum vier
- * Grenzen statt zweier Oeffnungswinkel.
+ * Sie ist immer mittig um die Blickachse. Ein aussermittiges Fenster wird
+ * *nicht* hier abgebildet, sondern hinterher durch Verschieben von Kamera und
+ * Blickpunkt — s. `passeEin`. Der Versuch, die Asymmetrie in die Einpassung
+ * zu ziehen, geht schief, sobald das Fenster die Blickachse gar nicht mehr
+ * enthaelt (Karte ueber der halben Breite): dann steht in der Schranke eine
+ * Division durch fast null und die Kamera wandert ins Nichts.
  */
 interface Kamerabasis {
   richtung: V3
   xKam: V3
   yKam: V3
-  xLo: number
-  xHi: number
-  yLo: number
-  yHi: number
+  tanH: number
+  tanV: number
 }
 
-/** Mindestdistanz, bei der alle Ecken im Fenster liegen. */
+/** Mindestdistanz, bei der alle Ecken innerhalb beider Oeffnungswinkel liegen. */
 function einpassDistanz(ecken: V3[], ziel: V3, b: Kamerabasis): number {
   let d = 0
   for (const p of ecken) {
     const v: V3 = [p[0] - ziel[0], p[1] - ziel[1], p[2] - ziel[2]]
     const tiefe = skalarprodukt(v, b.richtung)
-    const ax = skalarprodukt(v, b.xKam)
-    const ay = skalarprodukt(v, b.yKam)
-    // Aus `ax / (d - tiefe) <= xHi` und `>= xLo` folgen zwei Schranken an d.
-    // Weil xLo negativ und xHi positiv ist, bindet immer genau eine — welche,
-    // haengt am Vorzeichen von ax. Das Maximum trifft beide Faelle.
-    d = Math.max(d, tiefe + Math.max(ax / b.xHi, ax / b.xLo))
-    d = Math.max(d, tiefe + Math.max(ay / b.yHi, ay / b.yLo))
+    const bx = Math.abs(skalarprodukt(v, b.xKam))
+    const by = Math.abs(skalarprodukt(v, b.yKam))
+    d = Math.max(d, tiefe + bx / b.tanH, tiefe + by / b.tanV)
   }
   return Math.max(d, 0.5)
 }
@@ -184,9 +181,8 @@ function zentriere(ecken: V3[], ziel: V3, b: Kamerabasis, d: number): V3 {
   // ferne. Mit `d` gerechnet bleibt bei einem aussermittigen Fenster jedes Mal
   // ein Rest stehen, und drei Durchlaeufe kommen nicht an.
   const tiefeMittel = tiefeSumme / n
-  // Nicht auf die Bildmitte, sondern auf die Mitte des freien Fensters.
-  const mx = ((xMin + xMax) / 2 - (b.xLo + b.xHi) / 2) * tiefeMittel
-  const my = ((yMin + yMax) / 2 - (b.yLo + b.yHi) / 2) * tiefeMittel
+  const mx = ((xMin + xMax) / 2) * tiefeMittel
+  const my = ((yMin + yMax) / 2) * tiefeMittel
   return [
     ziel[0] + b.xKam[0] * mx + b.yKam[0] * my,
     ziel[1] + b.xKam[1] * mx + b.yKam[1] * my,
@@ -231,23 +227,23 @@ export function passeEin(
     f.links = f.rechts = f.oben = f.unten = 0
   }
 
-  // Das freie Fenster in Bildkoordinaten (-1 .. +1), dann um `RAND` nach innen
-  // gezogen und in Steigungen umgerechnet.
-  const luft = (lo: number, hi: number): [number, number] => {
-    const m = (lo + hi) / 2
-    return [m + (lo - m) / (1 + RAND), m + (hi - m) / (1 + RAND)]
+  // Das freie Fenster in Bildkoordinaten (-1 .. +1): wo seine Mitte liegt und
+  // wie weit es von dort reicht. `RAND` zieht es nach innen.
+  const fenster = {
+    mx: f.links - f.rechts,
+    my: f.unten - f.oben,
+    hx: (1 - f.links - f.rechts) / (1 + RAND),
+    hy: (1 - f.oben - f.unten) / (1 + RAND),
   }
-  const [xLo, xHi] = luft(-1 + 2 * f.links, 1 - 2 * f.rechts)
-  const [yLo, yHi] = luft(-1 + 2 * f.unten, 1 - 2 * f.oben)
 
+  // Eingepasst wird mittig auf die *Groesse* des Fensters. Wo es liegt,
+  // erledigt danach der Versatz.
   const basis: Kamerabasis = {
     richtung,
     xKam,
     yKam,
-    xLo: xLo * tanH,
-    xHi: xHi * tanH,
-    yLo: yLo * tanV,
-    yHi: yHi * tanV,
+    tanH: tanH * fenster.hx,
+    tanV: tanV * fenster.hy,
   }
 
   let ziel: V3
@@ -276,28 +272,43 @@ export function passeEin(
     // haelt den Ausschnitt beim Kippen des Geraets gleich gross — ein Kasten
     // wuerde je nach Blickrichtung um bis zu 70 % aufgehen.
     ziel = preset.ausschnitt.ziel
-    const halbX = (basis.xHi - basis.xLo) / 2
-    const halbY = (basis.yHi - basis.yLo) / 2
     distanz =
-      preset.ausschnitt.radius / Math.sin(Math.min(Math.atan(halbX), Math.atan(halbY)))
+      preset.ausschnitt.radius /
+      Math.sin(Math.min(Math.atan(basis.tanV), Math.atan(basis.tanH)))
   }
   distanz = Math.max(distanz, 0.5)
 
-  // Beim Gesamtblick hat `zentriere` das Modell schon auf die Fenstermitte
-  // gezogen. Beim Detailblick ist das Ziel ein fester Punkt — der wird hier
-  // nachtraeglich versetzt. Fuer einen Punkt genau auf Zieltiefe ist das
-  // exakt: Kamera und Blickpunkt wandern gemeinsam.
-  const versatz =
-    preset.ausschnitt === 'gesamt'
-      ? { x: 0, y: 0 }
-      : {
-          x: (-(basis.xLo + basis.xHi) / 2) * distanz,
-          y: (-(basis.yLo + basis.yHi) / 2) * distanz,
-        }
+  // Jetzt sitzt das Modell mittig im Bild und hat die Groesse des Fensters.
+  // Es fehlt der Weg dorthin, wo das Fenster wirklich liegt: Blickpunkt und
+  // Kamera wandern gemeinsam, das Modell verschiebt sich dadurch im Bild.
+  let vx = -fenster.mx * tanH * distanz
+  let vy = -fenster.my * tanV * distanz
+
+  if (preset.ausschnitt === 'gesamt') {
+    // Die Verschiebung wirkt nicht auf alle Ecken gleich — eine kameranahe
+    // wandert im Bild weiter als eine ferne, der Kasten schert also leicht.
+    // Deshalb nachmessen statt hoffen: das Bild einmitten und, falls dabei
+    // etwas ueber die Fensterkante geraet, die Distanz nachziehen. Drei
+    // Durchlaeufe genuegen; gerechnet wird beim Einpassen der Leinwand, nicht
+    // je Bild.
+    const ecken = eckpunkte(huelle)
+    for (let i = 0; i < 3; i++) {
+      const k = bildkasten(ecken, ziel, xKam, yKam, richtung, distanz, vx, vy, tanH, tanV)
+      if (!k) break
+      vx -= (fenster.mx - (k.xMin + k.xMax) / 2) * tanH * distanz
+      vy -= (fenster.my - (k.yMin + k.yMax) / 2) * tanV * distanz
+      const ueber = Math.max(
+        (k.xMax - k.xMin) / (2 * fenster.hx),
+        (k.yMax - k.yMin) / (2 * fenster.hy),
+      )
+      if (ueber > 1.001) distanz *= ueber
+    }
+  }
+
   const blick: V3 = [
-    ziel[0] + xKam[0] * versatz.x + yKam[0] * versatz.y,
-    ziel[1] + xKam[1] * versatz.x + yKam[1] * versatz.y,
-    ziel[2] + xKam[2] * versatz.x + yKam[2] * versatz.y,
+    ziel[0] + xKam[0] * vx + yKam[0] * vy,
+    ziel[1] + xKam[1] * vx + yKam[1] * vy,
+    ziel[2] + xKam[2] * vx + yKam[2] * vy,
   ]
 
   return {
@@ -309,4 +320,52 @@ export function passeEin(
     ziel: blick,
     distanz,
   }
+}
+
+/** Die acht Ecken der Huelle. */
+function eckpunkte(h: Huelle): V3[] {
+  const ecken: V3[] = []
+  for (const x of [h.min[0], h.max[0]])
+    for (const y of [h.min[1], h.max[1]])
+      for (const z of [h.min[2], h.max[2]]) ecken.push([x, y, z])
+  return ecken
+}
+
+/**
+ * Wo die Huelle im fertigen Bild liegt, in Bildkoordinaten (-1 .. +1).
+ * `null`, wenn etwas hinter der Kamera landet — dann ist nichts zu korrigieren.
+ */
+function bildkasten(
+  ecken: V3[],
+  ziel: V3,
+  xKam: V3,
+  yKam: V3,
+  richtung: V3,
+  distanz: number,
+  vx: number,
+  vy: number,
+  tanH: number,
+  tanV: number,
+): { xMin: number; xMax: number; yMin: number; yMax: number } | null {
+  let xMin = Infinity
+  let xMax = -Infinity
+  let yMin = Infinity
+  let yMax = -Infinity
+  for (const p of ecken) {
+    // Lage der Ecke gegenueber dem verschobenen Blickpunkt.
+    const v: V3 = [
+      p[0] - ziel[0] - xKam[0] * vx - yKam[0] * vy,
+      p[1] - ziel[1] - xKam[1] * vx - yKam[1] * vy,
+      p[2] - ziel[2] - xKam[2] * vx - yKam[2] * vy,
+    ]
+    const tiefe = distanz - skalarprodukt(v, richtung)
+    if (tiefe < 1e-3) return null
+    const sx = skalarprodukt(v, xKam) / tiefe / tanH
+    const sy = skalarprodukt(v, yKam) / tiefe / tanV
+    xMin = Math.min(xMin, sx)
+    xMax = Math.max(xMax, sx)
+    yMin = Math.min(yMin, sy)
+    yMax = Math.max(yMax, sy)
+  }
+  return Number.isFinite(xMin) ? { xMin, xMax, yMin, yMax } : null
 }

@@ -65,6 +65,22 @@ for (const ansicht of ['iso', 'front', 'seite', 'oben', 'traufe'] as Ansicht[]) 
       sf: { oben: 0.3, unten: 0.22 },
       name: `${ansicht}/${wie}/kopf+fuss`,
     })
+    // Der Fall, an dem die erste Fassung zerbrach: eine Karte ueber knapp der
+    // halben Breite. Das freie Fenster enthaelt die Blickachse dann nicht mehr,
+    // und wer die Asymmetrie in die Einpassung zieht, teilt durch fast null —
+    // die Kamera wanderte ins Nichts und das Bild blieb leer.
+    faelle.push({
+      ansicht,
+      aspect,
+      sf: { links: 0.48 },
+      name: `${ansicht}/${wie}/karte-breit`,
+    })
+    faelle.push({
+      ansicht,
+      aspect,
+      sf: { rechts: 0.55, oben: 0.1 },
+      name: `${ansicht}/${wie}/karte-rechts`,
+    })
   }
 }
 
@@ -117,11 +133,10 @@ for (const f of faelle) {
     my = (yMin + yMax) / 2
   const zielMx = (freiX[0] + freiX[1]) / 2,
     zielMy = (freiY[0] + freiY[1]) / 2
-  // 5 % Rest sind zugelassen. Ein Kasten laesst sich perspektivisch nicht
-  // gleichzeitig randgenau einpassen *und* exakt mittig stellen: sobald das
-  // Fenster aussermittig liegt, schert die Huelle im Bild leicht. Der Rest
-  // liegt bei rund 3 % der Bildbreite — unsichtbar. Was zaehlt, ist `drin`.
-  const mittig = Math.abs(mx - zielMx) < 0.05 && Math.abs(my - zielMy) < 0.05
+  // Eng gefasst: seit der Versatz nachgemessen und nachgezogen wird, sitzt das
+  // Bild auf ein halbes Prozent genau. Eine weichere Schranke wuerde ein
+  // Abrutschen der Einmittung durchgehen lassen.
+  const mittig = Math.abs(mx - zielMx) < 0.01 && Math.abs(my - zielMy) < 0.01
 
   const ok = drin && mittig
   if (!ok) fehler++
