@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* Dark mode is class-driven, not media-driven, so the user can override the OS. */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -54,7 +54,7 @@
   --color-kh-rule: rgba(0, 0, 0, 0.1);
   --color-kh-footer: #ff9f2a;
 
-  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
 
   --text-body: 1.0625rem;
   --text-body--line-height: 1.6;
@@ -64,8 +64,14 @@
   --animate-fade-up: fade-up 0.5s ease-out both;
 
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: none; }
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 }
 
@@ -106,13 +112,17 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     font-weight: 700;
     line-height: 1.2;
     color: var(--color-kh-grey);
   }
 
-  strong, b {
+  strong,
+  b {
     font-weight: 700;
   }
 
@@ -131,8 +141,15 @@
 
   /* Ease the theme flip on the large grounds only; hover transitions
      elsewhere are defined per-component and stay untouched. */
-  body, header, section, footer, hr {
-    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+  body,
+  header,
+  section,
+  footer,
+  hr {
+    transition:
+      background-color 200ms ease,
+      border-color 200ms ease,
+      color 200ms ease;
   }
 }
 
@@ -181,7 +198,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
