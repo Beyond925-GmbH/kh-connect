@@ -197,6 +197,66 @@
   border-top: 1px solid var(--color-kh-rule);
 }
 
+/* ------------------------------------------------------------------
+   KHPL Connect — Step-Typografie.
+
+   Der Step-Titel ist bewusst *nicht* `kh-h1`: versal, zentriert und orange
+   ist die Signatur der Website und trägt eine Seite, aber fünfzehn Screens
+   hintereinander schreien damit. Bleibt: orange und 700 — linksbündig.
+------------------------------------------------------------------ */
+@utility kh-step-titel {
+  font-size: clamp(1.5rem, 1.15rem + 1.5vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.12;
+  color: var(--color-kh-orange);
+  text-wrap: balance;
+}
+
+/* Fachtext: max. ~250 Zeichen je Step (flow 6.2). 17px aus dem Design-System,
+   auf großen Screens etwas mehr — das iPad steht eine Armlänge entfernt. */
+@utility kh-fachtext {
+  font-size: clamp(1rem, 0.95rem + 0.3vw, 1.2rem);
+  font-weight: 200;
+  line-height: 1.55;
+  color: var(--color-kh-grey);
+  max-width: 62ch;
+}
+
+/* ------------------------------------------------------------------
+   Kiosk-Verhalten (khpl-ui-shell.md 8).
+
+   Kein Zoom, kein Bounce, keine Textauswahl. Pinch-Zoom hängt zusätzlich an
+   `maximum-scale=1` im Viewport-Meta; `touch-action: manipulation` nimmt den
+   Doppeltipp-Zoom, ohne Wischen und Ziehen zu blockieren.
+------------------------------------------------------------------ */
+@layer base {
+  html,
+  body {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  body {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  /* Kein Longpress-Menü auf Bildern, kein versehentliches Ziehen. */
+  img,
+  video {
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+  }
+
+  /* Ausnahmen bewusst gesetzt: alles, was Text zum Lesen und Markieren ist,
+     bleibt markierbar, sobald jemand es ausdrücklich will. */
+  [data-auswaehlbar] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
