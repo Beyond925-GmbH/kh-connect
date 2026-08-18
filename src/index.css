@@ -1,0 +1,189 @@
+@import "tailwindcss";
+
+/* Dark mode is class-driven, not media-driven, so the user can override the OS. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ------------------------------------------------------------------
+   Design system: kh-online.de/ausbildungsmanagement
+   Values below are measured from the live site (computed styles),
+   not approximated.
+
+     page            #FFFFFF, band #E3E3E3
+     brand orange    #FF9F2A          H1, buttons, links, footer
+     body grey       #585858
+     black           #000000          section headings, footer text
+     type            Barlow — body 200 / headings 700
+     H1              35.2px  700  uppercase  centered  orange
+     H2              30px    700  #585858 (teaser) | #000 centered (band)
+     H3              22.4px  700  #585858
+     body            16/24   200  #585858
+     button          #FF9F2A / #fff / 16px / weight 200 / radius 4px / 16px 32px
+     rule            1px rgba(0,0,0,.1)
+     grid            1190px content, 3 x 377px, 30px gap
+     teaser image    ratio 3.84 : 1, no radius
+     footer          #FF9F2A bg, black text, 30px 0 60px
+
+   Teen-facing modifications (kept deliberately slight):
+     - H1 scales up (35 -> clamp 40/56px); the system stays intact
+     - body 16 -> 17px for reading distance on the iPad
+     - buttons 50 -> 54px tall, hover darkens + lifts 1px
+     - teaser photos zoom slightly on hover
+     - two brand devices already used by the campaign are reused as
+       UI: the rotated orange sticker and the #hashtag pill
+
+   Optional dark mode:
+     The light design above stays canonical. Dark mode re-points the
+     colour tokens only — no utility in a component knows which theme
+     is active, so the two stay in step by construction. Preference is
+     `system` by default; an explicit choice persists in localStorage.
+     Warm near-blacks are used rather than neutral greys so the brand
+     orange does not read as a foreign accent on the page.
+------------------------------------------------------------------ */
+
+@theme {
+  /* Every colour below is re-pointed by the `.dark` block further down.
+     Keep them semantic — a literal `#fff` in a component breaks the flip. */
+  --color-kh-page: #ffffff;
+  --color-kh-surface: #ffffff;
+  --color-kh-ink: #000000;
+  --color-kh-orange: #ff9f2a;
+  --color-kh-orange-hover: #f28c0c;
+  --color-kh-grey: #585858;
+  --color-kh-band: #e3e3e3;
+  --color-kh-band-soft: #f1f1f1;
+  --color-kh-rule: rgba(0, 0, 0, 0.1);
+  --color-kh-footer: #ff9f2a;
+
+  --font-sans: "Barlow", ui-sans-serif, system-ui, sans-serif;
+
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.6;
+
+  --radius-kh: 4px;
+
+  --animate-fade-up: fade-up 0.5s ease-out both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: none; }
+  }
+}
+
+/* ------------------------------------------------------------------
+   Dark theme. Unlayered on purpose: it must outrank the `@layer theme`
+   defaults above no matter where it sits in the file.
+   Only tokens change here — nothing else in the codebase branches.
+------------------------------------------------------------------ */
+.dark {
+  --color-kh-page: #141311;
+  --color-kh-surface: #1c1a17;
+  --color-kh-ink: #f6f3ef;
+  --color-kh-grey: #cac5be;
+  --color-kh-band: #1f1d1a;
+  --color-kh-band-soft: #262320;
+  --color-kh-rule: rgba(255, 255, 255, 0.12);
+  /* On a dark ground a hover should brighten, not darken. */
+  --color-kh-orange-hover: #ffb659;
+  /* The closing orange slab stays orange, dimmed so it doesn't glare. */
+  --color-kh-footer: #d1811b;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    color-scheme: light;
+  }
+
+  body {
+    background-color: var(--color-kh-page);
+    color: var(--color-kh-grey);
+    font-family: var(--font-sans);
+    font-weight: 200;
+    font-size: var(--text-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-kh-grey);
+  }
+
+  strong, b {
+    font-weight: 700;
+  }
+
+  a {
+    color: var(--color-kh-orange);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-kh-orange);
+    outline-offset: 3px;
+  }
+
+  /* Ease the theme flip on the large grounds only; hover transitions
+     elsewhere are defined per-component and stay untouched. */
+  body, header, section, footer, hr {
+    transition: background-color 200ms ease, border-color 200ms ease, color 200ms ease;
+  }
+}
+
+/* The site's content column: 1190px at a 1280px viewport, 15px gutters. */
+@utility kh-container {
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
+  padding-inline: 15px;
+}
+
+/* H1 — orange, uppercase, centred. Scaled up for teens; system unchanged. */
+@utility kh-h1 {
+  font-size: clamp(2.125rem, 1.4rem + 2.6vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-kh-orange);
+}
+
+/* Section heading inside a band — near-black on light, near-white on dark. */
+@utility kh-h2-band {
+  font-size: clamp(1.5rem, 1.1rem + 1.3vw, 1.875rem);
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-kh-ink);
+  text-transform: uppercase;
+}
+
+@utility kh-h2 {
+  font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem);
+  font-weight: 700;
+  color: var(--color-kh-grey);
+}
+
+@utility kh-h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-kh-grey);
+}
+
+@utility kh-rule {
+  border: 0;
+  border-top: 1px solid var(--color-kh-rule);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

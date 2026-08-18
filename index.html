@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/brand/kh-paderborn-lippe2.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#FF9F2A" />
+
+    <!-- Set the theme before first paint so dark mode never flashes white.
+         Storage key and colours mirror src/lib/theme.ts. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('kh-theme')
+          var dark =
+            stored === 'dark' ||
+            (stored !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)
+          if (dark) {
+            document.documentElement.classList.add('dark')
+            document.querySelector('meta[name="theme-color"]').content = '#141311'
+          }
+        } catch (e) {}
+      })()
+    </script>
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>Folge deinem Ich — Kreishandwerkerschaft Paderborn-Lippe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:ital,wght@0,200;0,300;0,400;0,500;0,700;1,200;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
