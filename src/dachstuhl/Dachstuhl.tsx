@@ -106,7 +106,10 @@ export function Dachstuhl({
       )}
       {[1, -1].map((s) =>
         passt(auswahl, 'zone-traufe', s) ? (
-          <mesh key={s} position={[0, masse.C - masse.zT + masse.dY / 2, s * (masse.zT + 0.03)]}>
+          <mesh
+            key={s}
+            position={[0, masse.C - masse.zT + masse.dY / 2, s * (masse.zT + 0.03)]}
+          >
             <boxGeometry args={[masse.LD, 0.06, 0.06]} />
             <meshBasicMaterial color={AUSWAHL_EMISSIV} />
           </mesh>

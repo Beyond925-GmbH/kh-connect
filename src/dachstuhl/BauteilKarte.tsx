@@ -29,7 +29,9 @@ export function BauteilKarte({
       <h3 className="kh-h3 pr-6 text-kh-orange">{text.label}</h3>
       <p className="mt-2 text-kh-grey">{text.text}</p>
       {auswahl.index !== null && (
-        <p className="mt-3 text-sm text-kh-grey/70">Ausgewähltes Teil: Achse {auswahl.index}</p>
+        <p className="mt-3 text-sm text-kh-grey/70">
+          Ausgewähltes Teil: Achse {auswahl.index}
+        </p>
       )}
     </div>
   )

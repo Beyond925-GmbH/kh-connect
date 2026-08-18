@@ -43,7 +43,12 @@ function smoothstep(u: number): number {
  * Gewicht eines Staffelschritts. 0 = noch nicht da, 1 = an seinem Platz.
  * Phase 0 (Rohdecke, Antipp-Zonen) ist immer fertig.
  */
-export function fortschritt(t: number, phase: number, animIndex: number, n: number): number {
+export function fortschritt(
+  t: number,
+  phase: number,
+  animIndex: number,
+  n: number,
+): number {
   if (phase === 0) return 1
   const p = PHASEN[phase - 1]
   if (!p) return 1
@@ -54,7 +59,12 @@ export function fortschritt(t: number, phase: number, animIndex: number, n: numb
 }
 
 /** Sichtbarkeit: ein Bauteil erscheint mit dem Beginn seines Staffelschritts. */
-export function sichtbar(t: number, phase: number, animIndex: number, n: number): boolean {
+export function sichtbar(
+  t: number,
+  phase: number,
+  animIndex: number,
+  n: number,
+): boolean {
   if (phase === 0) return true
   const p = PHASEN[phase - 1]
   if (!p) return true

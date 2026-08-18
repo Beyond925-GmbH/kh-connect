@@ -42,7 +42,10 @@ function extrudiere(punkte: Punkt[], dicke: number): THREE.BufferGeometry {
 export function sparrenProfil(m: DachstuhlMasse): Punkt[] {
   const { C, zMLi, zMLa, zT, tanA, dY } = m
   const hML = m.p.q.mauerlatte.h
-  const punkte: Punkt[] = [[0, C], [zMLi, C - zMLi * tanA]]
+  const punkte: Punkt[] = [
+    [0, C],
+    [zMLi, C - zMLi * tanA],
+  ]
   if (m.p.kerve && m.p.tK > 0) {
     // Kerve: Wange hoch, Kervengrund ueber der Mauerlatte, Ferse zurueck auf die UK.
     punkte.push([zMLi, hML], [zMLa, hML])

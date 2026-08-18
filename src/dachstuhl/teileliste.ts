@@ -222,7 +222,9 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
       }
     }
   })
-  kopfbaender.sort((a, b) => a.position[0] - b.position[0] || a.position[2] - b.position[2])
+  kopfbaender.sort(
+    (a, b) => a.position[0] - b.position[0] || a.position[2] - b.position[2],
+  )
   kopfbaender.forEach((k, i) => {
     k.ordnung = i
     roh.push(k)

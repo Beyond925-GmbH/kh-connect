@@ -26,3 +26,6 @@ dev-dist
 
 # Abnahme-Artefakte (Screenshots, Notizen)
 .review/
+
+# Playwright MCP scratch output (screenshots, snapshots)
+.playwright-mcp/

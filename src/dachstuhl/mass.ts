@@ -186,7 +186,12 @@ function pruefeKontrollwerte(m: DachstuhlMasse): void {
     pruefe('Sparrenlaenge', m.lS, 6.859, 0.001)
     pruefe('Achsmass e', m.e, 0.75143, 0.0005)
     pruefe('Sparrenpaare', m.nPaare, 15, 0)
-    pruefe('lichte Hoehe unter Kehlbalken', m.yKB - m.p.q.kehlbalken.h / 2 - m.yBBok, 2.51, 0.01)
+    pruefe(
+      'lichte Hoehe unter Kehlbalken',
+      m.yKB - m.p.q.kehlbalken.h / 2 - m.yBBok,
+      2.51,
+      0.01,
+    )
     pruefe('Stuhlraster', 6 * m.e, 4.509, 0.005)
     pruefe('Dachflaeche ueber Grundriss', m.aDachGrundriss, 120.2, 0.2)
     pruefe('Dachflaeche gedeckt', m.aDachGedeckt, 145.4, 0.2)

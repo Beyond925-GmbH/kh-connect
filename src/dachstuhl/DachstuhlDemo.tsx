@@ -104,11 +104,14 @@ export default function DachstuhlDemo() {
       />
 
       <div className="pointer-events-none absolute top-4 left-4 z-20 max-w-xs">
-        <p className="text-sm tracking-wide text-kh-grey uppercase">Dachstuhl · Beweis-Prototyp</p>
+        <p className="text-sm tracking-wide text-kh-grey uppercase">
+          Dachstuhl · Beweis-Prototyp
+        </p>
         <p className="kh-h3 text-kh-orange">{phase}</p>
         <p className="mt-1 text-sm text-kh-grey/80">
-          {masse.nPaare} Sparrenpaare · Achsmaß {(masse.e * 100).toFixed(1)} cm · Firsthöhe{' '}
-          {masse.yFirstOK.toFixed(2)} m · {masse.aDachGrundriss.toFixed(0)} m² über dem Grundriss
+          {masse.nPaare} Sparrenpaare · Achsmaß {(masse.e * 100).toFixed(1)} cm ·
+          Firsthöhe {masse.yFirstOK.toFixed(2)} m · {masse.aDachGrundriss.toFixed(0)} m²
+          über dem Grundriss
         </p>
       </div>
 

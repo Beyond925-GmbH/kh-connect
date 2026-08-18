@@ -10,9 +10,7 @@ export function Beleuchtung({ dunkel }: { dunkel: boolean }) {
   return (
     <>
       <ambientLight intensity={dunkel ? 0.3 : 0.4} />
-      <hemisphereLight
-        args={[farben.himmel, farben.boden, dunkel ? 0.3 : 0.35]}
-      />
+      <hemisphereLight args={[farben.himmel, farben.boden, dunkel ? 0.3 : 0.35]} />
       <directionalLight
         position={[7, 11, 5]}
         intensity={dunkel ? 1.1 : 1.5}

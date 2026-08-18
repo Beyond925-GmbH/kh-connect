@@ -132,7 +132,8 @@ const FARBEN: Record<BauteilTyp, string> = {
 }
 
 export function farbeFuer(typ: BauteilTyp, animIndex: number): string {
-  if (typ === 'sparren') return SPARREN_FARBEN[Math.abs(animIndex) % SPARREN_FARBEN.length]
+  if (typ === 'sparren')
+    return SPARREN_FARBEN[Math.abs(animIndex) % SPARREN_FARBEN.length]
   return FARBEN[typ]
 }
 

@@ -33,7 +33,12 @@ export function DebugLeiste({
             frei
           </Knopf>
           {ANSICHTEN.map((a) => (
-            <Knopf key={a} aktiv={ansicht === a} onClick={() => onAnsicht(a)} titel={KAMERA[a].beschreibung}>
+            <Knopf
+              key={a}
+              aktiv={ansicht === a}
+              onClick={() => onAnsicht(a)}
+              titel={KAMERA[a].beschreibung}
+            >
               {a}
             </Knopf>
           ))}
@@ -50,8 +55,16 @@ export function DebugLeiste({
           >
             <RotateCcw size={16} strokeWidth={1.5} />
           </Knopf>
-          <Knopf aktiv={false} onClick={() => onPausiert(!pausiert)} titel={pausiert ? 'Abspielen' : 'Pause'}>
-            {pausiert ? <Play size={16} strokeWidth={1.5} /> : <Pause size={16} strokeWidth={1.5} />}
+          <Knopf
+            aktiv={false}
+            onClick={() => onPausiert(!pausiert)}
+            titel={pausiert ? 'Abspielen' : 'Pause'}
+          >
+            {pausiert ? (
+              <Play size={16} strokeWidth={1.5} />
+            ) : (
+              <Pause size={16} strokeWidth={1.5} />
+            )}
           </Knopf>
         </div>
 
