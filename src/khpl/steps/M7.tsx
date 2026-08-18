@@ -11,7 +11,7 @@ import {
 import { AnimatePresence, motion } from 'motion/react'
 import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3D'
+import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { M7_SCHRITTE, M7_START, type Bauschritt } from '@/khpl/buehne/aufbauabschnitte'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'

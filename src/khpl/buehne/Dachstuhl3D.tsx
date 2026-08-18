@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { STANDARD_PARAMETER } from '@/dachstuhl/parameter'
 import { berechneMasse } from '@/dachstuhl/mass'
 import { bildeEinheiten, erzeugeTeile, schritteJePhase } from '@/dachstuhl/teileliste'
@@ -173,23 +173,6 @@ export default function Dachstuhl3D({
         onDaneben={daneben}
         onBereit={bereit}
       />
-    </div>
-  )
-}
-
-/** Ladezustand, solange das three-Bündel unterwegs ist. */
-export function Dachstuhl3DFallback() {
-  const [punkte, setPunkte] = useState('')
-  useEffect(() => {
-    const id = window.setInterval(
-      () => setPunkte((p) => (p.length >= 3 ? '' : p + '·')),
-      400,
-    )
-    return () => window.clearInterval(id)
-  }, [])
-  return (
-    <div className="grid size-full place-items-center bg-kh-band-soft">
-      <p className="text-[15px] text-kh-grey">Der Dachstuhl wird aufgestellt {punkte}</p>
     </div>
   )
 }

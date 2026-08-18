@@ -1,6 +1,6 @@
 import { Suspense, lazy } from 'react'
 import { motion } from 'motion/react'
-import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3D'
+import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import type { StepId } from '@/khpl/flow/steps'

@@ -1,6 +1,6 @@
 import { Suspense, lazy, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3D'
+import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { M5_ENDE } from '@/khpl/buehne/aufbauabschnitte'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
