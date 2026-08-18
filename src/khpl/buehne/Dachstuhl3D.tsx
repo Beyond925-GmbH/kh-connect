@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { STANDARD_PARAMETER } from '@/dachstuhl/parameter'
 import { berechneMasse } from '@/dachstuhl/mass'
 import { bildeEinheiten, erzeugeTeile, schritteJePhase } from '@/dachstuhl/teileliste'
@@ -8,6 +8,7 @@ import type { Ansicht } from '@/dachstuhl/kamera'
 import { phaseAt } from '@/dachstuhl/zeitachse'
 import { useTapErkennung } from '@/dachstuhl/useTapErkennung'
 import { Szene } from '@/dachstuhl/Szene'
+import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
 
 /**
  * Der parametrische Dachstuhl als Bühne — einmal gebaut, viermal benutzt:
@@ -37,11 +38,15 @@ export interface Dachstuhl3DProps {
   /** Nach 8 s ohne Eingabe dreht das Modell von selbst weiter. */
   attraktor?: boolean
   /**
-   * Faktor auf den Kameraabstand. Die Presets in `kamera.ts` sind für den
-   * Vollbild-Prototyp gesetzt; in einem Step liegen Textkarte und Fuß über der
-   * Szene, und das Modell braucht mehr Luft.
+   * Anteil der Dachfläche, der schon gelattet ist (0…1).
+   *
+   * Voll gelattet ist der bauliche Endzustand — und genau dann verschwindet
+   * die Zimmererarbeit darunter: Pfetten, Stuhlsäulen und Kopfbänder liegen
+   * unter einem geschlossenen Lattenteppich. Wo es ums Verstehen geht (B3.2),
+   * bleibt die Lattung deshalb angedeutet; wo das fertige Dach die Aussage ist
+   * (M8), wird zugelattet.
    */
-  kameraAbstand?: number
+  lattung?: number
   /** Warmes Abendlicht statt Tageslicht — für M8. */
   abendlicht?: boolean
   /** Angetipptes Bauteil. Der Step hält die Auswahl, damit er sie merken kann. */
@@ -60,7 +65,7 @@ export default function Dachstuhl3D({
   dauer = 16,
   ansicht = null,
   attraktor = false,
-  kameraAbstand = 1,
+  lattung,
   abendlicht = false,
   auswahl = null,
   onBauteil,
@@ -68,7 +73,23 @@ export default function Dachstuhl3D({
   onPhase,
   onAngekommen,
 }: Dachstuhl3DProps) {
-  const masse = useMemo(() => berechneMasse(STANDARD_PARAMETER), [])
+  const sichtfeld = useSichtfeld()
+  // Nach Stunden Standbetrieb fordert iOS Speicher zurück und nimmt der Seite
+  // den WebGL-Kontext. Ohne Behandlung bleibt eine schwarze Fläche stehen, die
+  // von allein nicht wiederkommt — und niemand am Stand weiß, dass ein Neuladen
+  // hilft. Die Szene wird deshalb über `key` neu aufgebaut, sobald der Kontext
+  // zurück ist, und solange liegt eine Erklärung darüber.
+  const [kontextWeg, setKontextWeg] = useState(false)
+  const [neustart, setNeustart] = useState(0)
+  const masse = useMemo(
+    () =>
+      berechneMasse(
+        lattung === undefined
+          ? STANDARD_PARAMETER
+          : { ...STANDARD_PARAMETER, lattungAnteil: lattung },
+      ),
+    [lattung],
+  )
   const teile = useMemo(() => erzeugeTeile(masse), [masse])
   const einheiten = useMemo(() => bildeEinheiten(teile), [teile])
   const schritte = useMemo(() => schritteJePhase(teile), [teile])
@@ -153,8 +174,13 @@ export default function Dachstuhl3D({
   )
 
   return (
-    <div className="size-full" onPointerDown={(e) => tap.merken(e)} data-wisch="aus">
+    <div
+      className="relative size-full"
+      onPointerDown={(e) => tap.merken(e)}
+      data-wisch="aus"
+    >
       <Szene
+        key={neustart}
         masse={masse}
         einheiten={einheiten}
         schritte={schritte}
@@ -162,7 +188,7 @@ export default function Dachstuhl3D({
         auswahl={auswahl}
         ansicht={ansicht}
         attraktor={attraktor}
-        kameraAbstand={kameraAbstand}
+        sichtfeld={sichtfeld}
         dpr={null}
         // Die Szene kennt nur „hell“ und „dunkel“. Das Abendlicht von M8 fährt
         // über den Dunkel-Zweig: warmer Himmel, tief stehende Sonne.
@@ -172,7 +198,20 @@ export default function Dachstuhl3D({
         onTap={tippen}
         onDaneben={daneben}
         onBereit={bereit}
+        onKontextVerloren={() => setKontextWeg(true)}
+        onKontextZurueck={() => {
+          setKontextWeg(false)
+          setNeustart((n) => n + 1)
+        }}
       />
+
+      {kontextWeg && (
+        <div className="absolute inset-0 z-30 grid place-items-center bg-kh-page/90">
+          <p className="max-w-xs px-6 text-center text-[15px] text-kh-grey">
+            Die 3D-Ansicht wird neu aufgebaut. Einen Moment.
+          </p>
+        </div>
+      )}
     </div>
   )
 }

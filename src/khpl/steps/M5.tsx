@@ -48,9 +48,6 @@ export function M5() {
             zielT={M5_ENDE}
             startT={0}
             dauer={26}
-            // Weiter weg als im Prototyp: die Textkarte oben links und der Fuß
-            // unten rechts nehmen der Szene rund die Hälfte der Fläche.
-            kameraAbstand={1.35}
             onPhase={setPhase}
             onAngekommen={() => setSteht(true)}
           />

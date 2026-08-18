@@ -132,7 +132,6 @@ export function M7() {
             // Kürzer als in M5: hier wartet jemand auf das Ergebnis seiner
             // eigenen Entscheidung, nicht auf eine Vorführung.
             dauer={12}
-            kameraAbstand={1.35}
           />
         </Suspense>
       }

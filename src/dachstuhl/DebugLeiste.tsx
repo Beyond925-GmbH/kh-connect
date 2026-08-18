@@ -109,7 +109,7 @@ function Knopf({
       className={[
         'grid h-[35px] min-w-[35px] place-items-center rounded-kh border px-3 text-sm transition-colors',
         aktiv
-          ? 'border-kh-orange bg-kh-orange text-white'
+          ? 'border-kh-orange bg-kh-orange text-kh-page'
           : 'border-kh-rule text-kh-grey hover:border-kh-orange hover:text-kh-orange',
       ].join(' ')}
     >

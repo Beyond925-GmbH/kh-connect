@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "pruefe:kamera": "jiti src/dachstuhl/kamera.pruefung.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -35,6 +36,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "^6.0.4",
+    "jiti": "^2.7.0",
     "oxlint": "^1.75.0",
     "prettier": "^3.9.6",
     "typescript": "~6.0.2",

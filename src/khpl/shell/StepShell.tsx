@@ -4,6 +4,7 @@ import { STEPS, type StepId } from '@/khpl/flow/steps'
 import { DeinWeg } from './DeinWeg'
 import { Rail } from './Rail'
 import { WeiterKontext } from './WeiterKontext'
+import { SichtfeldMesser } from './SichtfeldKontext'
 import { useStaffAusgang } from './staffAusgang'
 import { useWisch } from './useWisch'
 import {
@@ -86,6 +87,10 @@ export function StepShell({
   const staffTap = useStaffAusgang()
   const [wegOffen, setWegOffen] = useState(false)
   const flaeche = useRef<HTMLElement>(null)
+  // Die beiden deckenden Kaesten des `buehne`-Layouts. Der Messer rechnet
+  // daraus aus, wie viel Flaeche dem 3D-Modell bleibt.
+  const karteOben = useRef<HTMLDivElement>(null)
+  const blockUnten = useRef<HTMLDivElement>(null)
 
   const def = STEPS[id]
   const imSkip = fortschritt.detourReturnTo !== null
@@ -179,20 +184,26 @@ export function StepShell({
           )}
 
           {aufteilung === 'buehne' && (
-            <>
+            <SichtfeldMesser flaeche={flaeche} oben={karteOben} unten={blockUnten}>
               {buehne && <div className="absolute inset-0 overflow-hidden">{buehne}</div>}
               <div className="pointer-events-none absolute inset-0 flex flex-col justify-between gap-3 p-4 landscape:p-6">
-                <div className="pointer-events-auto w-full max-w-[30rem] rounded-kh bg-kh-page p-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:p-5">
+                <div
+                  ref={karteOben}
+                  className="pointer-events-auto w-full max-w-[30rem] rounded-kh bg-kh-page p-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:p-5"
+                >
                   {titel}
                   {fachtext && <div className="kh-fachtext mt-2">{fachtext}</div>}
                 </div>
-                <div className="pointer-events-auto flex flex-col gap-3 landscape:ml-auto landscape:w-[min(42rem,62%)]">
+                <div
+                  ref={blockUnten}
+                  className="pointer-events-auto flex flex-col gap-3 landscape:ml-auto landscape:w-[min(42rem,62%)]"
+                >
                   {interaktion}
                   {aha}
                   {fussFlaeche}
                 </div>
               </div>
-            </>
+            </SichtfeldMesser>
           )}
         </main>
 

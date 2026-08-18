@@ -65,7 +65,12 @@ export function B32() {
             // Nur solange nichts ausgewählt ist: sonst dreht das hervorgehobene
             // Bauteil aus dem Bild, während man den Text dazu liest.
             attraktor={auswahl === null}
-            kameraAbstand={1.45}
+            // Nur angedeutet gelattet. Voll gelattet ist zwar der bauliche
+            // Endzustand, begräbt aber genau das, was dieser Step erklären
+            // soll: Pfetten, Stuhlsäulen und Kopfbänder liegen dann unter
+            // einem geschlossenen Lattenteppich und sind weder zu sehen noch
+            // anzutippen.
+            lattung={0.35}
             auswahl={auswahl}
             onBauteil={(teil) => tippen(teil.typ, teil.auswahlIndex)}
             onDaneben={() => setAuswahl(null)}

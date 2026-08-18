@@ -1,6 +1,6 @@
 import type { DachstuhlMasse } from './mass'
 import type { BauteilTyp } from './bauteil-texte'
-import { BAUTEIL_TEXTE, farbeFuer } from './bauteil-texte'
+import { farbeFuer, textFuer } from './bauteil-texte'
 
 /**
  * Erzeugt die vollstaendige Teileliste aus den abgeleiteten Massen (Bauplan 3).
@@ -98,8 +98,11 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
       groesse: [p.L, q.mauerlatte.h, q.mauerlatte.b],
       auswahlIndex: s,
       phase: 1,
-      ordnung: s > 0 ? 0 : 1,
-      einflug: [0, 1.5, 0],
+      // Beide Mauerlatten im selben Staffelschritt: der erste Frame der
+      // Animation zeigt sonst eine einzelne schwebende Latte statt des
+      // symmetrischen Anfangs eines Dachstuhls.
+      ordnung: 0,
+      einflug: [0, 0.6, 0],
     })
   }
 
@@ -117,18 +120,40 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
     })
   })
 
-  // ---- Phase 3: Stuhlsaeulen ---------------------------------------------
-  const hFirstsaeule = m.yFiPuk - m.yBBok
-  const hMittelsaeule = m.yMPuk - m.yBBok
+  // ---- Phase 3: Stuhlschwellen -------------------------------------------
+  // Unter jeder Saeulenreihe laeuft eine Schwelle laengs ueber die Balkenlage.
+  // Ohne sie gaebe eine Stuhlsaeule die ganze Pfettenlast an einen einzelnen
+  // Deckenbalken ab — statisch Unsinn, und man sieht es sofort.
+  const schwellen: { z: number; ordnung: number }[] = [
+    { z: 0, ordnung: 0 },
+    { z: m.zMP, ordnung: 1 },
+    { z: -m.zMP, ordnung: 1 },
+  ]
+  schwellen.forEach(({ z, ordnung }) => {
+    roh.push({
+      id: `stuhlschwelle-z${z > 0 ? '+' : z < 0 ? '-' : '0'}`,
+      typ: 'stuhlschwelle',
+      position: [0, m.yBBok + q.stuhlschwelle.h / 2, z],
+      groesse: [p.L, q.stuhlschwelle.h, q.stuhlschwelle.b],
+      auswahlIndex: Math.sign(z),
+      phase: 3,
+      ordnung,
+      einflug: [0, 1.2, 0],
+    })
+  })
+
+  // ---- Phase 4: Stuhlsaeulen ---------------------------------------------
+  const hFirstsaeule = m.yFiPuk - m.ySchwelleOk
+  const hMittelsaeule = m.yMPuk - m.ySchwelleOk
   let saeulenOrdnung = 0
   m.saeulenJ.forEach((j) => {
     roh.push({
       id: `firstsaeule-j${vz(j)}`,
       typ: 'firstsaeule',
-      position: [j * m.e, m.yBBok + hFirstsaeule / 2, 0],
+      position: [j * m.e, m.ySchwelleOk + hFirstsaeule / 2, 0],
       groesse: [q.firstsaeule.b, hFirstsaeule, q.firstsaeule.h],
       auswahlIndex: j,
-      phase: 3,
+      phase: 4,
       ordnung: saeulenOrdnung++,
       einflug: [0, 2.5, 0],
     })
@@ -138,17 +163,17 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
       roh.push({
         id: `mittelsaeule-j${vz(j)}-z${s > 0 ? '+' : '-'}`,
         typ: 'mittelsaeule',
-        position: [j * m.e, m.yBBok + hMittelsaeule / 2, s * m.zMP],
+        position: [j * m.e, m.ySchwelleOk + hMittelsaeule / 2, s * m.zMP],
         groesse: [q.mittelsaeule.b, hMittelsaeule, q.mittelsaeule.h],
         auswahlIndex: j,
-        phase: 3,
+        phase: 4,
         ordnung: saeulenOrdnung++,
         einflug: [0, 2.5, 0],
       })
     }
   })
 
-  // ---- Phase 4: Mittelpfetten --------------------------------------------
+  // ---- Phase 5: Mittelpfetten --------------------------------------------
   for (const s of [1, -1]) {
     roh.push({
       id: `mittelpfette-z${s > 0 ? '+' : '-'}`,
@@ -157,24 +182,24 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
       position: NULL3,
       spiegelZ: s < 0,
       auswahlIndex: s,
-      phase: 4,
+      phase: 5,
       ordnung: s > 0 ? 0 : 1,
       einflug: [0, 2.5, 0],
     })
   }
 
-  // ---- Phase 5: Firstpfette ----------------------------------------------
+  // ---- Phase 6: Firstpfette ----------------------------------------------
   roh.push({
     id: 'firstpfette',
     typ: 'firstpfette',
     form: 'firstpfette',
     position: NULL3,
-    phase: 5,
+    phase: 6,
     ordnung: 0,
     einflug: [0, 3, 0],
   })
 
-  // ---- Phase 6: Kopfbaender ----------------------------------------------
+  // ---- Phase 7: Kopfbaender ----------------------------------------------
   // Nach aussen gerichtete Baender entfallen, wo sie ueber die Dachkante ragen.
   const kopfbandGrenze = m.LD / 2 - 0.1
   const kopfbaender: Roh[] = []
@@ -195,7 +220,7 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
       rotation: [0, 0, (richtung * Math.PI) / 4],
       groesse: [schenkel * Math.SQRT2, q.kopfband.h, q.kopfband.b],
       auswahlIndex: j,
-      phase: 6,
+      phase: 7,
       ordnung: 0,
       einflug: [0, 0.8, 0],
     })
@@ -230,7 +255,7 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
     roh.push(k)
   })
 
-  // ---- Phase 7: Sparrenpaare ---------------------------------------------
+  // ---- Phase 8: Sparrenpaare ---------------------------------------------
   m.achsen.forEach(({ j }, i) => {
     for (const s of [1, -1]) {
       roh.push({
@@ -242,7 +267,7 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
         farbIndex: j,
         auswahlIndex: j,
         einheit: `sparrenpaar-j${vz(j)}`,
-        phase: 7,
+        phase: 8,
         ordnung: i,
         einflug: [0, 3, 0],
         neigung: (-5 * Math.PI) / 180,
@@ -250,7 +275,7 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
     }
   })
 
-  // ---- Phase 8: Kehlbalken ------------------------------------------------
+  // ---- Phase 9: Kehlbalken ------------------------------------------------
   m.achsen.forEach(({ j }, i) => {
     roh.push({
       id: `kehlbalken-j${vz(j)}`,
@@ -258,17 +283,17 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
       position: [j * m.e, m.yKB, 0],
       groesse: [q.kehlbalken.b, q.kehlbalken.h, 2 * m.lKBh],
       auswahlIndex: j,
-      phase: 8,
+      phase: 9,
       ordnung: i,
       einflug: [1.6, 0, 0],
     })
   })
 
-  // ---- Phase 9: Windrispenbaender (Dachflaechen-Frame) --------------------
+  // ---- Phase 10: Windrispenbaender (Dachflaechen-Frame) -------------------
   // Ein Kreuz je Dachhaelfte, ueber sechs Sparrenfelder gespannt.
   const rispeX = 3 * m.e
-  const rispeZnah = 0.4
-  const rispeZfern = m.lS - 0.26
+  const rispeZnah = m.dachZFirst + 0.6
+  const rispeZfern = m.dachZTraufe - 0.26
   const rispeDz = rispeZfern - rispeZnah
   const rispeLaenge = Math.hypot(2 * rispeX, rispeDz)
   const rispeWinkel = Math.atan((2 * rispeX) / rispeDz)
@@ -285,7 +310,7 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
         einheitRotation: [0, band * rispeWinkel, 0],
         groesse: [q.windrispe.b, q.windrispe.h, rispeLaenge],
         auswahlIndex: s,
-        phase: 9,
+        phase: 10,
         ordnung: s > 0 ? 0 : 1,
         // Waechst aus dem Traufende heraus: Startlage ist genau dieses Ende.
         einflug: [band * rispeX, 0, rispeDz / 2],
@@ -295,38 +320,88 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
     }
   }
 
-  // ---- Phase 10: Konterlattung (Dachflaechen-Frame) -----------------------
-  const konterLaenge = m.lS - 0.05
+  // ---- Phase 11: Konterlattung (Dachflaechen-Frame) -----------------------
+  // Die Konterlatte deckt die Sparrenoberkante vom First bis zur Traufe ab.
+  // Bezug ist der Dachflaechen-Frame, nicht die Sparrenlaenge — sonst liegt
+  // die ganze Lattung um hS * tanA traufwaerts daneben.
+  const konterLaenge = m.dachZTraufe - m.dachZFirst - 0.02
+  const konterMitte = (m.dachZFirst + m.dachZTraufe) / 2
   m.achsen.forEach(({ j }, i) => {
     for (const s of [1, -1]) {
       roh.push({
         id: `konterlatte-j${vz(j)}-z${s > 0 ? '+' : '-'}`,
         typ: 'konterlatte',
         rahmen: s > 0 ? 'dach+' : 'dach-',
-        position: [j * m.e, q.sparren.h + q.konterlatte.h / 2, m.lS / 2],
+        position: [j * m.e, q.sparren.h + q.konterlatte.h / 2, konterMitte],
         groesse: [q.konterlatte.b, q.konterlatte.h, konterLaenge],
         auswahlIndex: j,
-        phase: 10,
+        phase: 11,
         ordnung: i,
         einflug: [0, 0.5, 0],
       })
     }
   })
 
-  // ---- Phase 11: Traglattung (Dachflaechen-Frame) -------------------------
+  // ---- Phase 12: Traglattung (Dachflaechen-Frame) -------------------------
   const yTraglatte = q.sparren.h + q.konterlatte.h + q.traglatte.h / 2
-  for (let k = 0; k < m.nTraglatten; k++) {
+  m.traglattenZ.forEach((z, k) => {
     for (const s of [1, -1]) {
       roh.push({
         id: `traglatte-k${k}-z${s > 0 ? '+' : '-'}`,
         typ: 'traglatte',
         rahmen: s > 0 ? 'dach+' : 'dach-',
-        position: [0, yTraglatte, m.lS - 0.16 - k * p.lw],
+        position: [0, yTraglatte, z],
         groesse: [m.LD, q.traglatte.h, q.traglatte.b],
         auswahlIndex: k,
-        phase: 11,
+        phase: 12,
         ordnung: k,
         einflug: [0, 0.4, 0],
+      })
+    }
+  })
+
+  // ---- Phase 13: Traufbohle und Ortgangbretter ----------------------------
+  // Ohne diese beiden Brettreihen hoert das Dach an drei Kanten messerscharf
+  // auf: an der Traufe haengen die nackten Sparrenschwaenze heraus, am Ortgang
+  // enden die Latten buendig auf dem letzten Sparren. Beides ist der Punkt,
+  // an dem man einen Rohbau von einem fertigen Dach unterscheidet.
+  for (const s of [1, -1]) {
+    roh.push({
+      id: `traufbohle-z${s > 0 ? '+' : '-'}`,
+      typ: 'traufbohle',
+      // Steht als Stirnbrett lotrecht vor den Sparrenkoepfen, Oberkante
+      // buendig mit dem Sparrenruecken.
+      position: [0, m.C - m.zT + q.traufbohle.h / 2, s * (m.zT + q.traufbohle.b / 2)],
+      groesse: [m.LD, q.traufbohle.h, q.traufbohle.b],
+      auswahlIndex: s,
+      phase: 13,
+      ordnung: 0,
+      einflug: [0, 0.5, 0],
+    })
+  }
+  // Je Dachhaelfte und Giebelseite ein Windbrett aussen auf dem Ortgangsparren.
+  // Es sitzt im Dachflaechen-Frame und laeuft damit von selbst parallel zur
+  // Dachflaeche, vom First bis zur Traufe.
+  const ortgangLaenge = m.dachZTraufe - m.dachZFirst
+  const ortgangMitte = (m.dachZFirst + m.dachZTraufe) / 2
+  for (const s of [1, -1]) {
+    for (const g of [1, -1]) {
+      roh.push({
+        id: `ortgangbrett-z${s > 0 ? '+' : '-'}-x${g > 0 ? '+' : '-'}`,
+        typ: 'ortgangbrett',
+        rahmen: s > 0 ? 'dach+' : 'dach-',
+        // Deckt die Lattenenden ab: von 5 cm unter der Sparrenunterkante bis
+        // knapp ueber die Traglatte.
+        position: [
+          g * (m.xOrtgang + q.ortgangbrett.b / 2),
+          m.dachOben / 2 - 0.02,
+          ortgangMitte,
+        ],
+        groesse: [q.ortgangbrett.b, q.ortgangbrett.h, ortgangLaenge],
+        auswahlIndex: g,
+        phase: 13,
+        ordnung: 1,
+        einflug: [g * 0.5, 0, 0],
       })
     }
   }
@@ -341,7 +416,7 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
     form: 'zone',
     position: [0, m.yFirstUK + 0.2, 0],
     groesse: [m.LD, 0.3, 0.3],
-    phase: 5,
+    phase: 6,
     ordnung: 0,
     wirftSchatten: false,
     empfaengtSchatten: false,
@@ -354,7 +429,7 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
       position: [0, m.C - m.zT + m.dY / 2, s * m.zT],
       groesse: [m.LD, 0.3, 0.25],
       auswahlIndex: s,
-      phase: 7,
+      phase: 8,
       ordnung: 0,
       wirftSchatten: false,
       empfaengtSchatten: false,
@@ -365,7 +440,9 @@ export function erzeugeTeile(m: DachstuhlMasse): Bauteil[] {
 }
 
 function veredle(r: Roh): Bauteil {
-  const text = BAUTEIL_TEXTE[r.typ]
+  // Lookup mit Rueckfallebene statt direktem Indexzugriff: ein Bauteil ohne
+  // Stammdatensatz hat frueher hier geworfen und die ganze Szene mitgerissen.
+  const text = textFuer(r.typ)
   return {
     id: r.id,
     typ: r.typ,
@@ -432,6 +509,30 @@ export function bildeEinheiten(teile: Bauteil[]): Einheit[] {
     })
   }
   return [...nach.values()]
+}
+
+/**
+ * Abnahme-Assertion fuer die Teileliste. Jedes Teil braucht eine eindeutige id,
+ * einen Begriff und ein antippbar-Flag — `antippbar` ist das Fundament von
+ * B3.2, und ein Teil, das ohne diese Felder durchlaeuft, ist entweder stumm
+ * oder loest beim Tippen den naechsten Fehler aus.
+ */
+export function pruefeTeileliste(teile: Bauteil[]): string[] {
+  const maengel: string[] = []
+  const gesehen = new Set<string>()
+  for (const t of teile) {
+    if (!t.id) maengel.push(`Bauteil ohne id (Typ ${t.typ})`)
+    else if (gesehen.has(t.id)) maengel.push(`id doppelt vergeben: ${t.id}`)
+    else gesehen.add(t.id)
+
+    const text = textFuer(t.typ)
+    if (!text.label) maengel.push(`${t.id}: kein Begriff hinterlegt`)
+    if (typeof t.antippbar !== 'boolean')
+      maengel.push(`${t.id}: antippbar ist kein Wahrheitswert`)
+    if (!t.farbe) maengel.push(`${t.id}: keine Materialfarbe`)
+  }
+  if (teile.length === 0) maengel.push('Die Teileliste ist leer')
+  return maengel
 }
 
 /** Anzahl Staffelschritte je Phase = hoechster animIndex + 1. */

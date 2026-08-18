@@ -134,7 +134,7 @@ export function M8() {
       buehne={
         <div className="relative size-full">
           <Suspense fallback={<Dachstuhl3DFallback />}>
-            <Dachstuhl3D zielT={1} attraktor kameraAbstand={1.5} />
+            <Dachstuhl3D zielT={1} attraktor />
           </Suspense>
           {/* Abendlicht als Lage darüber statt als zweite Lichtstimmung in der
               Szene: die Szene kennt nur hell und dunkel, und „dunkel“ ist ein
