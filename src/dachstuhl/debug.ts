@@ -82,7 +82,11 @@ export function leseDebug(suche: string): DebugZustand {
 }
 
 /** Trifft die Auswahl dieses Bauteil? */
-export function passt(auswahl: Auswahl | null, typ: BauteilTyp, index: number | null): boolean {
+export function passt(
+  auswahl: Auswahl | null,
+  typ: BauteilTyp,
+  index: number | null,
+): boolean {
   if (auswahl === null) return false
   if (auswahl.typ !== typ) return false
   return auswahl.index === null || auswahl.index === index

@@ -923,7 +923,7 @@ steht, die Kreishandwerkerschaft muss ihn bestätigen. `OFFEN` heißt: fehlt noc
 
 1. `TEILWEISE` **Bildmaterial** — der Bestand aus dem Nachbarprojekt `kh-connect` liegt
    jetzt lokal unter `public/medien/` (31 Dateien, 17 MB, Inventar in
-   `public/medien/INVENTAR.md`). Details und Lücken in 13
+   `MEDIEN-INVENTAR.md` (Repo-Wurzel, bewusst nicht unter `public/` — Arbeitsdokumente werden nicht mit ausgeliefert)). Details und Lücken in 13
 2. `OFFEN` **3D-Modell** eines Dachstuhls, polygonarm, für B3.2 — siehe Beschaffungswege
    unten
 3. `OFFEN – terminiert` **Der Name** für „Sprich jetzt mit [Name] am Stand". Wird
@@ -1377,7 +1377,7 @@ der Besucher sie für die Antwort hält.
 | **Sparren** | Die schrägen Balken, die von der Traufe zum First laufen und die Dachfläche tragen. Sie liegen sich paarweise gegenüber und stützen einander |
 | **Sparrenpaar** | Zwei gegenüberliegende Sparren, die oben am First zusammenstoßen. Sie werden meist am Boden vormontiert und als Ganzes vom Kran eingehoben |
 | **Pfette** | Ein waagerechter Balken, der quer unter den Sparren liegt und sie stützt. Nach ihrer Lage heißen sie Fußpfette, Mittelpfette und Firstpfette |
-| **Kehlbalken** | Ein waagerechter Balken, der ein Sparrenpaar auf halber Höhe verbindet. Er verhindert, dass die Sparren sich durchbiegen — und bildet nebenbei die Decke des Spitzbodens |
+| **Kehlbalken** | Ein waagerechter Balken, der ein Sparrenpaar im oberen Drittel bis auf halber Höhe verbindet. Er verhindert, dass die Sparren sich durchbiegen — und bildet nebenbei die Decke des Spitzbodens |
 | **First** | Die oberste Kante des Dachs, an der die beiden Dachflächen zusammentreffen |
 | **Traufe** | Die untere Kante der Dachfläche, an der das Regenwasser abläuft. Dort hängt die Dachrinne |
 | **Gaube** | Ein Aufbau, der aus der Dachfläche herausragt und ein senkrechtes Fenster aufnimmt. Sie schafft Kopfhöhe und Licht — und ist der aufwendigste Teil vieler Dächer. Deshalb wird sie im Angebot separat gerechnet |
@@ -1402,7 +1402,7 @@ der Besucher sie für die Antwort hält.
 Stand 18.08.2026. Der Medienbestand des Nachbarprojekts `kh-connect` ist vollständig nach
 `public/medien/` übernommen: **31 Dateien, rund 17 MB**, Ordnerstruktur der Quelle erhalten,
 Prüfsummen verifiziert. Vollständiges Inventar mit Quellen und Lizenzlage in
-`public/medien/INVENTAR.md`.
+`MEDIEN-INVENTAR.md` (Repo-Wurzel, bewusst nicht unter `public/` — Arbeitsdokumente werden nicht mit ausgeliefert).
 
 Der Bestand ist **kleiner, als der Ordner vermuten lässt**: 22 Fotos und 5 Videos, davon
 **zehn Dateien Zimmerer**. Der Rest gehört zu Zerspanungsmechaniker und Anlagenmechaniker.

@@ -1,0 +1,21 @@
+# Reproduzierbarer Deploy der Dachstuhl-Demo.
+# Ohne diese Datei macht die Netlify-CLI Framework-Autodetection und baut selbst -
+# dabei landet alles aus public/ im Deploy, auch was dort nicht hingehoert.
+
+[build]
+  command = "pnpm build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Arbeitsdokumente nie ausliefern, egal wo sie liegen.
+[[redirects]]
+  from = "/*.md"
+  to = "/index.html"
+  status = 404
+
+[[redirects]]
+  from = "/medien/*.md"
+  to = "/index.html"
+  status = 404

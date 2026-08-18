@@ -29,9 +29,15 @@ export interface DachstuhlParameter {
   fKB: number
   /** Kervenhoehe am Sparrenfuss. */
   tK: number
+  /** Kervenhoehe ueber Mittel- und Firstpfette, lotrecht gemessen. */
+  tKPfette: number
   /** Lattweite der Traglattung. */
   lw: number
-  /** Anteil der Dachflaeche mit Traglattung, von der Traufe aus. */
+  /**
+   * Anteil der Dachflaeche mit Traglattung, von der Traufe aus.
+   * 1 = fertig gelattet bis zur Firstlatte. Kleinere Werte nur zur Abnahme
+   * (`?latten=`), damit man ein halb gelattetes Dach anschauen kann.
+   */
   lattungAnteil: number
   /** Zielabstand der Stuhlsaeulen. */
   stuhlRaster: number
@@ -53,9 +59,12 @@ export interface DachstuhlParameter {
     firstsaeule: Querschnitt
     mittelsaeule: Querschnitt
     kopfband: Querschnitt
+    stuhlschwelle: Querschnitt
     konterlatte: Querschnitt
     traglatte: Querschnitt
     windrispe: Querschnitt
+    traufbohle: Querschnitt
+    ortgangbrett: Querschnitt
   }
 }
 
@@ -70,8 +79,9 @@ export const STANDARD_PARAMETER: DachstuhlParameter = {
   fMP: 0.45,
   fKB: 1 / 3,
   tK: 0.05,
+  tKPfette: 0.04,
   lw: 0.32,
-  lattungAnteil: 0.35,
+  lattungAnteil: 1.0,
   stuhlRaster: 4.5,
   kerve: true,
   rohdeckeDicke: 0.24,
@@ -87,8 +97,14 @@ export const STANDARD_PARAMETER: DachstuhlParameter = {
     firstsaeule: { b: 0.16, h: 0.16 },
     mittelsaeule: { b: 0.14, h: 0.14 },
     kopfband: { b: 0.1, h: 0.12 },
+    stuhlschwelle: { b: 0.16, h: 0.12 },
     konterlatte: { b: 0.06, h: 0.04 },
     traglatte: { b: 0.06, h: 0.04 },
     windrispe: { b: 0.04, h: 0.003 },
+    // Schalbretter: `b` ist die Brettdicke, `h` die Brettbreite.
+    // 34 cm: reicht von der Traufspitze der Sparren-UK bis unter die
+    // Traglattenoberkante, deckt den lotrechten Traufschnitt also ganz ab.
+    traufbohle: { b: 0.03, h: 0.34 },
+    ortgangbrett: { b: 0.03, h: 0.34 },
   },
 }

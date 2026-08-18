@@ -1,6 +1,7 @@
 import { useRef } from 'react'
 import type { RefObject } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
+import * as THREE from 'three'
 import type { DachstuhlMasse } from './mass'
 import type { Bauteil as BauteilDaten, Einheit } from './teileliste'
 import { Beleuchtung } from './Beleuchtung'
@@ -8,9 +9,32 @@ import { Kamerasteuerung } from './Kamerasteuerung'
 import { Dachstuhl } from './Dachstuhl'
 import { SZENE_FARBEN } from './bauteil-texte'
 import type { Ansicht } from './kamera'
-import { FOV, START_KAMERA } from './kamera'
+import { FOV } from './kamera'
 import type { Auswahl } from './debug'
 import type { TapErkennung } from './useTapErkennung'
+
+/**
+ * Tiefenstaffelung. In der reinen Seitenansicht ueberlagern sich vordere und
+ * hintere Sparrenreihe sonst zu einem Liniengitter; der leichte Dunst setzt
+ * die hintere Reihe ab, ohne die freie Drehung mit einer unsichtbaren Wand
+ * einzuschraenken.
+ *
+ * Die Reichweite haengt an der aktuellen Kameradistanz, nicht an festen
+ * Metern: seit die Kamera sich ans Seitenverhaeltnis anpasst, steht sie im
+ * Hochformat deutlich weiter weg — mit festem Nebel waere das Modell dort
+ * flaechig eingegraut.
+ */
+function Tiefenstaffelung({ farbe, mitte }: { farbe: string; mitte: THREE.Vector3 }) {
+  const nebel = useRef<THREE.Fog>(null)
+  useFrame(({ camera }) => {
+    const f = nebel.current
+    if (!f) return
+    const d = camera.position.distanceTo(mitte)
+    f.near = Math.max(d * 0.62, 0.1)
+    f.far = d * 2.1
+  })
+  return <fog ref={nebel} attach="fog" args={[farbe, 11, 40]} />
+}
 
 /** Meldet dem DOM, dass wirklich zwei Frames gerendert wurden. */
 function Bereitmeldung({ onBereit }: { onBereit: () => void }) {
@@ -42,6 +66,8 @@ export function Szene({
   onTap,
   onDaneben,
   onBereit,
+  onKontextVerloren,
+  onKontextZurueck,
 }: {
   masse: DachstuhlMasse
   einheiten: Einheit[]
@@ -57,8 +83,12 @@ export function Szene({
   onTap: (teil: BauteilDaten) => void
   onDaneben: () => void
   onBereit: () => void
+  onKontextVerloren: () => void
+  onKontextZurueck: () => void
 }) {
   const hintergrund = (dunkel ? SZENE_FARBEN.dunkel : SZENE_FARBEN.hell).hintergrund
+  const mitte = useRef(new THREE.Vector3(...masse.huelle.mitte))
+  mitte.current.set(...masse.huelle.mitte)
 
   return (
     <Canvas
@@ -66,16 +96,33 @@ export function Szene({
       // das killt iOS Safari die PointerEvents nach wenigen Pixeln Bewegung.
       style={{ touchAction: 'none', width: '100%', height: '100%' }}
       dpr={dpr ?? [1, 2]}
-      shadows
+      // 'percentage' = PCFShadowMap. Der Default 'soft' (PCFSoftShadowMap) ist
+      // in three r185 deprecated und faellt intern ohnehin auf PCF zurueck —
+      // die Weichheit kommt hier ueber die 2048er Shadow-Map.
+      shadows="percentage"
       gl={{ antialias: true, alpha: false }}
-      camera={{ fov: FOV, near: 0.1, far: 120, position: START_KAMERA.position }}
+      camera={{ fov: FOV, near: 0.1, far: 160, position: [14, 7, 13] }}
+      // Der WebGL-Kontext geht auf dem iPad verloren, wenn iOS Speicher
+      // zurueckfordert — nach stundenlangem Standbetrieb ist das der
+      // wahrscheinlichste Ausfall. Ohne `preventDefault` stellt der Browser
+      // ihn gar nicht erst wieder her, und zurueck bleibt eine schwarze
+      // Flaeche, die von allein nicht wiederkommt.
+      onCreated={({ gl }) => {
+        const leinwand = gl.domElement
+        leinwand.addEventListener('webglcontextlost', (e) => {
+          e.preventDefault()
+          onKontextVerloren()
+        })
+        leinwand.addEventListener('webglcontextrestored', () => onKontextZurueck())
+      }}
       onPointerMissed={(e: MouseEvent) => {
         if (tap.istTap(e)) onDaneben()
       }}
     >
       <color attach="background" args={[hintergrund]} />
+      <Tiefenstaffelung farbe={hintergrund} mitte={mitte.current} />
       <Beleuchtung dunkel={dunkel} />
-      <Kamerasteuerung ansicht={ansicht} attraktor={attraktor} />
+      <Kamerasteuerung ansicht={ansicht} huelle={masse.huelle} attraktor={attraktor} />
       <Dachstuhl
         masse={masse}
         einheiten={einheiten}

@@ -40,42 +40,59 @@ function extrudiere(punkte: Punkt[], dicke: number): THREE.BufferGeometry {
 }
 
 export function sparrenProfil(m: DachstuhlMasse): Punkt[] {
-  const { C, zMLi, zMLa, zT, tanA, dY } = m
+  const { C, zMLi, zMLa, zT, tanA, dY, zMPi, zMPa, zFiPa, tKP } = m
   const hML = m.p.q.mauerlatte.h
-  const punkte: Punkt[] = [[0, C], [zMLi, C - zMLi * tanA]]
+  const uk = (z: number) => C - z * tanA
+  const punkte: Punkt[] = []
+
+  // Unterkante vom First zur Traufe. Jede Kerve hebt die Unterkante um die
+  // Kervenhoehe an und schliesst mit zwei senkrechten Anschlagflaechen ab.
+  if (tKP > 0) {
+    // Firstkerve: der Sparren sitzt auf der angeschnittenen Firstpfette.
+    punkte.push([0, C + tKP], [zFiPa, uk(zFiPa) + tKP], [zFiPa, uk(zFiPa)])
+    // Kerve ueber der Mittelpfette.
+    punkte.push(
+      [zMPi, uk(zMPi)],
+      [zMPi, uk(zMPi) + tKP],
+      [zMPa, uk(zMPa) + tKP],
+      [zMPa, uk(zMPa)],
+    )
+  } else {
+    punkte.push([0, C])
+  }
+
+  punkte.push([zMLi, uk(zMLi)])
   if (m.p.kerve && m.p.tK > 0) {
-    // Kerve: Wange hoch, Kervengrund ueber der Mauerlatte, Ferse zurueck auf die UK.
+    // Fusskerve: Wange hoch, Kervengrund auf der Mauerlatte, Ferse zurueck.
     punkte.push([zMLi, hML], [zMLa, hML])
   }
-  punkte.push(
-    [zMLa, C - zMLa * tanA],
-    [zT, C - zT * tanA],
-    [zT, C - zT * tanA + dY],
-    [0, C + dY],
-  )
+  punkte.push([zMLa, uk(zMLa)], [zT, uk(zT)])
+
+  // Lotrechter Traufschnitt und Oberkante zurueck zum First.
+  punkte.push([zT, uk(zT) + dY], [0, C + dY])
   return punkte
 }
 
 export function mittelpfettenProfil(m: DachstuhlMasse): Punkt[] {
-  const b = m.p.q.mittelpfette.b
-  const zAussen = m.zMP + b / 2
-  const zInnen = m.zMP - b / 2
+  // Oberkante auf die Dachneigung angeschnitten und um die Kervenhoehe
+  // angehoben: sie fuellt die Sparrenkerve satt aus.
   return [
-    [zInnen, m.yMPuk],
-    [zAussen, m.yMPuk],
-    [zAussen, m.C - zAussen * m.tanA],
-    [zInnen, m.C - zInnen * m.tanA],
+    [m.zMPi, m.yMPuk],
+    [m.zMPa, m.yMPuk],
+    [m.zMPa, m.C - m.zMPa * m.tanA + m.tKP],
+    [m.zMPi, m.C - m.zMPi * m.tanA + m.tKP],
   ]
 }
 
 export function firstpfettenProfil(m: DachstuhlMasse): Punkt[] {
-  const b = m.p.q.firstpfette.b
+  // Rechteck plus Dachkappe. Der Scheitel liegt um die Kervenhoehe ueber dem
+  // Firstpunkt der Sparrenunterkante und fuellt damit beide Firstkerven.
   return [
-    [-b / 2, m.yFiPuk],
-    [b / 2, m.yFiPuk],
-    [b / 2, m.yFiPok],
-    [0, m.C],
-    [-b / 2, m.yFiPok],
+    [-m.zFiPa, m.yFiPuk],
+    [m.zFiPa, m.yFiPuk],
+    [m.zFiPa, m.yFiPok],
+    [0, m.yFiPfirst],
+    [-m.zFiPa, m.yFiPok],
   ]
 }
 
