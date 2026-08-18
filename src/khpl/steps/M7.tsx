@@ -141,46 +141,54 @@ export function M7() {
           geht. Was noch nicht dran ist, hält nicht.
         </p>
       }
+      // Ist alles gesetzt, bleibt sonst eine leere weiße Karte zwischen Modell
+      // und Aha-Karte stehen — sie sieht aus wie ein Renderfehler.
       interaktion={
-        <DndContext sensors={sensoren} onDragEnd={ablegen}>
-          {/* Eine Karte statt vier: Ablage, Rückmeldung und Vorrat gehören zu
+        fertig ? null : (
+          <DndContext sensors={sensoren} onDragEnd={ablegen}>
+            {/* Eine Karte statt vier: Ablage, Rückmeldung und Vorrat gehören zu
               einer Handlung, und übereinandergestapelte Einzelkarten zerlegen
               den Screen in Kästchen. */}
-          <div
-            className="flex flex-col gap-3 rounded-kh bg-kh-page p-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:p-5"
-            data-wisch="aus"
-          >
-            <Ablage fertig={fertig} anzahl={gesetzt.length} gesamt={M7_SCHRITTE.length} />
+            <div
+              className="flex flex-col gap-3 rounded-kh bg-kh-page p-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:p-5"
+              data-wisch="aus"
+            >
+              <Ablage
+                fertig={fertig}
+                anzahl={gesetzt.length}
+                gesamt={M7_SCHRITTE.length}
+              />
 
-            <Rueckmeldung
-              ok={meldung ? meldung.ok : null}
-              text={meldung ? meldung.text : null}
-              testid="m7-meldung"
-            />
+              <Rueckmeldung
+                ok={meldung ? meldung.ok : null}
+                text={meldung ? meldung.text : null}
+                testid="m7-meldung"
+              />
 
-            {!fertig && (
-              <>
-                <div className="flex flex-wrap gap-2">
-                  {offen.map((s) => (
-                    <Bauteilkarte key={s.label} schritt={s} />
-                  ))}
-                </div>
-                {fehler >= HILFE_AB && (
-                  <div className="flex justify-start">
-                    <Button
-                      variant="ghost"
-                      onClick={zeigMirWie}
-                      data-testid="m7-zeig-mir-wie"
-                      className="h-[60px] px-4 text-[15px]"
-                    >
-                      Zeig mir wie
-                    </Button>
+              {!fertig && (
+                <>
+                  <div className="flex flex-wrap gap-2">
+                    {offen.map((s) => (
+                      <Bauteilkarte key={s.label} schritt={s} />
+                    ))}
                   </div>
-                )}
-              </>
-            )}
-          </div>
-        </DndContext>
+                  {fehler >= HILFE_AB && (
+                    <div className="flex justify-start">
+                      <Button
+                        variant="ghost"
+                        onClick={zeigMirWie}
+                        data-testid="m7-zeig-mir-wie"
+                        className="h-[60px] px-4 text-[15px]"
+                      >
+                        Zeig mir wie
+                      </Button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </DndContext>
+        )
       }
       aha={
         <AhaKarte sichtbar={fertig} eyebrow={null}>

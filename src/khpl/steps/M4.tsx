@@ -323,36 +323,47 @@ function Zuschnitt({
         </div>
       </DndContext>
 
-      <div className="flex shrink-0 flex-col gap-2">
-        <p className="text-[15px] text-kh-grey">Und der Winkel am First:</p>
-        <div className="flex gap-2">
-          {WINKEL.map((w) => (
-            <Button
-              key={w}
-              variant={winkel === w ? 'default' : 'outline'}
-              onClick={() => onWinkel(w)}
-              disabled={gesperrt}
-              data-testid={`m4-winkel-${w}`}
-              className="h-[60px] flex-1 gap-2 text-[16px]"
-            >
-              <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
-                <path
-                  d={`M2 20 L22 20 L22 ${20 - 20 * Math.tan((w * Math.PI) / 180) * 0.5} Z`}
-                  fill="currentColor"
-                  opacity="0.45"
-                />
-              </svg>
-              {w}°
-            </Button>
-          ))}
+      {/* Ist der Schnitt gesetzt, schrumpft die Winkelwahl auf eine Zeile.
+          Drei deaktivierte 60-px-Knöpfe stehen sonst weiter im Weg — und im
+          Querformat schob genau das die Erfolgsmeldung aus der Spalte heraus,
+          sodass „Passt. Nummer drauf“ überhaupt nicht mehr zu sehen war. */}
+      {gesperrt ? (
+        <p className="shrink-0 text-[15px] text-kh-grey">
+          Winkel am First: <span className="font-normal text-kh-ink">{winkel}°</span>
+        </p>
+      ) : (
+        <div className="flex shrink-0 flex-col gap-2">
+          <p className="text-[15px] text-kh-grey">Und der Winkel am First:</p>
+          <div className="flex gap-2">
+            {WINKEL.map((w) => (
+              <Button
+                key={w}
+                variant={winkel === w ? 'default' : 'outline'}
+                onClick={() => onWinkel(w)}
+                data-testid={`m4-winkel-${w}`}
+                className="h-[60px] flex-1 gap-2 text-[16px]"
+              >
+                <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
+                  <path
+                    d={`M2 20 L22 20 L22 ${20 - 20 * Math.tan((w * Math.PI) / 180) * 0.5} Z`}
+                    fill="currentColor"
+                    opacity="0.45"
+                  />
+                </svg>
+                {w}°
+              </Button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
-      <Rueckmeldung
-        ok={ergebnis ? ergebnis.treffer : null}
-        text={ergebnis ? ergebnis.text : null}
-        testid="m4-rueckmeldung"
-      />
+      <div className="shrink-0">
+        <Rueckmeldung
+          ok={ergebnis ? ergebnis.treffer : null}
+          text={ergebnis ? ergebnis.text : null}
+          testid="m4-rueckmeldung"
+        />
+      </div>
 
       {!gesperrt && (
         <div className="flex items-center justify-between gap-3">

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
 import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
@@ -300,19 +299,23 @@ function Auswertung({
           : `${treffer.length} von ${RICHTIGE} hast du. Das hier ist noch offen:`}
       </p>
 
-      <ul className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto overscroll-contain">
+      {/* Zwei Spalten wie die Frage selbst. Untereinander passten schon vier
+          Karten weder ins Hoch- noch ins Querformat — und ein `overflow-y-auto`
+          macht daraus eine Scrollfläche, also genau das, was flow 5
+          ausschließt, statt es zu lösen. */}
+      <ul className="grid shrink-0 auto-rows-min grid-cols-1 content-start gap-2 landscape:grid-cols-2">
         {zuKlaeren.slice(0, 4).map((p) => {
           const gefehlt = !daneben.includes(p)
           return (
             <li
               key={p.id}
-              className="rounded-kh border border-kh-rule bg-kh-surface px-4 py-3"
+              className="rounded-kh border border-kh-rule bg-kh-surface px-3 py-2"
               data-testid={`m1-klaerung-${p.id}`}
             >
               <div className="flex items-start gap-3">
                 <span
                   aria-hidden
-                  className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${
+                  className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full ${
                     gefehlt ? 'bg-kh-orange/15 text-kh-orange' : 'bg-kh-band text-kh-grey'
                   }`}
                 >
@@ -323,8 +326,8 @@ function Auswertung({
                   )}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[15px] font-normal text-kh-ink">{p.text}</p>
-                  <p className="mt-0.5 text-[14px] leading-[1.45] text-kh-grey">
+                  <p className="text-[14px] font-normal text-kh-ink">{p.text}</p>
+                  <p className="mt-0.5 text-[13px] leading-[1.35] text-kh-grey">
                     {p.grund}
                   </p>
                 </div>
@@ -332,48 +335,46 @@ function Auswertung({
             </li>
           )
         })}
-
-        {treffer.length > 0 && (
-          <li className="mt-1">
-            <p className="mb-1.5 text-[13px] tracking-[0.12em] text-kh-grey/60 uppercase">
-              Hattest du
-            </p>
-            <ul className="flex flex-col gap-1">
-              {treffer.map((p) => (
-                <li key={p.id}>
-                  <button
-                    type="button"
-                    onClick={() => setOffen((o) => (o === p.id ? null : p.id))}
-                    className="flex w-full items-start gap-2 rounded-kh px-2 py-2 text-left text-[14px] text-kh-grey transition-colors hover:bg-kh-band-soft"
-                  >
-                    <Check
-                      className="mt-0.5 size-4 shrink-0 text-kh-orange-text-text"
-                      strokeWidth={2.5}
-                      aria-hidden
-                    />
-                    <span className="min-w-0">
-                      {p.text}
-                      <AnimatePresence initial={false}>
-                        {offen === p.id && (
-                          <motion.span
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.2 }}
-                            className="block overflow-hidden text-kh-grey/80"
-                          >
-                            {p.grund}
-                          </motion.span>
-                        )}
-                      </AnimatePresence>
-                    </span>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </li>
-        )}
       </ul>
+
+      {/* Die Treffer als Zeile aus Marken, nicht als zweite Kartenliste: sie
+          brauchen keine Begründung mehr, sie waren richtig. Wer sie trotzdem
+          lesen will, tippt eine an — dann steht sie in dem Feld darunter, das
+          immer dieselbe Höhe hat, damit nichts springt. So bleibt „mit kurzer
+          Begründung je Punkt“ (flow 7 M1) für alle zehn erreichbar, ohne dass
+          zehn Begründungen gleichzeitig auf dem Screen stehen. */}
+      {treffer.length > 0 && (
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[13px] tracking-[0.12em] text-kh-grey/60 uppercase">
+            Hattest du
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {treffer.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setOffen((o) => (o === p.id ? null : p.id))}
+                aria-pressed={offen === p.id}
+                className={`flex items-center gap-1.5 rounded-kh border px-2.5 py-1.5 text-left text-[13px] transition-colors ${
+                  offen === p.id
+                    ? 'border-kh-orange bg-kh-orange/10 text-kh-ink'
+                    : 'border-kh-rule bg-kh-surface text-kh-grey'
+                }`}
+              >
+                <Check
+                  className="size-3.5 shrink-0 text-kh-orange-text"
+                  strokeWidth={3}
+                  aria-hidden
+                />
+                {p.text}
+              </button>
+            ))}
+          </div>
+          <p className="min-h-[2.6em] text-[14px] leading-[1.35] text-kh-grey">
+            {offen ? treffer.find((p) => p.id === offen)?.grund : ''}
+          </p>
+        </div>
+      )}
     </div>
   )
 }
