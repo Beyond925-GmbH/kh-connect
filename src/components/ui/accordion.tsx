@@ -4,8 +4,13 @@ import { cn } from '@/lib/utils'
 
 const Accordion = BaseAccordion.Root
 
-function AccordionItem({ className, ...props }: React.ComponentProps<typeof BaseAccordion.Item>) {
-  return <BaseAccordion.Item className={cn('border-b border-kh-rule', className)} {...props} />
+function AccordionItem({
+  className,
+  ...props
+}: React.ComponentProps<typeof BaseAccordion.Item>) {
+  return (
+    <BaseAccordion.Item className={cn('border-b border-kh-rule', className)} {...props} />
+  )
 }
 
 function AccordionTrigger({

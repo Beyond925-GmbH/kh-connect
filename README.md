@@ -11,9 +11,39 @@ system in code — theme tokens, style primitives and brand assets. Content come
 ```bash
 pnpm install
 pnpm dev        # http://localhost:5173
-pnpm typecheck
-pnpm lint
+pnpm check      # typecheck + lint + format:check
+pnpm format     # prettier --write .
 ```
+
+## Installed for the KHPL Connect flow, not yet used
+
+The packages the flow spec calls for are installed so implementation can start
+without a dependency detour. **Nothing imports them yet.**
+
+| Paket | Wofür (flow spec 8.2) |
+| --- | --- |
+| `motion` | Ein-/Ausgänge, animierter Dachaufbau (M5), Aha-Karten |
+| `@dnd-kit/core` | Zieh-Interaktionen: M4 Schnitt, M7 Bauteile, B4.1 Auswahl |
+| `three`, `@react-three/fiber`, `@react-three/drei` | 3D-Modell in B3.2 |
+
+`three` must stay behind a lazy boundary — it is budgeted at ≤ 500 KB gzip and
+must never land in the first load (flow spec 8.5).
+
+## Offline / PWA
+
+`vite-plugin-pwa` is configured in `vite.config.ts` and emits `sw.js` plus a web
+manifest at build time; registration is injected automatically, so no app code
+imports it. This covers the spec's requirement that a WLAN dropout cannot stop
+the app.
+
+Two things are deliberately left open and commented in the config:
+
+- **No app icons.** The only brand mark in the repo is a 1000×248 wordmark. The
+  manifest needs square 192/512 PNGs plus a maskable 512 before the app can be
+  installed to an iPad home screen.
+- **Barlow still comes from the Google Fonts CDN.** It is covered by a runtime
+  cache rule, which works but is the workaround. Self-hosting weights 200 and 700
+  as subsetted woff2 is the real fix and also removes a render-blocking request.
 
 ## Design system
 

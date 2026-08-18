@@ -17,8 +17,7 @@ const buttonVariants = cva(
           'bg-kh-orange text-white border border-kh-orange hover:bg-kh-orange-hover hover:border-kh-orange-hover hover:-translate-y-px',
         outline:
           'bg-transparent text-kh-orange border border-kh-orange hover:bg-kh-orange hover:text-white hover:-translate-y-px',
-        dark:
-          'bg-kh-ink text-kh-page border border-kh-ink hover:bg-kh-grey hover:border-kh-grey hover:-translate-y-px',
+        dark: 'bg-kh-ink text-kh-page border border-kh-ink hover:bg-kh-grey hover:border-kh-grey hover:-translate-y-px',
         ghost: 'text-kh-grey hover:text-kh-orange',
       },
       size: {
@@ -33,7 +32,8 @@ const buttonVariants = cva(
 )
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   render?: useRender.RenderProp
 }

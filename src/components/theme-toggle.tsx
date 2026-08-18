@@ -1,5 +1,11 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
-import { Menu, MenuContent, MenuRadioGroup, MenuRadioItem, MenuTrigger } from '@/components/ui/menu'
+import {
+  Menu,
+  MenuContent,
+  MenuRadioGroup,
+  MenuRadioItem,
+  MenuTrigger,
+} from '@/components/ui/menu'
 import { useTheme, type Theme } from '@/lib/theme'
 
 const options: { value: Theme; label: string; icon: typeof Sun }[] = [

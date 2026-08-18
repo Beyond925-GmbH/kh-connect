@@ -31,7 +31,10 @@ function DialogContent({
   )
 }
 
-function DialogTitle({ className, ...props }: React.ComponentProps<typeof BaseDialog.Title>) {
+function DialogTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof BaseDialog.Title>) {
   return <BaseDialog.Title className={cn('kh-h1 mb-4', className)} {...props} />
 }
 
@@ -42,4 +45,11 @@ function DialogDescription({
   return <BaseDialog.Description className={cn('font-light', className)} {...props} />
 }
 
-export { Dialog, DialogTrigger, DialogClose, DialogContent, DialogTitle, DialogDescription }
+export {
+  Dialog,
+  DialogTrigger,
+  DialogClose,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+}

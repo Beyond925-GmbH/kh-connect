@@ -1,0 +1,13 @@
+# Build output and generated service-worker artefacts
+dist
+dev-dist
+
+node_modules
+pnpm-lock.yaml
+
+# Brand assets are binary
+public/brand
+
+# khpl-flow.md is hand-laid-out (ASCII diagrams, aligned tables) — Prettier
+# would reflow it and destroy the alignment. Markdown stays manual.
+*.md
