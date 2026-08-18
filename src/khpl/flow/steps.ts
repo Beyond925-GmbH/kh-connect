@@ -225,7 +225,9 @@ export const STEPS: Record<StepId, StepDef> = {
   M10: {
     id: 'M10',
     titel: 'Dein nächster Schritt',
-    kurz: 'CTA',
+    // Nicht 'CTA': `kurz` steht im Sheet und auf dem Weitermachen-Knopf des
+    // Splash. „Weitermachen bei ‚CTA‘“ ist Board-Sprache, keine Besuchersprache.
+    kurz: 'Dein nächster Schritt',
     art: 'haupt',
     weiter: null,
     abstecher: [],

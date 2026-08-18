@@ -96,7 +96,10 @@ export function Splash() {
       <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
 
       <div className="relative flex min-h-0 flex-1 flex-col justify-between p-6 landscape:p-10">
-        <Logo className="h-8 w-auto rounded-kh bg-white/90 px-3 py-2 landscape:h-12" />
+        {/* `self-start`, sonst zieht die Flex-Spalte das Bild auf volle Breite. */}
+        <div className="w-fit self-start rounded-kh bg-white/90 px-3 py-2">
+          <Logo className="h-8 w-auto landscape:h-10" />
+        </div>
 
         <div className="flex flex-col items-start gap-5">
           <motion.h1
