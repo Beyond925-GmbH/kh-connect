@@ -4,6 +4,13 @@
  * ENTWURF – UNGEPRUEFT: die Erklaertexte gehoeren vor der Messe der Innung zum
  * Gegenlesen vorgelegt, genau wie das uebrige Glossar.
  *
+ * Sobald diese Karten ueber B3.2 am Stand erscheinen, gilt fuer sie die
+ * ⚠️-Regel des Flow-Dokuments: konkrete Masse und Mengen sind daraus entfernt
+ * (Saeulenabstand, Lattweite). Sie waren mit den Modellparametern konsistent,
+ * aber durch keine Quelle gedeckt — und ein Jugendlicher liest eine Zahl auf
+ * einer Erklaerkarte als Tatsache ueber echte Daecher, nicht als Angabe ueber
+ * dieses eine Modell.
+ *
  * Die Farben stehen bewusst hier und nicht als Tailwind-Token: innerhalb des
  * <Canvas> gibt es kein Tailwind. Theme-abhaengig sind nur Hintergrund, Boden
  * und Lichtstaerken — das Holz bleibt Holz.
@@ -76,12 +83,12 @@ export const BAUTEIL_TEXTE: Record<BauteilTyp, BauteilText> = {
   },
   firstsaeule: {
     label: 'Stuhlsäule',
-    text: 'Der senkrechte Pfosten unter einer Pfette. Er steht auf der Stuhlschwelle und leitet die Last nach unten in die Decke. Etwa alle viereinhalb Meter steht einer.',
+    text: 'Der senkrechte Pfosten unter einer Pfette. Er steht auf der Stuhlschwelle und leitet die Last nach unten in die Decke — in regelmäßigen Abständen über die ganze Länge.',
     antippbar: true,
   },
   mittelsaeule: {
     label: 'Stuhlsäule',
-    text: 'Der senkrechte Pfosten unter einer Pfette. Er steht auf der Stuhlschwelle und leitet die Last nach unten in die Decke. Etwa alle viereinhalb Meter steht einer.',
+    text: 'Der senkrechte Pfosten unter einer Pfette. Er steht auf der Stuhlschwelle und leitet die Last nach unten in die Decke — in regelmäßigen Abständen über die ganze Länge.',
     antippbar: true,
   },
   kopfband: {
@@ -101,7 +108,7 @@ export const BAUTEIL_TEXTE: Record<BauteilTyp, BauteilText> = {
   },
   traglatte: {
     label: 'Dachlatte',
-    text: 'Auf diesen waagerechten Latten werden später die Ziegel eingehängt. Ihr Abstand hängt davon ab, wie weit ein Ziegel den nächsten überdeckt — hier rund 32 Zentimeter. An der Traufe sitzt die erste Latte etwas enger.',
+    text: 'Auf diesen waagerechten Latten werden später die Ziegel eingehängt. Ihr Abstand hängt davon ab, wie weit ein Ziegel den nächsten überdeckt. An der Traufe sitzt die erste Latte etwas enger.',
     antippbar: true,
   },
   konterlatte: {

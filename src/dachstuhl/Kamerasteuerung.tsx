@@ -4,7 +4,7 @@ import { useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import type { Huelle } from './mass'
-import type { Ansicht } from './kamera'
+import type { Ansicht, Sichtfeld } from './kamera'
 import { KAMERA, START_ANSICHT, passeEin } from './kamera'
 
 /**
@@ -19,10 +19,13 @@ export function Kamerasteuerung({
   ansicht,
   huelle,
   attraktor,
+  sichtfeld,
 }: {
   ansicht: Ansicht | null
   huelle: Huelle
   attraktor: boolean
+  /** Verdeckte Anteile der Leinwand — s. `Sichtfeld` in `kamera.ts`. */
+  sichtfeld?: Sichtfeld
 }) {
   const kamera = useThree((zustand) => zustand.camera)
   const breite = useThree((zustand) => zustand.size.width)
@@ -34,10 +37,22 @@ export function Kamerasteuerung({
   // Die Kamera wird eingepasst, nicht gesetzt: aus Huelle, Blickrichtung und
   // Seitenverhaeltnis folgt die Distanz. Beim Drehen des iPads laeuft der
   // Effekt erneut, weil `breite`/`hoehe` sich aendern.
+  // Als Zahlen ausgepackt: ein Objektliteral aus dem Step waere bei jedem
+  // Rendern neu, und der Effekt liefe endlos.
+  const sfL = sichtfeld?.links ?? 0
+  const sfR = sichtfeld?.rechts ?? 0
+  const sfO = sichtfeld?.oben ?? 0
+  const sfU = sichtfeld?.unten ?? 0
+
   useEffect(() => {
     if (hoehe <= 0) return
     const preset = KAMERA[ansicht ?? START_ANSICHT]
-    const lage = passeEin(preset, huelle, breite / hoehe)
+    const lage = passeEin(preset, huelle, breite / hoehe, {
+      links: sfL,
+      rechts: sfR,
+      oben: sfO,
+      unten: sfU,
+    })
     kamera.position.set(...lage.position)
     const ziel = new THREE.Vector3(...lage.ziel)
     kamera.lookAt(ziel)
@@ -48,7 +63,7 @@ export function Kamerasteuerung({
       s.target.copy(ziel)
       s.update()
     }
-  }, [ansicht, huelle, kamera, breite, hoehe])
+  }, [ansicht, huelle, kamera, breite, hoehe, sfL, sfR, sfO, sfU])
 
   // Attraktor-Modus: nach 8 s ohne Eingabe dreht das Modell von selbst weiter.
   useEffect(() => {

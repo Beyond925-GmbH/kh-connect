@@ -63,6 +63,31 @@ export const FOV = 40
 /** Luft zwischen Modell und Bildrand. */
 const RAND = 0.09
 
+/**
+ * Der Teil der Leinwand, der wirklich frei ist — als Anteil je Kante.
+ *
+ * Im Vollbild-Prototyp gehoert dem Modell die ganze Flaeche. In einem Step
+ * liegen Textkarte, Kopf und Fuss darueber, und die Leinwand ist trotzdem so
+ * gross wie der Bildschirm: `passeEin` wuerde das Modell mittig einpassen und
+ * damit unter die Karte schieben. Wer die verdeckten Anteile hier angibt,
+ * bekommt ein Modell, das in die *freie* Flaeche passt und dort auch mittig
+ * sitzt.
+ *
+ * `{ links: 0.42 }` heisst: die linken 42 % sind verdeckt.
+ *
+ * Das ersetzt den frueher von Hand gesuchten Abstandsfaktor. Ein Faktor
+ * schiebt die Kamera nur weiter weg — das Modell blieb mittig und lag
+ * weiterhin zur Haelfte hinter der Karte, nur kleiner.
+ */
+export interface Sichtfeld {
+  links?: number
+  rechts?: number
+  oben?: number
+  unten?: number
+}
+
+const OFFEN: Required<Sichtfeld> = { links: 0, rechts: 0, oben: 0, unten: 0 }
+
 /** Freie Ansicht ohne Parameter. */
 export const START_ANSICHT: Ansicht = 'iso'
 
@@ -90,23 +115,37 @@ export interface Kameralage {
   distanz: number
 }
 
+/**
+ * Das Bildfenster, in das eingepasst wird — in Steigungen (Weltmass je Meter
+ * Tiefe), nicht in Winkeln.
+ *
+ * Es ist ausdruecklich *nicht* mittig: liegt links eine Textkarte, reicht das
+ * Fenster nur noch von der Kartenkante bis zum rechten Rand. Darum vier
+ * Grenzen statt zweier Oeffnungswinkel.
+ */
 interface Kamerabasis {
   richtung: V3
   xKam: V3
   yKam: V3
-  tanH: number
-  tanV: number
+  xLo: number
+  xHi: number
+  yLo: number
+  yHi: number
 }
 
-/** Mindestdistanz, bei der alle Ecken innerhalb beider Oeffnungswinkel liegen. */
+/** Mindestdistanz, bei der alle Ecken im Fenster liegen. */
 function einpassDistanz(ecken: V3[], ziel: V3, b: Kamerabasis): number {
   let d = 0
   for (const p of ecken) {
     const v: V3 = [p[0] - ziel[0], p[1] - ziel[1], p[2] - ziel[2]]
     const tiefe = skalarprodukt(v, b.richtung)
-    const bx = Math.abs(skalarprodukt(v, b.xKam))
-    const by = Math.abs(skalarprodukt(v, b.yKam))
-    d = Math.max(d, tiefe + bx / b.tanH, tiefe + by / b.tanV)
+    const ax = skalarprodukt(v, b.xKam)
+    const ay = skalarprodukt(v, b.yKam)
+    // Aus `ax / (d - tiefe) <= xHi` und `>= xLo` folgen zwei Schranken an d.
+    // Weil xLo negativ und xHi positiv ist, bindet immer genau eine — welche,
+    // haengt am Vorzeichen von ax. Das Maximum trifft beide Faelle.
+    d = Math.max(d, tiefe + Math.max(ax / b.xHi, ax / b.xLo))
+    d = Math.max(d, tiefe + Math.max(ay / b.yHi, ay / b.yLo))
   }
   return Math.max(d, 0.5)
 }
@@ -124,6 +163,8 @@ function zentriere(ecken: V3[], ziel: V3, b: Kamerabasis, d: number): V3 {
   let xMax = -Infinity
   let yMin = Infinity
   let yMax = -Infinity
+  let tiefeSumme = 0
+  let n = 0
   for (const p of ecken) {
     const v: V3 = [p[0] - ziel[0], p[1] - ziel[1], p[2] - ziel[2]]
     const tiefe = d - skalarprodukt(v, b.richtung)
@@ -134,10 +175,18 @@ function zentriere(ecken: V3[], ziel: V3, b: Kamerabasis, d: number): V3 {
     xMax = Math.max(xMax, sx)
     yMin = Math.min(yMin, sy)
     yMax = Math.max(yMax, sy)
+    tiefeSumme += tiefe
+    n++
   }
   if (!Number.isFinite(xMin)) return ziel
-  const mx = ((xMin + xMax) / 2) * d
-  const my = ((yMin + yMax) / 2) * d
+  // Umgerechnet wird mit der mittleren Ecktiefe, nicht mit der Zieldistanz:
+  // ein Schub am Ziel verschiebt eine nahe Ecke im Bild staerker als eine
+  // ferne. Mit `d` gerechnet bleibt bei einem aussermittigen Fenster jedes Mal
+  // ein Rest stehen, und drei Durchlaeufe kommen nicht an.
+  const tiefeMittel = tiefeSumme / n
+  // Nicht auf die Bildmitte, sondern auf die Mitte des freien Fensters.
+  const mx = ((xMin + xMax) / 2 - (b.xLo + b.xHi) / 2) * tiefeMittel
+  const my = ((yMin + yMax) / 2 - (b.yLo + b.yHi) / 2) * tiefeMittel
   return [
     ziel[0] + b.xKam[0] * mx + b.yKam[0] * my,
     ziel[1] + b.xKam[1] * mx + b.yKam[1] * my,
@@ -159,6 +208,7 @@ export function passeEin(
   preset: Kamerapreset,
   huelle: Huelle,
   aspect: number,
+  sichtfeld?: Sichtfeld,
 ): Kameralage {
   const richtung = normiere(preset.richtung)
   // Bei der Draufsicht ist der Welt-Up-Vektor kollinear zur Blickrichtung;
@@ -166,13 +216,38 @@ export function passeEin(
   const referenz: V3 =
     Math.abs(skalarprodukt(richtung, [0, 1, 0])) > 0.999 ? [0, 0, -1] : [0, 1, 0]
   const xKam = normiere(kreuzprodukt(referenz, richtung))
-  const tanV = Math.tan(((FOV / 2) * Math.PI) / 180) / (1 + RAND)
+  // xKam zeigt nach Bildschirm-rechts, yKam nach oben: `richtung` weist vom
+  // Ziel zur Kamera, geblickt wird also entlang -richtung.
+  const yKam = kreuzprodukt(richtung, xKam)
+  // Die echte Oeffnung der Kamera — ohne `RAND`, denn sie beschreibt den
+  // Bildrand selbst und nicht die Luft, die davor bleiben soll.
+  const tanV = Math.tan(((FOV / 2) * Math.PI) / 180)
+  const tanH = tanV * aspect
+
+  const f = { ...OFFEN, ...sichtfeld }
+  if (1 - f.links - f.rechts <= 0.05 || 1 - f.oben - f.unten <= 0.05) {
+    // Unbrauchbare Angabe — lieber mittig einpassen als das Modell auf einen
+    // Punkt zusammenziehen.
+    f.links = f.rechts = f.oben = f.unten = 0
+  }
+
+  // Das freie Fenster in Bildkoordinaten (-1 .. +1), dann um `RAND` nach innen
+  // gezogen und in Steigungen umgerechnet.
+  const luft = (lo: number, hi: number): [number, number] => {
+    const m = (lo + hi) / 2
+    return [m + (lo - m) / (1 + RAND), m + (hi - m) / (1 + RAND)]
+  }
+  const [xLo, xHi] = luft(-1 + 2 * f.links, 1 - 2 * f.rechts)
+  const [yLo, yHi] = luft(-1 + 2 * f.unten, 1 - 2 * f.oben)
+
   const basis: Kamerabasis = {
     richtung,
     xKam,
-    yKam: kreuzprodukt(richtung, xKam),
-    tanH: tanV * aspect,
-    tanV,
+    yKam,
+    xLo: xLo * tanH,
+    xHi: xHi * tanH,
+    yLo: yLo * tanV,
+    yHi: yHi * tanV,
   }
 
   let ziel: V3
@@ -189,7 +264,10 @@ export function passeEin(
 
     ziel = huelle.mitte
     distanz = einpassDistanz(ecken, ziel, basis)
-    for (let i = 0; i < 3; i++) {
+    // Sechs statt drei Durchlaeufe: bei mittigem Fenster sitzt es nach zweien,
+    // bei stark aussermittigem braucht es mehr. Es sind ein paar Dutzend
+    // Multiplikationen, einmal je Groessenaenderung der Leinwand.
+    for (let i = 0; i < 6; i++) {
       ziel = zentriere(ecken, ziel, basis, distanz)
       distanz = einpassDistanz(ecken, ziel, basis)
     }
@@ -198,19 +276,37 @@ export function passeEin(
     // haelt den Ausschnitt beim Kippen des Geraets gleich gross — ein Kasten
     // wuerde je nach Blickrichtung um bis zu 70 % aufgehen.
     ziel = preset.ausschnitt.ziel
+    const halbX = (basis.xHi - basis.xLo) / 2
+    const halbY = (basis.yHi - basis.yLo) / 2
     distanz =
-      preset.ausschnitt.radius /
-      Math.sin(Math.min(Math.atan(tanV), Math.atan(basis.tanH)))
+      preset.ausschnitt.radius / Math.sin(Math.min(Math.atan(halbX), Math.atan(halbY)))
   }
   distanz = Math.max(distanz, 0.5)
 
+  // Beim Gesamtblick hat `zentriere` das Modell schon auf die Fenstermitte
+  // gezogen. Beim Detailblick ist das Ziel ein fester Punkt — der wird hier
+  // nachtraeglich versetzt. Fuer einen Punkt genau auf Zieltiefe ist das
+  // exakt: Kamera und Blickpunkt wandern gemeinsam.
+  const versatz =
+    preset.ausschnitt === 'gesamt'
+      ? { x: 0, y: 0 }
+      : {
+          x: (-(basis.xLo + basis.xHi) / 2) * distanz,
+          y: (-(basis.yLo + basis.yHi) / 2) * distanz,
+        }
+  const blick: V3 = [
+    ziel[0] + xKam[0] * versatz.x + yKam[0] * versatz.y,
+    ziel[1] + xKam[1] * versatz.x + yKam[1] * versatz.y,
+    ziel[2] + xKam[2] * versatz.x + yKam[2] * versatz.y,
+  ]
+
   return {
     position: [
-      ziel[0] + richtung[0] * distanz,
-      ziel[1] + richtung[1] * distanz,
-      ziel[2] + richtung[2] * distanz,
+      blick[0] + richtung[0] * distanz,
+      blick[1] + richtung[1] * distanz,
+      blick[2] + richtung[2] * distanz,
     ],
-    ziel,
+    ziel: blick,
     distanz,
   }
 }

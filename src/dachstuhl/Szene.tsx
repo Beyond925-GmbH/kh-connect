@@ -8,7 +8,7 @@ import { Beleuchtung } from './Beleuchtung'
 import { Kamerasteuerung } from './Kamerasteuerung'
 import { Dachstuhl } from './Dachstuhl'
 import { SZENE_FARBEN } from './bauteil-texte'
-import type { Ansicht } from './kamera'
+import type { Ansicht, Sichtfeld } from './kamera'
 import { FOV } from './kamera'
 import type { Auswahl } from './debug'
 import type { TapErkennung } from './useTapErkennung'
@@ -59,6 +59,7 @@ export function Szene({
   auswahl,
   ansicht,
   attraktor,
+  sichtfeld,
   dpr,
   dunkel,
   reduziert,
@@ -76,6 +77,8 @@ export function Szene({
   auswahl: Auswahl | null
   ansicht: Ansicht | null
   attraktor: boolean
+  /** Verdeckte Anteile der Leinwand — s. `Sichtfeld` in `kamera.ts`. */
+  sichtfeld?: Sichtfeld
   dpr: number | null
   dunkel: boolean
   reduziert: boolean
@@ -122,7 +125,12 @@ export function Szene({
       <color attach="background" args={[hintergrund]} />
       <Tiefenstaffelung farbe={hintergrund} mitte={mitte.current} />
       <Beleuchtung dunkel={dunkel} />
-      <Kamerasteuerung ansicht={ansicht} huelle={masse.huelle} attraktor={attraktor} />
+      <Kamerasteuerung
+        ansicht={ansicht}
+        huelle={masse.huelle}
+        attraktor={attraktor}
+        sichtfeld={sichtfeld}
+      />
       <Dachstuhl
         masse={masse}
         einheiten={einheiten}

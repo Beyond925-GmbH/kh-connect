@@ -27,3 +27,9 @@ dev-dist
 
 # Abnahme-Artefakte (Screenshots, Notizen)
 .review/
+
+# Claude-Arbeitsverzeichnis — hier liegen auch die Worktrees
+.claude/
+
+# Netlify-CLI
+.netlify/
