@@ -2,7 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useLayoutEffect,
+  useEffect,
   useRef,
   useState,
 } from 'react'
@@ -104,7 +104,19 @@ export function SichtfeldMesser({
     }
   }, [flaeche, oben, unten])
 
-  useLayoutEffect(() => {
+  /**
+   * Bewusst `useEffect` und nicht `useLayoutEffect`.
+   *
+   * Dieser Messer steht *innerhalb* von `<main>`, und React hängt die Refs
+   * eines Elternteils erst ein, nachdem die Layout-Effekte seiner Kinder
+   * gelaufen sind. Im Layout-Effekt wäre `flaeche.current` also noch `null`
+   * und die Fläche unbekannt. Passive Effekte laufen nach dem gesamten
+   * Commit — dann steht die Ref.
+   *
+   * Ein Bild ohne Messung ist unkritisch: die Leinwand mit `three` wird
+   * ohnehin nachgeladen und ist zu diesem Zeitpunkt noch gar nicht da.
+   */
+  useEffect(() => {
     messen()
     const beobachter = new ResizeObserver(messen)
     for (const r of [flaeche.current, oben.current, unten.current]) {
