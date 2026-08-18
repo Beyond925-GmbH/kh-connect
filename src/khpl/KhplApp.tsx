@@ -12,6 +12,9 @@ import { M4 } from '@/khpl/steps/M4'
 import { B41 } from '@/khpl/steps/B41'
 import { M5 } from '@/khpl/steps/M5'
 import { B51 } from '@/khpl/steps/B51'
+import { M6 } from '@/khpl/steps/M6'
+import { M7 } from '@/khpl/steps/M7'
+import { M8 } from '@/khpl/steps/M8'
 import { useBildschirm, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
@@ -33,6 +36,9 @@ const GEBAUT: Partial<Record<StepId, () => React.ReactNode>> = {
   'B4.1': () => <B41 />,
   M5: () => <M5 />,
   'B5.1': () => <B51 />,
+  M6: () => <M6 />,
+  M7: () => <M7 />,
+  M8: () => <M8 />,
 }
 
 export function KhplApp() {
