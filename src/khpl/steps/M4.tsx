@@ -346,7 +346,7 @@ function Zuschnitt({
             />
           </div>
 
-          <Schnittgriff anteil={anteil} gesperrt={gesperrt} />
+          <Schnittgriff anteil={anteil} gesperrt={gesperrt} winkel={winkel} />
         </div>
       </DndContext>
 
@@ -400,11 +400,23 @@ function Zuschnitt({
   )
 }
 
-function Schnittgriff({ anteil, gesperrt }: { anteil: number; gesperrt: boolean }) {
+function Schnittgriff({
+  anteil,
+  gesperrt,
+  winkel,
+}: {
+  anteil: number
+  gesperrt: boolean
+  winkel: Winkel | null
+}) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: GRIFF,
     disabled: gesperrt,
   })
+
+  // Gleiche Geometrie wie das Dreieck auf den Winkelknöpfen: je kleiner der
+  // Winkel am First, desto schräger die Schnittlinie gegen die Senkrechte.
+  const grad = 90 - (winkel ?? 90)
 
   return (
     // Die Position kommt aus dem Zustand, nicht aus `transform`: so ist der
@@ -421,7 +433,9 @@ function Schnittgriff({ anteil, gesperrt }: { anteil: number; gesperrt: boolean 
       }`}
     >
       <div
-        className={`absolute top-[12px] bottom-[12px] left-1/2 w-[3px] -translate-x-1/2 rounded-full transition-colors ${
+        data-testid="m4-schnittlinie"
+        style={{ transform: `translateX(-50%) rotate(${grad}deg)` }}
+        className={`absolute top-[12px] bottom-[12px] left-1/2 w-[3px] origin-center rounded-full transition-all duration-200 ${
           isDragging ? 'bg-kh-signal' : 'bg-kh-paper'
         }`}
       />
