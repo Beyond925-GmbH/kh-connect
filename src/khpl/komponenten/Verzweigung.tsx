@@ -182,7 +182,7 @@ function WegeDialog({
             Wohin als Nächstes?
           </BaseDialog.Title>
           <BaseDialog.Description className="mt-1.5 text-[1rem] text-kh-mute">
-            Du entscheidest — beides bringt dich ans Ziel.
+            Du entscheidest — jeder Weg bringt dich ans Ziel.
           </BaseDialog.Description>
 
           <div className="mt-4 flex flex-col gap-2">

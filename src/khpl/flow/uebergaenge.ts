@@ -20,10 +20,9 @@ interface Angebot {
   /** Das, was auf dem Button steht. */
   einladung: string
   /**
-   * Die Zeile darunter. ui-shell 5 zeigt das Angebot dreizeilig:
-   * „Noch eine Minute? / Schau dir an, wie das Material bestellt wird. /
-   * [ Ja, zeig mir das ]“. Ohne die mittlere Zeile liest sich „Noch eine
-   * Minute?“ wie eine Rückfrage, ob man wirklich weitermachen will.
+   * Die Zeile darunter — im Wege-Dialog die Erklärung unter der Einladung.
+   * Ohne sie ist „Woher kommt das Holz?“ nur eine Frage; mit ihr steht
+   * daneben, was einen hinter dem Tap erwartet.
    */
   beschreibung: string
 }

@@ -27,7 +27,8 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * angenommen oder abgelehnt, mit einem Satz dazu, wofür es gebraucht wird.
  * Die Übung *ist* die Erklärung.
  *
- * Zieh-Geste: Swipe-Navigation abgeschaltet (flow 6.1).
+ * Der Fuß hat keine eigene Aktion — beladen wird durch Ziehen. Solange nicht
+ * alles drauf ist, trägt er nur das leise Überspringen (`uebungOffen`).
  */
 
 interface Teil {
@@ -165,7 +166,7 @@ export function B41() {
       }
       interaktion={
         <DndContext sensors={sensoren} onDragEnd={ablegen}>
-          <div className="flex flex-col gap-3" data-wisch="aus">
+          <div className="flex flex-col gap-2" data-wisch="aus">
             <Fahrzeug geladen={geladen} fertig={fertig} />
 
             <Rueckmeldung
@@ -206,14 +207,14 @@ function Fahrzeug({ geladen, fertig }: { geladen: string[]; fertig: boolean }) {
     <div
       ref={setNodeRef}
       data-testid="b41-fahrzeug"
-      className={`flex min-h-[104px] shrink-0 items-center gap-4 rounded-kh border-2 border-dashed px-4 py-3 transition-colors ${
+      className={`flex min-h-[88px] shrink-0 items-center gap-4 rounded-kh border-2 border-dashed px-4 py-2.5 transition-colors ${
         isOver
           ? 'border-kh-signal bg-kh-signal/15'
           : 'border-kh-line-strong bg-white/[0.04]'
       }`}
     >
       <Truck
-        className={`size-10 shrink-0 transition-colors ${
+        className={`size-9 shrink-0 transition-colors ${
           fertig ? 'text-kh-signal' : 'text-kh-paper/45'
         }`}
         strokeWidth={1.75}
@@ -230,7 +231,7 @@ function Fahrzeug({ geladen, fertig }: { geladen: string[]; fertig: boolean }) {
         </p>
         {/* Bewusst ohne Liste der geladenen Teile: die stehen abgehakt im Raster
             darunter, und zweimal dasselbe kostet nur Platz. */}
-        <div className="mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
           <motion.div
             className={`h-full rounded-full ${fertig ? 'bg-kh-signal' : 'bg-kh-orange'}`}
             initial={false}
@@ -276,7 +277,7 @@ function Hallenteil({
       // und greifbar; was verladen ist, trägt die Signalfarbe; was abgelehnt
       // wurde, verblasst und wird durchgestrichen. Vorher waren alle drei
       // Graustufen desselben Kastens.
-      className={`flex min-h-[62px] touch-none items-center gap-2 rounded-kh border-2 px-3 py-2 text-left text-[1rem] leading-tight transition-transform ${
+      className={`flex min-h-[54px] touch-none items-center gap-2 rounded-kh border-2 px-3 py-1.5 text-left text-[0.9375rem] leading-tight transition-transform ${
         isDragging ? 'scale-105 shadow-[0_16px_40px_rgba(0,0,0,0.6)]' : ''
       } ${
         geladen

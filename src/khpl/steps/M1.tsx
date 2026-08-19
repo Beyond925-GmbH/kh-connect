@@ -172,17 +172,26 @@ export function M1() {
   return (
     <StepShell
       id="M1"
+      // Das breite Panel: zehn Chips plus Auswertung brauchen die Fläche in
+      // der Breite, sonst holen sie sie sich in der Höhe — und dann scrollt
+      // der Screen, was flow 5 ausschließt.
+      karteBreit
       interaktionOffen={!ausgewertet}
       // Endlich der Ortstermin selbst: zwei Leute im Gespräch auf der
       // Baustelle, Klemmbrett in der Hand. Vorher lief hier das Aufmaß am
       // Sparren als Notbehelf (flow 13, Priorität 2 der Fotoliste).
       buehne={<StepFoto id="M1" />}
+      // Nach der Auswertung fällt der Einstiegstext weg — er ist dann gelesen,
+      // und die drei Zeilen fehlen sonst genau der Auswertung, die ohne
+      // Scrollen auf den Screen passen muss. M2 macht es genauso.
       fachtext={
-        <p>
-          Ein Anruf, eine Adresse, ein altes Dach. Du fährst hin, misst auf —{' '}
-          <Begriff id="aufmass">vom Zollstock bis zum Laser</Begriff> —, machst Fotos und
-          hörst zu. Was du hier übersiehst, fehlt dir später im Angebot.
-        </p>
+        ausgewertet ? undefined : (
+          <p>
+            Ein Anruf, eine Adresse, ein altes Dach. Du fährst hin, misst auf —{' '}
+            <Begriff id="aufmass">vom Zollstock bis zum Laser</Begriff> —, machst Fotos
+            und hörst zu. Was du hier übersiehst, fehlt dir später im Angebot.
+          </p>
+        )
       }
       interaktion={
         ausgewertet ? (
@@ -237,7 +246,7 @@ function Liste({
   onUmschalten: (id: string) => void
 }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2.5">
       <p className="text-[1.125rem] leading-snug font-semibold text-kh-paper sm:text-[1.25rem]">
         {FRAGE}{' '}
         <span className="font-normal text-kh-mute">Tipp alles an, was dazugehört.</span>
@@ -251,7 +260,7 @@ function Liste({
           6-px-Checkbox links neben grauem Text ist auf einem Touchscreen die
           leiseste Rückmeldung, die man bauen kann — und diese Übung besteht
           aus nichts anderem als zehnmal antippen. */}
-      <ul className="grid auto-rows-min grid-cols-1 content-start gap-2 sm:grid-cols-2">
+      <ul className="grid auto-rows-min grid-cols-1 content-start gap-1.5 sm:grid-cols-2">
         {ANGEZEIGT.map((p) => {
           const an = gewaehlt.includes(p.id)
           return (
@@ -263,7 +272,7 @@ function Liste({
                 data-testid={`m1-${p.id}`}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 600, damping: 26 }}
-                className={`flex min-h-[62px] w-full items-center gap-3 rounded-kh border-2 px-3.5 py-2 text-left text-[1.0625rem] leading-tight transition-colors ${
+                className={`flex min-h-[56px] w-full items-center gap-3 rounded-kh border-2 px-3.5 py-1.5 text-left text-[1.0625rem] leading-tight transition-colors ${
                   an
                     ? 'border-kh-orange bg-kh-orange font-semibold text-[#0E0D0B]'
                     : 'border-kh-line-strong bg-white/5 text-kh-paper/85'
@@ -312,12 +321,24 @@ function Auswertung({
   const zuKlaeren = [...verpasst, ...daneben]
 
   return (
-    <div className="flex flex-col gap-3">
-      <p className="text-[1.125rem] leading-snug font-semibold text-kh-paper sm:text-[1.25rem]">
+    // Der Screen baut sich auf, statt alles auf einmal hinzustellen: erst die
+    // Zeile, dann die Karten nacheinander, dann die Treffer-Chips. Bewusst
+    // dezent (kleiner Versatz, kein Überschwingen) — der Stagger ordnet das
+    // Lesen, er soll nicht selbst die Show sein.
+    <motion.div
+      initial="aus"
+      animate="an"
+      variants={{ an: { transition: { staggerChildren: 0.09 } } }}
+      className="flex flex-col gap-2.5"
+    >
+      <motion.p
+        variants={{ aus: { opacity: 0, y: 10 }, an: { opacity: 1, y: 0 } }}
+        className="text-[1.125rem] leading-snug font-semibold text-kh-paper sm:text-[1.25rem]"
+      >
         {alleGefunden
           ? `Alle ${RICHTIGE}. Der Ortstermin sitzt.`
           : `${treffer.length} von ${RICHTIGE} hast du. Das hier ist noch offen:`}
-      </p>
+      </motion.p>
 
       {/* Zwei Spalten wie die Frage selbst. Untereinander passten schon vier
           Karten weder ins Hoch- noch ins Querformat — und ein `overflow-y-auto`
@@ -331,8 +352,10 @@ function Auswertung({
         {zuKlaeren.slice(0, 4).map((p) => {
           const gefehlt = !daneben.includes(p)
           return (
-            <li
+            <motion.li
               key={p.id}
+              variants={{ aus: { opacity: 0, y: 10 }, an: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className={`rounded-kh border-2 px-3.5 py-2.5 ${
                 gefehlt
                   ? 'border-kh-orange/45 bg-kh-orange/10'
@@ -364,7 +387,7 @@ function Auswertung({
                   </p>
                 </div>
               </div>
-            </li>
+            </motion.li>
           )
         })}
       </ul>
@@ -376,8 +399,16 @@ function Auswertung({
           Begründung je Punkt“ (flow 7 M1) für alle zehn erreichbar, ohne dass
           zehn Begründungen gleichzeitig auf dem Screen stehen. */}
       {treffer.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <p className="kh-etikett text-kh-mute">Hattest du</p>
+        <motion.div
+          variants={{ aus: { opacity: 0, y: 10 }, an: { opacity: 1, y: 0 } }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col gap-1.5"
+        >
+          {/* Führt statt zu etikettieren: die Zeile sagt, was der Tap bringt —
+              „Hattest du“ allein hat niemand als Einladung gelesen. */}
+          <p className="kh-etikett text-kh-mute">
+            Richtig erkannt — tipp an für die Begründung
+          </p>
           <div className="flex flex-wrap gap-1.5">
             {treffer.map((p) => (
               <button
@@ -396,11 +427,11 @@ function Auswertung({
               </button>
             ))}
           </div>
-          <p className="min-h-[2.6em] text-[1rem] leading-[1.4] text-kh-mute">
+          <p className="min-h-[1.4em] text-[1rem] leading-[1.4] text-kh-mute">
             {offen ? treffer.find((p) => p.id === offen)?.grund : ''}
           </p>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

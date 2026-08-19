@@ -27,7 +27,8 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * kostet Material, und genau das ist die Lektion.“ Der Screen verbindet
  * Planlesen mit Handwerk — die Brücke zu B3.2.
  *
- * Zieh-Geste: Swipe-Navigation ist hier abgeschaltet (flow 6.1).
+ * Solange der Schnitt nicht sitzt, ist „Schnitt setzen“ die Primärhandlung im
+ * Fuß und Weiter nur ein leises Überspringen (siehe `Verzweigung`).
  */
 
 // ---------------------------------------------------------------------------
@@ -89,7 +90,6 @@ export function M4() {
     <StepShell
       id="M4"
       interaktionOffen={!geloest}
-      // Ein Zieh-Vorgang darf nie versehentlich den Step wechseln (flow 6.1).
       // Die Werkzeichnung ist von der Bühne in die Karte gewandert (siehe
       // `interaktion`): sie trägt Sollmaß und Sollwinkel und ist damit die
       // Aufgabenstellung, nicht die Kulisse. Auf der Bühne steht jetzt die
@@ -218,11 +218,11 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
  */
 function Werkzeichnung() {
   return (
-    <div className="kh-feld flex w-full flex-col gap-2 px-3.5 py-3">
+    <div className="kh-feld flex w-full flex-col gap-1.5 px-3.5 py-2.5">
       <p className="kh-etikett">Soll laut Plan</p>
       <svg
         viewBox="10 80 310 60"
-        className="h-[54px] w-full"
+        className="h-[44px] w-full"
         role="img"
         aria-label={`Werkzeichnung: Länge ${mm(ZIEL_MM)}, Winkel ${ZIEL_WINKEL} Grad`}
       >
@@ -304,7 +304,7 @@ function Zuschnitt({
   // Ausrichtung überlappen die Kinder, sobald der Fuß wächst (Abstecher-Angebot
   // plus Aha-Karte) — der Balken lief dann quer durch die Winkelknöpfe.
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-2.5" data-wisch="aus">
+    <div className="flex min-w-0 flex-1 flex-col gap-2" data-wisch="aus">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
         <span
           data-testid="m4-laenge"
@@ -324,13 +324,13 @@ function Zuschnitt({
         }}
         onDragMove={ziehen}
       >
-        <div ref={bahn} className="relative h-[84px] w-full shrink-0 select-none">
+        <div ref={bahn} className="relative h-[76px] w-full shrink-0 select-none">
           {/* Der Balken. Links der Schnittlinie liegt das Teil, rechts der
               Verschnitt — und genau so sieht es jetzt auch aus: das Teil ist
               volles Holz, der Verschnitt ist abgedunkelt und schraffiert.
               Vorher waren beide Hälften fast gleich hell und der Unterschied
               nur an der Sättigung zu erkennen. */}
-          <div className="absolute inset-x-0 top-[18px] h-[48px] overflow-hidden rounded-[6px] bg-[#4A382A] ring-1 ring-white/10">
+          <div className="absolute inset-x-0 top-[16px] h-[44px] overflow-hidden rounded-[6px] bg-[#4A382A] ring-1 ring-white/10">
             <div
               className="absolute inset-y-0 left-0 bg-[#C08A50]"
               style={{ width: `${anteil * 100}%` }}
@@ -351,7 +351,7 @@ function Zuschnitt({
       </DndContext>
 
       {/* Ist der Schnitt gesetzt, schrumpft die Winkelwahl auf eine Zeile.
-          Drei deaktivierte 60-px-Knöpfe stehen sonst weiter im Weg — und im
+          Drei deaktivierte Knöpfe stünden sonst weiter im Weg — und im
           Querformat schob genau das die Erfolgsmeldung aus der Spalte heraus,
           sodass „Passt. Nummer drauf“ überhaupt nicht mehr zu sehen war. */}
       {gesperrt ? (
@@ -369,7 +369,7 @@ function Zuschnitt({
                 onClick={() => onWinkel(w)}
                 data-testid={`m4-winkel-${w}`}
                 aria-pressed={winkel === w}
-                className={`flex h-[60px] flex-1 items-center justify-center gap-2 rounded-kh border-2 text-[1.125rem] font-semibold transition-transform active:scale-95 ${
+                className={`flex h-[52px] flex-1 items-center justify-center gap-2 rounded-kh border-2 text-[1.0625rem] font-semibold transition-transform active:scale-95 ${
                   winkel === w
                     ? 'border-kh-signal bg-kh-signal text-[#0E0D0B]'
                     : 'border-kh-line-strong bg-white/5 text-kh-paper'
@@ -421,7 +421,7 @@ function Schnittgriff({ anteil, gesperrt }: { anteil: number; gesperrt: boolean 
       }`}
     >
       <div
-        className={`absolute top-[14px] bottom-[14px] left-1/2 w-[3px] -translate-x-1/2 rounded-full transition-colors ${
+        className={`absolute top-[12px] bottom-[12px] left-1/2 w-[3px] -translate-x-1/2 rounded-full transition-colors ${
           isDragging ? 'bg-kh-signal' : 'bg-kh-paper'
         }`}
       />

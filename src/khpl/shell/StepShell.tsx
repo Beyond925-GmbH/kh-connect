@@ -198,9 +198,19 @@ export function StepShell({
         </h1>
       </motion.header>
 
-      <div
+      {/*
+        Das Panel kommt einen Takt nach dem Titel. Ein Screen, der alles auf
+        einmal hinstellt, liest sich als Wand — erst der Ort, dann der Inhalt
+        ist die kleinste Staffelung, die diesen Eindruck bricht, ohne dass
+        jemand auf die Bedienelemente warten muss.
+      */}
+      <motion.div
+        key={`panel-${id}`}
         ref={panel}
         data-testid="karte"
+        initial={{ opacity: 0, y: 22 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         // `min-h-0` ist die Bedingung dafür, dass das Scrollen unten
         // überhaupt greift: ein Flex-Kind hat von Haus aus `min-height: auto`
         // und wächst über den Container hinaus, statt zu scrollen.
@@ -247,7 +257,7 @@ export function StepShell({
             {fuss}
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   )
 

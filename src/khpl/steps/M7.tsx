@@ -36,7 +36,8 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * Zuschauen —, sondern legt das nächste Teil selbst ab und erklärt dabei, warum
  * es dieses ist.
  *
- * Zieh-Geste: Swipe-Navigation abgeschaltet (flow 6.1).
+ * Hier hat der Fuß keine eigene Aktion: die Bühne ist die Handlung. Solange
+ * das Dach nicht steht, trägt er nur das leise Überspringen (`uebungOffen`).
  */
 
 const Dachstuhl3D = lazy(() => import('@/khpl/buehne/Dachstuhl3D'))
@@ -146,7 +147,7 @@ export function M7() {
             {/* Eine Karte statt vier: Ablage, Rückmeldung und Vorrat gehören zu
               einer Handlung, und übereinandergestapelte Einzelkarten zerlegen
               den Screen in Kästchen. */}
-            <div className="flex flex-col gap-3" data-wisch="aus">
+            <div className="flex flex-col gap-2" data-wisch="aus">
               <Ablage
                 fertig={fertig}
                 anzahl={gesetzt.length}
@@ -218,7 +219,7 @@ function Ablage({
     <div
       ref={setNodeRef}
       data-testid="m7-ablage"
-      className={`flex min-h-[80px] items-center justify-between gap-3 rounded-kh border-2 border-dashed px-4 py-3 transition-colors ${
+      className={`flex min-h-[68px] items-center justify-between gap-3 rounded-kh border-2 border-dashed px-4 py-2.5 transition-colors ${
         isOver
           ? 'border-kh-signal bg-kh-signal/15'
           : 'border-kh-line-strong bg-white/[0.04]'
@@ -256,7 +257,7 @@ function Bauteilkarte({ schritt }: { schritt: Bauschritt }) {
       // Die Zieh-Karten sind bewusst hell: sie sind auf diesem Screen das
       // Einzige, was man anfassen kann, und müssen sich vom dunklen Panel
       // abheben wie ein Werkzeug vom Tisch.
-      className={`flex min-h-[60px] cursor-grab touch-none items-center rounded-kh-pill bg-kh-paper px-5 py-2 text-[1.0625rem] font-semibold text-[#0E0D0B] transition-transform active:cursor-grabbing ${
+      className={`flex min-h-[52px] cursor-grab touch-none items-center rounded-kh-pill bg-kh-paper px-4 py-1.5 text-[1.0625rem] font-semibold text-[#0E0D0B] transition-transform active:cursor-grabbing ${
         isDragging ? 'scale-105 shadow-[0_16px_40px_rgba(0,0,0,0.6)]' : ''
       }`}
     >
