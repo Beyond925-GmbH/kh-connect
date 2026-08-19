@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 
 /**
@@ -26,7 +26,6 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * Freigabe bestehen (flow 7 M6).
  */
 export function M6() {
-  const { weiter } = useStepNavigation('M6')
   const [aha, setAha] = useState(false)
 
   // Deutlich später als auf anderen Screens. Wer hier ankommt, soll erst
@@ -40,7 +39,6 @@ export function M6() {
     <StepShell
       id="M6"
       interaktionOffen={false}
-      onWeiter={weiter}
       buehne={<StepFoto id="M6" />}
       fachtext={
         <>

@@ -121,7 +121,7 @@ function rueckblick(f: Fortschritt): string[] {
 }
 
 export function M8() {
-  const { fortschritt, weiter } = useStepNavigation('M8')
+  const { fortschritt } = useStepNavigation('M8')
   const liste = rueckblick(fortschritt)
 
   return (
@@ -129,8 +129,6 @@ export function M8() {
       id="M8"
       buehneInteraktiv
       interaktionOffen={false}
-      wischen={false}
-      onWeiter={weiter}
       buehne={
         <div className="relative size-full">
           <Suspense fallback={<Dachstuhl3DFallback />}>

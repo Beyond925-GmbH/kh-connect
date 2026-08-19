@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { motion } from 'motion/react'
 import type { StepId } from '@/khpl/flow/steps'
 import { SCHRITT_BILDER, StepFoto } from '@/khpl/buehne/Foto'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeKarriereweg } from '@/khpl/store/fortschritt'
 import { karriereweg } from './karrierewege'
@@ -19,7 +19,6 @@ import { karriereweg } from './karrierewege'
  * Aufhänger in M10 — genau die `XYZ`-Logik des Boards.
  */
 export function B9({ id }: { id: StepId }) {
-  const { weiter } = useStepNavigation(id)
   const weg = karriereweg(id)
 
   useEffect(() => {
@@ -33,7 +32,6 @@ export function B9({ id }: { id: StepId }) {
       id={id}
       titelZusatz="Karriere-Weg"
       interaktionOffen={false}
-      onWeiter={weiter}
       // Die drei Karriere-Screens hatten vorher überhaupt kein Bild: weiße
       // Fläche, eine Definitionsliste, ein Knopf. Genau die drei Screens, die
       // den Ausschlag geben sollen, ob jemand am Stand stehen bleibt.

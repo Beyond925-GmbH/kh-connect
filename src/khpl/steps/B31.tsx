@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 
 /**
@@ -33,7 +33,6 @@ import { StepShell } from '@/khpl/shell/StepShell'
  */
 
 export function B31() {
-  const { weiter } = useStepNavigation('B3.1')
   const [aha, setAha] = useState(false)
 
   useEffect(() => {
@@ -45,7 +44,6 @@ export function B31() {
     <StepShell
       id="B3.1"
       titelZusatz="Abstecher"
-      onWeiter={weiter}
       buehne={<StepFoto id="B3.1" />}
       fachtext={
         <p>

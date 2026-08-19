@@ -12,7 +12,7 @@ import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
@@ -56,7 +56,6 @@ const HILFE_AB = 2
 const mm = (n: number) => `${(n / 1000).toFixed(2).replace('.', ',')} m`
 
 export function M4() {
-  const { weiter } = useStepNavigation('M4')
   const gespeichert = useFortschritt().answers.m4
   const fertig = !!gespeichert?.getroffen
   const [laenge, setLaenge] = useState(() => (fertig ? ZIEL_MM : START_MM))
@@ -91,8 +90,6 @@ export function M4() {
       id="M4"
       interaktionOffen={!geloest}
       // Ein Zieh-Vorgang darf nie versehentlich den Step wechseln (flow 6.1).
-      wischen={false}
-      onWeiter={weiter}
       // Die Werkzeichnung ist von der Bühne in die Karte gewandert (siehe
       // `interaktion`): sie trägt Sollmaß und Sollwinkel und ist damit die
       // Aufgabenstellung, nicht die Kulisse. Auf der Bühne steht jetzt die
@@ -140,6 +137,7 @@ export function M4() {
       fuss={
         <StepFuss
           id="M4"
+          uebungOffen={!geloest}
           aktion={
             geloest ? null : (
               <div className="flex items-center gap-2">

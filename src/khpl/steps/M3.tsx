@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 
 /**
@@ -16,8 +16,6 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * Begriffs-Popover eingelöst (flow 6.3). Danach die erste Verzweigung.
  */
 export function M3() {
-  const { weiter } = useStepNavigation('M3')
-
   // Die Aha-Karte kommt einen Takt später. Sie ist ein Einwurf, keine Ansage —
   // erst liest man, was passiert, dann kommt der Kommentar dazu (flow 6.4).
   const [aha, setAha] = useState(false)
@@ -29,7 +27,6 @@ export function M3() {
   return (
     <StepShell
       id="M3"
-      onWeiter={weiter}
       buehne={<StepFoto id="M3" />}
       fachtext={
         // Wortlaut aus flow 11 (M3), um einen Satz ergänzt: die beiden losen

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
@@ -151,7 +151,6 @@ const ANGEZEIGT = REIHENFOLGE.map((id) => PUNKTE.find((p) => p.id === id)!).filt
 )
 
 export function M1() {
-  const { weiter } = useStepNavigation('M1')
   // Aus dem Store vorbelegt: wer über „Dein Weg“ zurückspringt, soll seine
   // Auswertung wiederfinden und nicht von vorn anfangen müssen.
   const gespeichert = useFortschritt().answers.m1
@@ -174,7 +173,6 @@ export function M1() {
     <StepShell
       id="M1"
       interaktionOffen={!ausgewertet}
-      onWeiter={weiter}
       // Endlich der Ortstermin selbst: zwei Leute im Gespräch auf der
       // Baustelle, Klemmbrett in der Hand. Vorher lief hier das Aufmaß am
       // Sparren als Notbehelf (flow 13, Priorität 2 der Fotoliste).
@@ -202,6 +200,7 @@ export function M1() {
       fuss={
         <StepFuss
           id="M1"
+          uebungOffen={!ausgewertet}
           aktion={
             <Button
               variant="aktion"

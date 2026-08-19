@@ -11,7 +11,7 @@ import {
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
@@ -51,7 +51,6 @@ const POSTEN = [
 const euro = (n: number) => n.toLocaleString('de-DE') + ' €'
 
 export function M2() {
-  const { weiter } = useStepNavigation('M2')
   const gespeichert = useFortschritt().answers.m2
   const [wert, setWert] = useState(() => gespeichert?.schaetzung ?? START)
   const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
@@ -65,7 +64,6 @@ export function M2() {
     <StepShell
       id="M2"
       interaktionOffen={!aufgeloest}
-      onWeiter={weiter}
       // Statt der Skizze jetzt der Schreibtisch, an dem so ein Angebot
       // entsteht: Grundriss, Maßstab, Taschenrechner. Die drei Zahlen, die
       // die Skizze getragen hat — 45 Grad, 120 m², Satteldach —, stehen ohnehin
@@ -95,6 +93,7 @@ export function M2() {
       fuss={
         <StepFuss
           id="M2"
+          uebungOffen={!aufgeloest}
           aktion={
             aufgeloest ? null : (
               <Button variant="aktion" onClick={aufloesen} data-testid="m2-aufloesen">

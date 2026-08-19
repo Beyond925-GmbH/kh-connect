@@ -12,7 +12,7 @@ import { motion } from 'motion/react'
 import { Check, Truck, X } from 'lucide-react'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
@@ -118,7 +118,6 @@ const ANGEZEIGT = ANZEIGE.map((id) => TEILE.find((t) => t.id === id)!).filter(Bo
 const LADEFLAECHE = 'b41-fahrzeug'
 
 export function B41() {
-  const { weiter } = useStepNavigation('B4.1')
   const gespeichert = useFortschritt().answers.b41
   const [geladen, setGeladen] = useState<string[]>(() => gespeichert?.geladen ?? [])
   const [abgelehnt, setAbgelehnt] = useState<string[]>([])
@@ -154,8 +153,6 @@ export function B41() {
       id="B4.1"
       titelZusatz="Abstecher"
       interaktionOffen={!fertig}
-      wischen={false}
-      onWeiter={weiter}
       // Vorher trug dieser Step überhaupt kein Bild — weiße Fläche hinter
       // einer Zieh-Übung. Jetzt die Halle, aus der geladen wird.
       buehne={<StepFoto id="B4.1" />}
@@ -191,7 +188,13 @@ export function B41() {
           </div>
         </DndContext>
       }
-      fuss={<StepFuss id="B4.1" geschafft={fertig ? 'Alles geladen' : null} />}
+      fuss={
+        <StepFuss
+          id="B4.1"
+          uebungOffen={!fertig}
+          geschafft={fertig ? 'Alles geladen' : null}
+        />
+      }
     />
   )
 }

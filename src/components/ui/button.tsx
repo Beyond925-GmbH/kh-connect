@@ -38,13 +38,13 @@ const buttonVariants = cva(
       variant: {
         weiter: [
           'bg-kh-orange text-[#0E0D0B] border-2 border-kh-orange',
-          'shadow-[0_5px_0_0_#8A4A00]',
-          'active:translate-y-[5px] active:shadow-[0_0_0_0_#8A4A00]',
+          'shadow-[0_4px_0_0_#8A4A00]',
+          'active:translate-y-[4px] active:shadow-[0_0_0_0_#8A4A00]',
         ].join(' '),
         aktion: [
           'bg-kh-signal text-[#0E0D0B] border-2 border-kh-signal',
-          'shadow-[0_5px_0_0_#5E7300]',
-          'active:translate-y-[5px] active:shadow-[0_0_0_0_#5E7300]',
+          'shadow-[0_4px_0_0_#5E7300]',
+          'active:translate-y-[4px] active:shadow-[0_0_0_0_#5E7300]',
         ].join(' '),
         neben: [
           'bg-white/6 text-kh-paper border-2 border-kh-line-strong',
@@ -52,11 +52,16 @@ const buttonVariants = cva(
         ].join(' '),
         leise: 'text-kh-mute border-2 border-transparent active:scale-[0.97]',
       },
+      /* Kompakter als die erste Fassung (60/68 px): die Knoepfe frassen im
+         angehefteten Fuss so viel Hoehe, dass Uebungen darueber scrollen
+         mussten. 52 px bleibt oberhalb der 44-pt-Untergrenze von iOS und
+         unter Hallenbedingungen gut treffbar; die alte 60-px-Regel aus flow
+         8.5 galt der *Leiste*, nicht jedem Knopf im Panel. */
       size: {
-        sm: 'h-12 px-5 text-[1rem]',
-        default: 'h-[60px] px-7 text-[1.0625rem]',
-        lg: 'h-[68px] px-9 text-[1.1875rem]',
-        icon: 'size-[60px] px-0',
+        sm: 'h-11 px-4 text-[0.9375rem]',
+        default: 'h-[52px] px-6 text-[1.0625rem]',
+        lg: 'h-[58px] px-7 text-[1.125rem]',
+        icon: 'size-[52px] px-0',
       },
     },
     defaultVariants: { variant: 'weiter', size: 'default' },

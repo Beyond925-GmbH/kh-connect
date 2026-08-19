@@ -29,7 +29,6 @@ export function M9() {
     <StepShell
       id="M9"
       interaktionOffen={false}
-      onWeiter={weiter}
       buehne={<StepFoto id="M9" />}
       fachtext={
         <p>
@@ -92,10 +91,9 @@ export function M9() {
         </ul>
       }
       fuss={
-        // Kein `gedaempft`: auf M9 ist keine Übung offen, die den gefüllten
-        // Knopf für sich beanspruchen könnte. Die drei Karriere-Karten sind
-        // Umriss-Angebote — bliebe Weiter auch nur ein Umriss, stünde auf dem
-        // Screen gar keine gefüllte Fläche und nichts sagte, wo es weitergeht.
+        // `offen={[]}`: der Fuß zeigt hier bewusst kein Abstecher-Angebot und
+        // damit auch keinen Wege-Dialog — die drei Karten *sind* das Angebot.
+        // Weiter bleibt der eine gefüllte Knopf, der sagt, wo es weitergeht.
         <Verzweigung
           offen={[]}
           weiterVon="M9"

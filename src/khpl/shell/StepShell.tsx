@@ -1,13 +1,11 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { STEPS, type StepId } from '@/khpl/flow/steps'
 import { DeinWeg } from './DeinWeg'
 import { Rail } from './Rail'
-import { WeiterKontext } from './WeiterKontext'
 import { SichtfeldMesser } from './SichtfeldKontext'
 import { useStaffAusgang } from './staffAusgang'
-import { useWisch } from './useWisch'
 import {
   beendeKarriereSkip,
   geheZurueck,
@@ -43,8 +41,15 @@ import {
  * Die Leiste oben schwebt über der Bühne, statt ihr 68 px abzuschneiden. Sie
  * hat keinen eigenen Grund; der Verlauf der Bühne trägt sie.
  *
- * Was bleibt: der Weiter-Knopf sitzt auf **jedem** Screen in derselben Ecke,
- * unten rechts im Panel. Und in der Karte scrollt nur der Inhalt, nie der Fuß.
+ * Was bleibt: die Primärhandlung sitzt auf **jedem** Screen in derselben
+ * Ecke, unten rechts im Panel — bei offener Übung ist das die Lösung, sonst
+ * Weiter (siehe `Verzweigung`). Und im Panel scrollt nur der Inhalt, nie der
+ * Fuß.
+ *
+ * **Wisch-Navigation gibt es nicht mehr.** Sie kollidierte mit jeder
+ * Zieh-Übung und dem 3D-Modell, musste deshalb auf der Hälfte der Screens
+ * abgeschaltet werden — und eine Geste, die mal geht und mal nicht, ist
+ * schlimmer als keine. Vor und zurück gehen ausschließlich über Knöpfe.
  */
 
 /**
@@ -69,9 +74,7 @@ export function StepShell({
   buehneInteraktiv = false,
   karteBreit = false,
   interaktionOffen,
-  wischen = true,
   titelZusatz,
-  onWeiter,
 }: {
   id: StepId
   buehne?: React.ReactNode
@@ -92,15 +95,8 @@ export function StepShell({
    * Interaktion als offen — der sichere Zustand muss der Standard sein.
    */
   interaktionOffen?: boolean
-  /** Auf Drag-&-Drop-Screens abschalten (flow 6.1). */
-  wischen?: boolean
   /** Das Etikett über dem Titel, z. B. „Abstecher“. */
   titelZusatz?: string
-  /**
-   * Der eine Weg nach vorn. Button und Wisch nach links benutzen ihn beide —
-   * siehe `WeiterKontext`.
-   */
-  onWeiter?: () => void
 }) {
   const fortschritt = useFortschritt()
   const staffTap = useStaffAusgang()
@@ -109,6 +105,39 @@ export function StepShell({
   // Das Panel. Der Messer rechnet daraus aus, wie viel Fläche dem 3D-Modell
   // bleibt.
   const panel = useRef<HTMLDivElement>(null)
+
+  /**
+   * Liegt unterhalb der Scrollkante noch Inhalt? Nur dann bekommt das Panel
+   * seinen Auslauf-Verlauf. Gemessen bei jedem Scroll und bei jeder
+   * Größenänderung von Fläche oder Inhalt — eine Übung, die sich auflöst,
+   * ändert die Höhe, ohne dass gescrollt wird.
+   */
+  const scrollFlaeche = useRef<HTMLDivElement>(null)
+  const [ueberlauf, setUeberlauf] = useState(false)
+  const messeUeberlauf = useCallback(() => {
+    const el = scrollFlaeche.current
+    if (!el) return
+    setUeberlauf(el.scrollHeight - el.scrollTop - el.clientHeight > 6)
+  }, [])
+  useEffect(() => {
+    messeUeberlauf()
+    const el = scrollFlaeche.current
+    if (!el) return
+    const beobachter = new ResizeObserver(messeUeberlauf)
+    beobachter.observe(el)
+    for (const kind of el.children) beobachter.observe(kind)
+    // Kinder, die später dazukommen (Auswertung, Aha-Karte), ändern die Höhe
+    // ebenfalls — der MutationObserver hängt sie an den ResizeObserver an.
+    const mutation = new MutationObserver(() => {
+      messeUeberlauf()
+      for (const kind of el.children) beobachter.observe(kind)
+    })
+    mutation.observe(el, { childList: true, subtree: true })
+    return () => {
+      beobachter.disconnect()
+      mutation.disconnect()
+    }
+  }, [messeUeberlauf])
 
   const def = STEPS[id]
   const imSkip = fortschritt.detourReturnTo !== null
@@ -123,13 +152,6 @@ export function StepShell({
     if (imSkip) beendeKarriereSkip()
     else if (kannZurueck) geheZurueck()
   }, [imSkip, kannZurueck])
-
-  useWisch({
-    ziel: flaeche,
-    aktiv: wischen && !wegOffen,
-    onLinks: () => onWeiter?.(),
-    onRechts: zurueck,
-  })
 
   /**
    * Breite der Textspalte.
@@ -195,28 +217,33 @@ export function StepShell({
         */}
         <div className="relative flex min-h-0 flex-1 flex-col">
           <div
+            ref={scrollFlaeche}
             data-scroll
-            // `pb-5` ist der Platz, den der Auslauf-Verlauf darunter braucht.
-            // Ohne ihn liegt die letzte Zeile unter dem Verlauf und wird
-            // weggeblendet, auch wenn gar nichts zu scrollen ist — auf M10 war
-            // das ausgerechnet die Zeile „Sprich jetzt mit … am Stand“.
-            className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pr-0.5 pb-5"
+            onScroll={messeUeberlauf}
+            className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pr-0.5"
           >
             {fachtext && <div className="kh-fachtext">{fachtext}</div>}
             {interaktion}
             {aha}
           </div>
-          {/* Auslauf nach unten. Wo gescrollt wird, franst der Text aus, statt
-              mitten im Wort abgeschnitten dazustehen — und wo nichts zu
-              scrollen ist, liegt der Verlauf über leerem Panelgrund und ist
-              unsichtbar, weil er in genau dessen Farbe endet. */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-[#0E0D0B] to-transparent"
-          />
+          {/*
+            Auslauf nach unten — aber nur, wenn tatsächlich etwas darunter
+            liegt. Die erste Fassung blendete den Verlauf immer ein und
+            begründete das damit, dass er auf leerem Grund unsichtbar sei.
+            Stimmt nur, solange darunter *nichts* steht: endet der Inhalt
+            genau an der Kante (kein Überlauf, oder zu Ende gescrollt), fraß
+            der Verlauf die letzte Zeile an, obwohl gar nichts zu scrollen
+            war. Jetzt wird gemessen: Verlauf nur bei echtem Rest nach unten.
+          */}
+          {ueberlauf && (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#0E0D0B] to-transparent"
+            />
+          )}
         </div>
         {fuss && (
-          <div className="mt-3 shrink-0 border-t border-kh-line pt-3 landscape:mt-4 landscape:pt-4">
+          <div className="mt-2.5 shrink-0 border-t border-kh-line pt-2.5 landscape:mt-3 landscape:pt-3">
             {fuss}
           </div>
         )}
@@ -235,7 +262,7 @@ export function StepShell({
   )
 
   return (
-    <WeiterKontext.Provider value={onWeiter ?? null}>
+    <>
       <div
         className="kh-screen flex flex-col overflow-hidden bg-kh-ink"
         data-step={id}
@@ -313,7 +340,7 @@ export function StepShell({
           onSpringe={springeZuBesuchtem}
         />
       </div>
-    </WeiterKontext.Provider>
+    </>
   )
 }
 

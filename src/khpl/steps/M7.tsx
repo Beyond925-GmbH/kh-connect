@@ -13,7 +13,7 @@ import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { M7_SCHRITTE, M7_START, type Bauschritt } from '@/khpl/buehne/aufbauabschnitte'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
@@ -65,7 +65,6 @@ function mische<T>(liste: T[]): T[] {
 }
 
 export function M7() {
-  const { weiter } = useStepNavigation('M7')
   const gespeichert = useFortschritt().answers.m7
   const [gesetzt, setGesetzt] = useState<string[]>(() => gespeichert?.gesetzt ?? [])
   const [fehler, setFehler] = useState(0)
@@ -122,8 +121,6 @@ export function M7() {
       id="M7"
       buehneInteraktiv
       interaktionOffen={!fertig}
-      wischen={false}
-      onWeiter={weiter}
       buehne={
         <Suspense fallback={<Dachstuhl3DFallback />}>
           <Dachstuhl3D
@@ -193,7 +190,13 @@ export function M7() {
           der Baustelle — den hast du in der Kalkulation schon bezahlt.
         </AhaKarte>
       }
-      fuss={<StepFuss id="M7" geschafft={fertig ? 'Dach steht' : null} />}
+      fuss={
+        <StepFuss
+          id="M7"
+          uebungOffen={!fertig}
+          geschafft={fertig ? 'Dach steht' : null}
+        />
+      }
     />
   )
 }

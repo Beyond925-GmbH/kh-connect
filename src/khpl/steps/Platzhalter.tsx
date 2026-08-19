@@ -1,6 +1,6 @@
 import { STEPS, type StepId } from '@/khpl/flow/steps'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 
 /**
  * Ein Step, dessen Inhalt noch nicht gebaut ist. Er hält den Graphen von der
@@ -11,14 +11,12 @@ import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
  * dem letzten Step aus dem Bündel.
  */
 export function Platzhalter({ id }: { id: StepId }) {
-  const { weiter } = useStepNavigation(id)
   const def = STEPS[id]
 
   return (
     <StepShell
       id={id}
       titelZusatz={def.art === 'abstecher' ? 'Abstecher' : undefined}
-      onWeiter={weiter}
       buehne={<div className="size-full bg-kh-surface" />}
       fachtext={<p>Dieser Schritt ist noch nicht gebaut.</p>}
       fuss={<StepFuss id={id} />}

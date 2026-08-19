@@ -4,7 +4,7 @@ import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { M5_ENDE } from '@/khpl/buehne/aufbauabschnitte'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 
 /**
@@ -29,7 +29,6 @@ import { StepShell } from '@/khpl/shell/StepShell'
 const Dachstuhl3D = lazy(() => import('@/khpl/buehne/Dachstuhl3D'))
 
 export function M5() {
-  const { weiter } = useStepNavigation('M5')
   const [phase, setPhase] = useState('')
   const [steht, setSteht] = useState(false)
 
@@ -40,8 +39,6 @@ export function M5() {
       // Zuschauen, nicht lösen: hier ist nichts offen, was den Karriere-Link
       // verdrängen müsste.
       interaktionOffen={false}
-      wischen={false}
-      onWeiter={weiter}
       buehne={
         <Suspense fallback={<Dachstuhl3DFallback />}>
           <Dachstuhl3D

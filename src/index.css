@@ -177,11 +177,17 @@
   text-wrap: balance;
 }
 
-/* Der Step-Titel. Dieselbe Familie, eine Stufe kleiner. */
+/* Der Step-Titel. Dieselbe Familie, eine Stufe kleiner.
+
+   Deutlich kleiner als in der ersten Fassung (3.4rem → 2.4rem am Anschlag):
+   der Titel ist die Ortsangabe des Screens, nicht sein Inhalt — und jede
+   Zeile, die er hoch ist, fehlt dem Panel darunter. Auf dem iPad quer soll
+   **kein** Step scrollen muessen; der Titel ist der billigste Platz, das
+   einzuhalten. */
 @utility kh-titel {
   font-family: var(--font-display);
-  font-size: clamp(1.9rem, 1.2rem + 3vw, 3.4rem);
-  line-height: 0.94;
+  font-size: clamp(1.5rem, 1.05rem + 1.9vw, 2.4rem);
+  line-height: 0.96;
   text-transform: uppercase;
   color: var(--color-kh-paper);
   text-wrap: balance;

@@ -3,7 +3,6 @@ import { STEPS, type StepId } from '@/khpl/flow/steps'
 import { offeneAbstecher } from '@/khpl/flow/uebergaenge'
 import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
 import { geheZu, useFortschritt } from '@/khpl/store/fortschritt'
-import { useWeiter } from './WeiterKontext'
 
 /**
  * Verdrahtet den Fuß eines Steps mit dem Store. Jeder Step benutzt dieselben
@@ -29,6 +28,7 @@ export function StepFuss({
   ohneWeiter,
   geschafft,
   aktion,
+  uebungOffen,
 }: {
   id: StepId
   /**
@@ -40,20 +40,21 @@ export function StepFuss({
   geschafft?: string | null
   /** Die Handlung, die die Übung abschließt. Siehe `Verzweigung`. */
   aktion?: React.ReactNode
+  /** Solange die Übung ungelöst ist. Siehe `Verzweigung`. */
+  uebungOffen?: boolean
 }) {
   const { offen, weiter, zumAbstecher } = useStepNavigation(id)
-  // Denselben Weg wie der Wisch nach links — nie einen zweiten.
-  const nachVorn = useWeiter(weiter)
 
   return (
     <Verzweigung
       offen={offen}
       weiterVon={id}
       onAbstecher={zumAbstecher}
-      onWeiter={nachVorn}
+      onWeiter={weiter}
       ohneWeiter={ohneWeiter ?? STEPS[id].weiter === null}
       geschafft={geschafft}
       aktion={aktion}
+      uebungOffen={uebungOffen}
     />
   )
 }

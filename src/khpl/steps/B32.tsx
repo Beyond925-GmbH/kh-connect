@@ -6,7 +6,7 @@ import type { Auswahl } from '@/dachstuhl/debug'
 import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
@@ -31,7 +31,6 @@ const Dachstuhl3D = lazy(() => import('@/khpl/buehne/Dachstuhl3D'))
 const AHA_AB = 2
 
 export function B32() {
-  const { weiter } = useStepNavigation('B3.2')
   const gespeichert = useFortschritt().answers.b32
   const [auswahl, setAuswahl] = useState<Auswahl | null>(null)
   const [angetippt, setAngetippt] = useState<string[]>(() => gespeichert?.angetippt ?? [])
@@ -55,9 +54,7 @@ export function B32() {
       titelZusatz="Abstecher"
       // Das Modell will jede Geste selbst: Drehen darf nie den Step wechseln
       // (flow 6.1 — Drag-Gesten haben Vorrang vor Swipe-Navigation).
-      wischen={false}
       interaktionOffen={!genug}
-      onWeiter={weiter}
       buehne={
         <Suspense fallback={<Dachstuhl3DFallback />}>
           <Dachstuhl3D
@@ -108,7 +105,13 @@ export function B32() {
           die lernt man dort systematisch.
         </AhaKarte>
       }
-      fuss={<StepFuss id="B3.2" geschafft={genug ? 'Bauteile erkundet' : null} />}
+      fuss={
+        <StepFuss
+          id="B3.2"
+          uebungOffen={!genug}
+          geschafft={genug ? 'Bauteile erkundet' : null}
+        />
+      }
     />
   )
 }
