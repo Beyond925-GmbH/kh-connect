@@ -1,5 +1,6 @@
 import { Suspense, lazy, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
+import { RotateCw } from 'lucide-react'
 import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { M5_ENDE } from '@/khpl/buehne/aufbauabschnitte'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
@@ -60,11 +61,14 @@ export function M5() {
         </p>
       }
       interaktion={
-        <AnimatePresence initial={false}>
-          {/* Steht der Unterbau, fliegt nichts mehr ein — dann verschwindet auch
-              die Anzeige, statt eine leere Karte stehen zu lassen. */}
-          {!steht && <Phasenanzeige key="phase" label={phase} />}
-        </AnimatePresence>
+        <div className="flex flex-col items-start gap-2">
+          <AnimatePresence initial={false}>
+            {/* Steht der Unterbau, fliegt nichts mehr ein — dann verschwindet auch
+                die Anzeige, statt eine leere Karte stehen zu lassen. */}
+            {!steht && <Phasenanzeige key="phase" label={phase} />}
+          </AnimatePresence>
+          <DrehHinweis />
+        </div>
       }
       aha={
         <AhaKarte sichtbar={steht} eyebrow="Bevor der erste Sparren fliegt">
@@ -96,7 +100,7 @@ function Phasenanzeige({ label }: { label: string }) {
         className="size-3 shrink-0 animate-puls rounded-full bg-kh-orange"
       />
       <span className="min-w-0">
-        <span className="kh-etikett block text-kh-paper/50">Es fliegt ein</span>
+        <span className="kh-etikett block text-kh-paper/50">Kommt aufs Dach</span>
         <AnimatePresence mode="wait" initial={false}>
           <motion.p
             key={label}
@@ -112,5 +116,24 @@ function Phasenanzeige({ label }: { label: string }) {
         </AnimatePresence>
       </span>
     </motion.div>
+  )
+}
+
+/**
+ * Freies Drehen läuft in M5 die ganze Zeit mit (Kamerasteuerung, `ansicht`
+ * default `null`) — anders als in B3.2 gibt es dafür aber keine Aufforderung.
+ * Ohne einen Hinweis findet das kaum jemand von allein.
+ */
+function DrehHinweis() {
+  return (
+    <motion.p
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4, delay: 1 }}
+      className="flex items-center gap-1.5 text-[0.9rem] text-kh-paper/50"
+    >
+      <RotateCw className="size-3.5 shrink-0" strokeWidth={2} aria-hidden />
+      Zieh, um dich umzuschauen
+    </motion.p>
   )
 }
