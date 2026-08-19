@@ -155,21 +155,22 @@ export function M8() {
           animate="an"
           variants={{ an: { transition: { staggerChildren: 0.12, delayChildren: 0.4 } } }}
           data-testid="m8-rueckblick"
-          className="rounded-kh bg-kh-page p-5 shadow-[0_2px_24px_rgba(0,0,0,0.14)] landscape:p-6"
+          className="kh-feld p-4 landscape:p-5"
         >
-          <p className="kh-eyebrow text-kh-grey/70">Du hast heute</p>
-          <ul className="mt-2 flex flex-col gap-1.5">
+          <p className="kh-etikett">Du hast heute</p>
+          <ul className="mt-3 flex flex-col gap-2">
             {liste.map((zeile) => (
               <motion.li
                 key={zeile}
                 variants={{ aus: { opacity: 0, x: -8 }, an: { opacity: 1, x: 0 } }}
-                className="flex items-baseline gap-2 text-[1.125rem] leading-snug text-kh-ink"
+                className="flex items-start gap-2.5 text-[1.125rem] leading-snug text-kh-paper"
               >
-                <Check
-                  className="mt-0.5 size-4 shrink-0 text-kh-orange-text"
-                  strokeWidth={2.5}
+                <span
                   aria-hidden
-                />
+                  className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-kh-signal text-[#0E0D0B]"
+                >
+                  <Check className="size-3.5" strokeWidth={3.5} />
+                </span>
                 {zeile}
               </motion.li>
             ))}
@@ -177,7 +178,7 @@ export function M8() {
           <motion.p
             variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
             transition={{ duration: 0.8 }}
-            className="mt-4 border-t border-kh-rule pt-3 text-[1.125rem] font-normal text-kh-grey"
+            className="kh-titel-klein mt-4 border-t border-kh-line pt-4 text-kh-orange"
           >
             Heute Morgen war da nur ein Grundriss.
           </motion.p>

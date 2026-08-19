@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { MotionConfig } from 'motion/react'
 import { Button } from '@/components/ui/button'
-import { setTheme } from '@/lib/theme'
 import {
   pruefeVerfall,
   setzeZurueck,
@@ -25,9 +24,9 @@ import { useStaffDialogAnmeldung } from './staffAusgang'
  * bringt die App nur auf S0; der nächste Besucher wählt dort „Neu starten“, wer
  * kurz abgelenkt war „Weitermachen“. Den Rest erledigt die 30-Minuten-Frist.
  *
- * **Theme.** Die Kiosk-Instanz ist auf `light` gepinnt — ein Jugendlicher, der
- * das Gerät versehentlich umschaltet, ist kein Feature. `?web=1` gibt den
- * Schalter für den Web- und Schuleinsatz wieder frei.
+ * **Theme.** Es gibt keins mehr. Das Designsystem „Baustelle“ ist einfarbig
+ * dunkel (siehe `index.css`), und damit entfallen Schalter, Pinnen und der
+ * Sonderfall `?web=1` gleich mit.
  */
 
 const IDLE_HINWEIS_MS = 60_000
@@ -55,10 +54,6 @@ const GEDULD: Partial<Record<string, number>> = {
 /** Wie oft der Splash prüft, ob der gespeicherte Stand abgelaufen ist. */
 const VERFALL_TAKT_MS = 20_000
 
-export function istWebModus(): boolean {
-  return new URLSearchParams(window.location.search).get('web') === '1'
-}
-
 export function KioskGuard({ children }: { children: React.ReactNode }) {
   const bildschirm = useBildschirm()
   const { currentStepId } = useFortschritt()
@@ -66,14 +61,10 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
   const [staff, setStaff] = useState(false)
   const uhr = useRef(0)
 
-  // Die Geste selbst haengt an den Screens (leere Dehnfuge in der Leiste, Logo
-  // auf dem Splash) — hier liegt nur das Fenster, das sie oeffnet.
+  // Die Geste selbst hängt an den Screens (leere Dehnfuge in der Leiste, Logo
+  // auf dem Splash) — hier liegt nur das Fenster, das sie öffnet.
   const oeffnen = useCallback(() => setStaff(true), [])
   useStaffDialogAnmeldung(oeffnen)
-
-  useEffect(() => {
-    if (!istWebModus()) setTheme('light')
-  }, [])
 
   const geduld = (bildschirm === 'step' && GEDULD[currentStepId]) || 1
 
@@ -117,14 +108,12 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
       {hinweis && (
         <div
           data-testid="idle-hinweis"
-          className="fixed inset-0 z-[60] grid animate-fade-up place-items-center bg-kh-ink/70 backdrop-blur-[3px]"
+          className="fixed inset-0 z-[60] grid animate-fade-up place-items-center bg-kh-ink/80 backdrop-blur-md"
         >
           <div className="flex flex-col items-center gap-6 px-6 text-center">
-            <p className="kh-step-titel text-white">Bist du noch da?</p>
-            <p className="kh-fachtext text-white/85">
-              Tipp irgendwo hin, dann geht es weiter.
-            </p>
-            <Button onClick={zuruecksetzen} size="lg" className="h-[60px]">
+            <p className="kh-titel">Bist du noch da?</p>
+            <p className="kh-fachtext">Tipp irgendwo hin, dann geht es weiter.</p>
+            <Button onClick={zuruecksetzen} variant="weiter" size="lg">
               Ja, weiter
             </Button>
           </div>
@@ -153,11 +142,13 @@ export function StaffDialog({
     <div
       onClick={(e) => e.stopPropagation()}
       data-testid="staff-dialog"
-      className="fixed inset-0 z-[70] grid place-items-center bg-black/50 p-6"
+      className="fixed inset-0 z-[70] grid place-items-center bg-black/70 p-6 backdrop-blur-sm"
     >
-      <div className="flex w-[min(28rem,92vw)] flex-col gap-4 rounded-kh bg-kh-surface p-7 shadow-2xl">
-        <h2 className="kh-h3 text-kh-ink">Standpersonal</h2>
-        <p className="text-kh-grey">Wenn etwas hängt oder der nächste Besucher wartet.</p>
+      <div className="flex w-[min(28rem,92vw)] flex-col gap-4 rounded-kh-lg border-t-4 border-kh-orange bg-kh-raised p-7 shadow-[0_28px_80px_rgba(0,0,0,0.7)]">
+        <h2 className="kh-titel-klein">Standpersonal</h2>
+        <p className="text-[1.0625rem] text-kh-mute">
+          Wenn etwas hängt oder der nächste Besucher wartet.
+        </p>
         <div className="flex flex-col gap-2">
           <Button
             onClick={() => {
@@ -165,18 +156,19 @@ export function StaffDialog({
               onSchliessen()
             }}
             data-testid="staff-neu"
-            className="h-[60px] w-full"
+            variant="weiter"
+            className="w-full"
           >
             Neu starten
           </Button>
           <Button
-            variant="outline"
+            variant="neben"
             onClick={() => window.location.reload()}
-            className="h-[60px] w-full"
+            className="w-full"
           >
             App neu laden
           </Button>
-          <Button variant="ghost" onClick={onSchliessen} className="h-[60px] w-full">
+          <Button variant="leise" onClick={onSchliessen} className="w-full">
             Abbrechen
           </Button>
         </div>

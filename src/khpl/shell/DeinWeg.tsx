@@ -30,18 +30,22 @@ export function DeinWeg({
   return (
     <BaseDialog.Root open={offen} onOpenChange={(auf) => !auf && onSchliessen()}>
       <BaseDialog.Portal>
-        <BaseDialog.Backdrop className="fixed inset-0 z-40 bg-black/45 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+        <BaseDialog.Backdrop className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
         <BaseDialog.Popup
           data-testid="dein-weg"
-          className="fixed inset-y-0 left-0 z-50 flex w-[min(30rem,92vw)] flex-col bg-kh-surface shadow-2xl outline-none transition-transform duration-250 data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full"
+          className="fixed inset-y-0 left-0 z-50 flex w-[min(30rem,92vw)] flex-col bg-kh-surface shadow-[0_0_80px_rgba(0,0,0,0.8)] outline-none transition-transform duration-250 data-[ending-style]:-translate-x-full data-[starting-style]:-translate-x-full"
         >
-          <header className="flex shrink-0 items-center justify-between border-b border-kh-rule px-6 py-3">
-            <BaseDialog.Title className="kh-h3 text-kh-ink">Dein Weg</BaseDialog.Title>
+          {/* Das Warnband oben ist die einzige Stelle, an der das Sheet die
+              Marke trägt — ein oranger Balken darüber wäre ein zweites
+              Orange neben dem, das im Sheet schon die Häkchen macht. */}
+          <div aria-hidden className="kh-warnband h-1.5 shrink-0" />
+          <header className="flex shrink-0 items-center justify-between border-b border-kh-line px-5 py-3">
+            <BaseDialog.Title className="kh-titel-klein">Dein Weg</BaseDialog.Title>
             <BaseDialog.Close
               aria-label="Schließen"
-              className="grid size-11 place-items-center rounded-kh text-kh-grey transition-colors hover:bg-kh-band"
+              className="grid size-12 place-items-center rounded-kh-pill bg-white/6 text-kh-paper transition-transform active:scale-90"
             >
-              <X className="size-5" strokeWidth={1.5} />
+              <X className="size-5" strokeWidth={2.25} />
             </BaseDialog.Close>
           </header>
 
@@ -55,7 +59,7 @@ export function DeinWeg({
                   onSchliessen={onSchliessen}
                 />
                 {haupt.abstecher.length > 0 && (
-                  <ol className="mb-0.5 ml-7 border-l border-kh-rule pl-3">
+                  <ol className="mb-0.5 ml-7 border-l-2 border-kh-line pl-3">
                     {haupt.abstecher.map((id) => (
                       <li key={id}>
                         <Zeile
@@ -100,13 +104,15 @@ function Zeile({
     <>
       <span className="grid size-6 shrink-0 place-items-center" aria-hidden>
         {eingerueckt && zustand === 'offen' ? (
-          <CornerDownRight className="size-4 text-kh-grey/40" strokeWidth={1.5} />
+          <CornerDownRight className="size-4 text-kh-mute/50" strokeWidth={2} />
         ) : zustand === 'besucht' ? (
-          <Check className="size-5 text-kh-orange-text" strokeWidth={2.5} />
+          <span className="grid size-6 place-items-center rounded-full bg-kh-orange text-[#0E0D0B]">
+            <Check className="size-4" strokeWidth={3.5} />
+          </span>
         ) : zustand === 'aktuell' ? (
-          <span className="size-3 rounded-full bg-kh-orange ring-4 ring-kh-orange/25" />
+          <span className="size-3.5 rounded-full bg-kh-signal ring-4 ring-kh-signal/25" />
         ) : (
-          <span className="size-2.5 rounded-full border border-kh-rule" />
+          <span className="size-2.5 rounded-full border-2 border-white/25" />
         )}
       </span>
       {/*
@@ -125,12 +131,12 @@ function Zeile({
         {zustand === 'offen' ? def.kurz : def.titel}
       </span>
       {zustand === 'aktuell' && (
-        <span className="shrink-0 text-[0.9375rem] whitespace-nowrap text-kh-orange-text">
+        <span className="shrink-0 rounded-kh-pill bg-kh-signal px-2.5 py-1 text-[0.8125rem] font-bold whitespace-nowrap text-[#0E0D0B] uppercase">
           du bist hier
         </span>
       )}
       {nichtGenommen && (
-        <span className="shrink-0 text-[0.9375rem] whitespace-nowrap text-kh-grey/50">
+        <span className="shrink-0 text-[0.875rem] whitespace-nowrap text-kh-mute/60">
           nicht angeschaut
         </span>
       )}
@@ -138,7 +144,7 @@ function Zeile({
   )
 
   const basis =
-    'flex w-full items-center gap-3 rounded-kh px-3 py-1.5 text-[1.0625rem] min-h-[48px] transition-colors'
+    'flex w-full items-center gap-3 rounded-kh px-3 py-1.5 text-[1.0625rem] min-h-[52px] transition-colors'
 
   if (!antippbar) {
     return (
@@ -147,8 +153,8 @@ function Zeile({
         data-zustand={zustand}
         className={`${basis} ${
           zustand === 'aktuell'
-            ? 'bg-kh-band-soft font-normal text-kh-ink'
-            : 'text-kh-grey/45'
+            ? 'bg-white/8 font-semibold text-kh-paper'
+            : 'text-kh-mute/50'
         }`}
         aria-current={zustand === 'aktuell' ? 'step' : undefined}
       >
@@ -166,7 +172,7 @@ function Zeile({
         onSpringe(id)
         onSchliessen()
       }}
-      className={`${basis} cursor-pointer text-kh-grey hover:bg-kh-band-soft hover:text-kh-ink`}
+      className={`${basis} cursor-pointer text-kh-paper/85 transition-transform active:scale-[0.98] active:bg-white/8`}
     >
       {inhalt}
     </button>

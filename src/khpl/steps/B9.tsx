@@ -43,17 +43,21 @@ export function B9({ id }: { id: StepId }) {
         ) : undefined
       }
       interaktion={
-        <dl className="flex flex-col gap-3.5">
+        <dl className="flex flex-col gap-2.5">
           {weg.abschnitte.map((a, i) => (
             <motion.div
               key={a.frage}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="border-l-2 border-kh-orange/40 pl-4"
+              // Je Frage ein eigenes Feld statt vier Absätze an einer
+              // gemeinsamen Linie: „Was ist das · Wie lange · Was es kostet ·
+              // Was du verdienst“ sind vier Antworten auf vier Fragen, und als
+              // durchlaufende Definitionsliste liest sich das wie ein Merkblatt.
+              className="kh-feld px-4 py-3"
             >
-              <dt className="kh-eyebrow">{a.frage}</dt>
-              <dd className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-ink sm:text-[1.1875rem]">
+              <dt className="kh-etikett">{a.frage}</dt>
+              <dd className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90 sm:text-[1.1875rem]">
                 {a.antwort}
               </dd>
             </motion.div>

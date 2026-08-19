@@ -1,128 +1,133 @@
 @import 'tailwindcss';
 
-/* Dark mode is class-driven, not media-driven, so the user can override the OS. */
-@custom-variant dark (&:where(.dark, .dark *));
+/* ==================================================================
+   KHPL CONNECT — Designsystem „Baustelle“
 
-/* ------------------------------------------------------------------
-   Design system: kh-online.de/ausbildungsmanagement
-   Values below are measured from the live site (computed styles),
-   not approximated.
+   Wofuer das hier gebaut ist: ein iPad auf Brusthoehe, in einer lauten
+   Messehalle, vor jemandem mit fuenfzehn. Das Vorgaengersystem war eine
+   massstabsgetreue Uebersetzung der Website kh-online.de — Barlow 200,
+   weisse Karten, 4-px-Radien, viel Weissraum. Auf einem Schreibtisch ist
+   das richtig. Vor einem Publikum, das taeglich TikTok, Duolingo und
+   FIFA bedient, sieht es aus wie ein Formular.
 
-     page            #FFFFFF, band #E3E3E3
-     brand orange    #FF9F2A          H1, buttons, links, footer
-     body grey       #585858
-     black           #000000          section headings, footer text
-     type            Barlow — body 200 / headings 700
-     H1              35.2px  700  uppercase  centered  orange
-     H2              30px    700  #585858 (teaser) | #000 centered (band)
-     H3              22.4px  700  #585858
-     body            16/24   200  #585858
-     button          #FF9F2A / #fff / 16px / weight 200 / radius 4px / 16px 32px
-     rule            1px rgba(0,0,0,.1)
-     grid            1190px content, 3 x 377px, 30px gap
-     teaser image    ratio 3.84 : 1, no radius
-     footer          #FF9F2A bg, black text, 30px 0 60px
+   Was von der Marke bleibt: **Orange #FF9F2A und Barlow.** Beides ist
+   gemessen, beides gehoert der Kreishandwerkerschaft.
 
-   Teen-facing modifications (kept deliberately slight):
-     - H1 scales up (35 -> clamp 40/56px); the system stays intact
-     - body 16 -> 17px for reading distance on the iPad
-     - buttons 50 -> 54px tall, hover darkens + lifts 1px
-     - teaser photos zoom slightly on hover
-     - two brand devices already used by the campaign are reused as
-       UI: the rotated orange sticker and the #hashtag pill
+   Was dazukommt:
 
-   Optional dark mode:
-     The light design above stays canonical. Dark mode re-points the
-     colour tokens only — no utility in a component knows which theme
-     is active, so the two stay in step by construction. Preference is
-     `system` by default; an explicit choice persists in localStorage.
-     Warm near-blacks are used rather than neutral greys so the brand
-     orange does not read as a foreign accent on the page.
------------------------------------------------------------------- */
+     Warnweste statt Weissraum. Der Beruf traegt Warnfarben — Orange auf
+     der Baustelle, das giftige Gelbgruen der Sicherheitswesten. Beide
+     Farben stehen dort nebeneinander, seit es Baustellen gibt. Auf
+     Schwarz sind sie laut und sind trotzdem echt.
+
+     Ein Ton, nicht zwei. Der Kiosk hatte Light und Dark. Diese Fassung
+     ist einfarbig dunkel — nicht aus Sparsamkeit: die Buehne ist immer
+     ein Foto oder ein 3D-Modell, und ein dunkler Grund laesst beides
+     leuchten, waehrend ein weisser dagegen anleuchtet.
+
+     Anton fuer Schlagzeilen. Barlow 200 ist eine Fluesterstimme. Anton
+     ist eine schmale, fette Plakatschrift — und schmal ist bei deutschen
+     Komposita („Absturzsicherung“, „Kreishandwerkerschaft“) kein Stil,
+     sondern der Unterschied zwischen einer Zeile und dreien.
+================================================================== */
 
 @theme {
-  /* Every colour below is re-pointed by the `.dark` block further down.
-     Keep them semantic — a literal `#fff` in a component breaks the flip. */
-  --color-kh-page: #ffffff;
-  --color-kh-surface: #ffffff;
-  --color-kh-ink: #000000;
+  /* -- Grund ------------------------------------------------------ */
+  /* Warmes Schwarz, kein Neutralgrau: neben Orange kippt jedes kuehle
+     Grau ins Blaeuliche, und die Markenfarbe sieht dann geliehen aus. */
+  --color-kh-ink: #0e0d0b;
+  --color-kh-surface: #191713;
+  --color-kh-raised: #26221c;
+  --color-kh-line: rgba(255, 255, 255, 0.13);
+  --color-kh-line-strong: rgba(255, 255, 255, 0.26);
+
+  /* -- Schrift auf dem Grund -------------------------------------- */
+  --color-kh-paper: #fbf7f0;
+  --color-kh-mute: #a49b8e;
+
+  /* -- Marke ------------------------------------------------------ */
   --color-kh-orange: #ff9f2a;
-  --color-kh-orange-hover: #f28c0c;
-  /* Oranger *Text* auf hellem Grund. Die Markenfarbe selbst kommt auf Weiß nur
-     auf 2,05:1 — in einer hell ausgeleuchteten Messehalle, aus Armlänge, ist
-     das der Unterschied zwischen lesbar und nicht. Dieser Ton hält 4,88:1 und
-     bleibt erkennbar dieselbe Familie. Flächen, Buttons und Grafik behalten
-     `--color-kh-orange`: die sind aus dem Design-System der Website gemessen
-     und keine Textfarbe. */
-  --color-kh-orange-text: #a85f05;
-  --color-kh-grey: #585858;
-  --color-kh-band: #e3e3e3;
-  --color-kh-band-soft: #f1f1f1;
-  --color-kh-rule: rgba(0, 0, 0, 0.1);
-  --color-kh-footer: #ff9f2a;
+  --color-kh-orange-hot: #ff7a1a;
+  --color-kh-orange-deep: #8a4a00;
 
+  /* Warnwesten-Gelbgruen. Zweitfarbe, nie Flaeche unter Text ausser
+     mit schwarzer Schrift darauf — auf Weiss ist sie unlesbar, auf
+     Schwarz traegt sie 15:1. Sie markiert genau eine Sache: „das hast
+     du geschafft“. Wer sie fuer Dekoration verbraucht, hat sie fuer die
+     Rueckmeldung verloren. */
+  --color-kh-signal: #d8f63c;
+  --color-kh-signal-dim: #9ab520;
+
+  /* -- Schriften -------------------------------------------------- */
   --font-sans: 'Barlow', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Anton', 'Barlow', ui-sans-serif, system-ui, sans-serif;
 
-  /* 20px statt der 17px des Website-Systems.
-     Die Website wird am Schreibtisch gelesen, diese App im Stehen: iPad auf
-     Brusthoehe am Messestand, oder Handy in der Hand eines 14-Jaehrigen in
-     einer lauten Halle. Beides ist eine schlechtere Leseumgebung als ein
-     Buerostuhl, und 17px Barlow 200 ist dort grenzwertig. Die Schriftfamilie
-     und das Gewichtspaar 200/700 bleiben, nur die Groesse waechst. */
+  /* 20px Grundtext, aber in 400 statt 200. Das Gewicht ist der halbe
+     Unterschied: dieselbe Groesse in Barlow 200 verschwindet unter
+     Hallenlicht, in 400 steht sie. */
   --text-body: 1.25rem;
-  --text-body--line-height: 1.55;
+  --text-body--line-height: 1.5;
 
-  --radius-kh: 4px;
+  /* Radien. Das alte System hatte genau einen Wert (4px) und sah damit
+     aus wie ein Formular. Hier: Flaechen rund, Knoepfe ganz rund. */
+  --radius-kh: 14px;
+  --radius-kh-lg: 22px;
+  --radius-kh-pill: 999px;
 
-  --animate-fade-up: fade-up 0.5s ease-out both;
+  --animate-fade-up: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop: pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  /* Der Ring, der unter einem wartenden Ziel nach aussen laeuft. */
+  --animate-puls: puls-ring 2s ease-out infinite;
 
   @keyframes fade-up {
     from {
       opacity: 0;
-      transform: translateY(12px);
+      transform: translateY(14px);
     }
     to {
       opacity: 1;
       transform: none;
     }
   }
-}
 
-/* ------------------------------------------------------------------
-   Dark theme. Unlayered on purpose: it must outrank the `@layer theme`
-   defaults above no matter where it sits in the file.
-   Only tokens change here — nothing else in the codebase branches.
------------------------------------------------------------------- */
-.dark {
-  --color-kh-page: #141311;
-  --color-kh-surface: #1c1a17;
-  --color-kh-ink: #f6f3ef;
-  --color-kh-grey: #cac5be;
-  --color-kh-band: #1f1d1a;
-  --color-kh-band-soft: #262320;
-  --color-kh-rule: rgba(255, 255, 255, 0.12);
-  /* On a dark ground a hover should brighten, not darken. */
-  --color-kh-orange-hover: #ffb659;
-  /* Auf dunklem Grund trägt die helle Markenfarbe von selbst. */
-  --color-kh-orange-text: #ffb659;
-  /* The closing orange slab stays orange, dimmed so it doesn't glare. */
-  --color-kh-footer: #d1811b;
-  color-scheme: dark;
+  @keyframes pop {
+    0% {
+      opacity: 0;
+      transform: scale(0.86);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes puls-ring {
+    0% {
+      box-shadow: 0 0 0 0 rgb(255 159 42 / 0.5);
+    }
+    70% {
+      box-shadow: 0 0 0 22px rgb(255 159 42 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(255 159 42 / 0);
+    }
+  }
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
-    color-scheme: light;
+    color-scheme: dark;
+    background-color: var(--color-kh-ink);
   }
 
   body {
-    background-color: var(--color-kh-page);
-    color: var(--color-kh-grey);
+    background-color: var(--color-kh-ink);
+    color: var(--color-kh-paper);
     font-family: var(--font-sans);
-    font-weight: 200;
+    font-weight: 400;
     font-size: var(--text-body);
-    line-height: 1.6;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -webkit-tap-highlight-color: transparent;
   }
@@ -131,165 +136,161 @@
   h2,
   h3,
   h4 {
-    font-weight: 700;
-    line-height: 1.2;
-    color: var(--color-kh-grey);
+    font-family: var(--font-display);
+    font-weight: 400; /* Anton hat genau einen Schnitt. */
+    line-height: 1;
+    letter-spacing: 0.005em;
+    color: var(--color-kh-paper);
   }
 
   strong,
   b {
-    font-weight: 700;
+    font-weight: 600;
+    color: var(--color-kh-paper);
   }
 
   a {
     color: var(--color-kh-orange);
     text-decoration: none;
   }
-  a:hover {
-    text-decoration: underline;
-  }
 
   :focus-visible {
-    outline: 2px solid var(--color-kh-orange);
+    outline: 3px solid var(--color-kh-signal);
     outline-offset: 3px;
   }
-
-  /* Ease the theme flip on the large grounds only; hover transitions
-     elsewhere are defined per-component and stay untouched. */
-  body,
-  header,
-  section,
-  footer,
-  hr {
-    transition:
-      background-color 200ms ease,
-      border-color 200ms ease,
-      color 200ms ease;
-  }
-}
-
-/* The site's content column: 1190px at a 1280px viewport, 15px gutters. */
-@utility kh-container {
-  width: 100%;
-  max-width: 1600px;
-  margin-inline: auto;
-  padding-inline: 15px;
-}
-
-/* H1 — orange, uppercase, centred. Scaled up for teens; system unchanged. */
-@utility kh-h1 {
-  font-size: clamp(2.125rem, 1.4rem + 2.6vw, 3.5rem);
-  font-weight: 700;
-  line-height: 1.1;
-  text-transform: uppercase;
-  text-align: center;
-  color: var(--color-kh-orange);
-}
-
-/* Section heading inside a band — near-black on light, near-white on dark. */
-@utility kh-h2-band {
-  font-size: clamp(1.5rem, 1.1rem + 1.3vw, 1.875rem);
-  font-weight: 700;
-  text-align: center;
-  color: var(--color-kh-ink);
-  text-transform: uppercase;
-}
-
-@utility kh-h2 {
-  font-size: clamp(1.375rem, 1.1rem + 0.9vw, 1.875rem);
-  font-weight: 700;
-  color: var(--color-kh-grey);
-}
-
-@utility kh-h3 {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: var(--color-kh-grey);
-}
-
-@utility kh-rule {
-  border: 0;
-  border-top: 1px solid var(--color-kh-rule);
 }
 
 /* ------------------------------------------------------------------
-   KHPL Connect — Step-Typografie.
-
-   Der Step-Titel ist bewusst *nicht* `kh-h1`: versal, zentriert und orange
-   ist die Signatur der Website und trägt eine Seite, aber fünfzehn Screens
-   hintereinander schreien damit. Bleibt: orange und 700 — linksbündig.
+   SCHRIFT-BAUSTEINE
 ------------------------------------------------------------------ */
-@utility kh-step-titel {
-  font-size: clamp(1.75rem, 1.25rem + 2.2vw, 3rem);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.01em;
-  color: var(--color-kh-orange-text);
+
+/* Die Plakatzeile. Anton, versal, eng gesetzt, so gross wie der Screen
+   es hergibt. Sie steht **auf** dem Bild, nie in einer Karte — das ist
+   der Unterschied zwischen einem Titel und einer Ueberschrift. */
+@utility kh-plakat {
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 1.4rem + 5.2vw, 5.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.005em;
+  text-transform: uppercase;
+  color: var(--color-kh-paper);
   text-wrap: balance;
 }
 
-/* Fachtext: max. ~250 Zeichen je Step (flow 6.2).
-   19px auf dem Handy, 24px auf dem iPad quer.
-
-   Zeilenlaenge 58ch, nicht 46: bei 46 lief der Fachtext auf den Uebungs-Steps
-   ueber sechs Zeilen, und die Uebung darunter rutschte aus dem sichtbaren Teil
-   der Karte. Zwei Zeilen weniger Text sind hier mehr wert als die etwas
-   kuerzere Zeile — gelesen wird ohnehin ein Absatz, keine Textspalte. */
-@utility kh-fachtext {
-  font-size: clamp(1.1875rem, 1.05rem + 0.6vw, 1.5rem);
-  font-weight: 200;
-  line-height: 1.5;
-  color: var(--color-kh-grey);
-  max-width: 58ch;
+/* Der Step-Titel. Dieselbe Familie, eine Stufe kleiner. */
+@utility kh-titel {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 1.2rem + 3vw, 3.4rem);
+  line-height: 0.94;
+  text-transform: uppercase;
+  color: var(--color-kh-paper);
+  text-wrap: balance;
 }
 
-/* Die Kleinzeile ueber dem Titel und ueber Aha-Karten. */
-@utility kh-eyebrow {
-  font-size: clamp(0.8125rem, 0.75rem + 0.25vw, 0.9375rem);
-  font-weight: 400;
-  letter-spacing: 0.14em;
+@utility kh-titel-klein {
+  font-family: var(--font-display);
+  font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.85rem);
+  line-height: 1;
   text-transform: uppercase;
-  color: var(--color-kh-orange-text);
+  color: var(--color-kh-paper);
+}
+
+/* Der Fachtext. 400 statt 200, und die Zeile darf laenger sein, weil sie
+   jetzt Gewicht hat. */
+@utility kh-fachtext {
+  font-size: clamp(1.125rem, 1.02rem + 0.5vw, 1.375rem);
+  font-weight: 400;
+  line-height: 1.45;
+  color: rgb(251 247 240 / 0.82);
+  max-width: 60ch;
+}
+
+/* Die Kleinzeile. Frueher grau und leise; jetzt ist sie ein Etikett —
+   Versalien, weit gesperrt, in Signalfarbe oder Orange. */
+@utility kh-etikett {
+  font-family: var(--font-sans);
+  font-size: clamp(0.75rem, 0.7rem + 0.2vw, 0.875rem);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-kh-orange);
+}
+
+/* Zahlen, die etwas bedeuten — Preise, Maße, Zaehlstaende. */
+@utility kh-zahl {
+  font-family: var(--font-display);
+  font-size: clamp(2.6rem, 1.6rem + 4vw, 4.5rem);
+  line-height: 0.9;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-kh-signal);
 }
 
 /* ------------------------------------------------------------------
-   Die Inhaltskarte.
-
-   Ein einziges Layout traegt jetzt alle siebzehn Steps: Buehne vollflaechig,
-   darueber genau diese Karte. Sie ist deckend, nicht transluzent — Barlow 200
-   ueber einem Foto ist unter Hallenlicht nicht lesbar (flow 6.2), und ein
-   Blur-Panel loest das nicht, es macht es nur teurer.
+   FLAECHEN
 ------------------------------------------------------------------ */
-@utility kh-karte {
-  background-color: var(--color-kh-page);
-  border-radius: 10px;
-  box-shadow:
-    0 1px 2px rgb(0 0 0 / 0.08),
-    0 12px 40px rgb(0 0 0 / 0.18);
+
+/* Das Panel, in dem Fachtext und Interaktion sitzen.
+
+   Frueher war das eine weisse Karte mit Schlagschatten — sie legte sich
+   ueber 60 % des Fotos und sah aus, als haette jemand ein Word-Dokument
+   ueber ein Bild gelegt. Jetzt: fast deckendes Schwarz mit einer Kante
+   aus Licht oben, und das Foto laeuft ringsum weiter. Kein Schatten, der
+   Kontrast macht die Trennung.
+
+   `backdrop-blur` steht bewusst nur als Verstaerker dahinter, nicht als
+   Traeger: die Deckkraft allein reicht schon fuer Barlow 400. */
+@utility kh-panel {
+  background-color: rgb(14 13 11 / 0.9);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  border-radius: var(--radius-kh-lg);
+  border-top: 1px solid rgb(255 255 255 / 0.14);
 }
 
-/* Verlauf ueber dem Foto: unten dunkler, damit die Karte nicht auf einer
-   zufaellig hellen Bildstelle klebt und der Rand ausfranst. */
+/* Ein Kaestchen im Panel — Aufgabe, Liste, Auswertung. */
+@utility kh-feld {
+  background-color: rgb(255 255 255 / 0.05);
+  border: 1px solid var(--color-kh-line);
+  border-radius: var(--radius-kh);
+}
+
+/* Der Verlauf ueber der Buehne. Steiler als vorher: das Panel sitzt
+   unten und braucht dort einen dunklen Fuss, damit seine Kante nicht auf
+   einer zufaellig hellen Bildstelle ausfranst. */
 @utility kh-scrim {
-  background: linear-gradient(
-    to top,
-    rgb(0 0 0 / 0.5) 0%,
-    rgb(0 0 0 / 0.22) 32%,
-    rgb(0 0 0 / 0) 62%
+  background:
+    linear-gradient(
+      to top,
+      rgb(14 13 11 / 0.92) 0%,
+      rgb(14 13 11 / 0.55) 26%,
+      rgb(14 13 11 / 0.08) 58%,
+      rgb(14 13 11 / 0.28) 100%
+    ),
+    radial-gradient(125% 85% at 50% 45%, transparent 45%, rgb(14 13 11 / 0.32) 100%);
+}
+
+/* Das Warnband. Die eine Stelle, an der das System dekorativ wird —
+   Absperrband als 6-px-Streifen. Es markiert den oberen Rand des
+   Fortschrittsbereichs und sonst nichts. */
+@utility kh-warnband {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--color-kh-orange) 0 12px,
+    #0e0d0b 12px 24px
   );
 }
 
 /* ------------------------------------------------------------------
-   Vollbild-Screen mit sicheren Rändern.
+   Vollbild-Screen mit sicheren Raendern.
 
    `index.html` setzt `viewport-fit=cover` und eine schwarz-transluzente
-   Statusleiste — genau die Kombination, die das Kiosk-iPad im Homescreen-Modus
-   braucht. Ohne `env(safe-area-inset-*)` liegt die Statusleiste dann über der
-   Navigationsleiste: der Zurück-Button und der linke Rand der Rail
-   verschwinden unter der Uhr.
+   Statusleiste — genau die Kombination, die das Kiosk-iPad im
+   Homescreen-Modus braucht. Ohne `env(safe-area-inset-*)` liegt die
+   Statusleiste ueber der Navigation: Zurueck-Button und linker Rand der
+   Rail verschwinden unter der Uhr.
 
-   `100dvh` statt `100vh`, damit im Browserbetrieb die einfahrende Adressleiste
-   den Fuß nicht abschneidet.
+   `100dvh` statt `100vh`, damit im Browserbetrieb die einfahrende
+   Adressleiste den Fuss nicht abschneidet.
 ------------------------------------------------------------------ */
 @utility kh-screen {
   position: fixed;
@@ -301,78 +302,83 @@
   padding-right: env(safe-area-inset-right);
 }
 
-/* Die persistente Leiste. 60-px-Ziele brauchen 68 px Höhe (flow 8.5). */
+/* Die persistente Leiste. 60-px-Ziele brauchen 68 px Hoehe (flow 8.5). */
 @utility kh-leiste {
   height: 68px;
 }
 
 /* ------------------------------------------------------------------
-   Der Schätz-Regler aus M2.
+   Der Schaetz-Regler aus M2.
 
-   Ein natives `input[type=range]`, nur neu eingekleidet: auf iPad-Safari ist
-   das die einzige Variante, die zuverlässig zieht, ohne dass man
-   Pointer-Capture von Hand nachbauen muss. Der Griff ist 44 px, die Bahn 14 px
-   — anfassbar mit ausgestrecktem Arm (flow 8.5).
+   Ein natives `input[type=range]`, nur neu eingekleidet: auf iPad-Safari
+   ist das die einzige Variante, die zuverlaessig zieht, ohne dass man
+   Pointer-Capture von Hand nachbaut. Der Griff ist jetzt 52 px und traegt
+   einen Ring — er ist auf diesem Screen das Einzige, was man anfassen
+   kann, und soll auch so aussehen.
 ------------------------------------------------------------------ */
 @utility kh-regler {
   -webkit-appearance: none;
   appearance: none;
-  height: 44px;
+  height: 52px;
   background: transparent;
   touch-action: none;
   cursor: pointer;
 
   &::-webkit-slider-runnable-track {
-    height: 14px;
+    height: 18px;
     border-radius: 999px;
-    background: var(--color-kh-band);
+    background: rgb(255 255 255 / 0.12);
+    border: 1px solid var(--color-kh-line);
   }
   &::-moz-range-track {
-    height: 14px;
+    height: 18px;
     border-radius: 999px;
-    background: var(--color-kh-band);
+    background: rgb(255 255 255 / 0.12);
+    border: 1px solid var(--color-kh-line);
   }
 
   &::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 44px;
-    height: 44px;
-    margin-top: -15px;
+    width: 52px;
+    height: 52px;
+    margin-top: -18px;
     border-radius: 999px;
-    border: 3px solid var(--color-kh-page);
+    border: 4px solid #0e0d0b;
     background: var(--color-kh-orange);
-    box-shadow: 0 2px 10px rgb(0 0 0 / 0.22);
+    box-shadow: 0 6px 20px rgb(255 122 26 / 0.45);
   }
   &::-moz-range-thumb {
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: 52px;
     border-radius: 999px;
-    border: 3px solid var(--color-kh-page);
+    border: 4px solid #0e0d0b;
     background: var(--color-kh-orange);
-    box-shadow: 0 2px 10px rgb(0 0 0 / 0.22);
+    box-shadow: 0 6px 20px rgb(255 122 26 / 0.45);
   }
 
-  /* Nach der Auflösung steht der Griff still, bleibt aber sichtbar: er ist
-     dann die Marke „das hast du geschätzt“. */
+  /* Nach der Aufloesung steht der Griff still, bleibt aber sichtbar: er
+     ist dann die Marke „das hast du geschaetzt“. */
   &:disabled {
     cursor: default;
     opacity: 1;
   }
   &:disabled::-webkit-slider-thumb {
-    background: var(--color-kh-grey);
+    background: var(--color-kh-mute);
+    box-shadow: none;
   }
   &:disabled::-moz-range-thumb {
-    background: var(--color-kh-grey);
+    background: var(--color-kh-mute);
+    box-shadow: none;
   }
 }
 
 /* ------------------------------------------------------------------
    Kiosk-Verhalten (khpl-ui-shell.md 8).
 
-   Kein Zoom, kein Bounce, keine Textauswahl. Pinch-Zoom hängt zusätzlich an
-   `maximum-scale=1` im Viewport-Meta; `touch-action: manipulation` nimmt den
-   Doppeltipp-Zoom, ohne Wischen und Ziehen zu blockieren.
+   Kein Zoom, kein Bounce, keine Textauswahl. Pinch-Zoom haengt zusaetzlich
+   an `maximum-scale=1` im Viewport-Meta; `touch-action: manipulation` nimmt
+   den Doppeltipp-Zoom, ohne Wischen und Ziehen zu blockieren.
 ------------------------------------------------------------------ */
 @layer base {
   html,
@@ -387,18 +393,32 @@
     user-select: none;
   }
 
-  /* Kein Longpress-Menü auf Bildern, kein versehentliches Ziehen. */
+  /* Kein Longpress-Menue auf Bildern, kein versehentliches Ziehen. */
   img,
   video {
     -webkit-touch-callout: none;
     -webkit-user-drag: none;
   }
 
-  /* Ausnahmen bewusst gesetzt: alles, was Text zum Lesen und Markieren ist,
-     bleibt markierbar, sobald jemand es ausdrücklich will. */
+  /* Ausnahmen bewusst gesetzt: alles, was Text zum Lesen und Markieren
+     ist, bleibt markierbar, sobald jemand es ausdruecklich will. */
   [data-auswaehlbar] {
     -webkit-user-select: text;
     user-select: text;
+  }
+
+  /* Die Scrollflaeche im Panel bekommt einen schmalen, sichtbaren Balken.
+     Unsichtbare Scrollbalken sind auf einem Kiosk eine Falle: niemand
+     probiert aus, ob eine Flaeche scrollt, die nicht danach aussieht. */
+  [data-scroll]::-webkit-scrollbar {
+    width: 6px;
+  }
+  [data-scroll]::-webkit-scrollbar-thumb {
+    background: rgb(255 255 255 / 0.22);
+    border-radius: 999px;
+  }
+  [data-scroll]::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 

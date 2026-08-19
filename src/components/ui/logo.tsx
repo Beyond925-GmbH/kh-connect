@@ -1,23 +1,29 @@
-import { useTheme } from '@/lib/theme'
 import { cn } from '@/lib/utils'
 
 /**
- * The wordmark is near-black artwork on transparency, so it disappears on a
- * dark ground. It is swapped for a re-inked copy of the same file rather than
- * filtered: no CSS filter round-trips the orange mark faithfully — `invert()`
- * alone turns it blue, and correcting the hue drags it to red or olive.
- * `public/brand/kh-paderborn-lippe2-dark.png` recolours only the wordmark and
- * leaves the octagon and every antialiased edge byte-identical.
+ * Der Schriftzug ist fast schwarze Zeichnung auf Transparenz und verschwindet
+ * damit auf dunklem Grund. Seit die App einfarbig dunkel ist, gibt es keinen
+ * hellen Grund mehr — deshalb fällt die Theme-Abfrage weg und die App zeigt
+ * durchgängig die hell eingefärbte Kopie derselben Datei.
+ *
+ * Eingefärbt, nicht gefiltert: kein CSS-Filter führt das Orange der Marke
+ * sauber zurück — `invert()` allein macht daraus Blau, und die Korrektur der
+ * Farbe zieht es nach Rot oder Oliv. `kh-paderborn-lippe2-dark.png` färbt nur
+ * den Schriftzug um und lässt Achteck und Kantenglättung Byte für Byte
+ * unangetastet.
+ *
+ * `aufHell` gibt es für die eine Ausnahme: den Abschluss-Screen M10, wo der
+ * Grund eine volle orange Fläche ist.
  */
-function Logo({ className, ...props }: React.ComponentProps<'img'>) {
-  const { resolved } = useTheme()
-
+function Logo({
+  className,
+  aufHell = false,
+  ...props
+}: React.ComponentProps<'img'> & { aufHell?: boolean }) {
   return (
     <img
       src={
-        resolved === 'dark'
-          ? '/brand/kh-paderborn-lippe2-dark.png'
-          : '/brand/kh-paderborn-lippe2.png'
+        aufHell ? '/brand/kh-paderborn-lippe2.png' : '/brand/kh-paderborn-lippe2-dark.png'
       }
       alt="Kreishandwerkerschaft Paderborn-Lippe"
       width={150}

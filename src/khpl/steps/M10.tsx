@@ -60,7 +60,7 @@ export function M10() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             data-testid="m10-aufhaenger"
-            className="text-[clamp(1.05rem,0.95rem+0.7vw,1.35rem)] leading-[1.4] font-light text-kh-grey"
+            className="text-[clamp(1.05rem,0.95rem+0.7vw,1.35rem)] leading-[1.4] text-kh-paper/80"
           >
             {aufhaenger}
           </motion.p>
@@ -72,51 +72,51 @@ export function M10() {
             data-testid="m10-cta"
             className="flex flex-col gap-1"
           >
-            <p className="text-[clamp(1.6rem,1.15rem+2vw,2.8rem)] leading-[1.05] font-bold text-kh-ink">
+            {/* Der eine Satz, um den es auf diesem Screen geht — in Anton, so
+                groß wie der Titel darüber. Vorher stand er in Barlow 700 und
+                war damit die drittgrößte Schrift auf seinem eigenen Screen. */}
+            <p className="kh-titel text-kh-orange">
               {stand.name
                 ? `Sprich jetzt mit ${stand.name} am Stand.`
                 : 'Sprich jetzt mit uns am Stand.'}
             </p>
             {stand.rolle && (
-              <p className="text-[clamp(1rem,0.95rem+0.3vw,1.2rem)] font-light text-kh-grey">
+              <p className="mt-1 text-[clamp(1rem,0.95rem+0.3vw,1.2rem)] text-kh-paper/65">
                 {stand.rolle}
               </p>
             )}
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-          >
-            <Logo className="h-8 w-auto" />
           </motion.div>
         </div>
       }
       fuss={
         <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Das Logo steht im **angehefteten** Fuß und nicht mehr unten im
+              Inhalt: dort lag es unter dem Auslauf-Verlauf des Panels und war
+              zur Hälfte weggeblendet — ausgerechnet auf dem einen Screen, auf
+              dem wieder die Kreishandwerkerschaft spricht und nicht die Rolle. */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="mr-auto"
+          >
+            <Logo className="h-9 w-auto" />
+          </motion.div>
           {imSkip ? (
             <Button
-              variant="outline"
+              variant="neben"
               onClick={beendeKarriereSkip}
               data-testid="m10-zurueck-zum-tag"
-              className="h-[60px] px-6 text-[1.0625rem]"
             >
-              <ChevronLeft className="size-5" strokeWidth={1.75} />
+              <ChevronLeft className="size-5" strokeWidth={2.25} />
               Zurück zu deinem Tag
             </Button>
-          ) : (
-            <span />
-          )}
-          {/* Vorher `ghost` — und damit das leiseste Element auf dem Screen,
-              obwohl es die einzige Handlung darauf ist. */}
-          <Button
-            variant="outline"
-            onClick={setzeZurueck}
-            data-testid="m10-neu-starten"
-            className="h-[60px] px-7 text-[1.0625rem]"
-          >
-            <RotateCcw className="size-5" strokeWidth={1.5} />
+          ) : null}
+          {/* Der einzige Knopf auf dem Screen, der etwas tut — also trägt er
+              auch die Farbe dafür. Vorher war er `ghost` und damit das
+              leiseste Element auf seinem eigenen Screen. */}
+          <Button variant="weiter" onClick={setzeZurueck} data-testid="m10-neu-starten">
+            <RotateCcw className="size-5" strokeWidth={2.25} />
             Von vorn
           </Button>
         </div>
@@ -152,10 +152,16 @@ function Abschlussfeld() {
         style={{ objectPosition: bild.pos }}
         className="size-full object-cover"
       />
-      {/* Zwei Schichten: `multiply` färbt ein, die halbdeckende darüber nimmt
-          dem Foto so viel Detail, dass die weiße Karte davor ruhig steht. */}
+      {/* Drei Schichten: `multiply` färbt ein, die halbdeckende darüber nimmt
+          dem Foto Detail, und der Verlauf nach unten legt den Grund fest, auf
+          dem das dunkle Panel steht. Ohne ihn schwimmt es auf einer Fläche, die
+          genauso hell ist wie sein eigener Rand. */}
       <div className="absolute inset-0 bg-kh-orange mix-blend-multiply" aria-hidden />
-      <div className="absolute inset-0 bg-kh-orange/45" aria-hidden />
+      <div className="absolute inset-0 bg-kh-orange/40" aria-hidden />
+      <div
+        className="absolute inset-0 bg-gradient-to-t from-[#0E0D0B]/75 via-transparent to-[#0E0D0B]/25"
+        aria-hidden
+      />
       <motion.img
         src="/brand/kh-pb-lippe.png"
         alt=""
@@ -163,7 +169,7 @@ function Abschlussfeld() {
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 0.22, y: 0 }}
         transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute inset-x-0 top-[6%] mx-auto h-[40%] w-auto max-w-none object-contain brightness-0"
+        className="absolute inset-x-0 top-[5%] mx-auto h-[38%] w-auto max-w-none object-contain brightness-0"
       />
     </div>
   )

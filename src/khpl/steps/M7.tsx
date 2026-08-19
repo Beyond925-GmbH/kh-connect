@@ -149,10 +149,7 @@ export function M7() {
             {/* Eine Karte statt vier: Ablage, Rückmeldung und Vorrat gehören zu
               einer Handlung, und übereinandergestapelte Einzelkarten zerlegen
               den Screen in Kästchen. */}
-            <div
-              className="flex flex-col gap-3 rounded-kh bg-kh-page p-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)] landscape:p-5"
-              data-wisch="aus"
-            >
+            <div className="flex flex-col gap-3" data-wisch="aus">
               <Ablage
                 fertig={fertig}
                 anzahl={gesetzt.length}
@@ -175,10 +172,9 @@ export function M7() {
                   {fehler >= HILFE_AB && (
                     <div className="flex justify-start">
                       <Button
-                        variant="ghost"
+                        variant="leise"
                         onClick={zeigMirWie}
                         data-testid="m7-zeig-mir-wie"
-                        className="h-[60px] px-4 text-[1.0625rem]"
                       >
                         Zeig mir wie
                       </Button>
@@ -197,9 +193,7 @@ export function M7() {
           der Baustelle — den hast du in der Kalkulation schon bezahlt.
         </AhaKarte>
       }
-      fuss={
-        <StepFuss id="M7" gedaempft={!fertig} geschafft={fertig ? 'Dach steht' : null} />
-      }
+      fuss={<StepFuss id="M7" geschafft={fertig ? 'Dach steht' : null} />}
     />
   )
 }
@@ -221,14 +215,16 @@ function Ablage({
     <div
       ref={setNodeRef}
       data-testid="m7-ablage"
-      className={`flex min-h-[76px] items-center justify-between gap-3 rounded-kh border-2 border-dashed px-4 py-3 transition-colors ${
-        isOver ? 'border-kh-orange bg-kh-orange/15' : 'border-kh-rule bg-kh-band-soft'
+      className={`flex min-h-[80px] items-center justify-between gap-3 rounded-kh border-2 border-dashed px-4 py-3 transition-colors ${
+        isOver
+          ? 'border-kh-signal bg-kh-signal/15'
+          : 'border-kh-line-strong bg-white/[0.04]'
       }`}
     >
-      <p className="text-[1.125rem] font-normal text-kh-ink">
+      <p className="text-[1.125rem] font-semibold text-kh-paper">
         Was kommt als Nächstes aufs Dach?
       </p>
-      <span className="shrink-0 text-[1rem] text-kh-grey/70 tabular-nums">
+      <span className="shrink-0 font-display text-[1.5rem] leading-none text-kh-paper/60 tabular-nums">
         {anzahl}/{gesamt}
       </span>
     </div>
@@ -254,8 +250,11 @@ function Bauteilkarte({ schritt }: { schritt: Bauschritt }) {
             }
           : undefined
       }
-      className={`flex min-h-[60px] cursor-grab touch-none items-center rounded-kh border border-kh-rule bg-kh-surface px-4 py-2 text-[1.0625rem] text-kh-ink transition-shadow active:cursor-grabbing ${
-        isDragging ? 'shadow-xl' : ''
+      // Die Zieh-Karten sind bewusst hell: sie sind auf diesem Screen das
+      // Einzige, was man anfassen kann, und müssen sich vom dunklen Panel
+      // abheben wie ein Werkzeug vom Tisch.
+      className={`flex min-h-[60px] cursor-grab touch-none items-center rounded-kh-pill bg-kh-paper px-5 py-2 text-[1.0625rem] font-semibold text-[#0E0D0B] transition-transform active:cursor-grabbing ${
+        isDragging ? 'scale-105 shadow-[0_16px_40px_rgba(0,0,0,0.6)]' : ''
       }`}
     >
       {schritt.name}

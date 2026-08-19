@@ -27,8 +27,8 @@ export function useStepNavigation(id: StepId) {
 export function StepFuss({
   id,
   ohneWeiter,
-  gedaempft,
   geschafft,
+  aktion,
 }: {
   id: StepId
   /**
@@ -36,10 +36,10 @@ export function StepFuss({
    * Button, der nichts tut, ist schlimmer als keiner.
    */
   ohneWeiter?: boolean
-  /** Solange die Übung dieses Steps offen ist. */
-  gedaempft?: boolean
   /** Kurze Bestätigung, sobald die Übung gelöst ist. Siehe `Verzweigung`. */
   geschafft?: string | null
+  /** Die Handlung, die die Übung abschließt. Siehe `Verzweigung`. */
+  aktion?: React.ReactNode
 }) {
   const { offen, weiter, zumAbstecher } = useStepNavigation(id)
   // Denselben Weg wie der Wisch nach links — nie einen zweiten.
@@ -52,8 +52,8 @@ export function StepFuss({
       onAbstecher={zumAbstecher}
       onWeiter={nachVorn}
       ohneWeiter={ohneWeiter ?? STEPS[id].weiter === null}
-      gedaempft={gedaempft}
       geschafft={geschafft}
+      aktion={aktion}
     />
   )
 }

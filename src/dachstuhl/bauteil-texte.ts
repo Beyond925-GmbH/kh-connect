@@ -213,7 +213,18 @@ export const AUSWAHL_INTENSITAET = 0.45
 export const ABDUNKLUNG_ZIEL = '#6B6259'
 export const ABDUNKLUNG_ANTEIL = 0.35
 
+/**
+ * Szenenfarben je Stimmung.
+ *
+ * `dunkel` ist seit dem Umbau auf das Designsystem „Baustelle“ die Stimmung
+ * der ganzen Anwendung — nicht mehr nur die von M8. Der Himmel ist deshalb
+ * **warm** und nicht mehr blaugrau: neben Markenorange kippt ein kuehler
+ * Himmel die ganze Szene ins Fremde, und das Holz sieht darunter grau aus.
+ *
+ * `hell` bleibt unveraendert. Es traegt nur noch den Prototypen unter
+ * `?demo=dachstuhl`.
+ */
 export const SZENE_FARBEN = {
   hell: { hintergrund: '#EFEDEA', himmel: '#FFFFFF', boden: '#B7ADA0' },
-  dunkel: { hintergrund: '#1C1A17', himmel: '#8A97A6', boden: '#2A2622' },
+  dunkel: { hintergrund: '#141210', himmel: '#C2A184', boden: '#2E271F' },
 } as const

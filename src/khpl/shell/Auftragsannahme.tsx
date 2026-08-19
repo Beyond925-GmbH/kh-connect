@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,16 @@ import { nimmAuftragAn, starteKarriereSkip } from '@/khpl/store/fortschritt'
  * Keine Zeile „das dauert 4 Minuten“, keine Erklärung, was die App ist —
  * wer am Stand vorbeigeht, steigt in eine Geschichte ein, nicht in ein Produkt.
  *
+ * **Bewegtbild statt Standbild.** Vorher lag hier dasselbe Posterframe wie auf
+ * dem Splash: wer „Tippen zum Starten“ druckte, sah als Ergebnis exakt
+ * denselben Screen mit anderem Text — der erste Tap fühlte sich an, als wäre
+ * nichts passiert. Jetzt läuft `szenario.mp4`, eine andere Aufnahme, und der
+ * Screen beantwortet den Tap mit einem Schnitt.
+ *
+ * Das Video hängt hinter demselben Vorhang wie auf dem Splash: erst das
+ * Poster, das Bewegtbild kommt nachgeladen darüber. Wer sofort weitertippt,
+ * hat den Auftrag angenommen, bevor es da ist.
+ *
  * Er trägt den ersten der periodischen Karriere-Links (ui-shell 6). Wer ihn
  * hier nimmt, hat den Auftrag damit angenommen: die Rückkehr aus dem Skip
  * führt laut Zustandsmaschine auf S2, nicht zurück auf S1.
@@ -19,25 +30,65 @@ import { nimmAuftragAn, starteKarriereSkip } from '@/khpl/store/fortschritt'
  * an?“), keinen fertigen Wortlaut.
  */
 
-const BILD = '/medien/media/zimmerer/hero-poster.webp'
+const POSTER = '/medien/media/zimmerer/szenario-poster.webp'
+const LOOP = '/medien/media/zimmerer/szenario.mp4'
 
 export function Auftragsannahme() {
+  const [videoBereit, setVideoBereit] = useState(false)
+  const [ladeVideo, setLadeVideo] = useState(false)
+  const video = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setLadeVideo(true), 250)
+    return () => window.clearTimeout(id)
+  }, [])
+
+  // Wie auf dem Splash: iOS gibt Video-Decoder eines entfernten, noch
+  // laufenden Elements nicht sofort frei.
+  useEffect(
+    () => () => {
+      const v = video.current
+      if (!v) return
+      v.pause()
+      v.removeAttribute('src')
+      v.load()
+    },
+    [],
+  )
+
   return (
     <div
       data-testid="auftragsannahme"
       className="kh-screen flex flex-col overflow-hidden bg-kh-ink"
     >
       <img
-        src={BILD}
+        src={POSTER}
         alt=""
         aria-hidden
         className="absolute inset-0 size-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/88 via-black/55 to-black/30" />
+      {ladeVideo && (
+        <video
+          ref={video}
+          src={LOOP}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          aria-hidden
+          onCanPlay={() => setVideoBereit(true)}
+          className={`absolute inset-0 size-full object-cover transition-opacity duration-700 ${
+            videoBereit ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0E0D0B] via-[#0E0D0B]/60 to-[#0E0D0B]/25" />
 
       {/* „klein, textuell, in Grau, nicht als Button“ (ui-shell 6). Auf einem
-          dunklen Foto heißt Grau nicht `text-kh-grey`, sondern gedämpftes Weiß —
-          er darf hier auf keinen Fall mit „Auftrag annehmen“ konkurrieren. */}
+          dunklen Video heißt Grau gedämpftes Weiß auf einer flachen Pille —
+          er darf hier auf keinen Fall mit „Auftrag annehmen“ konkurrieren, muss
+          aber trotzdem als antippbar zu erkennen sein. */}
       <div className="relative flex justify-end p-3 landscape:p-4">
         <button
           type="button"
@@ -46,27 +97,37 @@ export function Auftragsannahme() {
             nimmAuftragAn()
             starteKarriereSkip()
           }}
-          className="flex h-[60px] items-center gap-0.5 rounded-kh px-3 text-[1.0625rem] font-light text-white/45 transition-colors hover:text-white/80"
+          className="flex h-[52px] items-center gap-1 rounded-kh-pill bg-black/35 px-4 text-[1rem] font-medium text-kh-paper/60 backdrop-blur-md transition-transform active:scale-95"
         >
           Karriere-Wege
-          <ChevronRight className="size-4" strokeWidth={1.5} />
+          <ChevronRight className="size-4" strokeWidth={2} />
         </button>
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 18 }}
+        initial={{ opacity: 0, y: 22 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         className="relative flex min-h-0 flex-1 flex-col justify-end gap-6 p-6 landscape:p-10"
       >
-        <div className="flex max-w-[46rem] flex-col gap-4">
-          <p className="text-[clamp(1.6rem,1.2rem+1.9vw,2.6rem)] leading-[1.1] font-bold text-white">
-            Du bist Azubi in einer Zimmerei.
-          </p>
+        <div className="flex max-w-[44rem] flex-col gap-4">
+          {/* Das Etikett setzt die Rolle, bevor der erste Satz sie behauptet.
+              „Tag 1“ ist dabei kein Fortschrittszähler, sondern der Anfang
+              einer Geschichte — und macht die Zeitangabe überflüssig, die
+              ui-shell 1 ausdrücklich verbietet. */}
+          <span className="kh-etikett flex items-center gap-2">
+            <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
+            Dein erster Auftrag
+          </span>
+          <h1 className="kh-plakat">
+            Du bist Azubi
+            <br />
+            <span className="text-kh-orange">in einer Zimmerei.</span>
+          </h1>
           {/* Bindet die Werkstattaufnahme an den Anruf, statt ein Haus zu
               versprechen, das nicht im Bild ist. Der Ortstermin selbst hat
               inzwischen ein eigenes Motiv — es steht in M1, wo er stattfindet. */}
-          <p className="text-[clamp(1.1875rem,1.05rem+0.6vw,1.5rem)] leading-[1.5] font-light text-white/90">
+          <p className="text-[clamp(1.125rem,1.02rem+0.55vw,1.4rem)] leading-[1.45] text-kh-paper/85">
             Der Chef legt das Telefon weg und dreht sich zu dir um. Altes Haus, das Dach
             muss neu. Er fragt, ob du mitkommst.
           </p>
@@ -75,11 +136,13 @@ export function Auftragsannahme() {
         <div className="flex justify-start landscape:justify-end">
           <Button
             onClick={nimmAuftragAn}
+            variant="weiter"
+            size="lg"
             data-testid="auftrag-annehmen"
-            className="h-[64px] px-9 text-[1.25rem]"
+            className="px-10 text-[1.25rem]"
           >
             Auftrag annehmen
-            <ArrowRight className="size-5" strokeWidth={1.75} />
+            <ArrowRight className="size-5" strokeWidth={2.5} />
           </Button>
         </div>
       </motion.div>

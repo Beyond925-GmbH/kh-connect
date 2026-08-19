@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Check, X } from 'lucide-react'
+import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
@@ -29,6 +30,14 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 // Text — gebündelt oben in der Datei (flow 8.4). Tabelle wörtlich aus flow 11.
 // ---------------------------------------------------------------------------
 
+/**
+ * Die Etiketten in `PUNKTE.text` sind bewusst kurz — „Zustand der alten
+ * Balken“, nicht „Zustand der alten Balken — Feuchte, Schädlinge, Fäulnis“. Im
+ * Zweispalter kostet jede zweizeilige Karte eine ganze Reihe, und bei zehn
+ * Punkten war die Übung damit höher als das Panel. Was wegfällt, ist keine
+ * Information: die vollständige Begründung steht in `grund` und erscheint in
+ * der Auswertung.
+ */
 const FRAGE = 'Was nimmst du vom Ortstermin mit zurück in den Betrieb?'
 
 interface Punkt {
@@ -42,7 +51,7 @@ interface Punkt {
 const PUNKTE: Punkt[] = [
   {
     id: 'aufmass',
-    text: 'Aufmaß des Dachs — Länge, Breite, Neigung',
+    text: 'Aufmaß: Länge, Breite, Neigung',
     richtig: true,
     grund:
       'Ohne Maße kein Angebot. Für die Kante reicht der Zollstock, für den First nimmst du den Laser.',
@@ -55,40 +64,40 @@ const PUNKTE: Punkt[] = [
   },
   {
     id: 'balken',
-    text: 'Zustand der alten Balken — Feuchte, Schädlinge, Fäulnis',
+    text: 'Zustand der alten Balken',
     richtig: true,
     grund: 'Der Kunde weiß meist nicht, dass sein Dachstuhl feucht ist. Du siehst es.',
   },
   {
     id: 'kran',
-    text: 'Zufahrt und Stellfläche für den Kran',
+    text: 'Zufahrt für den Kran',
     richtig: true,
     grund:
       'Kommt der Kran nicht hin, ändert sich das ganze Angebot. Besser jetzt gemerkt als am Aufrichtetag.',
   },
   {
     id: 'budget',
-    text: 'Wunsch und Budget des Kunden',
+    text: 'Wunsch und Budget',
     richtig: true,
     grund:
       'Was er will und was er ausgeben kann, sind zwei Fragen. Beide musst du stellen.',
   },
   {
     id: 'anschluesse',
-    text: 'Anschlüsse: Schornstein, Gauben, Nachbargebäude',
+    text: 'Anschlüsse und Gauben',
     richtig: true,
     grund: 'Alles, was durchs Dach geht oder daran stößt, ist Mehrarbeit.',
   },
   {
     id: 'material',
-    text: 'Das Material gleich bestellen',
+    text: 'Material gleich bestellen',
     richtig: false,
     grund:
       'Noch nicht. Es gibt weder Auftrag noch Abbundplan — und ohne den weißt du nicht, was du brauchst.',
   },
   {
     id: 'preis',
-    text: 'Dem Kunden einen Preis nennen',
+    text: 'Einen Preis nennen',
     richtig: false,
     grund:
       'Aus dem Bauch? Das kostet dich entweder den Auftrag oder die Marge. Der Preis kommt aus der Kalkulation.',
@@ -101,7 +110,7 @@ const PUNKTE: Punkt[] = [
   },
   {
     id: 'termin',
-    text: 'Den Aufrichtetermin fest zusagen',
+    text: 'Aufrichtetermin zusagen',
     richtig: false,
     grund:
       'Verlockend. Aber ohne Kran, Wetter und Lieferzeiten ist jedes Datum geraten. Termine kommen in Schritt 3.',
@@ -174,15 +183,14 @@ export function M1() {
         <p>
           Ein Anruf, eine Adresse, ein altes Dach. Du fährst hin, misst auf —{' '}
           <Begriff id="aufmass">vom Zollstock bis zum Laser</Begriff> —, machst Fotos und
-          hörst zu: Was will der Kunde, was ist möglich. Was du hier übersiehst, fehlt dir
-          später im Angebot.
+          hörst zu. Was du hier übersiehst, fehlt dir später im Angebot.
         </p>
       }
       interaktion={
         ausgewertet ? (
           <Auswertung treffer={treffer} verpasst={verpasst} daneben={daneben} />
         ) : (
-          <Liste gewaehlt={gewaehlt} onUmschalten={umschalten} onAuswerten={auswerten} />
+          <Liste gewaehlt={gewaehlt} onUmschalten={umschalten} />
         )
       }
       aha={
@@ -194,7 +202,21 @@ export function M1() {
       fuss={
         <StepFuss
           id="M1"
-          gedaempft={!ausgewertet}
+          aktion={
+            <Button
+              variant="aktion"
+              onClick={auswerten}
+              disabled={gewaehlt.length === 0}
+              data-testid="m1-auswerten"
+            >
+              Zurück in den Betrieb
+              {gewaehlt.length > 0 && (
+                <span className="font-display text-[1.375rem] leading-none tabular-nums">
+                  {gewaehlt.length}
+                </span>
+              )}
+            </Button>
+          }
           geschafft={
             ausgewertet
               ? verpasst.length === 0 && daneben.length === 0
@@ -211,68 +233,57 @@ export function M1() {
 function Liste({
   gewaehlt,
   onUmschalten,
-  onAuswerten,
 }: {
   gewaehlt: string[]
   onUmschalten: (id: string) => void
-  onAuswerten: () => void
 }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[1.0625rem] font-normal text-kh-ink sm:text-[1.125rem]">
-        {FRAGE} <span className="text-kh-grey/70">Tipp alles an, was dazugehört.</span>
+      <p className="text-[1.125rem] leading-snug font-semibold text-kh-paper sm:text-[1.25rem]">
+        {FRAGE}{' '}
+        <span className="font-normal text-kh-mute">Tipp alles an, was dazugehört.</span>
       </p>
 
       {/* Zwei Spalten in **beiden** Ausrichtungen. Zehn Punkte untereinander
-          passen im Hochformat nicht auf einen Screen, und Scrollen ist
-          ausgeschlossen (flow 5). */}
+          passen im Hochformat nicht auf einen Screen.
+
+          Die Punkte sind keine Checkbox-Zeilen mehr, sondern Chips: angetippt
+          füllt sich der ganze Chip orange und zieht sich einmal zusammen. Eine
+          6-px-Checkbox links neben grauem Text ist auf einem Touchscreen die
+          leiseste Rückmeldung, die man bauen kann — und diese Übung besteht
+          aus nichts anderem als zehnmal antippen. */}
       <ul className="grid auto-rows-min grid-cols-1 content-start gap-2 sm:grid-cols-2">
         {ANGEZEIGT.map((p) => {
           const an = gewaehlt.includes(p.id)
           return (
             <li key={p.id}>
-              <button
+              <motion.button
                 type="button"
                 onClick={() => onUmschalten(p.id)}
                 aria-pressed={an}
                 data-testid={`m1-${p.id}`}
-                className={`flex min-h-[62px] w-full items-center gap-3 rounded-kh border px-4 py-2 text-left text-[1.0625rem] transition-colors ${
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 600, damping: 26 }}
+                className={`flex min-h-[62px] w-full items-center gap-3 rounded-kh border-2 px-3.5 py-2 text-left text-[1.0625rem] leading-tight transition-colors ${
                   an
-                    ? 'border-kh-orange bg-kh-orange/10 text-kh-ink'
-                    : 'border-kh-rule bg-kh-surface text-kh-grey hover:border-kh-orange/50'
+                    ? 'border-kh-orange bg-kh-orange font-semibold text-[#0E0D0B]'
+                    : 'border-kh-line-strong bg-white/5 text-kh-paper/85'
                 }`}
               >
                 <span
                   aria-hidden
-                  className={`grid size-6 shrink-0 place-items-center rounded-[3px] border transition-colors ${
-                    an ? 'border-kh-orange bg-kh-orange' : 'border-kh-rule'
+                  className={`grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors ${
+                    an ? 'border-[#0E0D0B] bg-[#0E0D0B]' : 'border-white/35'
                   }`}
                 >
-                  {an && <Check className="size-4 text-white" strokeWidth={3} />}
+                  {an && <Check className="size-4 text-kh-orange" strokeWidth={3.5} />}
                 </span>
                 <span className="min-w-0">{p.text}</span>
-              </button>
+              </motion.button>
             </li>
           )
         })}
       </ul>
-
-      <div className="flex items-center justify-between gap-3">
-        <span className="text-[1rem] text-kh-grey/70 tabular-nums">
-          {gewaehlt.length} angetippt
-        </span>
-        {/* Dunkel, nicht orange: auf diesem Screen gehört die eine gefüllte
-            orange Fläche dem Weiter-Knopf. Siehe `Verzweigung`. */}
-        <Button
-          variant="dark"
-          onClick={onAuswerten}
-          disabled={gewaehlt.length === 0}
-          data-testid="m1-auswerten"
-          className="h-[60px] px-7 text-[1.0625rem]"
-        >
-          Zurück in den Betrieb
-        </Button>
-      </div>
     </div>
   )
 }
@@ -303,7 +314,7 @@ function Auswertung({
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[1.0625rem] font-normal text-kh-ink sm:text-[1.125rem]">
+      <p className="text-[1.125rem] leading-snug font-semibold text-kh-paper sm:text-[1.25rem]">
         {alleGefunden
           ? `Alle ${RICHTIGE}. Der Ortstermin sitzt.`
           : `${treffer.length} von ${RICHTIGE} hast du. Das hier ist noch offen:`}
@@ -312,32 +323,44 @@ function Auswertung({
       {/* Zwei Spalten wie die Frage selbst. Untereinander passten schon vier
           Karten weder ins Hoch- noch ins Querformat — und ein `overflow-y-auto`
           macht daraus eine Scrollfläche, also genau das, was flow 5
-          ausschließt, statt es zu lösen. */}
+          ausschließt, statt es zu lösen.
+
+          Die Farbe sagt hier, welche Sorte Fehler es war: was gefehlt hat,
+          trägt einen orangen Rand („das hättest du mitnehmen sollen“), was zu
+          viel war, bleibt neutral („das gehört hier nicht hin“). */}
       <ul className="grid shrink-0 auto-rows-min grid-cols-1 content-start gap-2 sm:grid-cols-2">
         {zuKlaeren.slice(0, 4).map((p) => {
           const gefehlt = !daneben.includes(p)
           return (
             <li
               key={p.id}
-              className="rounded-kh border border-kh-rule bg-kh-surface px-3 py-2"
+              className={`rounded-kh border-2 px-3.5 py-2.5 ${
+                gefehlt
+                  ? 'border-kh-orange/45 bg-kh-orange/10'
+                  : 'border-kh-line bg-white/4'
+              }`}
               data-testid={`m1-klaerung-${p.id}`}
             >
               <div className="flex items-start gap-3">
                 <span
                   aria-hidden
-                  className={`mt-0.5 grid size-5 shrink-0 place-items-center rounded-full ${
-                    gefehlt ? 'bg-kh-orange/15 text-kh-orange' : 'bg-kh-band text-kh-grey'
+                  className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${
+                    gefehlt
+                      ? 'bg-kh-orange text-[#0E0D0B]'
+                      : 'bg-white/12 text-kh-paper/70'
                   }`}
                 >
                   {gefehlt ? (
-                    <Check className="size-4" strokeWidth={2.5} />
+                    <Check className="size-4" strokeWidth={3.5} />
                   ) : (
-                    <X className="size-4" strokeWidth={2.5} />
+                    <X className="size-4" strokeWidth={3.5} />
                   )}
                 </span>
                 <div className="min-w-0">
-                  <p className="text-[1rem] font-normal text-kh-ink">{p.text}</p>
-                  <p className="mt-0.5 text-[0.9375rem] leading-[1.35] text-kh-grey">
+                  <p className="text-[1.0625rem] leading-tight font-semibold text-kh-paper">
+                    {p.text}
+                  </p>
+                  <p className="mt-1 text-[0.9375rem] leading-[1.4] text-kh-mute">
                     {p.grund}
                   </p>
                 </div>
@@ -354,8 +377,8 @@ function Auswertung({
           Begründung je Punkt“ (flow 7 M1) für alle zehn erreichbar, ohne dass
           zehn Begründungen gleichzeitig auf dem Screen stehen. */}
       {treffer.length > 0 && (
-        <div className="flex flex-col gap-1.5">
-          <p className="kh-eyebrow text-kh-grey/70">Hattest du</p>
+        <div className="flex flex-col gap-2">
+          <p className="kh-etikett text-kh-mute">Hattest du</p>
           <div className="flex flex-wrap gap-1.5">
             {treffer.map((p) => (
               <button
@@ -363,22 +386,18 @@ function Auswertung({
                 type="button"
                 onClick={() => setOffen((o) => (o === p.id ? null : p.id))}
                 aria-pressed={offen === p.id}
-                className={`flex items-center gap-1.5 rounded-kh border px-3 py-2 text-left text-[0.9375rem] transition-colors ${
+                className={`flex items-center gap-1.5 rounded-kh-pill border-2 px-3 py-2 text-left text-[0.9375rem] transition-transform active:scale-95 ${
                   offen === p.id
-                    ? 'border-kh-orange bg-kh-orange/10 text-kh-ink'
-                    : 'border-kh-rule bg-kh-surface text-kh-grey'
+                    ? 'border-kh-signal bg-kh-signal font-semibold text-[#0E0D0B]'
+                    : 'border-kh-line-strong bg-white/5 text-kh-paper/80'
                 }`}
               >
-                <Check
-                  className="size-3.5 shrink-0 text-kh-orange-text"
-                  strokeWidth={3}
-                  aria-hidden
-                />
+                <Check className="size-3.5 shrink-0" strokeWidth={3.5} aria-hidden />
                 {p.text}
               </button>
             ))}
           </div>
-          <p className="min-h-[2.6em] text-[1rem] leading-[1.35] text-kh-grey">
+          <p className="min-h-[2.6em] text-[1rem] leading-[1.4] text-kh-mute">
             {offen ? treffer.find((p) => p.id === offen)?.grund : ''}
           </p>
         </div>

@@ -45,31 +45,46 @@ export function M9() {
         <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           {KARRIEREWEGE.map((weg, i) => (
             <li key={weg.id} className="flex">
+              {/*
+                Drei Karten, drei Nummern. Der Titel steht in Anton, damit die
+                Wahl aussieht wie eine Wahl und nicht wie drei Listeneinträge —
+                und die Ziffer oben rechts macht aus drei gleich aussehenden
+                Kacheln drei unterscheidbare Ziele. „Studium“ darf sich nicht
+                hinter den anderen verstecken (flow 7 M9); gleiche Größe,
+                gleiche Farbe, gleiche Nummerngröße ist die Umsetzung davon.
+              */}
               <motion.button
                 type="button"
-                initial={{ opacity: 0, y: 14 }}
+                initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
+                whileTap={{ scale: 0.96 }}
                 transition={{
-                  duration: 0.4,
+                  duration: 0.42,
                   delay: i * 0.09,
                   ease: [0.22, 1, 0.36, 1],
                 }}
                 onClick={() => zumAbstecher(weg.id)}
                 data-testid={`m9-${weg.id}`}
-                className="flex min-h-[92px] w-full flex-col gap-1 rounded-kh border-2 border-kh-orange/35 bg-kh-surface p-4 text-left transition-colors hover:border-kh-orange hover:bg-kh-orange/5"
+                className="relative flex min-h-[112px] w-full flex-col justify-between gap-2 overflow-hidden rounded-kh border-2 border-kh-line-strong bg-white/6 p-4 text-left"
               >
-                <span className="flex items-center justify-between gap-2">
-                  <span className="text-[1.25rem] leading-tight font-bold text-kh-orange-text">
-                    {weg.titel}
+                <span
+                  aria-hidden
+                  className="absolute -top-3 right-2 font-display text-[3.5rem] leading-none text-white/8"
+                >
+                  {i + 1}
+                </span>
+                <span className="kh-titel-klein relative text-kh-orange">
+                  {weg.titel}
+                </span>
+                <span className="relative flex items-end justify-between gap-2">
+                  <span className="text-[1rem] leading-snug text-kh-paper/80">
+                    {weg.koeder}
                   </span>
                   <ArrowRight
-                    className="size-5 shrink-0 text-kh-orange-text"
-                    strokeWidth={2}
+                    className="size-5 shrink-0 text-kh-orange"
+                    strokeWidth={2.5}
                     aria-hidden
                   />
-                </span>
-                <span className="text-[1rem] leading-snug text-kh-grey">
-                  {weg.koeder}
                 </span>
               </motion.button>
             </li>

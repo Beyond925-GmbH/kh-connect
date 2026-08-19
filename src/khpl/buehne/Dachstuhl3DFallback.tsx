@@ -26,8 +26,8 @@ export function Dachstuhl3DFallback() {
   }, [])
 
   return (
-    <div className="grid size-full place-items-center bg-kh-band-soft">
-      <p className="text-[15px] text-kh-grey">Der Dachstuhl wird aufgestellt {punkte}</p>
+    <div className="grid size-full place-items-center bg-kh-surface">
+      <p className="text-[15px] text-kh-mute">Der Dachstuhl wird aufgestellt {punkte}</p>
     </div>
   )
 }

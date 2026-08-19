@@ -29,16 +29,16 @@ class Auffangnetz extends Component<{ children: ReactNode }, { gefallen: boolean
   render() {
     if (!this.state.gefallen) return this.props.children
     return (
-      <div className="fixed inset-0 grid place-items-center bg-kh-page p-6 text-center">
+      <div className="fixed inset-0 grid place-items-center bg-kh-ink p-6 text-center">
         <div>
-          <p className="kh-h3 text-kh-orange">Die 3D-Ansicht ist ausgefallen</p>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-kh-grey">
+          <p className="kh-titel-klein text-kh-orange">Die 3D-Ansicht ist ausgefallen</p>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-kh-mute">
             Bitte die Seite neu laden. Wenn es erneut passiert, hilft ein Neustart des
             Geräts.
           </p>
           <button
             type="button"
-            className="mt-4 rounded-kh bg-kh-orange px-4 py-2 text-sm text-kh-page"
+            className="mt-4 rounded-kh-pill bg-kh-orange px-5 py-2.5 text-sm font-semibold text-[#0E0D0B]"
             onClick={() => window.location.reload()}
           >
             Seite neu laden
@@ -57,7 +57,7 @@ export default function App() {
       <Auffangnetz>
         <Suspense
           fallback={
-            <div className="fixed inset-0 grid place-items-center bg-kh-page text-kh-grey">
+            <div className="fixed inset-0 grid place-items-center bg-kh-ink text-kh-mute">
               3D-Modell wird geladen …
             </div>
           }

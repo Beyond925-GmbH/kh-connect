@@ -8,19 +8,21 @@ import { cn } from '@/lib/utils'
  * einer Interaktion einfährt. Kein Pflichtelement: sie sitzt dort, wo sie
  * etwas umdreht, nicht auf jedem Screen.
  *
- * **Sie klappt auf, statt einfach dazustehen.** Vorher fuhr der ganze Absatz
- * von allein ein. Auf Screens mit zwei Karten standen damit bis zu neunzig
- * Wörter Zusatztext da, die niemand angefordert hatte — bei einem Publikum,
- * das im Vorbeigehen dreißig Sekunden investiert, ist das der Punkt, an dem
- * weggeschaut wird. Als Zeile mit Pluszeichen kostet derselbe Inhalt zwei
- * Zeilen Platz, und wer ihn liest, hat sich dafür entschieden.
+ * **Sie klappt auf, statt einfach dazustehen.** Als Absatz standen auf Screens
+ * mit zwei Karten bis zu neunzig Wörter Zusatztext da, die niemand angefordert
+ * hatte — bei einem Publikum, das im Vorbeigehen dreißig Sekunden investiert,
+ * ist das der Punkt, an dem weggeschaut wird. Als Zeile mit Pluszeichen kostet
+ * derselbe Inhalt zwei Zeilen Platz, und wer ihn liest, hat sich dafür
+ * entschieden.
  *
  * Der Preis ist ein Tap. Das ist hier kein Preis, sondern der Zweck: die
- * Lese-Steps (M3, B3.1, B5.1, M6) hatten sonst überhaupt nichts zu tun.
+ * Lese-Steps (M3, B3.1, B5.1, M6) hätten sonst überhaupt nichts zu tun.
  *
- * Das Framing ist die Belohnung, nicht die Ansage (khpl-ui-shell.md 5) —
- * deshalb hat die Komponente kein `sichtbar`-Default: der Step entscheidet
- * bewusst, wann sie kommt.
+ * **Der geschlossene Streifen sieht seit dem Umbau aus wie ein Knopf**, nicht
+ * wie ein Kasten mit einem Icon rechts. Er hat einen vollen orangen Rand, das
+ * Pluszeichen sitzt in einem gefüllten Kreis, und beim Drücken sinkt er ein.
+ * Vorher stand da ein hellgrauer Balken mit einer grauen Kleinzeile darauf —
+ * das las sich wie eine Überschrift, und Überschriften tippt niemand an.
  */
 export function AhaKarte({
   sichtbar,
@@ -50,12 +52,12 @@ export function AhaKarte({
     <AnimatePresence initial={false}>
       {sichtbar && (
         <motion.aside
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
-          transition={{ duration: 0.42, delay: verzoegerung, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.45, delay: verzoegerung, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
-            'overflow-hidden rounded-kh border-l-4 border-kh-orange bg-kh-band-soft',
+            'shrink-0 overflow-hidden rounded-kh border-2 border-kh-orange/45 bg-kh-orange/10',
             className,
           )}
         >
@@ -65,16 +67,16 @@ export function AhaKarte({
             aria-expanded={offen}
             aria-controls={inhaltId}
             data-testid="aha-schalter"
-            className="flex min-h-[56px] w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors hover:bg-kh-band"
+            className="flex min-h-[60px] w-full items-center justify-between gap-3 px-4 py-3 text-left transition-transform active:scale-[0.985]"
           >
-            <span className="kh-eyebrow">{beschriftung}</span>
+            <span className="kh-etikett">{beschriftung}</span>
             <motion.span
               aria-hidden
-              animate={{ rotate: offen ? 45 : 0 }}
-              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="grid size-8 shrink-0 place-items-center rounded-full bg-kh-orange text-white"
+              animate={{ rotate: offen ? 135 : 0 }}
+              transition={{ type: 'spring', stiffness: 380, damping: 22 }}
+              className="grid size-9 shrink-0 place-items-center rounded-full bg-kh-orange text-[#0E0D0B]"
             >
-              <Plus className="size-5" strokeWidth={2.25} />
+              <Plus className="size-5" strokeWidth={3} />
             </motion.span>
           </button>
 
@@ -89,7 +91,7 @@ export function AhaKarte({
               >
                 <div
                   data-auswaehlbar
-                  className="px-5 pb-4 text-[1.0625rem] leading-[1.5] text-kh-ink sm:text-[1.125rem]"
+                  className="px-4 pb-4 text-[1.0625rem] leading-[1.45] text-kh-paper/90 sm:text-[1.125rem]"
                 >
                   {children}
                 </div>

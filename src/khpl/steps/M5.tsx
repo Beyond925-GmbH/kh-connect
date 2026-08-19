@@ -89,22 +89,31 @@ function Phasenanzeige({ label }: { label: string }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25 }}
-      className="w-fit rounded-kh bg-kh-page px-5 py-3 shadow-[0_2px_24px_rgba(0,0,0,0.12)]"
+      // Die Phasenanzeige ist kein Kästchen im Panel, sondern eine Marke: ein
+      // Punkt, der mitläuft, und der Name daneben. Sie kommentiert eine
+      // Animation und darf deshalb nicht aussehen wie ein Absatz.
+      className="flex w-fit items-center gap-3 rounded-kh-pill border-2 border-kh-orange/40 bg-kh-orange/12 py-2.5 pr-5 pl-3"
     >
-      <p className="kh-eyebrow text-kh-grey/70">Es fliegt ein</p>
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.p
-          key={label}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.22 }}
-          data-testid="m5-phase"
-          className="kh-h3 text-kh-orange-text"
-        >
-          {label}
-        </motion.p>
-      </AnimatePresence>
+      <span
+        aria-hidden
+        className="size-3 shrink-0 animate-puls rounded-full bg-kh-orange"
+      />
+      <span className="min-w-0">
+        <span className="kh-etikett block text-kh-paper/50">Es fliegt ein</span>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.p
+            key={label}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22 }}
+            data-testid="m5-phase"
+            className="kh-titel-klein text-kh-orange"
+          >
+            {label}
+          </motion.p>
+        </AnimatePresence>
+      </span>
     </motion.div>
   )
 }

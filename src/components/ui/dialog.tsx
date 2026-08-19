@@ -13,17 +13,17 @@ function DialogContent({
 }: React.ComponentProps<typeof BaseDialog.Popup>) {
   return (
     <BaseDialog.Portal>
-      <BaseDialog.Backdrop className="fixed inset-0 z-50 bg-black/50 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+      <BaseDialog.Backdrop className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
       <BaseDialog.Popup
         className={cn(
-          'fixed top-1/2 left-1/2 z-50 max-h-[85vh] w-[min(44rem,92vw)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-kh bg-kh-surface p-10 shadow-2xl dark:ring-1 dark:ring-kh-rule outline-none transition-all duration-200 data-[ending-style]:scale-[0.98] data-[ending-style]:opacity-0 data-[starting-style]:scale-[0.98] data-[starting-style]:opacity-0',
+          'fixed top-1/2 left-1/2 z-50 max-h-[85dvh] w-[min(42rem,92vw)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-kh-lg border-t-4 border-kh-orange bg-kh-raised p-8 shadow-[0_28px_80px_rgba(0,0,0,0.7)] ring-1 ring-white/10 outline-none transition-all duration-200 data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0 data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0 sm:p-10',
           className,
         )}
         {...props}
       >
         {children}
-        <BaseDialog.Close className="absolute top-4 right-4 grid size-10 place-items-center rounded-kh text-kh-grey transition-colors hover:bg-kh-band">
-          <X className="size-5" />
+        <BaseDialog.Close className="absolute top-4 right-4 grid size-12 place-items-center rounded-kh-pill bg-white/8 text-kh-paper transition-transform active:scale-90">
+          <X className="size-5" strokeWidth={2.25} />
           <span className="sr-only">Schließen</span>
         </BaseDialog.Close>
       </BaseDialog.Popup>
@@ -35,14 +35,19 @@ function DialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof BaseDialog.Title>) {
-  return <BaseDialog.Title className={cn('kh-h1 mb-4', className)} {...props} />
+  return <BaseDialog.Title className={cn('kh-titel mb-4', className)} {...props} />
 }
 
 function DialogDescription({
   className,
   ...props
 }: React.ComponentProps<typeof BaseDialog.Description>) {
-  return <BaseDialog.Description className={cn('font-light', className)} {...props} />
+  return (
+    <BaseDialog.Description
+      className={cn('text-[1.125rem] leading-[1.5] text-kh-paper/85', className)}
+      {...props}
+    />
+  )
 }
 
 export {

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
 /**
- * Die Foto-Bühne. Ein Motiv, vollflächig, mit Verlauf darüber.
+ * Die Foto-Bühne. Ein Motiv, vollflächig.
  *
  * Seit dem Umbau auf ein einziges Step-Layout trägt fast jeder Screen ein
  * echtes Foto statt einer Zeichnung. Diese Komponente ist die einzige Stelle,
@@ -17,23 +17,29 @@ import { cn } from '@/lib/utils'
  * `aria-hidden`, weil das Foto den Screen stimmt und nichts erzählt, was nicht
  * im Fachtext daneben steht — ein Alt-Text wäre hier eine Dopplung, die jeder
  * Screenreader mitlesen muss.
+ *
+ * **Der Verlauf liegt nicht mehr hier, sondern in `StepShell`.** Er gehört zur
+ * Bühne als Ebene, egal ob darunter ein Foto, ein 3D-Modell oder nichts liegt —
+ * der Titel steht seit dem Umbau auf dem Bild und braucht ihn in jedem Fall.
+ * Zweimal derselbe Verlauf übereinander machte die Motive matschig.
+ *
+ * Dafür kommt hier eine leichte Anhebung von Sättigung und Kontrast dazu: die
+ * Pexels-Motive sind neutral abgestimmt, und neben Anton-Versalien und
+ * Warnfarben sieht neutral aus wie ausgewaschen.
  */
 export function Foto({
   src,
   pos = 'center',
   className,
-  /** Ohne Verlauf — für Motive, über denen keine Karte klebt. */
-  ohneScrim = false,
 }: {
   src: string
   pos?: string
   className?: string
-  ohneScrim?: boolean
 }) {
   const [geladen, setGeladen] = useState(false)
 
   return (
-    <div className={cn('relative size-full overflow-hidden bg-kh-band', className)}>
+    <div className={cn('relative size-full overflow-hidden bg-kh-surface', className)}>
       <img
         src={src}
         alt=""
@@ -45,13 +51,12 @@ export function Foto({
         fetchPriority="high"
         decoding="async"
         onLoad={() => setGeladen(true)}
-        style={{ objectPosition: pos }}
+        style={{ objectPosition: pos, filter: 'saturate(1.12) contrast(1.06)' }}
         className={cn(
-          'size-full object-cover transition-opacity duration-500',
+          'size-full scale-[1.01] object-cover transition-opacity duration-700',
           geladen ? 'opacity-100' : 'opacity-0',
         )}
       />
-      {!ohneScrim && <div className="kh-scrim pointer-events-none absolute inset-0" />}
     </div>
   )
 }

@@ -9,8 +9,12 @@ import {
 
 /**
  * Fachbegriff im Fließtext (khpl-flow.md 6.3). Antippbar, in Markerfarbe
- * unterlegt und unterstrichen — wer weitergehen will, geht weiter; wer
+ * unterlegt und dick unterstrichen — wer weitergehen will, geht weiter; wer
  * stolpert, bekommt die Antwort an Ort und Stelle.
+ *
+ * Die Unterstreichung ist 3 px stark statt 2 und der Begriff halbfett: auf
+ * dunklem Grund, hinter einer Fensterscheibe aus Hallenlicht, war die feine
+ * Variante als antippbar nicht zu erkennen.
  *
  * Trefferfläche: khpl-flow.md 8.5 setzt 60 pt für diskrete Ziele. Ein Begriff
  * mitten im Satz kann das nicht einhalten, ohne den Absatz zu zerreißen — die
@@ -27,7 +31,7 @@ export function Begriff({ id, children }: { id: BegriffId; children?: React.Reac
   return (
     <Popover>
       <PopoverTrigger
-        className="inline cursor-pointer rounded-[2px] bg-kh-orange/20 px-[0.12em] font-normal text-kh-ink underline decoration-kh-orange-text decoration-2 underline-offset-[0.18em] transition-colors hover:bg-kh-orange/40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kh-orange"
+        className="inline cursor-pointer rounded-[3px] bg-kh-orange/25 px-[0.14em] font-semibold text-kh-paper underline decoration-kh-orange decoration-[3px] underline-offset-[0.2em] transition-colors active:bg-kh-orange active:text-[#0E0D0B]"
         aria-label={`${eintrag.label} — was ist das?`}
       >
         {children ?? eintrag.label}

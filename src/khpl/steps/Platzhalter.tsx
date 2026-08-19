@@ -19,7 +19,7 @@ export function Platzhalter({ id }: { id: StepId }) {
       id={id}
       titelZusatz={def.art === 'abstecher' ? 'Abstecher' : undefined}
       onWeiter={weiter}
-      buehne={<div className="size-full bg-kh-band" />}
+      buehne={<div className="size-full bg-kh-surface" />}
       fachtext={<p>Dieser Schritt ist noch nicht gebaut.</p>}
       fuss={<StepFuss id={id} />}
     />

@@ -101,9 +101,8 @@ export function M4() {
       fachtext={
         <p>
           <Begriff id="abbundplan">Abbundplan</Begriff> lesen, Hölzer anzeichnen, ablängen
-          und die Verbindungen ausarbeiten — heute meist auf der{' '}
-          <Begriff id="abbundanlage">Abbundanlage</Begriff>, bei Sonderteilen von Hand.
-          Jedes Teil bekommt eine Nummer, damit es auf der Baustelle seinen Platz findet.
+          — heute meist auf der <Begriff id="abbundanlage">Abbundanlage</Begriff>, bei
+          Sonderteilen von Hand. Jedes Teil bekommt eine Nummer.
         </p>
       }
       karteBreit
@@ -128,9 +127,6 @@ export function M4() {
             }}
             gesperrt={geloest}
             ergebnis={ergebnis}
-            versuche={versuche}
-            onPruefen={pruefen}
-            onZeigMirWie={zeigMirWie}
           />
         </div>
       }
@@ -144,7 +140,24 @@ export function M4() {
       fuss={
         <StepFuss
           id="M4"
-          gedaempft={!geloest}
+          aktion={
+            geloest ? null : (
+              <div className="flex items-center gap-2">
+                <Button variant="aktion" onClick={pruefen} data-testid="m4-pruefen">
+                  Schnitt setzen
+                </Button>
+                {versuche >= HILFE_AB && (
+                  <Button
+                    variant="leise"
+                    onClick={zeigMirWie}
+                    data-testid="m4-zeig-mir-wie"
+                  >
+                    Zeig mir wie
+                  </Button>
+                )}
+              </div>
+            )
+          }
           geschafft={geloest ? 'Zuschnitt sitzt' : null}
         />
       }
@@ -207,46 +220,39 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
  */
 function Werkzeichnung() {
   return (
-    <div className="w-full rounded-kh border border-kh-rule bg-kh-band-soft px-3 py-2">
+    <div className="kh-feld flex w-full flex-col gap-2 px-3.5 py-3">
+      <p className="kh-etikett">Soll laut Plan</p>
       <svg
-        viewBox="10 60 310 125"
-        className="h-[56px] w-full"
+        viewBox="10 80 310 60"
+        className="h-[54px] w-full"
         role="img"
         aria-label={`Werkzeichnung: Länge ${mm(ZIEL_MM)}, Winkel ${ZIEL_WINKEL} Grad`}
       >
         <path
           d="M20 96 L280 96 L262 130 L20 130 Z"
           fill="var(--color-kh-orange)"
-          opacity="0.18"
-          stroke="var(--color-kh-ink)"
-          strokeWidth="1.5"
+          opacity="0.3"
+          stroke="var(--color-kh-orange)"
+          strokeWidth="2"
         />
-        <path
-          d="M20 150 L280 150"
-          stroke="var(--color-kh-grey)"
-          strokeWidth="1.2"
-          strokeDasharray="4 3"
-        />
-        <text
-          x="150"
-          y="172"
-          fontSize="20"
-          fontWeight="700"
-          textAnchor="middle"
-          fill="var(--color-kh-ink)"
-        >
-          {mm(ZIEL_MM)}
-        </text>
-        <path
-          d="M266 96 A 26 26 0 0 1 274 114"
-          fill="none"
-          stroke="var(--color-kh-grey)"
-          strokeWidth="1.2"
-        />
-        <text x="284" y="86" fontSize="18" fontWeight="700" fill="var(--color-kh-ink)">
-          {ZIEL_WINKEL}°
-        </text>
       </svg>
+      {/* Die beiden Sollwerte stehen als Zahlen daneben, nicht als 18-px-Text
+          in der Zeichnung. Sie sind die Aufgabe — wer sie sucht, soll sie aus
+          zwei Metern Entfernung finden, nicht in einer Vektorgrafik lesen. */}
+      <dl className="flex gap-5">
+        <div>
+          <dt className="text-[0.875rem] text-kh-mute">Länge</dt>
+          <dd className="font-display text-[1.5rem] leading-none text-kh-paper tabular-nums">
+            {mm(ZIEL_MM)}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-[0.875rem] text-kh-mute">Winkel am First</dt>
+          <dd className="font-display text-[1.5rem] leading-none text-kh-paper tabular-nums">
+            {ZIEL_WINKEL}°
+          </dd>
+        </div>
+      </dl>
     </div>
   )
 }
@@ -264,9 +270,6 @@ function Zuschnitt({
   onWinkel,
   gesperrt,
   ergebnis,
-  versuche,
-  onPruefen,
-  onZeigMirWie,
 }: {
   laenge: number
   onLaenge: (n: number) => void
@@ -274,9 +277,6 @@ function Zuschnitt({
   onWinkel: (w: Winkel) => void
   gesperrt: boolean
   ergebnis: Rueckmeldung | null
-  versuche: number
-  onPruefen: () => void
-  onZeigMirWie: () => void
 }) {
   const bahn = useRef<HTMLDivElement>(null)
   const beimGreifen = useRef(laenge)
@@ -306,15 +306,15 @@ function Zuschnitt({
   // Ausrichtung überlappen die Kinder, sobald der Fuß wächst (Abstecher-Angebot
   // plus Aha-Karte) — der Balken lief dann quer durch die Winkelknöpfe.
   return (
-    <div className="flex min-w-0 flex-1 flex-col gap-3" data-wisch="aus">
-      <div className="flex items-baseline gap-3">
+    <div className="flex min-w-0 flex-1 flex-col gap-2.5" data-wisch="aus">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
         <span
           data-testid="m4-laenge"
-          className="text-[clamp(1.6rem,1.2rem+1.2vw,2.2rem)] leading-none font-bold text-kh-orange tabular-nums"
+          className="font-display text-[clamp(1.9rem,1.3rem+1.6vw,2.75rem)] leading-none text-kh-signal tabular-nums"
         >
           {mm(laenge)}
         </span>
-        <span className="text-[1.0625rem] text-kh-grey">
+        <span className="text-[1.0625rem] text-kh-mute">
           Zieh die Schnittlinie auf das Maß.
         </span>
       </div>
@@ -326,16 +326,24 @@ function Zuschnitt({
         }}
         onDragMove={ziehen}
       >
-        <div ref={bahn} className="relative h-[92px] w-full shrink-0 select-none">
-          {/* Der Balken. Der Teil rechts der Schnittlinie ist Verschnitt. */}
-          <div className="absolute inset-x-0 top-[22px] h-[48px] overflow-hidden rounded-[3px] bg-[#C08A50]">
+        <div ref={bahn} className="relative h-[84px] w-full shrink-0 select-none">
+          {/* Der Balken. Links der Schnittlinie liegt das Teil, rechts der
+              Verschnitt — und genau so sieht es jetzt auch aus: das Teil ist
+              volles Holz, der Verschnitt ist abgedunkelt und schraffiert.
+              Vorher waren beide Hälften fast gleich hell und der Unterschied
+              nur an der Sättigung zu erkennen. */}
+          <div className="absolute inset-x-0 top-[18px] h-[48px] overflow-hidden rounded-[6px] bg-[#4A382A] ring-1 ring-white/10">
             <div
-              className="absolute inset-y-0 left-0 bg-[#A9743F]"
+              className="absolute inset-y-0 left-0 bg-[#C08A50]"
               style={{ width: `${anteil * 100}%` }}
             />
             <div
-              className="absolute inset-y-0 bg-[repeating-linear-gradient(90deg,rgba(0,0,0,0.07)_0_2px,transparent_2px_26px)]"
-              style={{ left: 0, right: 0 }}
+              aria-hidden
+              className="absolute inset-y-0 right-0 bg-[repeating-linear-gradient(-45deg,rgba(255,255,255,0.07)_0_6px,transparent_6px_12px)]"
+              style={{ left: `${anteil * 100}%` }}
+            />
+            <div
+              className="absolute inset-y-0 inset-x-0 bg-[repeating-linear-gradient(90deg,rgba(0,0,0,0.12)_0_2px,transparent_2px_26px)]"
               aria-hidden
             />
           </div>
@@ -349,30 +357,35 @@ function Zuschnitt({
           Querformat schob genau das die Erfolgsmeldung aus der Spalte heraus,
           sodass „Passt. Nummer drauf“ überhaupt nicht mehr zu sehen war. */}
       {gesperrt ? (
-        <p className="shrink-0 text-[1.0625rem] text-kh-grey">
-          Winkel am First: <span className="font-normal text-kh-ink">{winkel}°</span>
+        <p className="shrink-0 text-[1.0625rem] text-kh-mute">
+          Winkel am First: <span className="font-semibold text-kh-paper">{winkel}°</span>
         </p>
       ) : (
-        <div className="flex shrink-0 flex-col gap-2">
-          <p className="text-[1.0625rem] text-kh-grey">Und der Winkel am First:</p>
+        <div className="flex shrink-0 flex-col gap-1.5">
+          <p className="text-[1.0625rem] text-kh-mute">Und der Winkel am First:</p>
           <div className="flex gap-2">
             {WINKEL.map((w) => (
-              <Button
+              <button
                 key={w}
-                variant={winkel === w ? 'default' : 'outline'}
+                type="button"
                 onClick={() => onWinkel(w)}
                 data-testid={`m4-winkel-${w}`}
-                className="h-[60px] flex-1 gap-2 text-[1.125rem]"
+                aria-pressed={winkel === w}
+                className={`flex h-[60px] flex-1 items-center justify-center gap-2 rounded-kh border-2 text-[1.125rem] font-semibold transition-transform active:scale-95 ${
+                  winkel === w
+                    ? 'border-kh-signal bg-kh-signal text-[#0E0D0B]'
+                    : 'border-kh-line-strong bg-white/5 text-kh-paper'
+                }`}
               >
                 <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
                   <path
                     d={`M2 20 L22 20 L22 ${20 - 20 * Math.tan((w * Math.PI) / 180) * 0.5} Z`}
                     fill="currentColor"
-                    opacity="0.45"
+                    opacity="0.5"
                   />
                 </svg>
                 {w}°
-              </Button>
+              </button>
             ))}
           </div>
         </div>
@@ -385,26 +398,6 @@ function Zuschnitt({
           testid="m4-rueckmeldung"
         />
       </div>
-
-      {!gesperrt && (
-        <div className="flex items-center justify-between gap-3">
-          {versuche >= HILFE_AB ? (
-            <Button
-              variant="ghost"
-              onClick={onZeigMirWie}
-              data-testid="m4-zeig-mir-wie"
-              className="h-[60px] px-4 text-[1.0625rem]"
-            >
-              Zeig mir wie
-            </Button>
-          ) : (
-            <span />
-          )}
-          <Button onClick={onPruefen} data-testid="m4-pruefen" className="h-[60px] px-7">
-            Schnitt setzen
-          </Button>
-        </div>
-      )}
     </div>
   )
 }
@@ -430,12 +423,12 @@ function Schnittgriff({ anteil, gesperrt }: { anteil: number; gesperrt: boolean 
       }`}
     >
       <div
-        className={`absolute top-[18px] bottom-[18px] left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-kh-ink transition-colors ${
-          isDragging ? 'bg-kh-orange' : ''
+        className={`absolute top-[14px] bottom-[14px] left-1/2 w-[3px] -translate-x-1/2 rounded-full transition-colors ${
+          isDragging ? 'bg-kh-signal' : 'bg-kh-paper'
         }`}
       />
       <div
-        className={`absolute top-1/2 left-1/2 size-11 -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-kh-page bg-kh-orange shadow-lg transition-transform ${
+        className={`absolute top-1/2 left-1/2 size-12 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-[#0E0D0B] bg-kh-orange shadow-[0_6px_20px_rgba(255,122,26,0.5)] transition-transform ${
           isDragging ? 'scale-110' : ''
         }`}
       />

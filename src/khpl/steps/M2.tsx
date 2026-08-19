@@ -79,14 +79,7 @@ export function M2() {
           </p>
         )
       }
-      interaktion={
-        <Schaetzung
-          wert={wert}
-          onWert={setWert}
-          aufgeloest={aufgeloest}
-          onAufloesen={aufloesen}
-        />
-      }
+      interaktion={<Schaetzung wert={wert} onWert={setWert} aufgeloest={aufgeloest} />}
       aha={
         <div className="flex flex-col gap-2">
           <AhaKarte sichtbar={aufgeloest} eyebrow="Der eigentliche Punkt">
@@ -102,7 +95,13 @@ export function M2() {
       fuss={
         <StepFuss
           id="M2"
-          gedaempft={!aufgeloest}
+          aktion={
+            aufgeloest ? null : (
+              <Button variant="aktion" onClick={aufloesen} data-testid="m2-aufloesen">
+                Und jetzt die echte Zahl
+              </Button>
+            )
+          }
           geschafft={aufgeloest ? 'Kalkuliert' : null}
         />
       }
@@ -114,36 +113,42 @@ function Schaetzung({
   wert,
   onWert,
   aufgeloest,
-  onAufloesen,
 }: {
   wert: number
   onWert: (n: number) => void
   aufgeloest: boolean
-  onAufloesen: () => void
 }) {
   const anteil = (n: number) => ((n - MIN) / (MAX - MIN)) * 100
 
   return (
-    // Kein `h-full justify-center` mehr: die Übung hing dadurch in der Mitte
-    // einer hohen leeren Spalte, mit einem Loch über und unter sich.
+    // Kein `h-full justify-center`: die Übung hinge dadurch in der Mitte einer
+    // hohen leeren Spalte, mit einem Loch über und unter sich.
     <div className="flex flex-col gap-4">
       {!aufgeloest && (
-        <p className="text-[1.0625rem] font-normal text-kh-ink sm:text-[1.125rem]">
+        <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
           Zieh, bis du glaubst, es passt.
         </p>
       )}
 
-      {/* Der Zahlenwechsel ist die Übung. Erst die eigene Zahl, dann die echte. */}
-      <div className="flex items-baseline gap-4">
+      {/*
+        Der Zahlenwechsel ist die Übung. Erst die eigene Zahl, dann die echte.
+
+        Die Zahl trägt jetzt Anton und ist so groß, wie das Panel es zulässt —
+        sie ist der Inhalt dieses Screens, nicht seine Beschriftung. Solange
+        geschätzt wird, steht sie in Warnwestengelb: sie gehört dem Besucher.
+        Nach der Auflösung wechselt sie auf Markenorange — das ist dann die Zahl
+        des Betriebs, nicht mehr die eigene.
+      */}
+      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
             key={aufgeloest ? 'echt' : 'schaetzung'}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, y: 18, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -18 }}
+            transition={{ type: 'spring', stiffness: 380, damping: 26 }}
             data-testid="m2-zahl"
-            className="text-[clamp(2.2rem,1.5rem+2.6vw,3.6rem)] leading-none font-bold text-kh-orange-text tabular-nums"
+            className={`kh-zahl ${aufgeloest ? 'text-kh-orange' : ''}`}
           >
             {euro(aufgeloest ? ECHT : wert)}
           </motion.span>
@@ -153,7 +158,7 @@ function Schaetzung({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="text-[1rem] text-kh-grey"
+            className="text-[1rem] text-kh-mute"
           >
             deine Schätzung: {euro(wert)}
           </motion.span>
@@ -177,15 +182,15 @@ function Schaetzung({
         />
         {aufgeloest && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="pointer-events-none absolute -top-1 bottom-0 w-[3px] -translate-x-1/2 rounded-full bg-kh-ink"
+            initial={{ opacity: 0, scaleY: 0 }}
+            animate={{ opacity: 1, scaleY: 1 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 24 }}
+            className="pointer-events-none absolute top-1 bottom-2 w-[4px] -translate-x-1/2 rounded-full bg-kh-orange"
             style={{ left: `${anteil(ECHT)}%` }}
             aria-hidden
           />
         )}
-        <div className="mt-1 flex justify-between text-[0.9375rem] text-kh-grey/60 tabular-nums">
+        <div className="mt-0.5 flex justify-between text-[0.9375rem] text-kh-mute/70 tabular-nums">
           <span>{euro(MIN)}</span>
           <span>{euro(MAX)}</span>
         </div>
@@ -204,43 +209,32 @@ function Schaetzung({
           {POSTEN.map((p) => (
             <motion.div
               key={p.was}
-              variants={{ aus: { opacity: 0, x: -10 }, an: { opacity: 1, x: 0 } }}
-              className="flex items-baseline justify-between gap-3 border-b border-kh-rule py-2.5 text-[1.0625rem] last:border-0"
+              variants={{ aus: { opacity: 0, x: -12 }, an: { opacity: 1, x: 0 } }}
+              className="flex items-baseline justify-between gap-3 border-b border-kh-line py-2.5 text-[1.0625rem] last:border-0"
             >
-              <span className="min-w-0 text-kh-ink">
+              <span className="min-w-0 text-kh-paper">
                 {p.was}
-                {p.detail && <span className="text-kh-grey/70"> · {p.detail}</span>}
+                {p.detail && <span className="text-kh-mute"> · {p.detail}</span>}
               </span>
-              <span className="shrink-0 text-kh-grey tabular-nums">{euro(p.betrag)}</span>
+              <span className="shrink-0 text-kh-mute tabular-nums">{euro(p.betrag)}</span>
             </motion.div>
           ))}
           {/* Die Summenzeile stand vorher nirgends — die vier Posten mussten im
               Kopf addiert werden, um auf die Zahl darüber zu kommen. */}
           <motion.div
             variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
-            className="mt-1 flex items-baseline justify-between gap-3 border-t-2 border-kh-ink/15 pt-2.5 text-[1.125rem]"
+            className="mt-1 flex items-baseline justify-between gap-3 border-t-2 border-kh-line-strong pt-2.5 text-[1.125rem]"
           >
-            <span className="font-normal text-kh-ink">Dachstuhl gesamt</span>
-            <span className="font-bold text-kh-orange-text tabular-nums">
+            <span className="font-semibold text-kh-paper">Dachstuhl gesamt</span>
+            <span className="font-display text-[1.5rem] text-kh-orange tabular-nums">
               {euro(ECHT)}
             </span>
           </motion.div>
-          <div className="pt-2">
+          <div className="pt-3">
             <Mathe />
           </div>
         </motion.div>
-      ) : (
-        <div className="flex justify-start">
-          <Button
-            variant="dark"
-            onClick={onAufloesen}
-            data-testid="m2-aufloesen"
-            className="h-[60px] px-7 text-[1.0625rem]"
-          >
-            Und jetzt die echte Zahl
-          </Button>
-        </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -249,12 +243,12 @@ function Schaetzung({
 function Mathe() {
   return (
     <Dialog>
-      <DialogTrigger className="text-[1.0625rem] text-kh-orange-text underline decoration-kh-orange-text/40 underline-offset-4">
+      <DialogTrigger className="rounded-kh-pill border-2 border-kh-line-strong bg-white/5 px-4 py-2.5 text-[1rem] font-medium text-kh-paper/85 transition-transform active:scale-95">
         Woher kommen die 120 Quadratmeter?
       </DialogTrigger>
       <DialogContent>
-        <DialogTitle className="kh-step-titel mb-3 normal-case">Achte Klasse</DialogTitle>
-        <DialogDescription className="kh-fachtext">
+        <DialogTitle>Achte Klasse</DialogTitle>
+        <DialogDescription>
           Die 120 Quadratmeter hat niemand gemessen. Das Haus ist 85 Quadratmeter groß,
           das Dach steht 45 Grad schräg — Grundfläche geteilt durch den Kosinus, und du
           hast die Dachfläche. Dreisatz und Pythagoras, achte Klasse. Hier zum ersten Mal

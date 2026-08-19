@@ -52,7 +52,9 @@ export function M6() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1.2, delay: 1.2 }}
-            className="mt-3 text-[1.125rem] font-normal text-kh-ink sm:text-[1.25rem]"
+            // Der eine Satz, der auf diesem Screen zählt — deshalb steht er
+            // in Anton und nicht als vierte Zeile Fließtext.
+            className="kh-titel-klein mt-4 text-kh-orange"
           >
             Schau einmal vom iPad hoch.
           </motion.p>

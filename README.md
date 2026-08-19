@@ -3,6 +3,10 @@
 React + Vite + TypeScript, Tailwind v4, shadcn-style components on **Base UI**
 (`@base-ui/react`).
 
+Das Designsystem heißt **„Baustelle“** und steht in [`src/index.css`](./src/index.css).
+Es hat die Website-Übersetzung abgelöst, die vorher hier stand — siehe
+[Designsystem](#designsystem-baustelle).
+
 **The app is implemented.** `src/khpl/` holds the KHPL Connect flow — splash,
 in-fiction intro and all seventeen steps (M1–M10 plus the seven Abstecher) — built
 on the design system below. See [Der Flow](#der-flow-srckhpl).
@@ -65,25 +69,40 @@ steps/               Ein Modul je Step. Der Text steht gebündelt oben in der
 
 ### Ein Layout, nicht drei
 
-Jeder Step — Haupt wie Abstecher — rendert gleich: **Bühne vollflächig, darüber
-genau eine deckende Karte, unten links.** Der Weiter-Knopf sitzt auf jedem
-einzelnen Screen in derselben Ecke.
+Jeder Step — Haupt wie Abstecher — rendert gleich, aus zwei Ebenen:
+
+1. **Der Titel steht auf der Bühne**, nicht in einer Karte. Anton, versal, so
+   groß wie der Screen es hergibt.
+2. **Darunter ein dunkles Panel**, das nur trägt, was man lesen oder anfassen
+   muss: Fachtext, Interaktion, Aha-Karte, Fuß.
 
 Vorher gab es drei Aufteilungen (`bild`, `uebung`, `buehne`), und jede setzte
 Titel, Text und Knopf woandershin. Über fünfzehn Screens las sich das nicht wie
-ein Produkt, sondern wie drei — und auf `uebung` gab es überhaupt kein Bild.
+ein Produkt, sondern wie drei. Der erste Umbau vereinheitlichte sie zu **einer
+weißen Karte unten links** — konsistent, aber auf dem iPad quer rund 62 % der
+Breite deckend weiß. Damit war jeder Screen ein Dokument mit Bildhintergrund.
 
-Was von der Unterscheidung bleibt, sind zwei Schalter an `StepShell`:
+Der Titel außerhalb des Panels ist die Änderung, an der der Rest hängt: sobald
+die Überschrift nicht mehr in demselben Kasten sitzt wie Text und Knopf, gehört
+das Foto wieder zum Screen statt hinter ihn.
 
-- `buehneInteraktiv` — die Bühne **ist** die Interaktion (B3.2, M5, M7, M8). Die
-  Karte bleibt schmal, und `SichtfeldMesser` sagt der Kamera, wie viel Fläche
+Zwei Schalter bleiben an `StepShell`:
+
+- `buehneInteraktiv` — die Bühne **ist** die Interaktion (B3.2, M5, M7, M8). Das
+  Panel bleibt schmal, und `SichtfeldMesser` sagt der Kamera, wie viel Fläche
   dem Modell wirklich bleibt.
 - `karteBreit` — für M4, den dichtesten Screen der Anwendung.
 
-**In der Karte scrollt nur der Inhalt, nie der Fuß.** M1 trägt zehn
+**Im Panel scrollt nur der Inhalt, nie der Fuß.** M1 trägt zehn
 Checklistenpunkte, hochkant auf dem Handy passt das nicht auf einen Screen.
-Scrollte die ganze Karte, läge ausgerechnet der Weiter-Knopf unter der Kante —
+Scrollte das ganze Panel, läge ausgerechnet der Weiter-Knopf unter der Kante —
 und dann sitzt jemand am Stand fest.
+
+**Und die Aktion einer Übung sitzt im Fuß, nicht in der Übung.** „Zurück in den
+Betrieb“ (M1), „Und jetzt die echte Zahl“ (M2), „Schnitt setzen“ (M4) gehen über
+den `aktion`-Slot von `StepFuss`. Vorher standen sie unten in der scrollenden
+Fläche — auf M1 und M4 unterhalb der Kante, und wer nicht auf die Idee kam zu
+scrollen, sah eine Aufgabe ohne Antwortknopf.
 
 ### Fotos
 
@@ -114,7 +133,6 @@ sagt der Screen „Sprich jetzt mit uns am Stand“, nie `[Name]`.
 - **Idle:** 60 s → „Bist du noch da?“, weitere 15 s → zurück auf den Splash.
   Der Fortschritt wird dabei **nicht** gelöscht; das erledigt die
   30-Minuten-Frist. Die Mittagspause (M6) bekommt die dreifache Geduld.
-- **`?web=1`** gibt den Theme-Schalter frei (Kiosk ist auf Light gepinnt).
 - **`?demo=dachstuhl`** öffnet weiterhin den 3D-Prototyp.
 
 ## Abhängigkeiten für den Flow
@@ -137,6 +155,12 @@ Gemessen nach `pnpm build`, gegen die Budgets aus flow 8.5:
 Der 1,4-MB-Attract-Loop lädt erst 400 ms **nach** dem ersten Frame und zählt
 deshalb nicht zum Weg bis „Tippen zum Starten“.
 
+> ⚠️ **Die Zahlen sind vom Stand vor dem Redesign und noch nicht neu gemessen.**
+> Die Lazy-Grenze um `three` ist unverändert, aber der Erststart hat mit **Anton**
+> eine zweite Schriftfamilie dazubekommen (ein Schnitt, rund 30 KB woff2), und
+> `szenario.mp4` liegt jetzt auf S1. Beides gehört einmal durch `pnpm build`
+> nachgerechnet.
+
 ## Offline / PWA
 
 `vite-plugin-pwa` is configured in `vite.config.ts` and emits `sw.js` plus a web
@@ -149,152 +173,142 @@ Two things are deliberately left open and commented in the config:
 - **No app icons.** The only brand mark in the repo is a 1000×248 wordmark. The
   manifest needs square 192/512 PNGs plus a maskable 512 before the app can be
   installed to an iPad home screen.
-- **Barlow still comes from the Google Fonts CDN.** It is covered by a runtime
-  cache rule, which works but is the workaround. Self-hosting weights 200 and 700
-  as subsetted woff2 is the real fix and also removes a render-blocking request.
+- **Barlow und Anton kommen weiterhin vom Google-Fonts-CDN.** Eine
+  Runtime-Cache-Regel deckt das ab, aber das ist der Notnagel. Selbst gehostet
+  und subsettet (Barlow 400/600/700 plus Anton) ist der eigentliche Fix und
+  spart zugleich einen render-blockierenden Request. Mit dem Redesign wiegt das
+  schwerer als vorher: **Anton trägt jeden Titel**, und wenn es nicht da ist,
+  fällt der Screen auf Barlow zurück und sieht aus wie die Vorfassung.
 
-## Design system
+## Designsystem „Baustelle“
 
-Ported from kh-online.de. Every value below was read off the live pages via computed
-styles, not eyeballed:
+Alles steht in [`src/index.css`](./src/index.css). **Einfarbig dunkel, ein
+Tokensatz, kein Theme-Schalter.**
 
-- <https://www.kh-online.de/ausbildungsmanagement/>
-- <https://www.kh-online.de/ausbildungsmanagement/ausbildungsoffensive/>
+### Warum nicht mehr die Website
 
-| Token | Value | Where it comes from |
+Die Vorfassung war eine maßstabsgetreue Übersetzung von
+kh-online.de/ausbildungsmanagement: Barlow 200, weiße Karten, 4-px-Radien, viel
+Weißraum, jeder Wert von den Live-Seiten abgelesen. Das ist als Website-Port
+korrekt und für dieses Produkt falsch. Das Publikum sind Vierzehn- bis
+Sechzehnjährige an einem Messestand, die täglich TikTok, Duolingo und FIFA
+bedienen — vor denen sieht ein sauberer Corporate-Port aus wie ein Formular.
+
+Was von der Marke bleibt: **Orange `#FF9F2A` und Barlow.** Beides ist gemessen
+und gehört der Kreishandwerkerschaft.
+
+### Die Tokens
+
+| Token | Wert | Wofür |
 | --- | --- | --- |
-| `--color-kh-orange` | `#FF9F2A` | H1, buttons, links, footer, hamburger |
-| `--color-kh-grey` | `#585858` | body copy and most headings |
-| `--color-kh-band` | `#E3E3E3` | alternating section band |
-| `--color-kh-band-soft` | `#F1F1F1` | image placeholder ground |
-| `--color-kh-rule` | `rgba(0,0,0,.1)` | 1px horizontal rules |
-| `--color-kh-page` | `#FFFFFF` | page ground, sticky header, hero slab |
-| `--color-kh-surface` | `#FFFFFF` | raised surfaces — dialog, menu popup |
-| `--color-kh-ink` | `#000000` | band headings, `Button variant="dark"` |
-| `--color-kh-footer` | `#FF9F2A` | the closing footer slab |
-| type | Barlow — **200** body / **700** headings | the 200/700 split is the site's signature |
-| H1 | 35.2px · 700 · uppercase · centred · orange | |
-| H2 | 30px · 700 · grey, or black+centred in a band | |
-| H3 | 22.4px · 700 · grey | |
-| body | 16 / 24 · weight 200 | |
-| button | orange bg · white · 16px · weight 200 · **radius 4px** · padding 16/32 · 165×50 | |
-| container | max-width **1600px**, 15px gutters | |
-| grid | 3 × 377px, 30px gap at 1280 | |
-| teaser image | ratio **3.84 : 1**, square corners | |
-| footer | orange bg, black text, padding 30/0/60 | |
+| `--color-kh-ink` | `#0E0D0B` | der Grund. Warmes Schwarz, kein Neutralgrau |
+| `--color-kh-surface` | `#191713` | Sheet „Dein Weg“, Ladeflächen |
+| `--color-kh-raised` | `#26221C` | Popover, Dialog, Staff-Menü |
+| `--color-kh-paper` | `#FBF7F0` | Schrift auf dem Grund |
+| `--color-kh-mute` | `#A49B8E` | Zweitzeilen, Beschriftungen |
+| `--color-kh-orange` | `#FF9F2A` | Marke. Der Weg nach vorn, Etiketten, Akzente |
+| `--color-kh-orange-deep` | `#8A4A00` | der harte Schatten unter dem Weiter-Knopf |
+| `--color-kh-signal` | `#D8F63C` | Warnwestengelb. **Nur** „das hast du geschafft“ |
+| `--color-kh-line` | `rgba(255,255,255,.13)` | Trennlinien im Panel |
+| Anzeigeschrift | **Anton**, versal | Titel, Zahlen, Etiketten |
+| Fließschrift | **Barlow 400/500/600/700** | Fachtext, Knöpfe, Listen |
+| Radien | 14 px Flächen · 22 px Panel · Pille für Knöpfe | |
 
-### Teen-facing modifications (deliberately slight)
+**Zwei Farben, zwei Bedeutungen.** Orange führt nach vorn — genau eine gefüllte
+orange Fläche pro Screen, und das ist immer *Weiter*. Gelbgrün gehört der
+Handlung *in* der Übung und der Rückmeldung „richtig“. Wer Gelbgrün für
+Dekoration verbraucht, hat es für die Rückmeldung verloren.
 
-The system is left intact; these are the only departures:
+Rot kommt nicht vor. Rot bewertet, und bewertet wird hier nicht (flow 6.6): eine
+falsche Antwort bekommt einen orangen Rand und ein Kopfschütteln, keine Note.
 
-- H1 scales up (`clamp(34px → 56px)`) — the site sets it at a timid 35px
-- body 16 → **20px**, and the Fachtext of a step runs 19 → 24px. The site is read
-  at a desk; this is read standing, at arm's length, in a loud hall, by someone
-  who is fourteen. 17px Barlow 200 was borderline there.
-- buttons 50 → 54px tall (the forward action 64px) with a 1px hover lift
-- teaser photos zoom ~4% on hover
-- two devices the campaign already uses are promoted to UI components: the rotated
-  orange **sticker** and the **#hashtag** pill
+### Warum Anton
 
-Everything lives in `src/index.css`. Re-theme by editing the `@theme` block — and
-the `.dark` block below it, which mirrors the same token names.
+Barlow 200 ist eine Flüsterstimme, und deutsche Komposita sind lang. „Absturz­-
+sicherung“, „Kreishandwerkerschaft“, „Sicherheitsbesprechung“ — eine schmale
+fette Plakatschrift ist hier kein Stil, sondern der Unterschied zwischen einer
+Zeile und dreien. Der Fließtext bleibt Barlow, aber in **400 statt 200**: dieselbe
+Größe verschwindet in 200 unter Hallenlicht und steht in 400.
 
-## Dark mode (optional)
+### Warum nur ein Ton
 
-Off by default in the sense that nothing is forced: the preference starts at
-**`system`**, and an explicit choice is remembered in `localStorage['kh-theme']`.
-The light design above stays canonical — dark mode is a second set of values for
-the same tokens, never a second set of components.
+Die Bühne ist auf jedem Screen ein Foto oder das 3D-Modell. Ein dunkler Grund
+lässt beides leuchten, ein weißer leuchtet dagegen an. Dazu kam, dass der Kiosk
+ohnehin auf ein Theme gepinnt war — der zweite Tokensatz kostete Pflege und
+stand nie auf dem Gerät.
 
-**How it works.** `src/index.css` declares a class-driven variant and a `.dark`
-block that re-points the colour tokens:
+Damit sind **entfallen**: die `.dark`-Überschreibungen, `?web=1`, das Pinnen im
+`KioskGuard` und der No-Flash-Block in `index.html`. `src/lib/theme.ts` und
+`<ThemeToggle />` gibt es noch, aber nur für den 3D-Prototypen unter
+`?demo=dachstuhl`, wo „hell“ und „dunkel“ die *Szenenbeleuchtung* meinen.
 
-```css
-@custom-variant dark (&:where(.dark, .dark *));
+**In der App gilt: niemals ein literales `bg-white` oder `text-black`.** Es gibt
+`bg-kh-ink` / `bg-kh-surface` / `text-kh-paper`. Die einzige erlaubte Ausnahme
+ist `text-[#0E0D0B]` auf einer orangen oder gelbgrünen Fläche — dort ist Schwarz
+Vordergrund und kein Grund.
 
-.dark {
-  --color-kh-page: #141311;
-  --color-kh-band: #1f1d1a;
-  --color-kh-grey: #cac5be;
-  /* … */
-}
-```
+### Die 3D-Szene gehört dazu
 
-Because every utility Tailwind generates from `@theme` compiles to
-`var(--color-kh-…)`, `bg-kh-band`, `text-kh-grey`, `kh-h2-band` and `kh-rule`
-follow the theme with no `dark:` prefix anywhere in a component. **Writing a
-literal `bg-white` or `text-black` in markup is what breaks this** — reach for
-`bg-kh-page` / `bg-kh-surface` / `text-kh-ink` instead.
+`Dachstuhl3D` läuft in der App durchgehend im Dunkel-Zweig von `SZENE_FARBEN`.
+Der war ursprünglich ein Nachtmodus und ist jetzt der Normalfall — deshalb liegen
+die Lichtstärken in `Beleuchtung.tsx` **über** denen des Hell-Zweigs: dunkler
+Grund, hell angestrahltes Modell, wie ein Werkstück unter der Lampe. Eine hell
+ausgeleuchtete 3D-Fläche zwischen fünfzehn dunklen Screens war der einzige Ort,
+an dem die App ihre eigene Farbe verließ.
 
-The near-blacks are warm (`#141311`, not `#111111`) so the brand orange reads as
-part of the palette rather than a foreign accent. Two tokens deliberately differ
-in kind rather than degree:
+Das Abendlicht von M8 liegt als zwei Farbschichten *über* der Leinwand und
+braucht dafür keinen eigenen Zweig mehr.
 
-- `--color-kh-orange-hover` **brightens** on dark (`#ffb659`) instead of darkening
-- `--color-kh-footer` dims to `#d1811b` — the closing slab stays orange and
-  on-brand, but a full-bleed `#FF9F2A` glares against a dark page
+### Marke auf dunklem Grund
 
-**Switching.** `src/lib/theme.ts` owns the state:
-
-```tsx
-const { theme, resolved, setTheme } = useTheme()
-```
-
-`theme` is the preference (`system | light | dark`), `resolved` is what is actually
-on screen. It toggles `.dark` on `<html>`, keeps `<meta name="theme-color">` in
-step for mobile browser chrome, follows the OS while the preference is `system`,
-and syncs across tabs. `<ThemeToggle />` is the ready-made 35px header control.
-
-An inline script in `index.html` applies the class **before first paint**, so a
-dark-mode visitor never gets a white flash. Its storage key and colours mirror
-`theme.ts` — change one, change the other.
-
-### Brand assets on a dark ground
-
-`kh-paderborn-lippe2.png` is near-black artwork on transparency, so it disappears on
-dark. Use `<Logo />`, which swaps in a re-inked copy of the file:
+`kh-paderborn-lippe2.png` ist fast schwarze Zeichnung auf Transparenz und
+verschwindet auf Dunkel. `<Logo />` zeigt deshalb durchgehend die hell
+eingefärbte Kopie derselben Datei; `aufHell` schaltet auf das Original zurück
+und wird genau einmal gebraucht, auf dem orangen Abschlussfeld M10.
 
 ```tsx
 import { Logo } from '@/components/ui/logo'
-
-<Logo />
+;<Logo />
 ```
 
-**Why an asset and not a filter.** The obvious `invert()` turns the orange octagon
-blue; rotating the hue back drags it to red at 180°, olive by 200° — CSS `hue-rotate`
-is a linear approximation and cannot round-trip an inverted colour. All five variants
-were rendered and compared against `#FF9F2A`; none held it.
+**Warum ein Asset und kein Filter.** Das naheliegende `invert()` macht aus dem
+orangen Achteck Blau; die Hue-Korrektur zieht es bei 180° nach Rot und bei 200°
+ins Olive — CSS `hue-rotate` ist eine lineare Näherung und bekommt eine
+invertierte Farbe nicht zurück. Alle fünf Varianten wurden gerendert und gegen
+`#FF9F2A` verglichen, keine hielt.
 
-The file itself is unusually clean — exactly two ink values, `#1D1D1B` for the
-wordmark and `#F59C00` for the mark — so `kh-paderborn-lippe2-dark.png` was generated
-by recolouring **only** the wordmark pixels to `--color-kh-ink`. Alpha and every
-orange pixel are byte-identical to the original, so antialiased edges survive intact.
-Regenerate it if the logo is ever replaced.
+Die Datei selbst ist ungewöhnlich sauber — genau zwei Farbwerte, `#1D1D1B` für
+den Schriftzug und `#F59C00` für die Marke —, deshalb entstand
+`kh-paderborn-lippe2-dark.png` durch Umfärben **nur** der Schriftzug-Pixel.
+Alpha und jedes orange Pixel sind byte-identisch zum Original, die
+Kantenglättung überlebt intakt. Neu erzeugen, wenn das Logo je ersetzt wird.
 
-The skyline (`kh-pb-lippe.png`) is already orange on transparency and needs nothing.
-`Handygrafik.png` has an **opaque white background** — on a dark band it reads as a
-stray white rectangle, so give it a light plate: `dark:rounded-kh dark:bg-white dark:p-3`.
+Die Silhouette (`kh-pb-lippe.png`) ist bereits Orange auf Transparenz und
+braucht nichts.
 
-## What's in here
+## Was liegt wo
 
 ```
-src/index.css              tokens + .dark overrides + kh-container / kh-h1 / kh-h2 /
-                           kh-h3 utilities
-src/lib/theme.ts           theme preference store (system | light | dark)
+src/index.css              Das Designsystem „Baustelle“: Tokens, Schrift-
+                           bausteine (kh-plakat / kh-titel / kh-fachtext /
+                           kh-etikett / kh-zahl), Flächen (kh-panel / kh-feld /
+                           kh-scrim / kh-warnband), Kiosk-Verhalten
+src/lib/theme.ts           Nur noch für ?demo=dachstuhl: hell/dunkel meint dort
+                           die Szenenbeleuchtung, nicht das App-Theme
 src/components/
-  theme-toggle.tsx         header control: Hell / Dunkel / Wie im System
+  theme-toggle.tsx         Schalter dazu, sitzt in der Debug-Leiste des Demos
 src/components/ui/
-  button.tsx               the site's "mehr erfahren" button (Base UI useRender)
-  teaser.tsx               photo + heading + copy + button unit
-  sticker.tsx              rotated orange circle
-  hashtag.tsx              campaign hashtag pill
-  accordion.tsx            Base UI accordion, site styling
-  dialog.tsx               Base UI dialog, site styling
-  menu.tsx                 Base UI menu + radio items, site styling
-  logo.tsx                 wordmark, light/dark asset swap
-public/brand/              logo (light + dark), skyline, Handygrafik
-                           from kh-online.de
+  button.tsx               weiter · aktion · neben · leise (Base UI useRender)
+  dialog.tsx               Base UI Dialog im System
+  popover.tsx              Base UI Popover — trägt das Glossar
+  menu.tsx                 Base UI Menü, nur im Demo
+  logo.tsx                 Schriftzug, hell eingefärbt (aufHell für M10)
+public/brand/              Logo hell + dunkel, Silhouette, Handygrafik
 ```
 
-`Button` uses Base UI's `useRender`, so composition is via a `render` prop rather than
-the Radix-era `asChild`: `<DialogTrigger render={<Button variant="outline" />}>`.
+Mit dem Redesign entfallen sind `teaser.tsx`, `sticker.tsx`, `hashtag.tsx` und
+`accordion.tsx`. Sie stammten aus dem Website-Port, wurden von keinem Screen
+benutzt und trugen Tokens, die es nicht mehr gibt.
+
+`Button` benutzt Base UIs `useRender`; komponiert wird also über `render` statt
+über das Radix-`asChild`: `<DialogTrigger render={<Button variant="neben" />}>`.

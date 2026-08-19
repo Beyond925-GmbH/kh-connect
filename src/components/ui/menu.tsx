@@ -16,7 +16,7 @@ function MenuContent({
       <BaseMenu.Positioner side="bottom" align="end" sideOffset={8} className="z-50">
         <BaseMenu.Popup
           className={cn(
-            'min-w-48 origin-[var(--transform-origin)] rounded-kh border border-kh-rule bg-kh-surface p-1 shadow-xl outline-none transition-all duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
+            'min-w-48 origin-[var(--transform-origin)] rounded-kh border border-kh-line bg-kh-raised p-1 shadow-xl outline-none transition-all duration-150 data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0',
             className,
           )}
           {...props}
@@ -36,7 +36,7 @@ function MenuRadioItem({
   return (
     <BaseMenu.RadioItem
       className={cn(
-        'flex cursor-default items-center gap-3 rounded-kh px-3 py-2.5 text-[15px] font-light text-kh-grey outline-none select-none data-[highlighted]:bg-kh-band data-[highlighted]:text-kh-orange',
+        'flex cursor-default items-center gap-3 rounded-kh px-3 py-2.5 text-[15px] text-kh-paper/85 outline-none select-none data-[highlighted]:bg-white/8 data-[highlighted]:text-kh-orange',
         className,
       )}
       {...props}

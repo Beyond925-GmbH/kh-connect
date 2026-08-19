@@ -156,8 +156,8 @@ export function B41() {
       interaktionOffen={!fertig}
       wischen={false}
       onWeiter={weiter}
-      // Vorher trug dieser Step ueberhaupt kein Bild — weisse Flaeche hinter
-      // einer Zieh-Uebung. Jetzt die Halle, aus der geladen wird.
+      // Vorher trug dieser Step überhaupt kein Bild — weiße Fläche hinter
+      // einer Zieh-Übung. Jetzt die Halle, aus der geladen wird.
       buehne={<StepFoto id="B4.1" />}
       fachtext={
         <p>
@@ -191,13 +191,7 @@ export function B41() {
           </div>
         </DndContext>
       }
-      fuss={
-        <StepFuss
-          id="B4.1"
-          gedaempft={!fertig}
-          geschafft={fertig ? 'Alles geladen' : null}
-        />
-      }
+      fuss={<StepFuss id="B4.1" geschafft={fertig ? 'Alles geladen' : null} />}
     />
   )
 }
@@ -209,25 +203,33 @@ function Fahrzeug({ geladen, fertig }: { geladen: string[]; fertig: boolean }) {
     <div
       ref={setNodeRef}
       data-testid="b41-fahrzeug"
-      className={`flex min-h-[112px] shrink-0 items-center gap-4 rounded-kh border-2 border-dashed px-4 py-3 transition-colors ${
-        isOver ? 'border-kh-orange bg-kh-orange/10' : 'border-kh-rule bg-kh-band-soft'
+      className={`flex min-h-[104px] shrink-0 items-center gap-4 rounded-kh border-2 border-dashed px-4 py-3 transition-colors ${
+        isOver
+          ? 'border-kh-signal bg-kh-signal/15'
+          : 'border-kh-line-strong bg-white/[0.04]'
       }`}
     >
-      <Truck className="size-9 shrink-0 text-kh-grey/60" strokeWidth={1.25} aria-hidden />
+      <Truck
+        className={`size-10 shrink-0 transition-colors ${
+          fertig ? 'text-kh-signal' : 'text-kh-paper/45'
+        }`}
+        strokeWidth={1.75}
+        aria-hidden
+      />
       <div className="min-w-0 flex-1">
-        <p className="text-[1.0625rem] font-normal text-kh-ink">
+        <p className="flex flex-wrap items-baseline gap-x-2.5 text-[1.0625rem] font-medium text-kh-paper">
           {fertig
             ? 'Vollständig. Alles drauf, was heute gebraucht wird.'
             : 'Zieh hierher, was mit muss.'}
-          <span className="ml-2 text-kh-grey/70 tabular-nums">
+          <span className="font-display text-[1.5rem] leading-none text-kh-paper/60 tabular-nums">
             {geladen.length}/{NOETIG}
           </span>
         </p>
         {/* Bewusst ohne Liste der geladenen Teile: die stehen abgehakt im Raster
             darunter, und zweimal dasselbe kostet nur Platz. */}
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-kh-band">
+        <div className="mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-white/10">
           <motion.div
-            className="h-full rounded-full bg-kh-orange"
+            className={`h-full rounded-full ${fertig ? 'bg-kh-signal' : 'bg-kh-orange'}`}
             initial={false}
             animate={{ width: `${(geladen.length / NOETIG) * 100}%` }}
             transition={{ type: 'spring', stiffness: 220, damping: 26 }}
@@ -267,20 +269,22 @@ function Hallenteil({
             }
           : undefined
       }
-      className={`flex min-h-[60px] touch-none items-center gap-2 rounded-kh border px-3 py-2 text-left text-[1rem] transition-colors ${
-        isDragging ? 'shadow-xl' : ''
+      // Drei Zustände, drei Erscheinungen. Was noch im Regal liegt, ist hell
+      // und greifbar; was verladen ist, trägt die Signalfarbe; was abgelehnt
+      // wurde, verblasst und wird durchgestrichen. Vorher waren alle drei
+      // Graustufen desselben Kastens.
+      className={`flex min-h-[62px] touch-none items-center gap-2 rounded-kh border-2 px-3 py-2 text-left text-[1rem] leading-tight transition-transform ${
+        isDragging ? 'scale-105 shadow-[0_16px_40px_rgba(0,0,0,0.6)]' : ''
       } ${
         geladen
-          ? 'border-kh-orange/40 bg-kh-orange/10 text-kh-grey/50'
+          ? 'border-kh-signal/50 bg-kh-signal/12 font-medium text-kh-paper/70'
           : abgelehnt
-            ? 'border-kh-rule bg-kh-band-soft text-kh-grey/40 line-through'
-            : 'cursor-grab border-kh-rule bg-kh-surface text-kh-ink active:cursor-grabbing'
+            ? 'border-kh-line bg-white/[0.03] text-kh-mute/50 line-through'
+            : 'cursor-grab border-transparent bg-kh-paper font-semibold text-[#0E0D0B] active:cursor-grabbing'
       }`}
     >
-      {geladen && (
-        <Check className="size-4 shrink-0 text-kh-orange-text" strokeWidth={2.5} />
-      )}
-      {abgelehnt && <X className="size-4 shrink-0" strokeWidth={2.5} />}
+      {geladen && <Check className="size-4 shrink-0 text-kh-signal" strokeWidth={3.5} />}
+      {abgelehnt && <X className="size-4 shrink-0" strokeWidth={3} />}
       <span className="min-w-0">{teil.text}</span>
     </div>
   )

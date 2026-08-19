@@ -47,8 +47,6 @@ export interface Dachstuhl3DProps {
    * (M8), wird zugelattet.
    */
   lattung?: number
-  /** Warmes Abendlicht statt Tageslicht — für M8. */
-  abendlicht?: boolean
   /** Angetipptes Bauteil. Der Step hält die Auswahl, damit er sie merken kann. */
   auswahl?: Auswahl | null
   onBauteil?: (teil: Bauteil) => void
@@ -66,7 +64,6 @@ export default function Dachstuhl3D({
   ansicht = null,
   attraktor = false,
   lattung,
-  abendlicht = false,
   auswahl = null,
   onBauteil,
   onDaneben,
@@ -190,9 +187,12 @@ export default function Dachstuhl3D({
         attraktor={attraktor}
         sichtfeld={sichtfeld}
         dpr={null}
-        // Die Szene kennt nur „hell“ und „dunkel“. Das Abendlicht von M8 fährt
-        // über den Dunkel-Zweig: warmer Himmel, tief stehende Sonne.
-        dunkel={abendlicht}
+        // Immer der Dunkel-Zweig. Die Bühne muss denselben Grund haben wie das
+        // Panel davor — eine hell ausgeleuchtete 3D-Fläche zwischen fünfzehn
+        // dunklen Screens war der einzige Ort, an dem die App ihre eigene Farbe
+        // verließ. Das Abendlicht von M8 liegt als zwei Farbschichten *über*
+        // der Leinwand und braucht dafür keinen eigenen Zweig mehr.
+        dunkel
         reduziert={reduziert}
         tap={tap}
         onTap={tippen}
@@ -206,8 +206,8 @@ export default function Dachstuhl3D({
       />
 
       {kontextWeg && (
-        <div className="absolute inset-0 z-30 grid place-items-center bg-kh-page/90">
-          <p className="max-w-xs px-6 text-center text-[15px] text-kh-grey">
+        <div className="absolute inset-0 z-30 grid place-items-center bg-kh-ink/90">
+          <p className="max-w-xs px-6 text-center text-[15px] text-kh-mute">
             Die 3D-Ansicht wird neu aufgebaut. Einen Moment.
           </p>
         </div>

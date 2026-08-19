@@ -120,17 +120,22 @@ function Aufforderung({ gefunden }: { gefunden: number }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.25 }}
-      className="flex items-center gap-3 rounded-kh bg-kh-page px-5 py-4 shadow-[0_2px_24px_rgba(0,0,0,0.12)]"
+      className="flex items-center gap-3 rounded-kh border-2 border-kh-orange/40 bg-kh-orange/12 px-4 py-3.5"
     >
-      <RotateCw
-        className="size-5 shrink-0 text-kh-orange-text"
-        strokeWidth={1.75}
+      {/* Das Icon dreht sich langsam mit: die Aufforderung lautet „dreh das
+          Dach“, und ein stehendes Drehsymbol sagt das Gegenteil. */}
+      <motion.span
         aria-hidden
-      />
-      <p className="text-[1.125rem] text-kh-ink">
+        animate={{ rotate: 360 }}
+        transition={{ duration: 6, repeat: Infinity, ease: 'linear' }}
+        className="shrink-0 text-kh-orange"
+      >
+        <RotateCw className="size-6" strokeWidth={2.25} />
+      </motion.span>
+      <p className="text-[1.125rem] font-medium text-kh-paper">
         Dreh das Dach. Tipp an, was du wissen willst.
         {gefunden > 0 && (
-          <span className="text-kh-grey/70">
+          <span className="font-normal text-kh-paper/55">
             {' '}
             — {gefunden} {gefunden === 1 ? 'Bauteil' : 'Bauteile'} hast du schon.
           </span>
@@ -155,18 +160,18 @@ function BauteilKarte({
       exit={{ opacity: 0, y: -8 }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       data-testid="b32-bauteil"
-      className="relative rounded-kh bg-kh-page p-5 shadow-[0_2px_24px_rgba(0,0,0,0.14)]"
+      className="kh-feld relative p-4"
     >
       <button
         type="button"
         onClick={onSchliessen}
         aria-label="Erklärung schließen"
-        className="absolute top-2 right-2 grid size-11 place-items-center rounded-kh text-kh-grey transition-colors hover:text-kh-orange"
+        className="absolute top-2 right-2 grid size-11 place-items-center rounded-kh-pill bg-white/8 text-kh-paper transition-transform active:scale-90"
       >
-        <X className="size-5" strokeWidth={1.5} />
+        <X className="size-5" strokeWidth={2.25} />
       </button>
-      <h2 className="kh-h3 pr-12 text-kh-orange-text">{text.label}</h2>
-      <p className="mt-1.5 text-[1.125rem] leading-[1.5] text-kh-grey">{text.text}</p>
+      <h2 className="kh-titel-klein pr-12 text-kh-orange">{text.label}</h2>
+      <p className="mt-2 text-[1.125rem] leading-[1.45] text-kh-paper/85">{text.text}</p>
     </motion.div>
   )
 }

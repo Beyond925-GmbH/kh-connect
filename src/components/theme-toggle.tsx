@@ -26,7 +26,7 @@ export function ThemeToggle() {
     <Menu>
       <MenuTrigger
         aria-label="Farbschema wählen"
-        className="grid size-[35px] shrink-0 place-items-center border border-kh-rule text-kh-grey transition-colors hover:border-kh-orange hover:text-kh-orange data-[popup-open]:border-kh-orange data-[popup-open]:text-kh-orange"
+        className="grid size-[35px] shrink-0 place-items-center border border-kh-line text-kh-mute transition-colors hover:border-kh-orange hover:text-kh-orange data-[popup-open]:border-kh-orange data-[popup-open]:text-kh-orange"
       >
         <Icon className="size-[18px]" />
       </MenuTrigger>
