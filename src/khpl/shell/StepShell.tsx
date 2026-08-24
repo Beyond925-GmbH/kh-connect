@@ -3,6 +3,7 @@ import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { step, type StepId } from '@/khpl/flow/steps'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
+import { EinwurfBuehne } from '@/khpl/komponenten/AhaKarte'
 import { DeinWeg } from './DeinWeg'
 import { Rail } from './Rail'
 import { SichtfeldMesser } from './SichtfeldKontext'
@@ -26,11 +27,12 @@ import {
  *
  *   Bühne · Titel · Aha · Fachtext · Interaktion · Fuß
  *
- * `aha` steht seit dem Umbau der Einwürfe **außerhalb** des Panels, in einem
- * eigenen Slot zwischen Titel und Panel: die Karten klappen von dort nach oben
- * in die Bühne auf. Vorher hingen sie unten im Scrollbereich und machten das
- * Panel bei jeder gelösten Übung höher — der Screen wuchs genau dann, wenn er
- * fertig war.
+ * `aha` steht **außerhalb** des Panels und außerhalb der Spalte: die Einwürfe
+ * melden sich oben rechts, in unregelmäßigen Abständen und immer nur für ein
+ * paar Sekunden (siehe `EinwurfBuehne`). Vorher hingen sie unten im
+ * Scrollbereich und machten das Panel bei jeder gelösten Übung höher — der
+ * Screen wuchs genau dann, wenn er fertig war; danach standen sie dauerhaft
+ * über dem Panel und waren damit Inhalt statt Einwurf.
  *
  * **Was sich gegenüber der Vorfassung geändert hat, und warum.**
  *
@@ -203,21 +205,6 @@ export function StepShell({
       </motion.header>
 
       {/*
-        Der Einwurf-Slot. Er liegt **zwischen** Titel und Panel und ist der
-        Grund, warum die Aha-Karten das Panel nicht mehr wachsen lassen: sie
-        klappen von hier aus nach oben in die Bühne auf, statt unten im
-        Scrollbereich eine Zeile anzuhängen. `empty:hidden`, damit der `gap`
-        der Spalte auf Screens ohne Einwurf keinen Leerstreifen erzeugt.
-      */}
-      {aha && (
-        <div
-          className={`pointer-events-none flex w-full shrink-0 flex-col items-start gap-2 empty:hidden ${spaltenbreite}`}
-        >
-          {aha}
-        </div>
-      )}
-
-      {/*
         Das Panel kommt einen Takt nach dem Titel. Ein Screen, der alles auf
         einmal hinstellt, liest sich als Wand — erst der Ort, dann der Inhalt
         ist die kleinste Staffelung, die diesen Eindruck bricht, ohne dass
@@ -279,6 +266,21 @@ export function StepShell({
     </div>
   )
 
+  /*
+    Der Einwurf-Slot. Er steht bewusst **außerhalb** der Spalte aus Titel und
+    Panel: der Einwurf ist kein Inhalt des Screens, sondern jemand, der sich
+    gelegentlich meldet. Oben rechts, unterhalb der Leiste — die Ecke, in der
+    sonst nichts passiert, und weit genug weg von der Primärhandlung unten
+    rechts, dass er sie nie verdeckt.
+
+    `key={id}`: bei jedem Schritt fängt der Takt von vorn an.
+  */
+  const einwuerfe = aha && (
+    <div className="pointer-events-none absolute top-[74px] right-3 z-30 flex w-[min(26rem,calc(100%-1.5rem))] flex-col items-end sm:right-5 landscape:right-7">
+      <EinwurfBuehne key={id}>{aha}</EinwurfBuehne>
+    </div>
+  )
+
   const buehnenFlaeche = (
     <div className="absolute inset-0 overflow-hidden bg-kh-ink">
       {buehne}
@@ -311,6 +313,8 @@ export function StepShell({
               {ueberlagerung}
             </>
           )}
+
+          {einwuerfe}
 
           {imSkip ? (
             <RueckkehrLeiste ziel={fortschritt.detourReturnTo as StepId} />

@@ -62,13 +62,7 @@ export function B31() {
             eine neue Ausbildungsordnung. Wer diesen Sommer anfängt, ist der erste
             Jahrgang danach.
           </AhaKarte>
-          {/* Eigene Beschriftung statt `null`: die Karte klappt jetzt auf, und
-              ein Streifen braucht etwas, worauf man tippt. */}
-          <AhaKarte
-            sichtbar={aha}
-            eyebrow="Wie viel CO₂ steckt in diesem Dach?"
-            verzoegerung={1.8}
-          >
+          <AhaKarte sichtbar={aha} eyebrow="Wie viel CO₂ steckt in diesem Dach?">
             In dem Dachstuhl von eben stecken rund fünf Kubikmeter Holz — und damit etwa
             fünf Tonnen CO₂, die dort die nächsten hundert Jahre bleiben. Holz ist einer
             der wenigen Baustoffe, die nachwachsen, und der einzige, aus dem man

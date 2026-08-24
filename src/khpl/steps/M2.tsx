@@ -92,11 +92,7 @@ export function M2() {
             Mehr als die Hälfte davon ist Arbeitszeit, nicht Holz. Bezahlt wird nicht das
             Material — bezahlt wird, dass jemand weiß, wie es zusammengehört.
           </AhaKarte>
-          <AhaKarte
-            sichtbar={aufgeloest}
-            eyebrow="Und wenn der Bauherr nein sagt?"
-            verzoegerung={1.6}
-          >
+          <AhaKarte sichtbar={aufgeloest} eyebrow="Und wenn der Bauherr nein sagt?">
             Dann kommt der Satz, den jeder Betrieb kennt: Viele Angebote führen nie zum
             Auftrag. Gerechnet hast du trotzdem.
           </AhaKarte>
