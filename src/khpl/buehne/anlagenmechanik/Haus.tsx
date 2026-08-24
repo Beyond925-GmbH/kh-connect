@@ -153,7 +153,7 @@ export function Haus({
       aria-label="Gebäudeschnitt mit Heizungskeller"
     >
       <Defs />
-      <rect width={WELT.breite} height={WELT.hoehe} fill="url(#am-grund)" />
+      <rect width={WELT.breite} height={WELT.hoehe} fill="url(#am-grund-haus)" />
 
       <g ref={feld} transform={kamera(RAHMEN[szene])} clipPath="url(#am-sicht)">
         <Erdreich />
@@ -284,7 +284,7 @@ function Defs() {
       <clipPath id="am-sicht" clipPathUnits="userSpaceOnUse">
         <rect x={0} y={0} width={WELT.breite} height={WELT.hoehe} />
       </clipPath>
-      <radialGradient id="am-grund" cx="50%" cy="44%" r="74%">
+      <radialGradient id="am-grund-haus" cx="50%" cy="44%" r="74%">
         <stop offset="0%" stopColor={KALT.flaeche} stopOpacity={0.9} />
         <stop offset="100%" stopColor={KALT.flaeche} stopOpacity={0} />
       </radialGradient>

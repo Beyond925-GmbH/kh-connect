@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'motion/react'
+import { useEffect, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import {
@@ -110,10 +110,9 @@ export function A6() {
   const antworten = useFortschritt().answers
   const gespeichert = antworten.a6
   const fertig = !!gespeichert?.druckGetroffen
-  const reduziert = useMemo(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    [],
-  )
+  // Dieselbe Frage, dieselbe Antwort wie auf der Bühne (`Haus`, `Anlage`) —
+  // sonst stellt die Zeichnung sofort und der Screen wartet weiter.
+  const reduziert = useReducedMotion() ?? false
 
   /**
    * Der Weg aus A4 — **seiner, nicht irgendeiner.** Fehlt er (übersprungen
@@ -273,13 +272,13 @@ export function A6() {
       fuss={
         <StepFuss
           id="A6"
-          // Solange die Wärme unterwegs ist, zeigt der Fuß keinen Weg nach
-          // vorn: das ist der Moment, für den der Tag gebaut ist, und ein
-          // Knopf mitten hinein wäre die einzige Stelle, an der die App ihn
-          // selbst unterbricht. Bei reduzierter Bewegung entfällt die
-          // Wanderung und damit auch diese Pause.
-          ohneWeiter={laeuft && !angekommen ? true : undefined}
-          uebungOffen={!laeuft}
+          // Solange die Wärme unterwegs ist, bleibt der Fuß leise: kein oranger
+          // Knopf mitten in den Moment, für den der Tag gebaut ist. Aber der
+          // Ausweg bleibt — *Weiter* ist auf jedem Step jederzeit aktiv
+          // (khpl-tage.md 3), und die Wanderung ist mit einem verlustreichen
+          // Weg die längste Wartezeit des Produkts. Deshalb steht hier das
+          // leise „Überspringen" statt gar nichts.
+          uebungOffen={!laeuft || !angekommen}
           aktion={
             laeuft ? null : (
               <div className="flex items-center gap-2">

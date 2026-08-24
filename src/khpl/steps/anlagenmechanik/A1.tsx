@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -20,6 +20,12 @@ import { Fachwort } from './Fachwort'
  * Drei Takte: **suchen** (drei Prüfungen aus sechs) → **entscheiden** (auf die
  * Ursache tippen) → **gelöst** (was das für die Person bedeutet, bei der man
  * war). Der Screen wächst dabei nicht, er wird ausgetauscht (`Wechsel`).
+ *
+ * **Den Takt wechselt immer ein Tap, nie ein Zähler.** Auch nach der dritten
+ * Prüfung bleibt der Screen stehen, bis der Besucher „Ich weiß, woran es liegt"
+ * drückt — sonst tauscht der `Wechsel` die Ergebnisfläche in demselben Render
+ * aus, in dem sie das dritte Ergebnis bekommen hat, und der Befund, auf dem der
+ * Fall steht, wäre nie zu lesen.
  *
  * **Der Preis eines Fehlers ist eine zweite Anfahrt** — nicht Material
  * (Dachdecker), nicht Taktzeit (Zimmerer), nicht das Werkzeug (Zerspanung).
@@ -53,6 +59,13 @@ import { Fachwort } from './Fachwort'
 
 /** Drei Prüfungen sind frei. Danach entscheidet man — oder früher (Spec 6). */
 const PRUEFUNGEN_FREI = 3
+
+/**
+ * Wie lange die Zeichnung einen Prüfpunkt als „wird gerade geprüft" zeigt.
+ * Ein Puls, kein Ladebalken: der Screen wartet auf nichts, er markiert nur
+ * kurz, wo man eben hingefasst hat.
+ */
+const PULS_MS = 1600
 
 /** Angekommen bei Frau Osei. */
 const ANKUNFT = { stunde: 7, minute: 40 }
@@ -172,13 +185,26 @@ export function A1() {
   )
   const [geloest, setGeloest] = useState(() => !!gespeichert?.richtig)
   const [daneben, setDaneben] = useState<string | null>(null)
+  const [laeuft, setLaeuft] = useState<string | null>(null)
+
+  // Der Puls auf der Zeichnung. Er läuft aus, er wartet nicht: nichts im Screen
+  // hängt daran, und wer sofort die nächste Prüfung tippt, setzt ihn um.
+  useEffect(() => {
+    if (!laeuft) return
+    const uhr = setTimeout(() => setLaeuft(null), PULS_MS)
+    return () => clearTimeout(uhr)
+  }, [laeuft])
 
   const pruefe = (id: string) => {
     if (geprueft.includes(id) || geprueft.length >= PRUEFUNGEN_FREI) return
     const neu = [...geprueft, id]
     setGeprueft(neu)
+    setLaeuft(id)
     merkeAntwort('a1', { geprueft: neu, ursache: gewaehlt, richtig: geloest })
-    if (neu.length >= PRUEFUNGEN_FREI) setEntscheiden(true)
+    // **Kein automatischer Taktwechsel nach der dritten Prüfung.** Sonst
+    // tauscht der `Wechsel` die Ergebnisfläche im selben Render aus, und
+    // ausgerechnet das dritte Ergebnis — oft der Satz, an dem der Fall kippt —
+    // bekäme niemand zu lesen. Weiter geht es über „Ich weiß, woran es liegt".
   }
 
   const entscheide = (id: string) => {
@@ -202,11 +228,15 @@ export function A1() {
           zustand={{
             szene: 'anlage',
             geprueft,
-            laeuft: null,
-            ursache: gewaehlt,
+            laeuft,
+            // Erst der Treffer bekommt die Auszeichnung auf der Zeichnung.
+            // Gäbe man den Fehlgriff durch, hätte ausgerechnet die falsche
+            // Antwort den warmen Ring — und die richtige (`fuehler`) hat auf
+            // diesem Ausschnitt gar keinen Punkt.
+            ursache: geloest ? gewaehlt : null,
             geloest,
           }}
-          onPruefpunkt={entscheiden || geloest ? undefined : pruefe}
+          onPruefpunkt={entscheiden || geloest || offeneP <= 0 ? undefined : pruefe}
         />
       }
       fachtext={
@@ -281,7 +311,9 @@ function Suchen({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-          Drei Prüfungen hast du. Such dir aus, welche.
+          {offen > 0
+            ? 'Drei Prüfungen hast du. Such dir aus, welche.'
+            : 'Das waren deine drei Prüfungen. Jetzt entscheidest du.'}
         </p>
         <Uhr geprueft={geprueft.length} />
       </div>

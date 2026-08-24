@@ -10,6 +10,7 @@ import { StepShell } from '@/khpl/shell/StepShell'
 import type { StepId } from '@/khpl/flow/steps'
 import type { Fortschritt } from '@/khpl/store/fortschritt'
 import { merkeAntwort } from '@/khpl/store/fortschritt'
+import { VLIES_MARKE } from './A2'
 
 /**
  * A7 — Jetzt erklärst du es. **Zwei Dinge auf einem Screen: die Abfrage und
@@ -184,7 +185,9 @@ const TATEN: { id: StepId; tat: Tat }[] = [
     tat: {
       erledigt: 'einen alten Heizungskeller gelesen',
       gesehen: 'einen alten Heizungskeller gesehen',
-      geloest: (f) => (f.answers.a2?.angetippt.length ?? 0) > 0,
+      // Gelesen hat den Keller, wer ein Bauteil angetippt hat — die
+      // Vlies-Marke im selben Feld zählt nicht mit.
+      geloest: (f) => (f.answers.a2?.angetippt ?? []).some((w) => w !== VLIES_MARKE),
     },
   },
   {

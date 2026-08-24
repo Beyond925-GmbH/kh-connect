@@ -216,9 +216,15 @@ export const TRAGENDE_WAND = {
 } as const
 
 /**
- * Der Weg, den A4 meint, wenn es „der richtige" sagt: zwei Bögen, zwei
- * Rasterschritte länger als der kurze — und er geht unten durch den Durchgang
- * statt oben durch die Wand.
+ * Der Weg, den A4 meint, wenn es „der richtige" sagt: zwei Bögen, unten durch
+ * den Durchgang statt oben durch die Wand.
+ *
+ * ⚠️ Auf diesem Raster ist er **zugleich der kürzeste legale Weg** — die Wand
+ * sperrt die Zeilen 0–2 vollständig, einen Durchbruch gibt es nicht. Jeder Weg
+ * mit mehr Bögen ist gleich lang oder länger. Der Handel aus Spec 6 („der
+ * kürzeste Weg hat vier Bögen und einen Durchbruch") existiert hier also nicht;
+ * A4 textet deshalb, was auf dem Raster wirklich passiert, und meldet den
+ * Widerspruch, statt die Geometrie eigenmächtig umzubauen.
  *
  * Er ist zugleich der **Rückfall für A6 und A7**: kommt dort ein leerer Pfad
  * an — weil der Besucher A4 übersprungen oder nichts gezogen hat —, läuft die

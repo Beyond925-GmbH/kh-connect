@@ -46,6 +46,17 @@ import { Fachwort } from './Fachwort'
 const GENUG = 2
 
 /**
+ * Der ausgerollte Vlies-Handgriff, mitgeschrieben im selben Feld.
+ *
+ * Ohne ihn stünde beim Wiederkommen über „Dein Weg" oder Zurück der
+ * Anfangszustand da, und der Besucher müsste den Handgriff samt seines Textes
+ * ein zweites Mal machen. Die Form aus Spec 6 (`{ angetippt: string[] }`)
+ * bleibt unberührt: die Marke ist kein Bauteil und wird überall
+ * herausgefiltert, wo gezählt oder gezeichnet wird.
+ */
+export const VLIES_MARKE = 'vlies'
+
+/**
  * Was jedes Bauteil tut und ob es bleibt.
  *
  * ⚠️ **`ENTWURF – UNGEPRÜFT`** (Spec 6, A2) — fachlich abzunehmen. Bewusst
@@ -121,17 +132,26 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
 
 export function A2() {
   const gespeichert = useFortschritt().answers.a2
-  const vorher = (gespeichert?.angetippt ?? []).filter(istBauteil)
-  const [vlies, setVlies] = useState(vorher.length > 0)
+  const gemerkt = gespeichert?.angetippt ?? []
+  const vorher = gemerkt.filter(istBauteil)
+  const [vlies, setVlies] = useState(gemerkt.includes(VLIES_MARKE) || vorher.length > 0)
   const [angetippt, setAngetippt] = useState<BauteilId[]>(vorher)
   const [offen, setOffen] = useState<BauteilId | null>(null)
+
+  const merke = (bauteile: BauteilId[]) =>
+    merkeAntwort('a2', { angetippt: [VLIES_MARKE, ...bauteile] })
+
+  const ausrollen = () => {
+    setVlies(true)
+    merke(angetippt)
+  }
 
   const tippen = (id: BauteilId) => {
     setOffen((alt) => (alt === id ? null : id))
     if (angetippt.includes(id)) return
     const neu = [...angetippt, id]
     setAngetippt(neu)
-    merkeAntwort('a2', { angetippt: neu })
+    merke(neu)
   }
 
   const genug = vlies && angetippt.length >= GENUG
@@ -240,11 +260,7 @@ export function A2() {
           uebungOffen={!genug}
           aktion={
             vlies ? null : (
-              <Button
-                variant="aktion"
-                onClick={() => setVlies(true)}
-                data-testid="a2-vlies"
-              >
+              <Button variant="aktion" onClick={ausrollen} data-testid="a2-vlies">
                 Vlies ausrollen
               </Button>
             )

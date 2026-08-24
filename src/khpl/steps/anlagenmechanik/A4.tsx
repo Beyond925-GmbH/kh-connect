@@ -52,7 +52,21 @@ import { Fachwort } from './Fachwort'
  * **`answers.a4`** `{ pfad, boegen, fertig }` (Spec 6).
  */
 
-/** Ab so vielen Bögen ist der Weg der kurze und nicht der gute (Spec 6, A4). */
+/**
+ * Bis hierher ist der Weg sauber geführt; jeder Bogen darüber ist einer zu
+ * viel.
+ *
+ * ⚠️ **Gemeldet, nicht gelöst** (khpl-tage.md, Kopf): Spec 6 beschreibt den
+ * Handel als „der kürzeste Weg hat vier Bögen und einen Durchbruch durch eine
+ * tragende Wand; der richtige ist zwei Meter länger und hat zwei Bögen".
+ * Auf dem gebauten Raster gibt es diesen Handel nicht — die tragende Wand
+ * sperrt die oberen Zeilen ganz, es gibt keinen Durchbruch, und der Weg mit
+ * zwei Bögen ist zugleich der kürzeste mögliche. Mehr Bögen heißt hier immer
+ * gleich lang oder länger, nie kürzer. Ein zweiter, kürzerer Weg mit mehr
+ * Richtungswechseln wäre eine Änderung an der Geometrie und damit an der
+ * abgenommenen Übung; **die Copy unten richtet sich deshalb nach dem, was auf
+ * dem Raster wirklich passiert.**
+ */
 const BOEGEN_GUT = 2
 
 export function A4() {
@@ -214,12 +228,12 @@ function Bewertung({ boegen }: { boegen: number }) {
   return (
     <div className="flex flex-col gap-2">
       <p className="kh-titel-klein text-kh-paper" data-testid="a4-bewertung">
-        {gut ? 'Der Weg ist deiner.' : 'Der Weg ist deiner — und er ist kurz.'}
+        {gut ? 'Der Weg ist deiner.' : 'Der Weg ist deiner — und er hat Ecken.'}
       </p>
       <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/85">
         {gut
-          ? 'Zwei Bögen, ein paar Meter mehr Rohr. Genau so baut man es: Material ist billiger als eine Pumpe, die den Rest ihres Lebens dagegen anarbeitet.'
-          : 'Er passt, er ist dicht, und er bleibt so. Jeder Bogen darin kostet die Pumpe Kraft — gleich, wenn die Anlage anläuft, wirst du sehen, dass die Wärme etwas länger braucht.'}
+          ? 'Zwei Bögen — weniger lässt dieser Keller nicht zu. Du bist unter der tragenden Wand durch und in einem Zug zum Verteiler. Genau so baut man es: lieber ein Stück Rohr mehr als einen Bogen mehr, denn gegen den arbeitet die Pumpe den Rest ihres Lebens an.'
+          : 'Er passt, er ist dicht, und er bleibt so. Kürzer ist er dadurch nicht geworden — jeder Bogen darin kostet die Pumpe Kraft. Gleich, wenn die Anlage anläuft, wirst du sehen, dass die Wärme etwas länger braucht.'}
       </p>
     </div>
   )

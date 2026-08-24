@@ -90,12 +90,12 @@ function Grundton() {
   return (
     <>
       <defs>
-        <radialGradient id="am-grund" cx="50%" cy="46%" r="72%">
+        <radialGradient id="am-grund-anlage" cx="50%" cy="46%" r="72%">
           <stop offset="0%" stopColor={KALT.flaeche} stopOpacity={0.85} />
           <stop offset="100%" stopColor={KALT.flaeche} stopOpacity={0} />
         </radialGradient>
       </defs>
-      <rect width={WELT.breite} height={WELT.hoehe} fill="url(#am-grund)" />
+      <rect width={WELT.breite} height={WELT.hoehe} fill="url(#am-grund-anlage)" />
     </>
   )
 }
