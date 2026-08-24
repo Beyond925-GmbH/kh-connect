@@ -87,9 +87,11 @@ export interface WerkstueckProps {
 
   // -- Z3 -------------------------------------------------------------------
   /**
-   * Bis zu welcher Programmzeile die Kontur gezeichnet ist (Index in
-   * `PROGRAMM`). Mit jeder Zeile wächst ein Stück Weg — das ist der Reiz des
-   * Screens: aus Text wird eine Form, und man hat sie selbst entstehen lassen.
+   * Die Zeile, die als Nächstes drankommt (Index in `PROGRAMM`) — gezeichnet
+   * ist die Kontur **bis ausschließlich** dieser Zeile. Mit jeder Zeile wächst
+   * ein Stück Weg, und zwar in dem Moment, in dem der Besucher sie abschickt:
+   * das ist der Reiz des Screens — aus Text wird eine Form, und man hat sie
+   * selbst entstehen lassen.
    */
   zeile?: number
   /** Angetippte Zeile — die, die der Besucher für falsch hält. */

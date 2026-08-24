@@ -26,10 +26,11 @@ import { KARRIEREWEGE } from './karrierewege'
  * Der Fuß zeigt hier **kein** Abstecher-Angebot: die Karten sind das Angebot.
  * Beides nebeneinander wären dieselben drei Wege zweimal auf einem Screen.
  *
- * ⚠️ **Medienlücke, gemeldet.** Für diesen Screen führt §10 keinen Slot, und
- * im Bestand liegt kein passendes Motiv. `StepFoto` rendert dann nichts, und
- * die Bühne bleibt der dunkle Grund — die drei Karten tragen den Screen
- * allein. Ein Motiv gehört in `berufe/zerspanung.ts`, nicht hierher.
+ * **Das Motiv steht in `berufe/zerspanung.ts`, nicht hier.** §10 führt für
+ * diesen Screen keinen Slot; genommen ist deshalb `gallery-1.webp` aus dem
+ * ungenutzten Bestand. Ohne Eintrag gäbe `StepFoto` nichts zurück, und dieser
+ * Screen hätte als einziger des Tages eine leere Bühne — hochkant ein
+ * schwarzes oberes Drittel unter dem Titel.
  */
 export function Z7() {
   const { weiter, zumAbstecher } = useStepNavigation('Z7')

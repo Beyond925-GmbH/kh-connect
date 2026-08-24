@@ -59,7 +59,9 @@ const GESAMT_DAUER = ZEILEN_DAUER * Math.max(1, SCHNITT.length - 1)
 const HALT = [14, -NENNMASS / 2] as const
 
 export function Werkzeugweg({
-  zeile = PROGRAMM.length - 1,
+  // Ohne Angabe ist das Programm durch: `zeile` ist die Zeile, die als
+  // Nächstes drankäme, und hinter der letzten kommt keine mehr.
+  zeile = PROGRAMM.length,
   markierteZeile = null,
   luftschnitt = false,
 }: {
@@ -127,9 +129,11 @@ export function Werkzeugweg({
     return bis > 0 ? alsPfad([SCHNITT[bis - 1], SCHNITT[bis]]) : null
   }, [markierteZeile, luftschnitt])
 
-  const angefahren = zeile >= (SCHNITT[0]?.zeile ?? Infinity)
+  // Beides zählt wie `schnittAnteil` **bis ausschließlich** `zeile`: die Zeile
+  // mit diesem Index steht im Panel erst an und ist noch nicht gefahren.
+  const angefahren = zeile > (SCHNITT[0]?.zeile ?? Infinity)
   const zurueckgezogen =
-    RUECKZUG.length === 2 && zeile >= RUECKZUG[1].zeile && !luftschnitt
+    RUECKZUG.length === 2 && zeile > RUECKZUG[1].zeile && !luftschnitt
 
   return (
     <Bild viewBox={SICHT}>

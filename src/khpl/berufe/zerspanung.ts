@@ -231,8 +231,8 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
    * Szenario-Video die zweite echte Medienlücke des Tages und die wichtigere,
    * weil sie die Pointe trägt (§10).
    *
-   * Ungenutzt und verfügbar: `gallery-1.webp` (Fräser trägt Metall ab, Späne
-   * fliegen) und `schaetzen-spindel.webp` (Spindel mit Kühlmittelzuführung).
+   * Ungenutzt und verfügbar bleibt `schaetzen-spindel.webp` (Spindel mit
+   * Kühlmittelzuführung); `gallery-1.webp` trägt seit dem Ausbau Z7.
    */
   bilder: {
     // Bediener an der CNC-Maschine — der Screen, der `technik: 1` mit trägt.
@@ -246,6 +246,14 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       src: '/medien/media/zerspanungsmechaniker/quiz-praezision.webp',
       pos: '50% 50%',
     },
+    // §10 führt für Z7 keinen Slot — ohne Eintrag bliebe die Bühne des
+    // Karriere-Screens leer, und das wäre die einzige Stelle des Tages, an der
+    // sie das täte: hochkant ein schwarzes oberes Drittel, das sich wie ein
+    // Ladefehler liest. `gallery-1.webp` (Fräser trägt Metall ab, Späne
+    // fliegen) steht im Bestand ungenutzt und ist das Motiv mit Vorwärtsdrang
+    // — anders als `schaetzen-spindel.webp`, das neben `gallery-3` (Z2.1)
+    // zweimal dasselbe Kühlmittel zeigte.
+    Z7: { src: '/medien/media/zerspanungsmechaniker/gallery-1.webp', pos: '55% 55%' },
     // Die drei Karrierefotos sind gemeinsam und zeigen niemandes Gewerk
     // (khpl-tage.md §6.1 V2).
     'Z7.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },

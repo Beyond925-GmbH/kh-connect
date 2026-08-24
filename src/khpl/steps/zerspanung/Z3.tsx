@@ -163,8 +163,10 @@ export function Z3() {
         <Werkstueck
           zustand="werkzeugweg"
           // `gelesen` ist die Zahl der abgearbeiteten Zeilen und damit zugleich
-          // der Index der nächsten: gezeichnet ist die Kontur bis
-          // ausschließlich dieser Zeile.
+          // der Index der nächsten. Die Bühne rechnet **bis ausschließlich**
+          // dieser Zeile (`weg.ts`), damit das Stück Kontur in dem Moment
+          // erscheint, in dem der Besucher die Zeile abschickt — und nicht
+          // schon, während die Klammer sie erst ankündigt.
           zeile={gelesen}
           markierteZeile={markiert}
           luftschnitt={luftschnitt}
@@ -333,7 +335,12 @@ function Programmliste({
     <ol className="kh-feld flex flex-col gap-1.5 px-2 py-2" data-testid="z3-programm">
       {PROGRAMM.map((zeile, i) => {
         const dran = i === gelesen && takt === 'lesen'
-        const offen = i >= gelesen && takt === 'lesen'
+        // Abgeblendet ist, was **hinter** der aktuellen Zeile liegt. Die eine
+        // Zeile, über die die Klammer darunter gerade spricht, steht voll
+        // deckend in Orange da — sie zusätzlich auf 35 % zu nehmen, machte
+        // ausgerechnet sie zur blassesten der Liste, und am Messekiosk liest
+        // man sie mit ausgestrecktem Arm.
+        const offen = i > gelesen && takt === 'lesen'
         const waehlbar = suchen && zeile.faehrt === true
         const zeigen = vorschlag && i === FEHLERZEILE
         const istMarkiert = markiert === i

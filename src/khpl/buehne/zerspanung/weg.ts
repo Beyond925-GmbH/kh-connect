@@ -146,7 +146,15 @@ const LAENGEN = SCHNITT.slice(1).map((p, i) =>
 const GESAMTLAENGE = LAENGEN.reduce((a, b) => a + b, 0)
 
 /**
- * Wie viel des Schnittwegs bis einschließlich `zeile` gefahren ist, 0…1.
+ * Wie viel des Schnittwegs gefahren ist, wenn `zeile` als Nächstes drankommt,
+ * 0…1.
+ *
+ * **Bis ausschließlich `zeile`**, denn `zeile` ist der Index der Zeile, die im
+ * Panel als Nächstes ansteht und noch **nicht** ausgeführt ist (Z3, `Klammer`).
+ * Rechnete diese Funktion inklusiv, stünde das Stück Kontur schon da, bevor
+ * der Besucher die zugehörige Zeile abschickt — und die Zuordnung „diese Zeile
+ * hat dieses Stück gezeichnet“ wäre um eins verschoben. Genau die trägt aber
+ * den Reiz des Screens (§6 Z3).
  *
  * **Anteil an der Strecke, nicht an den Zeilen.** Bei gleicher Vorschub-
  * geschwindigkeit dauert `G1 Z-35.` deutlich länger als die Fase davor, und
@@ -157,7 +165,7 @@ export function schnittAnteil(zeile: number): number {
   if (GESAMTLAENGE === 0) return 0
   let gefahren = 0
   SCHNITT.slice(1).forEach((p, i) => {
-    if (p.zeile <= zeile) gefahren += LAENGEN[i]
+    if (p.zeile < zeile) gefahren += LAENGEN[i]
   })
   return gefahren / GESAMTLAENGE
 }
@@ -167,7 +175,7 @@ export function schnittAnteil(zeile: number): number {
  * der Stand, auf dem das Bild beim blinden Start stehen bleibt. Steht hier und
  * nicht oben bei `FEHLWEG`, weil `schnittAnteil` die Streckenlängen braucht.
  */
-export const ANTEIL_VOR_FEHLER = schnittAnteil(FEHLERZEILE - 1)
+export const ANTEIL_VOR_FEHLER = schnittAnteil(FEHLERZEILE)
 
 /** Der Schnittweg bis zum Anteil `anteil` (0…1), letzter Punkt interpoliert. */
 export function schnittBis(anteil: number): { z: number; r: number }[] {
