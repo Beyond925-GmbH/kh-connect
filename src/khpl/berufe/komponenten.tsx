@@ -28,6 +28,19 @@ import { A7 } from '@/khpl/steps/anlagenmechanik/A7'
 import { A8 } from '@/khpl/steps/anlagenmechanik/A8'
 import { A8Weg } from '@/khpl/steps/anlagenmechanik/A8Weg'
 import { A9 } from '@/khpl/steps/anlagenmechanik/A9'
+import { C1 } from '@/khpl/steps/zimmerer/C1'
+import { C11 } from '@/khpl/steps/zimmerer/C11'
+import { C2 } from '@/khpl/steps/zimmerer/C2'
+import { C3 } from '@/khpl/steps/zimmerer/C3'
+import { C31 } from '@/khpl/steps/zimmerer/C31'
+import { C4 } from '@/khpl/steps/zimmerer/C4'
+import { C5 } from '@/khpl/steps/zimmerer/C5'
+import { C51 } from '@/khpl/steps/zimmerer/C51'
+import { C6 } from '@/khpl/steps/zimmerer/C6'
+import { C7 } from '@/khpl/steps/zimmerer/C7'
+import { C8 } from '@/khpl/steps/zimmerer/C8'
+import { C8x } from '@/khpl/steps/zimmerer/C8x'
+import { C9 } from '@/khpl/steps/zimmerer/C9'
 
 /**
  * Welcher Step welches Modul rendert — je Beruf.
@@ -77,7 +90,23 @@ export const BERUF_KOMPONENTEN: Partial<
   // ---------------------------------------------------------------------
   // Zimmerer — Ids `C*` · Steps in `steps/zimmerer/`
   // ---------------------------------------------------------------------
-  zimmerer: {},
+  zimmerer: {
+    C1: () => <C1 />,
+    'C1.1': () => <C11 />,
+    C2: () => <C2 />,
+    C3: () => <C3 />,
+    'C3.1': () => <C31 />,
+    C4: () => <C4 />,
+    C5: () => <C5 />,
+    'C5.1': () => <C51 />,
+    C6: () => <C6 />,
+    C7: () => <C7 />,
+    C8: () => <C8 />,
+    'C8.1': () => <C8x id="C8.1" />,
+    'C8.2': () => <C8x id="C8.2" />,
+    'C8.3': () => <C8x id="C8.3" />,
+    C9: () => <C9 />,
+  },
 
   // ---------------------------------------------------------------------
   // Zerspanung — Ids `Z*` · Steps in `steps/zerspanung/`

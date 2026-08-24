@@ -83,7 +83,49 @@ export interface Antworten {
   // Zimmerer — Schlüssel `c*`
   // -------------------------------------------------------------------------
 
-  // (noch keine Interaktion)
+  /** C1 — das gesuchte Holz aus dem Stapel gefunden, mit Zahl der Versuche. */
+  c1?: { gefunden: boolean; versuche: number }
+  /** C2 — geschätztes Achsmaß in Zentimetern, und ob 62,5 schon stand. */
+  c2?: { schaetzung: number; aufgeloest: boolean }
+  /** C3 — welche Schichten der Wand schon liegen, von innen nach außen. */
+  c3?: { gelegt: string[]; fertig: boolean }
+  /**
+   * C4 — Fensterausschnitt getroffen, mit Zahl der Versuche. `abweichungMm` ist
+   * **optional**: alte localStorage-Stände und der Fehlversuch-Zweig kennen es
+   * nicht, und die Anzeige hängt allein an `getroffen`.
+   *
+   * `ausschnitt` trägt den **vollen** Ausschnitt in Millimetern, weil er das
+   * Fadenobjekt ab C4 kennzeichnet: „Ab C4 gehört das Element dem Besucher —
+   * der Ausschnitt ist deiner“ (khpl-tag-zimmerer.md 2). C5, C6 und C7 zeigen
+   * dasselbe Fenster wieder, und C6 fragt an ihm ab, wo oben ist — mit einem
+   * anderen Fenster als in C4 wäre das keine Erinnerungsleistung, sondern eine
+   * Falle. Ebenfalls optional: alte Stände und ein übersprungenes C4 kennen ihn
+   * nicht, dann fällt die Bühne auf ihren Standardausschnitt zurück.
+   *
+   * Strukturell notiert und nicht als `Fensterausschnitt` importiert: der Typ
+   * wohnt neben der lazy geladenen Bühne, und diese Datei gehört allen vier
+   * Berufen.
+   */
+  c4?: {
+    getroffen: boolean
+    versuche: number
+    abweichungMm?: number
+    ausschnitt?: { xMm: number; yMm: number; breiteMm: number; hoeheMm: number }
+  }
+  /** C5 — welche der drei Pausenfragen aufgedeckt wurden. */
+  c5?: { gelesen: string[] }
+  /** C6 — Lage am Haken richtig erkannt, Element versetzt, Zahl der Versuche. */
+  c6?: { seiteRichtig: boolean; versetzt: boolean; versuche: number }
+  /**
+   * C8 — angesehene Karrierewege, in Reihenfolge des Öffnens. Speist den
+   * personalisierten Aufhänger in C9.
+   *
+   * Eigener Schlüssel statt `m9`: `merkeKarriereweg` weiter unten schreibt fest
+   * nach `m9`, und `m9` gehört dem Dachdecker. Die Funktion steht in der
+   * gemeinsamen Hälfte dieser Datei und ist trotzdem berufsspezifisch — das ist
+   * gemeldet, nicht umgebaut. Die Zimmerer-Steps schreiben über `merkeAntwort`.
+   */
+  c8?: { angesehen: StepId[] }
 
   // -------------------------------------------------------------------------
   // Zerspanung — Schlüssel `z*`
@@ -268,7 +310,63 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   // Zimmerer — Schlüssel `c*`
   // ---------------------------------------------------------------------
 
-  // (noch keine Interaktion)
+  const c1 = q.c1 as Antworten['c1']
+  if (c1 && typeof c1.versuche === 'number') {
+    a.c1 = { gefunden: !!c1.gefunden, versuche: c1.versuche }
+  }
+  const c2 = q.c2 as Antworten['c2']
+  if (c2 && typeof c2.schaetzung === 'number' && Number.isFinite(c2.schaetzung)) {
+    a.c2 = { schaetzung: c2.schaetzung, aufgeloest: !!c2.aufgeloest }
+  }
+  const c3 = q.c3 as Antworten['c3']
+  if (c3 && stringListe(c3.gelegt)) {
+    a.c3 = { gelegt: stringListe(c3.gelegt) as string[], fertig: !!c3.fertig }
+  }
+  const c4 = q.c4 as Antworten['c4']
+  if (c4 && typeof c4.versuche === 'number') {
+    a.c4 = { getroffen: !!c4.getroffen, versuche: c4.versuche }
+    // Nur eine echte Zahl übernehmen — alles andere bleibt weg.
+    if (typeof c4.abweichungMm === 'number' && Number.isFinite(c4.abweichungMm)) {
+      a.c4.abweichungMm = c4.abweichungMm
+    }
+    // Alle vier Maße oder keines: ein halber Ausschnitt zeichnet ein halbes
+    // Fenster, und die Bühne hat für „keiner“ einen Rückfall.
+    const s = c4.ausschnitt
+    if (
+      s &&
+      Number.isFinite(s.xMm) &&
+      Number.isFinite(s.yMm) &&
+      Number.isFinite(s.breiteMm) &&
+      Number.isFinite(s.hoeheMm) &&
+      s.breiteMm > 0 &&
+      s.hoeheMm > 0
+    ) {
+      a.c4.ausschnitt = {
+        xMm: s.xMm,
+        yMm: s.yMm,
+        breiteMm: s.breiteMm,
+        hoeheMm: s.hoeheMm,
+      }
+    }
+  }
+  const c5 = q.c5 as Antworten['c5']
+  if (c5 && stringListe(c5.gelesen)) {
+    a.c5 = { gelesen: stringListe(c5.gelesen) as string[] }
+  }
+  const c6 = q.c6 as Antworten['c6']
+  if (c6 && typeof c6.versuche === 'number') {
+    a.c6 = {
+      seiteRichtig: !!c6.seiteRichtig,
+      versetzt: !!c6.versetzt,
+      versuche: c6.versuche,
+    }
+  }
+  const c8 = q.c8 as Antworten['c8']
+  if (c8 && Array.isArray(c8.angesehen)) {
+    // Fällt eine StepId aus dem Graphen, darf sie nicht als `titel` wieder
+    // auftauchen.
+    a.c8 = { angesehen: c8.angesehen.filter((x) => istStepId(graph, x)) }
+  }
 
   // ---------------------------------------------------------------------
   // Zerspanung — Schlüssel `z*`
