@@ -73,13 +73,13 @@ export function Helmwahl() {
             Er war in der ersten Fassung auf 15 rem gedeckelt und stand damit
             als Daumennagel in einer 34-%-Spalte: das Ergebnis der Wahl war das
             kleinste Element des Screens. Jetzt füllt er seine Spalte. */}
-        <div className="flex shrink-0 flex-col items-center justify-center gap-3 landscape:w-[36%]">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 landscape:w-[36%] landscape:flex-none">
           <motion.div
             key={farbe}
             initial={{ scale: 0.9, opacity: 0, rotate: -4 }}
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 420, damping: 22 }}
-            className="w-[13rem] landscape:w-full landscape:max-w-[23rem]"
+            className="w-[min(58%,17rem)] landscape:w-full landscape:max-w-[23rem]"
           >
             <Helm
               farbe={farbe}
@@ -90,86 +90,92 @@ export function Helmwahl() {
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 landscape:max-w-[40rem]">
           {/*
-            Überschrift und Wahl sind **ein** Block, und der steht quer mittig
-            neben dem Helm.
+            Überschrift und Wahl sind **ein** Block, und der steht mittig im
+            Platz, der ihm bleibt.
 
             Vorher hing die Überschrift oben fest und `justify-center` schob
             nur die Wahl in die Mitte — das ergab ein Loch zwischen beiden und
             ein zweites darunter, während der Helm daneben zentriert stand.
-            Hochkant bleibt es bei Oberkante: dort ist der Platz knapp, und ein
-            zentrierter Block in einem scrollenden Container schneidet oben ab.
+
+            Zentriert wird über `m-auto` am Block und nicht über
+            `justify-center` am Container: `justify-center` schneidet in einem
+            scrollenden Container oben ab, sobald der Inhalt höher wird als der
+            Platz (kleines Telefon, große Schrift). Automatische Ränder geben
+            in dem Fall einfach nach.
           */}
           <div
             data-scroll
-            className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain pr-0.5 landscape:justify-center"
+            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pr-0.5"
           >
-            <header className="flex shrink-0 flex-col gap-1.5">
-              <span className="kh-etikett flex items-center gap-2">
-                <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
-                Bevor du anfängst
-              </span>
-              <h1 className="kh-titel">Dein Helm</h1>
-            </header>
+            <div className="m-auto flex w-full flex-col gap-6 py-1">
+              <header className="flex shrink-0 flex-col gap-1.5">
+                <span className="kh-etikett flex items-center gap-2">
+                  <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
+                  Bevor du anfängst
+                </span>
+                <h1 className="kh-titel">Dein Helm</h1>
+              </header>
 
-            <section>
-              {/*
+              <section>
+                {/*
                 Die beiden Fragen sind die einzige Wegweisung auf diesem
                 Screen und standen in `kh-mute` — dem leisesten Ton des
                 Systems. Als Etikett tragen sie so weit wie der Rest.
               */}
-              <h2 className="kh-etikett">Welche Farbe?</h2>
-              <div className="mt-3 flex flex-wrap gap-3">
-                {HELM_FARBEN.map((f) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    aria-pressed={farbe === f.id}
-                    data-testid={`helm-farbe-${f.id}`}
-                    onClick={() => setFarbe(f.id)}
-                    // Der gewählte Zustand liegt **außerhalb** der Farbe: eine
-                    // weiße Kante im Kreis war auf dem weißen Helm unsichtbar,
-                    // und genau der ist die Voreinstellung. Ein abgesetzter
-                    // Ring in Signalfarbe trägt auf allen vier Farben.
-                    className={`size-[64px] rounded-kh-pill transition-transform active:scale-90 ${
-                      farbe === f.id
-                        ? 'scale-105 ring-3 ring-kh-signal ring-offset-3 ring-offset-kh-ink'
-                        : 'opacity-65'
-                    }`}
-                    style={{ backgroundColor: f.farbe }}
-                  >
-                    <span className="sr-only">{f.name}</span>
-                  </button>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <h2 className="kh-etikett">Wonach greifst du zuerst?</h2>
-              <div className="mt-3 grid grid-cols-3 gap-2.5">
-                {WERKZEUGE.map((w) => {
-                  const Icon = ICONS[w.icon]
-                  const gewaehlt = werkzeug === w.id
-                  return (
-                    <Wahlflaeche
-                      key={w.id}
-                      form="kachel"
-                      gewaehlt={gewaehlt}
-                      data-testid={`werkzeug-${w.id}`}
-                      onClick={() => setWerkzeug(gewaehlt ? '' : w.id)}
+                <h2 className="kh-etikett">Welche Farbe?</h2>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  {HELM_FARBEN.map((f) => (
+                    <button
+                      key={f.id}
+                      type="button"
+                      aria-pressed={farbe === f.id}
+                      data-testid={`helm-farbe-${f.id}`}
+                      onClick={() => setFarbe(f.id)}
+                      // Der gewählte Zustand liegt **außerhalb** der Farbe: eine
+                      // weiße Kante im Kreis war auf dem weißen Helm unsichtbar,
+                      // und genau der ist die Voreinstellung. Ein abgesetzter
+                      // Ring in Signalfarbe trägt auf allen vier Farben.
+                      className={`size-[64px] rounded-kh-pill transition-transform active:scale-90 ${
+                        farbe === f.id
+                          ? 'scale-105 ring-3 ring-kh-signal ring-offset-3 ring-offset-kh-ink'
+                          : 'opacity-65'
+                      }`}
+                      style={{ backgroundColor: f.farbe }}
                     >
-                      <Icon
-                        className={gewaehlt ? 'size-9' : 'size-9 text-kh-paper/70'}
-                        strokeWidth={1.75}
-                        aria-hidden
-                      />
-                      <span className="text-[0.9375rem] leading-tight font-semibold">
-                        {w.name}
-                      </span>
-                    </Wahlflaeche>
-                  )
-                })}
-              </div>
-            </section>
+                      <span className="sr-only">{f.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h2 className="kh-etikett">Wonach greifst du zuerst?</h2>
+                <div className="mt-3 grid grid-cols-3 gap-2.5">
+                  {WERKZEUGE.map((w) => {
+                    const Icon = ICONS[w.icon]
+                    const gewaehlt = werkzeug === w.id
+                    return (
+                      <Wahlflaeche
+                        key={w.id}
+                        form="kachel"
+                        gewaehlt={gewaehlt}
+                        data-testid={`werkzeug-${w.id}`}
+                        onClick={() => setWerkzeug(gewaehlt ? '' : w.id)}
+                      >
+                        <Icon
+                          className={gewaehlt ? 'size-9' : 'size-9 text-kh-paper/70'}
+                          strokeWidth={1.75}
+                          aria-hidden
+                        />
+                        <span className="text-[0.9375rem] leading-tight font-semibold">
+                          {w.name}
+                        </span>
+                      </Wahlflaeche>
+                    )
+                  })}
+                </div>
+              </section>
+            </div>
           </div>
 
           <div className="flex shrink-0 items-center justify-between gap-3 border-t border-kh-line pt-3">
