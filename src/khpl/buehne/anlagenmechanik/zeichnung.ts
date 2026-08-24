@@ -90,6 +90,29 @@ export const STRANG = { links: 78, rechts: 160, oben: 80 } as const
 /** Die Leitung, die unter der Kellerdecke vom Verteiler zum rechten Strang läuft. */
 export const STRANGVERTEILUNG_Y = 160
 
+/**
+ * **Wo die Thermostatventile sitzen — an jedem Heizkörper eins.**
+ *
+ * Der Text in A2 sagt „an jedem Heizkörper eins"; die Vorfassung markierte
+ * beim Antippen trotzdem nur ein einziges. Deshalb steht die Gruppe jetzt hier
+ * und wird aus `HEIZKOERPER` abgeleitet: vier Heizkörper, vier Ventile, und wer
+ * die Gruppe antippt, sieht alle vier.
+ *
+ * Der Kopf sitzt am Anschluss zwischen Strang und Heizkörper — also auf der
+ * Seite, auf der der Strang steht. Zwei der vier liegen im Kellerrahmen von A2
+ * über der Bildkante; das ist richtig so, sie sitzen im Obergeschoss.
+ */
+export const THERMOSTAT_ORTE: readonly { id: string; x: number; y: number }[] =
+  HEIZKOERPER.map((hk) => {
+    const strang = hk.kopf === 'links' ? STRANG.links : STRANG.rechts
+    const linksVomKoerper = strang < hk.x
+    return {
+      id: hk.id,
+      x: linksVomKoerper ? hk.x - 6 : hk.x + hk.breite + 6,
+      y: hk.y + hk.hoehe / 2,
+    }
+  })
+
 // ---------------------------------------------------------------------------
 // Kamera
 // ---------------------------------------------------------------------------

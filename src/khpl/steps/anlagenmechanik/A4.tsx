@@ -89,6 +89,22 @@ export function A4() {
     setAbgewiesen(null)
   }
 
+  /**
+   * **Neu ziehen.** `zieheNach` kennt nur „einen weiter" und „einen zurück" —
+   * wer sich verzogen hat, müsste den Weg Knoten für Knoten rückwärts
+   * nachfahren, und wer sich mit dem Kopf der Leitung einmauert (belegte
+   * Knoten plus Treppe), käme gar nicht mehr weiter, weil *Leitung liegt* bis
+   * zur Ankunft am Verteiler deaktiviert bleibt. Am Stand, mit
+   * Vierzehnjährigen, ist das ein realistischer Fall.
+   *
+   * Leise und neben dem Balken, nicht im Fuß: die Primärhandlung dort bleibt
+   * *Leitung liegt* beziehungsweise *Weiter* (Hüllenvertrag).
+   */
+  const neu = () => {
+    setPfad([])
+    setAbgewiesen(null)
+  }
+
   const legen = () => {
     setFertig(true)
     merkeAntwort('a4', { pfad, boegen, fertig: true })
@@ -127,7 +143,11 @@ export function A4() {
                 Zieh die Leitung. Von der Wärmepumpe zum Verteiler.
               </p>
 
-              <Verlustbalken verlust={verlust} boegen={boegen} />
+              <Verlustbalken
+                verlust={verlust}
+                boegen={boegen}
+                onNeu={gezogen ? neu : null}
+              />
 
               <Rueckmeldung
                 ok={abgewiesen ? false : null}
@@ -189,7 +209,15 @@ export function A4() {
  * Der Balken. **Kein Bar, kein Pascal, keine Zahl** — er misst einen relativen
  * Verlust, und der Screen sagt auch, warum das so ist (Spec 11).
  */
-function Verlustbalken({ verlust, boegen }: { verlust: number; boegen: number }) {
+function Verlustbalken({
+  verlust,
+  boegen,
+  onNeu,
+}: {
+  verlust: number
+  boegen: number
+  onNeu: (() => void) | null
+}) {
   return (
     <div className="kh-feld flex flex-col gap-2 px-3.5 py-2.5" data-testid="a4-verlust">
       <div className="flex items-baseline justify-between gap-3">
@@ -210,10 +238,22 @@ function Verlustbalken({ verlust, boegen }: { verlust: number; boegen: number })
           aria-hidden
         />
       </div>
-      <p className="text-[0.9375rem] leading-[1.4] text-kh-mute">
-        Jeder Bogen kostet Druck — wie viel genau, hängt an Rohrdurchmesser und
-        Fließgeschwindigkeit. Deshalb steht hier ein Balken und keine Zahl.
-      </p>
+      <div className="flex items-end justify-between gap-3">
+        <p className="min-w-0 flex-1 text-[0.9375rem] leading-[1.4] text-kh-mute">
+          Jeder Bogen kostet Druck — wie viel genau, hängt an Rohrdurchmesser und
+          Fließgeschwindigkeit. Deshalb steht hier ein Balken und keine Zahl.
+        </p>
+        {onNeu && (
+          <Button
+            variant="leise"
+            onClick={onNeu}
+            data-testid="a4-neu"
+            className="-mr-2 shrink-0"
+          >
+            Neu ziehen
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

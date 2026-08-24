@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
-import { StepFoto } from '@/khpl/buehne/Foto'
+import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
 import { wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { useStepNavigation } from '@/khpl/shell/StepFuss'
@@ -25,11 +25,15 @@ import { KARRIEREWEGE } from './karrierewege'
  * Studien-Anker (khpl-tage.md 0c, `belege/ausbildung-karriere.md`). Sie stehen
  * deshalb in `steps/anlagenmechanik/karrierewege.ts`.
  *
- * ⚠️ **Kein Motiv vergeben** (Spec 10): die Medienliste dieses Tages nennt für
- * A8 selbst kein Foto, nur für die drei Karten. `StepFoto` rendert dann
- * nichts, und die Bühne bleibt leer — dasselbe Ergebnis wie ein Step ganz ohne
- * `buehne`. Sobald ein Motiv in der Motivliste steht, trägt es den Screen ohne
- * weitere Änderung hier.
+ * **Die Bühne fährt zurück.** Die Medienliste dieses Tages nennt für A8 selbst
+ * kein Foto, nur für die drei Karten (Spec 10) — `StepFoto` rendert dann
+ * nichts, und der Einstieg in den Karrierebereich stand auf schwarzem Grund.
+ * Statt ein fremdes Motiv zu leihen, zeigt der Screen das Haus aus A3, jetzt
+ * warm: A7 steht im Keller mit dem angeschnittenen Haus darüber, A8 nimmt die
+ * Kamera heraus und zeigt das Ganze. Das ist derselbe Gedanke wie beim
+ * Fadenobjekt — **eine Welt, viele Zustände** (khpl-tage.md 1, Mechanismus 2)
+ * — und es beantwortet die Frage des Screens im Bild: das Haus ist fertig, und
+ * danach?
  */
 export function A8() {
   const { weiter, zumAbstecher } = useStepNavigation('A8')
@@ -38,7 +42,9 @@ export function A8() {
     <StepShell
       id="A8"
       interaktionOffen={false}
-      buehne={<StepFoto id="A8" />}
+      buehne={
+        <Schnitt zustand={{ szene: 'haus', schaetzungKw: null, aufgeloest: true }} />
+      }
       fachtext={
         // Dreieinhalb Jahre, `BELEGT` (`belege/ausbildung-karriere.md` 2:
         // SHKAMAusbV, 42 Monate). Nicht drei wie beim Dachdecker.

@@ -33,6 +33,21 @@ export const KALT = {
   linie: '#6b7c8c',
   linieMatt: '#4a5866',
   flaeche: '#2a323a',
+  /**
+   * **Die dritte Stufe — und sie gehört einem einzigen Strich:** der Leitung,
+   * die der Besucher in A4 selbst zieht.
+   *
+   * Vorher lag sie in `linie`, also in derselben Farbe wie Kellerwände, Hülle
+   * und Bestand, nur breiter. Auf dem dunklen Schnitt war der eigene Weg damit
+   * kaum vom Gebäude zu unterscheiden — ausgerechnet das Fadenobjekt dieses
+   * Tages („ab hier ist der Weg deiner", Spec 2 und 6 A4), das seinen Zweck
+   * sonst erst in A6 erfüllen könnte, wenn Warm darüberläuft.
+   *
+   * Ein hellerer Ton **derselben kalten Familie**: die Farbregel „der Keller
+   * bleibt kalt bis A6" bleibt gewahrt, Orange bleibt dem Moment in A6
+   * vorbehalten.
+   */
+  leitung: '#a8c0d4',
 } as const
 
 /**
@@ -188,9 +203,21 @@ export const SICHERHEITSVENTIL_BAR = 2.5
  * | `raster` | A4 | Kellerschnitt als Raster |
  * | `inbetriebnahme` | A6 | Keller + Haus, die Wärme läuft |
  * | `uebergabe` | A7 | Keller warm, darüber das Haus angeschnitten |
+ * | `transporter` | A5, A1.1 | Blick über das Armaturenbrett, mittags und nachts |
  *
- * A5 und die Abstecher tragen Fotos und keine Zeichnung; sie kommen hier
- * deshalb nicht vor.
+ * **Warum `transporter` dazugekommen ist.** Spec 7 vergibt A5 und A1.1 an
+ * Fotos, Spec 10 hält für beide fest: **das Motiv fehlt.** Ohne Eintrag in der
+ * Motivliste rendert `StepFoto` nichts, und die Zäsur des Tages sowie der
+ * ehrlichste Screen des Tages standen auf schwarzem Grund. Spec 6 (A5) erlaubt
+ * für die Zäsur ausdrücklich die Alternative — „Foto **oder eine ruhige
+ * Zeichnung**. Warmes Licht durch die Windschutzscheibe … auf dem
+ * Armaturenbrett liegt ein iPad" —, und das Medium der Bühne entscheidet
+ * ohnehin jeder Tag selbst (khpl-tage.md 4). A1.1 bekommt dieselbe Zeichnung
+ * bei Nacht: **eine Welt, zwei Zustände**, und die Frage „wer fährt eigentlich
+ * nachts?" hat damit ein Bild statt einer leeren Fläche.
+ *
+ * Die Abstecher A3.1, A4.1 und A8.x tragen weiterhin Fotos und kommen hier
+ * nicht vor.
  */
 export type BuehnenZustand =
   /**
@@ -273,4 +300,22 @@ export type BuehnenZustand =
   | {
       szene: 'uebergabe'
       pfad: readonly KnotenId[]
+    }
+  /**
+   * A5 und A1.1 — der Blick über das Armaturenbrett, von innen.
+   *
+   * `licht: 'mittag'` ist die Zäsur: warmes Licht durch die Windschutzscheibe,
+   * **die erste Wärme des Tages**, noch bevor die Anlage läuft — eine leise
+   * Vorbereitung auf A6. `licht: 'nacht'` ist der Notdienst-Abstecher:
+   * derselbe Blick, dieselbe Scheibe, nur dass draußen nichts als Straße und
+   * ein einzelnes Fenster ist.
+   *
+   * Das iPad auf dem Armaturenbrett steht in beiden Fällen da. Es ist keine
+   * Requisite, sondern Arbeitsalltag (`INTERVIEW`, Spec 6 A5) — und der
+   * billigste Beleg dafür, dass dieses Handwerk kein Beruf von gestern ist.
+   * `technik: 0.85` wird damit nebenbei mit eingelöst.
+   */
+  | {
+      szene: 'transporter'
+      licht: 'mittag' | 'nacht'
     }

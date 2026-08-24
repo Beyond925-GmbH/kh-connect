@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Check } from 'lucide-react'
 import { motion } from 'motion/react'
-import { StepFoto } from '@/khpl/buehne/Foto'
-import { WARM } from '@/khpl/buehne/anlagenmechanik/kanon'
+import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -40,11 +39,14 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * 6.2). Bis sie da ist, fragt der Kiosk nach einer Minute auf ausgerechnet dem
  * Screen nach, der niemanden drängen soll.
  *
- * ⚠️ **Das Motiv fehlt** (Spec 10): „Foto oder eine ruhige Zeichnung, warmes
- * Licht durch die Windschutzscheibe". Bis es da ist, trägt allein die
- * Lichtlage unten — **die erste Wärme des Tages**, noch bevor die Anlage
- * läuft, als leise Vorbereitung auf A6. Sobald ein Motiv in der Motivliste
- * steht, liegt sie darüber statt allein.
+ * **Die Bühne ist eine Zeichnung** (`buehne/anlagenmechanik/Transporter.tsx`).
+ * Spec 10 hält fest, dass das Foto fehlt; Spec 6 erlaubt für genau diesen
+ * Screen die Alternative — „Foto **oder eine ruhige Zeichnung**. Warmes Licht
+ * durch die Windschutzscheibe … auf dem Armaturenbrett liegt ein iPad". Bis
+ * hierher trug allein eine Lichtlage über einem leeren `StepFoto`, und der
+ * Screen war zu vier Fünfteln schwarz. Die Zeichnung trägt die **erste Wärme
+ * des Tages**, noch bevor die Anlage läuft, und das iPad steht darin, wo es im
+ * Interview steht: auf dem Armaturenbrett.
  */
 
 /**
@@ -110,28 +112,16 @@ export function A5() {
       // Keine Übung, kein Prüfknopf: der Karriere-Link darf hier auftauchen,
       // und *Weiter* bleibt der eine laute Knopf.
       interaktionOffen={false}
-      buehne={
-        <div className="relative size-full">
-          <StepFoto id="A5" />
-          {/*
-            Die erste Wärme des Tages — warmes Licht, das von schräg oben durch
-            die Windschutzscheibe fällt (Spec 6, A5).
-
-            Sie liegt als **Lage über der Bühne** und nicht als zweite
-            Bildfarbe darin, genau wie das Abendlicht in M8: die Farbwerte
-            stehen in `kanon.ts` (`WARM`), damit die Temperatur dieses Tages an
-            einer Stelle gepflegt wird. Keine gefüllte Fläche unter einem Knopf
-            — die eine orange Fläche pro Screen ist *Weiter* (khpl-tage.md 3).
-          */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: `radial-gradient(120% 85% at 72% 8%, ${WARM.linie}38 0%, ${WARM.schimmer}2e 42%, transparent 72%)`,
-            }}
-          />
-        </div>
-      }
+      /*
+        Die Zäsur bekommt die von Spec 6 (A5) ausdrücklich erlaubte
+        Alternative: „Foto **oder eine ruhige Zeichnung**. Warmes Licht durch
+        die Windschutzscheibe … auf dem Armaturenbrett liegt ein iPad."
+        Vorher stand hier `StepFoto` — und weil das Motiv fehlt (Spec 10),
+        rendert es nichts: der wichtigste Screen des Tages war zu vier
+        Fünfteln schwarz. Die Zeichnung löst zugleich das iPad ein und damit
+        `technik: 0.85`.
+      */
+      buehne={<Schnitt zustand={{ szene: 'transporter', licht: 'mittag' }} />}
       fachtext={
         <>
           <p>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { StepFoto } from '@/khpl/buehne/Foto'
+import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -24,9 +24,13 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * oft der Chef selbst fährt, und dass Bereithalten und Einsatz getrennt
  * vergütet werden — der Einsatz als Arbeitszeit mit Zuschlägen.
  *
- * ⚠️ **Bühne: Foto — es fehlt noch eins** (Spec 10). `StepFoto` rendert ohne
- * Eintrag in der Motivliste nichts; die Bühne bleibt dunkel, statt ein
- * fremdes Motiv zu leihen.
+ * **Bühne: dieselbe Zeichnung wie A5, nur nachts.** Spec 7 vergibt diesen
+ * Screen an ein Foto, Spec 10 hält fest, dass es fehlt — und `StepFoto`
+ * rendert ohne Eintrag in der Motivliste nichts, der Screen war leer. Der
+ * Transporter bei Nacht sagt dasselbe wie der Text: eine Straße, eine
+ * Laterne, ein Fenster, in dem noch Licht brennt. **Eine Welt, zwei
+ * Zustände** — mittags in A5, nachts hier. Kein fremdes Motiv geliehen und
+ * nichts dazuerfunden.
  */
 
 export function A11() {
@@ -41,7 +45,7 @@ export function A11() {
     <StepShell
       id="A1.1"
       titelZusatz="Abstecher"
-      buehne={<StepFoto id="A1.1" />}
+      buehne={<Schnitt zustand={{ szene: 'transporter', licht: 'nacht' }} />}
       fachtext={
         <>
           <p>

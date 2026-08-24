@@ -242,13 +242,36 @@ export const ANLAGENMECHANIKER: BerufDef = {
    * liegt**; geprüft am 24.08.2026.
    *
    * ⚠️ **Drei Motive fehlen** (Spec 10): A1.1 (Notdienst), A5 (im Transporter)
-   * und das Szenario-Video der Auftragsannahme. Sie bleiben ohne Eintrag —
-   * diese Steps tragen dann keine Foto-Bühne. Ungenutzt und bewusst nicht
-   * vergeben: `gallery-3.webp` (Umwälzpumpe und Regelung) und
-   * `quiz-waermepumpe.webp` (Wärmepumpe an der Fassade).
+   * und das Szenario-Video der Auftragsannahme. A1.1 und A5 tragen deshalb
+   * **die Transporter-Zeichnung** statt eines geliehenen Fotos — für A5 nennt
+   * Spec 6 die Zeichnung ausdrücklich als gleichwertige Alternative, und A1.1
+   * bekommt dieselbe bei Nacht. Kommen die Fotos, treten sie an ihre Stelle;
+   * ein Eintrag hier reicht dafür nicht mehr aus, die beiden Steps rufen die
+   * Zeichnung direkt auf.
+   *
+   * Ungenutzt und bewusst nicht vergeben: `gallery-3.webp` (Umwälzpumpe und
+   * Regelung — **GRUNDFOS und POTTERTON sind darauf lesbar**) und
+   * `quiz-waermepumpe.webp` (Wärmepumpe an der Fassade — **„alpha innotec"
+   * formatfüllend lesbar**). Beide fallen unter das Ausschlusskriterium
+   * „kein lesbares Firmenlogo im Bild" (Spec 10, MEDIEN-INVENTAR).
    */
   bilder: {
-    // Wärmepumpe im Garten — der Abstecher rechnet sie gegen den Ölkessel.
+    /*
+      Wärmepumpe im Garten — der Abstecher rechnet sie gegen den Ölkessel.
+
+      ⚠️ **Widerspruch in der Vorlage, gemeldet und behoben.** Spec 10 empfiehlt
+      genau dieses Motiv für A3.1 und nennt in derselben Tabelle „kein lesbares
+      Firmenlogo im Bild" als Ausschlusskriterium — auf dem Gerät stand
+      formatfüllend „alpha innotec". Am Stand hätte die Kreishandwerkerschaft
+      damit ausgesehen wie ein Herstellerwerbeträger. `pos` verschieben half
+      nicht, das Logo saß mittig auf dem Gerät.
+
+      Deshalb ist die Datei **retuschiert** (Schriftzug und das kleine Emblem
+      auf der schwarzen Seite herausgerechnet, Umgebung interpoliert);
+      `public/medien/media/anlagenmechaniker/**` liegt in der Hoheit dieses
+      Tages. Der Widerspruch selbst gehört trotzdem der Redaktion gemeldet: er
+      steht so in der Vorlage und trifft beim nächsten Motiv wieder zu.
+    */
     'A3.1': { src: '/medien/media/anlagenmechaniker/gallery-1.webp', pos: '50% 50%' },
     // Rohrverteiler. ⚠️ Passt nur halb (Spec 10): der Abstecher handelt von
     // Löten, Pressen und Stecken, das Motiv zeigt das Ergebnis, nicht den

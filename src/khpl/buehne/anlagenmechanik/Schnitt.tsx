@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type {
   BauteilId,
   BuehnenZustand,
@@ -6,6 +7,7 @@ import type {
 } from '@/khpl/buehne/anlagenmechanik/kanon'
 import { Anlage } from './Anlage'
 import { Haus } from './Haus'
+import { Transporter } from './Transporter'
 
 /**
  * Die Bühne dieses Tages — **der Schnitt**.
@@ -45,8 +47,18 @@ import { Haus } from './Haus'
  * Schnitt, der mittig sitzt, verliert genau die Hälfte, auf die es ankommt —
  * den Keller. Deshalb hat der Rahmen hier eine Vorspannung: hoch nach oben,
  * quer nach rechts. Das ist die 2D-Entsprechung zum `SichtfeldMesser` der
- * 3D-Bühnen, nur ohne Messung, weil eine Zeichnung keine Kamera nachführen
- * muss.
+ * 3D-Bühnen.
+ *
+ * **Hochkant wird die Unterkante gemessen und nicht geschätzt.** Die
+ * Vorfassung setzte sie auf feste 32 % der Höhe. Das Panel ist aber unten
+ * verankert und **unterschiedlich hoch**: es schrumpft, sobald eine Übung
+ * gelöst ist, und wächst mit jeder Zeile Fachtext. Auf 1080 × 1920 klaffte
+ * dadurch zwischen der Unterkante der Zeichnung und der Oberkante des Panels
+ * ein toter schwarzer Streifen von 300 bis 550 px — am deutlichsten auf A1
+ * nach dem Lösen. Jetzt läuft die Bühne hochkant bis kurz über die
+ * Panelkante, und die Zeichnung füllt den Raum, den sie tatsächlich hat.
+ * Quer bleibt es beim festen Rahmen: dort steht das Panel links und nimmt
+ * keine Höhe weg.
  */
 export interface SchnittProps {
   /** Welche Zeichnung, in welchem Zustand. */
@@ -82,9 +94,16 @@ export function Schnitt({
   onAbgewiesen,
   onWaermeAngekommen,
 }: SchnittProps) {
+  const { flaeche, rahmen } = useRahmen()
+
   return (
-    <div className="size-full" data-testid="anlagen-buehne" data-szene={zustand.szene}>
-      <div className="absolute inset-x-3 top-[76px] bottom-[32%] landscape:inset-y-[7%] landscape:right-[3%] landscape:left-[30%]">
+    <div
+      ref={flaeche}
+      className="size-full"
+      data-testid="anlagen-buehne"
+      data-szene={zustand.szene}
+    >
+      <div className="absolute" style={rahmen}>
         {zustand.szene === 'anlage' ? (
           <Anlage
             geprueft={zustand.geprueft}
@@ -93,6 +112,8 @@ export function Schnitt({
             geloest={zustand.geloest}
             onPruefpunkt={onPruefpunkt}
           />
+        ) : zustand.szene === 'transporter' ? (
+          <Transporter licht={zustand.licht} />
         ) : (
           <Haus
             zustand={zustand}
@@ -105,4 +126,103 @@ export function Schnitt({
       </div>
     </div>
   )
+}
+
+/** Wie viel Luft hochkant zwischen Zeichnung und Panelkante bleibt. */
+const LUFT_ZUM_PANEL = 14
+
+/** Oberkante der Bühne — darüber schwebt die Leiste. */
+const UNTER_DER_LEISTE = 76
+
+/** Seitlicher Rand hochkant. */
+const RAND = 12
+
+/**
+ * Das Seitenverhältnis aller drei Zeichnungen dieses Tages (320 × 260,
+ * `WELT`). Alle drei stehen in derselben `viewBox`, deshalb reicht **eine**
+ * Zahl — und der Rahmen kann sich nach ihr richten, statt die Zeichnung in
+ * einem zu hohen Kasten schweben zu lassen.
+ */
+const SEITENVERHAELTNIS = 320 / 260
+
+/**
+ * Der Rahmen, in dem die Zeichnung sitzt — quer fest, hochkant gemessen.
+ *
+ * Gemessen wird das Panel der `StepShell` (`[data-testid="karte"]`) gegen die
+ * eigene Fläche. Das ist derselbe Gedanke wie im `SichtfeldMesser`, nur ohne
+ * Kamera: eine Zeichnung muss nichts nachführen, sie muss nur wissen, wo sie
+ * aufhören darf. Der `SichtfeldMesser` selbst steht hier nicht zur Verfügung —
+ * ihn stellt die Hülle nur den Steps mit `buehneInteraktiv` bereit, und das ist
+ * an diesem Tag allein A4.
+ *
+ * Solange nichts gemessen ist, gilt der alte Festwert: ein Screen, der beim
+ * ersten Bild einmal zu klein zeichnet, ist besser als einer, der springt.
+ */
+function useRahmen() {
+  const flaeche = useRef<HTMLDivElement>(null)
+  const [rahmen, setRahmen] = useState<React.CSSProperties>({
+    inset: '76px 12px 32% 12px',
+  })
+
+  const messen = useCallback(() => {
+    const el = flaeche.current
+    const f = el?.getBoundingClientRect()
+    if (!el || !f || f.width <= 0 || f.height <= 0) return
+    if (f.width > f.height) {
+      setRahmen({ inset: '7% 3% 7% 30%' })
+      return
+    }
+    const panel = el
+      .closest('[data-testid="step"]')
+      ?.querySelector('[data-testid="karte"]')
+      ?.getBoundingClientRect()
+    // Der Deckel ist die Reißleine für kleine Fenster: ein Panel, das fast die
+    // ganze Höhe nimmt, dürfte den Rahmen nicht auf null oder ins Negative
+    // drücken.
+    const unten = Math.min(
+      panel ? Math.max(0, f.bottom - panel.top + LUFT_ZUM_PANEL) : f.height * 0.32,
+      f.height - UNTER_DER_LEISTE - 80,
+    )
+    /*
+      **Der Überschuss fällt überwiegend nach oben.** Hochkant ist der freie
+      Kasten viel höher, als die Zeichnung breit ist: sie ist
+      breitenbegrenzt, und `preserveAspectRatio="xMidYMid meet"` verteilt den
+      Rest gleichmäßig — die Hälfte davon lag als schwarzer Streifen zwischen
+      Zeichnung und Panel. Der Rahmen bekommt deshalb nur die Höhe, die die
+      Zeichnung wirklich braucht, und der Rest wandert zu 60 % nach oben unter
+      die Leiste, wo bei einem Gebäudeschnitt ohnehin Himmel wäre. Übrig
+      bleibt unten eine Kante Luft, keine Lücke.
+    */
+    const noetig = (f.width - 2 * RAND) / SEITENVERHAELTNIS
+    const frei = f.height - UNTER_DER_LEISTE - unten
+    const oben = UNTER_DER_LEISTE + Math.max(0, frei - noetig) * 0.6
+    setRahmen({
+      inset: `${Math.round(oben)}px ${RAND}px ${Math.round(unten)}px ${RAND}px`,
+    })
+  }, [])
+
+  useEffect(() => {
+    messen()
+    const el = flaeche.current
+    if (!el) return
+    const panel = el
+      .closest('[data-testid="step"]')
+      ?.querySelector('[data-testid="karte"]')
+    const beobachter = new ResizeObserver(messen)
+    beobachter.observe(el)
+    if (panel) beobachter.observe(panel)
+    /*
+      Das Panel fährt beim Betreten des Steps 22 px von unten herein
+      (`StepShell`, `initial={{ y: 22 }}`). Eine Verschiebung ist keine
+      Größenänderung und meldet sich beim `ResizeObserver` nicht — ohne diese
+      zweite Messung bliebe die Zeichnung um genau diese 22 px zu hoch.
+    */
+    const nachtreten = window.setTimeout(messen, 700)
+    return () => {
+      beobachter.disconnect()
+      window.clearTimeout(nachtreten)
+    }
+  }, [messen])
+
+  return { flaeche, rahmen }
 }

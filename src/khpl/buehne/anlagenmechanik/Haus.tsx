@@ -29,6 +29,7 @@ import {
   START,
   STRANG,
   STRANGVERTEILUNG_Y,
+  THERMOSTAT_ORTE,
   TRAGENDE_WAND,
   TREPPE_ORT,
   WAERMEPUMPE_ORT,
@@ -43,8 +44,11 @@ import {
   type Punkt,
 } from './zeichnung'
 
-/** Alles außer A1 spielt in dieser einen Welt. */
-type HausZustand = Exclude<BuehnenZustand, { szene: 'anlage' }>
+/**
+ * Alles, was im Haus spielt. Draußen bleiben nur die beiden eigenen
+ * Zeichnungen: der Anlagenausschnitt aus A1 und der Transporter aus A5/A1.1.
+ */
+type HausZustand = Exclude<BuehnenZustand, { szene: 'anlage' } | { szene: 'transporter' }>
 
 /**
  * **Das Haus im Schnitt** — der Keller und was darüber liegt, in einer
@@ -189,6 +193,17 @@ export function Haus({
           <Heizkoerper key={hk.id} hk={hk} warm={waermeRaum} />
         ))}
 
+        {/* Nach den Heizkörpern, damit die Ventile ihre Taps behalten. */}
+        {zeigtBestand && (
+          <Thermostatventile
+            angetippt={
+              szene === 'keller' && zustand.angetippt.includes('thermostatventile')
+            }
+            offen={szene === 'keller' && zustand.offen === 'thermostatventile'}
+            onBauteil={szene === 'keller' ? onBauteil : undefined}
+          />
+        )}
+
         {szene === 'haus' && (
           <Waermebedarf
             gezeigt={zustand.schaetzungKw !== null && !zustand.aufgeloest}
@@ -310,10 +325,25 @@ function Defs() {
         <stop offset="0%" stopColor={WARM.linie} stopOpacity={0.24} />
         <stop offset="100%" stopColor={WARM.linie} stopOpacity={0} />
       </radialGradient>
-      <radialGradient id="am-feierabend" cx="50%" cy="40%" r="60%">
-        <stop offset="0%" stopColor={WARM.linie} stopOpacity={0.13} />
-        <stop offset="100%" stopColor={WARM.linie} stopOpacity={0} />
+      {/*
+        **Feierabend im Hellen** (Spec 6, A7): „vier Feierabende, vier
+        Lichter". Der erste Anlauf blieb mit 13 % unter der
+        Wahrnehmungsschwelle — auf dem Screen war A7 genauso dunkel wie A2, und
+        das Unterscheidungsmerkmal dieses Tages war einfach nicht da. Jetzt ein
+        flächiger warmer Schein, der oben am hellsten ist und nach unten
+        ausläuft: das Haus liegt im Nachmittagslicht, der Keller bekommt den
+        Rest davon ab.
+      */}
+      <radialGradient id="am-feierabend" cx="50%" cy="30%" r="78%">
+        <stop offset="0%" stopColor={WARM.linie} stopOpacity={0.32} />
+        <stop offset="45%" stopColor={WARM.linie} stopOpacity={0.15} />
+        <stop offset="100%" stopColor={WARM.schimmer} stopOpacity={0.04} />
       </radialGradient>
+      <linearGradient id="am-feierabend-band" x1="0" y1="0" x2="0.25" y2="1">
+        <stop offset="0%" stopColor={WARM.linie} stopOpacity={0.17} />
+        <stop offset="60%" stopColor={WARM.linie} stopOpacity={0.05} />
+        <stop offset="100%" stopColor={WARM.linie} stopOpacity={0} />
+      </linearGradient>
     </defs>
   )
 }
@@ -547,7 +577,13 @@ function Bestand({
         strokeLinejoin="round"
       />
       <path d="M120 165 V160" fill="none" stroke={KALT.linieMatt} strokeWidth={2.4} />
-      {BAUTEILE.map((bauteil) => (
+      {/*
+        Die Thermostatventile fehlen hier bewusst: sie sitzen nicht im Keller,
+        sondern oben am Heizkörper, und sie müssen **über** den Heizkörpern
+        liegen — sonst schluckt der Heizkörper, der später im DOM steht, den
+        Tap. Sie kommen als eigene Gruppe nach ihnen (`Thermostatventile`).
+      */}
+      {BAUTEILE.filter((b) => b.id !== 'thermostatventile').map((bauteil) => (
         <BauteilFigur
           key={bauteil.id}
           id={bauteil.id}
@@ -576,7 +612,17 @@ function BauteilFigur({
 }) {
   const o = BAUTEIL_ORTE[id]
   if (!o) return null
-  const stroke = offen ? WARM.linie : angetippt ? KALT.linie : KALT.linieMatt
+  /*
+    Das offene Bauteil hebt sich **kalt** heraus, nicht orange.
+
+    Die Vorfassung nahm dafür `WARM.linie`. Damit stand Orange schon in A2 im
+    Keller — vier Screens, bevor die Anlage läuft — und nahm dem Farbumschlag
+    in A6 einen Teil seiner Wirkung. Die Farbregel dieses Tages sagt für A2
+    ausdrücklich: „Kalte Palette — der Keller ist grau und blau, und er bleibt
+    es bis A6" (Spec 6, A2). Ein hellerer Strich und ein Ring machen dieselbe
+    Auswahl sichtbar, ohne die Temperatur vorwegzunehmen.
+  */
+  const stroke = offen ? KALT.leitung : angetippt ? KALT.linie : KALT.linieMatt
 
   return (
     <g
@@ -593,7 +639,7 @@ function BauteilFigur({
           stroke={stroke}
           strokeWidth={2.4}
         />
-      ) : id === 'thermostatventile' ? null : (
+      ) : (
         <rect
           x={o.x}
           y={o.y}
@@ -622,19 +668,22 @@ function BauteilFigur({
           strokeWidth={1.8}
         />
       )}
-      {/*
-        Die Thermostatventile sitzen nicht im Keller, sondern am Heizkörper
-        darüber — deshalb zeichnen sie keinen eigenen Körper, sondern nur den
-        Kopf am Anschluss des Erdgeschoss-Heizkörpers.
-      */}
-      {id === 'thermostatventile' && (
-        <g stroke={stroke} strokeWidth={2.2} fill="none">
-          <circle cx={o.x + 4} cy={o.y + o.h / 2} r={5} fill={KALT.flaeche} />
-          <path d={`M${o.x + 1} ${o.y + o.h / 2 - 3.5} V${o.y + o.h / 2 + 3.5}`} />
-        </g>
-      )}
       {angetippt && !offen && (
         <circle cx={o.x + o.b - 2} cy={o.y + 2} r={3.4} fill={KALT.linie} opacity={0.9} />
+      )}
+      {/* Der Ring um das offene Bauteil — die Auswahl, kalt. */}
+      {offen && (
+        <rect
+          x={o.x - 5}
+          y={o.y - 5}
+          width={o.b + 10}
+          height={o.h + 10}
+          rx={6}
+          fill="none"
+          stroke={KALT.leitung}
+          strokeWidth={1.8}
+          opacity={0.55}
+        />
       )}
       {/* Trefferfläche: großzügig, unabhängig davon, wie klein das Symbol ist —
           und um das Symbol zentriert, auch wenn es größer als das Minimum ist. */}
@@ -645,6 +694,67 @@ function BauteilFigur({
         height={Math.max(32, o.h)}
         fill="transparent"
       />
+    </g>
+  )
+}
+
+/**
+ * **Die Thermostatventile — an jedem Heizkörper eins**, und deshalb vier
+ * Marken statt einer.
+ *
+ * Zwei Gründe, warum sie eine eigene Gruppe sind und nicht eine `BauteilFigur`
+ * wie die anderen fünf:
+ *
+ *  1. **Der Text und das Bild sollen dasselbe sagen.** A2 sagt „an jedem
+ *     Heizkörper eins"; markiert wurde bisher genau eines. Jetzt leuchtet die
+ *     ganze Gruppe auf, und der Satz stimmt auch auf der Zeichnung.
+ *  2. **Jede Marke bekommt ihre eigene Trefferfläche.** Die Vorfassung legte
+ *     eine einzige Fläche über die Gruppe, und deren Mitte lag mitten auf dem
+ *     Erdgeschoss-Heizkörper — der steht im DOM später und schluckte den Tap.
+ *     Deshalb steht diese Gruppe **nach** den Heizkörpern.
+ *
+ * Zwei der vier Ventile liegen im Kellerrahmen von A2 über der Bildkante: sie
+ * sitzen im Obergeschoss. Der Tap auf die beiden sichtbaren öffnet dieselbe
+ * Karte im Panel, und die redet ohnehin über alle vier.
+ */
+function Thermostatventile({
+  angetippt,
+  offen,
+  onBauteil,
+}: {
+  angetippt: boolean
+  offen: boolean
+  onBauteil?: (id: BauteilId) => void
+}) {
+  const stroke = offen ? KALT.leitung : angetippt ? KALT.linie : KALT.linieMatt
+  return (
+    <g
+      className={onBauteil ? 'cursor-pointer' : undefined}
+      onPointerDown={onBauteil ? () => onBauteil('thermostatventile') : undefined}
+    >
+      <title>Thermostatventile</title>
+      {THERMOSTAT_ORTE.map((v) => (
+        <g key={v.id}>
+          <g stroke={stroke} strokeWidth={2.2} fill="none">
+            <circle cx={v.x} cy={v.y} r={5} fill={KALT.flaeche} />
+            <path d={`M${v.x - 3.5} ${v.y - 3.5} V${v.y + 3.5}`} />
+          </g>
+          {offen && (
+            <circle
+              cx={v.x}
+              cy={v.y}
+              r={10}
+              fill="none"
+              stroke={KALT.leitung}
+              strokeWidth={1.8}
+              opacity={0.55}
+            />
+          )}
+          {/* Eigene Trefferfläche je Ventil — 32 Einheiten, wie bei den
+              anderen Bauteilen. */}
+          <rect x={v.x - 16} y={v.y - 16} width={32} height={32} fill="transparent" />
+        </g>
+      ))}
     </g>
   )
 }
@@ -761,13 +871,21 @@ function Waermepumpe({ warm }: { warm: MotionValue<number> }) {
  * Der warme Strich liegt als zweite Lage über dem kalten und wird über
  * `pathLength` aufgedeckt — ein Verlauf, der an der Linie entlangwandert, und
  * keine Fläche, die aufblendet.
+ *
+ * **Sie hat einen eigenen kalten Ton** (`KALT.leitung`). Vorher lag sie in
+ * derselben Farbe wie Kellerwände, Hülle und Bestand, nur breiter — auf dem
+ * dunklen Schnitt war der eigene Weg damit kaum vom Gebäude zu unterscheiden.
+ * Drei Lagen machen ihn eindeutig: ein dunkler Mantel, damit sie sich von
+ * allem abhebt, worüber sie läuft, darauf der helle Strich, und darüber erst
+ * das Warm aus A6. Die Farbregel bleibt gewahrt — der Keller ist bis A6 kalt.
  */
 function Leitung({ d, warm }: { d: string; warm: MotionValue<number> }) {
   const da = useAngefangen(warm)
   const schimmer = useTransform(da, (v) => v * 0.5)
   return (
     <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path d={d} stroke={KALT.linie} strokeWidth={4.5} />
+      <path d={d} stroke="#10161c" strokeWidth={8} opacity={0.85} />
+      <path d={d} stroke={KALT.leitung} strokeWidth={4.5} />
       <motion.path
         d={d}
         stroke={WARM.schimmer}
@@ -1112,19 +1230,28 @@ function Manometer({ bar, imFenster }: { bar: number; imFenster: boolean }) {
 
 /**
  * **Feierabend im Hellen.** Dieser Tag endet nachmittags im Wohnhaus einer
- * Familie, nicht auf einem Dach im Abendlicht — vier Feierabende, vier
- * Lichter (Spec 6, A7). Ein sehr flacher Schein, weit unter allem, was als
- * gefüllte Fläche durchginge.
+ * Familie, nicht auf einem Dach im Abendlicht — vier Feierabende, vier Lichter
+ * (Spec 6, A7). Das ist das Unterscheidungsmerkmal dieses Tages gegenüber den
+ * anderen drei, und es muss **zu sehen** sein: zwei Lagen im Screen-Modus,
+ * eine flächige und ein schräg einfallendes Band. Warm auf der Bühne ist
+ * ausdrücklich erlaubt (Spec 7), gefüllt ist hier nichts — die eine gefüllte
+ * orange Fläche des Screens bleibt *Weiter*.
  */
 function Feierabendlicht() {
   return (
-    <rect
-      x={0}
-      y={0}
-      width={WELT.breite}
-      height={WELT.hoehe}
-      fill="url(#am-feierabend)"
-      style={{ mixBlendMode: 'screen' }}
-    />
+    <g style={{ mixBlendMode: 'screen' }}>
+      <rect
+        x={0}
+        y={0}
+        width={WELT.breite}
+        height={WELT.hoehe}
+        fill="url(#am-feierabend)"
+      />
+      {/* Das Licht kommt von schräg oben links herein — wie durch ein Fenster. */}
+      <path
+        d={`M0 0 H${WELT.breite * 0.62} L${WELT.breite * 0.24} ${WELT.hoehe} H0 Z`}
+        fill="url(#am-feierabend-band)"
+      />
+    </g>
   )
 }
