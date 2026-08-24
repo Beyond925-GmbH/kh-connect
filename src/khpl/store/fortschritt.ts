@@ -93,9 +93,56 @@ export interface Antworten {
 
   // -------------------------------------------------------------------------
   // Anlagenmechanik — Schlüssel `a*`
+  //
+  // Formen wörtlich aus khpl-tag-anlagenmechanik.md 6, je Step am Ende seines
+  // Abschnitts. Alles, was der Rückblick in A7 aufzählt, kommt von hier.
   // -------------------------------------------------------------------------
 
-  // (noch keine Interaktion)
+  /**
+   * A1 — die Suche: welche Prüfungen gelaufen sind, worauf der Besucher getippt
+   * hat und ob er richtig lag.
+   *
+   * `ursache` ist `null`, solange nicht entschieden wurde. `richtig: false` ist
+   * **keine Note** — der Screen zeigt danach, welche Prüfung die entscheidende
+   * gewesen wäre, und der Preis ist eine zweite Anfahrt, kein Punktabzug.
+   */
+  a1?: { geprueft: string[]; ursache: string | null; richtig: boolean }
+  /** A2 — welche der sechs Bauteile im Keller angetippt wurden. */
+  a2?: { angetippt: string[] }
+  /** A3 — geschätzte Heizlast in kW, und ob die Auflösung schon stand. */
+  a3?: { schaetzung: number; aufgeloest: boolean }
+  /**
+   * A4 — der Weg der Leitung durch das Kellerraster.
+   *
+   * **Ab hier gehört der Weg dem Besucher:** in A6 läuft die Wärme genau diese
+   * Linie entlang, nicht irgendeine. Deshalb wird der Pfad gespeichert und
+   * nicht nur, dass er fertig ist.
+   */
+  a4?: { pfad: string[]; boegen: number; fertig: boolean }
+  /** A5 — welche der drei Pausenfragen gelesen wurden. */
+  a5?: { gelesen: string[] }
+  /** A6 — Fülldruck im Zielfenster getroffen, mit Zahl der Versuche. */
+  a6?: { druckGetroffen: boolean; versuche: number }
+  /**
+   * A7 — die Abfrage beim Kunden: welche Fragen beantwortet wurden und wie oft
+   * die **verständliche** Antwort dabei war.
+   *
+   * `gut` zählt keine Punkte, sondern speist die Reaktion der Kundin. Es gibt
+   * auf diesem Screen kein Richtig und kein Falsch, nur verständlich und nicht
+   * verständlich.
+   */
+  a7?: { beantwortet: string[]; gut: number }
+  /**
+   * A8 — angesehene Karrierewege, in Reihenfolge des Öffnens.
+   *
+   * ⚠️ **Noch ohne Schreiber, und das ist gemeldet** (khpl-tage.md 6.2):
+   * `merkeKarriereweg` unten schreibt fest verdrahtet nach `answers.m9`, einem
+   * Dachdecker-Schlüssel. Zur Laufzeit kollidiert das nicht, weil der
+   * Fortschritt je Beruf liegt — V5 verlangt aber disjunkte Schlüssel, und der
+   * dieses Tages ist `a8`. Die Auflösung ist ein Parameter an der Funktion und
+   * gehört in die Hülle, nicht in einen einzelnen Tag.
+   */
+  a8?: { angesehen: StepId[] }
 }
 
 /** Der Stand **eines** Berufs. */
@@ -233,7 +280,55 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   // Anlagenmechanik — Schlüssel `a*`
   // ---------------------------------------------------------------------
 
-  // (noch keine Interaktion)
+  const a1 = q.a1 as Antworten['a1']
+  if (a1 && stringListe(a1.geprueft)) {
+    a.a1 = {
+      geprueft: stringListe(a1.geprueft) as string[],
+      // Alles, was kein String ist, wird zu „noch nicht entschieden“ — ein
+      // halb gelesener Stand darf in A7 nicht als gelöste Störung auftauchen.
+      ursache: typeof a1.ursache === 'string' ? a1.ursache : null,
+      richtig: !!a1.richtig,
+    }
+  }
+  const a2 = q.a2 as Antworten['a2']
+  if (a2 && stringListe(a2.angetippt)) {
+    a.a2 = { angetippt: stringListe(a2.angetippt) as string[] }
+  }
+  const a3 = q.a3 as Antworten['a3']
+  if (a3 && typeof a3.schaetzung === 'number' && Number.isFinite(a3.schaetzung)) {
+    a.a3 = { schaetzung: a3.schaetzung, aufgeloest: !!a3.aufgeloest }
+  }
+  const a4 = q.a4 as Antworten['a4']
+  if (a4 && stringListe(a4.pfad)) {
+    a.a4 = {
+      pfad: stringListe(a4.pfad) as string[],
+      // `boegen` fällt aus dem Pfad ab und wird nur mitgeführt; ein kaputter
+      // Wert darf den Weg nicht mitreißen, aus dem A6 seine Linie zieht.
+      boegen: typeof a4.boegen === 'number' && Number.isFinite(a4.boegen) ? a4.boegen : 0,
+      fertig: !!a4.fertig,
+    }
+  }
+  const a5 = q.a5 as Antworten['a5']
+  if (a5 && stringListe(a5.gelesen)) {
+    a.a5 = { gelesen: stringListe(a5.gelesen) as string[] }
+  }
+  const a6 = q.a6 as Antworten['a6']
+  if (a6 && typeof a6.versuche === 'number' && Number.isFinite(a6.versuche)) {
+    a.a6 = { druckGetroffen: !!a6.druckGetroffen, versuche: a6.versuche }
+  }
+  const a7 = q.a7 as Antworten['a7']
+  if (a7 && stringListe(a7.beantwortet)) {
+    a.a7 = {
+      beantwortet: stringListe(a7.beantwortet) as string[],
+      gut: typeof a7.gut === 'number' && Number.isFinite(a7.gut) ? a7.gut : 0,
+    }
+  }
+  const a8 = q.a8 as Antworten['a8']
+  if (a8 && Array.isArray(a8.angesehen)) {
+    // Fällt eine StepId aus dem Graphen, darf sie nicht als Aufhänger auf A9
+    // wieder auftauchen.
+    a.a8 = { angesehen: a8.angesehen.filter((x) => istStepId(graph, x)) }
+  }
 
   return a
 }
