@@ -27,8 +27,11 @@ import { FASE, GROESSTMASS, KLEINSTMASS, NENNMASS, TOLERANZ } from './kanon'
  * liegt die Fläche in der Zone oder darüber oder darunter.
  */
 
-/** x ∈ [0, 108], y ∈ [-28, 44]. Eigene Welt: hier ist ein Millimeter groß. */
-const SICHT = '0 -28 108 72'
+/**
+ * x ∈ [0, 116], y ∈ [-28, 44]. Eigene Welt: hier ist ein Millimeter groß.
+ * Rechts steht der Weg mit drin, den die Trommel beim Aufdrehen zurücklegt.
+ */
+const SICHT = '0 -28 116 72'
 
 const TEIL = [24, 0] as const
 const TEIL_R = NENNMASS / 2
@@ -39,8 +42,36 @@ const TROMMEL = { x1: 74, x2: 96, r: 10.5 }
 /** Steigung der Messspindel: eine Umdrehung, ein halber Millimeter. */
 const STEIGUNG = 0.5
 
-/** Wo die Toleranzzone über dem Teil liegt und wie hoch sie gezeichnet wird. */
-const ZONE = { oben: -15, hoch: 6, von: 9, bis: 39 }
+/**
+ * Wo die Toleranzzone über dem Teil liegt und wie hoch sie gezeichnet wird.
+ *
+ * **Sie liegt über der Schraube, nicht in ihr.** In der ersten Fassung stand
+ * sie so dicht am Teil, dass der Balken den Rohling schnitt und die beiden
+ * Marken über der Skalentrommel lagen — der Beleg für „die Zahl liegt drin“
+ * kreuzte ausgerechnet die Kontur, um die es geht. Zwischen Teilkante
+ * (`-TEIL_R`) und Zonenunterkante bleibt jetzt ein Streifen frei, den die
+ * gestrichelte Hinweislinie überbrückt.
+ */
+const ZONE = { oben: -24, hoch: 6, von: 9, bis: 39 }
+
+/**
+ * Wie weit die Marke außerhalb der Zone laufen darf, in Zeichnungseinheiten.
+ * Weiter oben endet die Ansicht (`SICHT` beginnt bei −28), weiter unten fängt
+ * das Teil an.
+ */
+const MARKE_UEBERSTAND = 4
+
+/**
+ * Um wie viel der Weg der Messspindel überhöht wird.
+ *
+ * Zwischen offener Anzeige (20,590) und Endwert (19,987) liegen sechs
+ * Zehntelmillimeter. Maßstäblich sind das auf einem Ø-20-Teil rund fünf
+ * Bildschirmpunkte — die Schraube stünde vor und nach dem Zudrehen an
+ * derselben Stelle, und die Handlung „dreh sie zu“ lebte allein von der
+ * Ziffernanzeige. Überhöht ist sie sichtbar. Dieselbe Ehrlichkeit wie beim
+ * Toleranzfeld in Z1: gezeigt wird die **Bewegung**, nicht ihr Maß.
+ */
+const SPINDEL_UEBERHOEHT = 14
 
 export function Messschraube({
   messwert = NENNMASS,
@@ -51,6 +82,13 @@ export function Messschraube({
   toleranzUeberlagerung?: boolean
   korrigiert?: boolean
 }) {
+  /**
+   * Wie weit Spindel und Trommel noch offen stehen — überhöht, siehe
+   * `SPINDEL_UEBERHOEHT`. Unter dem Nennmaß liegt die Spindel an; weiter kann
+   * sie nicht, dort ist das Teil.
+   */
+  const offen = Math.max(0, (messwert - NENNMASS) * SPINDEL_UEBERHOEHT)
+
   return (
     <Bild viewBox={SICHT}>
       {/* Der Bügel. Ein Bauteil mit Ausdehnung, deshalb Fläche und nicht Linie. */}
@@ -73,16 +111,25 @@ export function Messschraube({
         strokeWidth={STRICH.voll}
         vectorEffect="non-scaling-stroke"
       />
-      <rect
-        x={34}
-        y={-5.5}
-        width={24}
-        height={11}
-        rx={1}
-        className={BAUTEIL}
-        strokeWidth={STRICH.voll}
-        vectorEffect="non-scaling-stroke"
-      />
+      {/*
+        Die Messspindel. Sie ist das eine Bauteil, das beim Zudrehen wandert —
+        zusammen mit Trommel und Ratsche weiter unten, und **ohne** die
+        Skalenhülse, die zum Bügel gehört. Der Weg ist überhöht
+        (`SPINDEL_UEBERHOEHT`): sechs Zehntel wären auf dieser Bühne fünf
+        Bildschirmpunkte, und ein Zudrehen, das man nicht sieht, ist keins.
+      */}
+      <g transform={`translate(${offen} 0)`}>
+        <rect
+          x={34}
+          y={-5.5}
+          width={24}
+          height={11}
+          rx={1}
+          className={BAUTEIL}
+          strokeWidth={STRICH.voll}
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
 
       {/* Das Teil, von der Stirnseite: der Durchmesser, um den es geht. */}
       <circle
@@ -140,28 +187,31 @@ export function Messschraube({
         />
       ))}
 
-      {/* Skalentrommel mit ihren Längsstrichen. */}
-      <rect
-        x={TROMMEL.x1}
-        y={-TROMMEL.r}
-        width={TROMMEL.x2 - TROMMEL.x1}
-        height={TROMMEL.r * 2}
-        rx={2.5}
-        className={BAUTEIL}
-        strokeWidth={STRICH.voll}
-        vectorEffect="non-scaling-stroke"
-      />
-      <Trommelstriche wert={messwert} />
-      <rect
-        x={96}
-        y={-4.5}
-        width={8}
-        height={9}
-        rx={2}
-        className={BAUTEIL}
-        strokeWidth={STRICH.voll}
-        vectorEffect="non-scaling-stroke"
-      />
+      {/* Skalentrommel und Ratsche — sie wandern über die feste Hülse, und
+          genau das ist die Anzeige. */}
+      <g transform={`translate(${offen} 0)`}>
+        <rect
+          x={TROMMEL.x1}
+          y={-TROMMEL.r}
+          width={TROMMEL.x2 - TROMMEL.x1}
+          height={TROMMEL.r * 2}
+          rx={2.5}
+          className={BAUTEIL}
+          strokeWidth={STRICH.voll}
+          vectorEffect="non-scaling-stroke"
+        />
+        <Trommelstriche wert={messwert} />
+        <rect
+          x={96}
+          y={-4.5}
+          width={8}
+          height={9}
+          rx={2}
+          className={BAUTEIL}
+          strokeWidth={STRICH.voll}
+          vectorEffect="non-scaling-stroke"
+        />
+      </g>
 
       <Toleranzzone
         wert={messwert}
@@ -227,8 +277,11 @@ function Toleranzzone({
   // `hoch / TOLERANZ` je Millimeter daneben. Gekappt, damit ein weit
   // danebenliegender Wert nicht aus dem Bild fährt.
   const lage = Math.max(
-    ZONE.oben - 7,
-    Math.min(unten + 7, ZONE.oben + ((GROESSTMASS - wert) / TOLERANZ) * ZONE.hoch),
+    ZONE.oben - MARKE_UEBERSTAND,
+    Math.min(
+      unten + MARKE_UEBERSTAND,
+      ZONE.oben + ((GROESSTMASS - wert) / TOLERANZ) * ZONE.hoch,
+    ),
   )
   const ton = gut ? 'text-kh-signal' : 'text-kh-orange'
 

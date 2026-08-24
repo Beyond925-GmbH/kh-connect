@@ -93,7 +93,12 @@ export interface Programmzeile {
  * abnehmen lassen.
  */
 export const PROGRAMM: readonly Programmzeile[] = [
-  { code: '(SCHLICHTEN WELLE OE20 H7)', kommentar: 'Programmkopf' },
+  // `D20` statt des `OE20` aus dem Beleg: In einem ISO-Kommentar ist kein „Ø“
+  // tippbar, und in der Werkstatt schreibt man dafür `D` oder `DM` — eine
+  // ae/oe/ue-Ersatzschreibung fällt ausgerechnet auf dem Screen auf, der
+  // dieselbe Kontur wie die Zeichnung („Ø 20 h7“) zeigt. Sachlich gleich; das
+  // Programm ist ohnehin von der Recherche selbst verfasst.
+  { code: '(SCHLICHTEN WELLE D20 H7)', kommentar: 'Programmkopf' },
   {
     code: 'G21 G40 G90',
     kommentar: 'Millimeter, keine Schneidenradiuskorrektur, absolut',

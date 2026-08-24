@@ -105,11 +105,21 @@ export interface Antworten {
   z3?: { zeilen: number; gefunden: boolean; kollision: boolean }
   /** Z4 — welche der drei Entdeckungen im Messraum aufgedeckt wurden. */
   z4?: { gelesen: string[] }
-  /** Z5 — das Urteil über den Messwert, ob es stimmte, und ob korrigiert wurde. */
+  /**
+   * Z5 — das Urteil über den Messwert, ob es stimmte, und ob korrigiert wurde.
+   *
+   * `endwert` ist der Messwert, den der Besucher am Ende von Beat 2 wirklich
+   * erreicht hat, in mm. Er steht **zusätzlich** zur Signatur der Spec (§6 Z5)
+   * und ist deshalb optional: Der Wert hängt daran, wie weit korrigiert wurde,
+   * und Z5 ist das Fadenobjekt-Feld dieses Tages — „deine Zahl“ (§2). Ohne ihn
+   * zeigte der Screen nach einem Rücksprung über „Dein Weg“ eine andere Zahl
+   * als die, die dort eben noch stand.
+   */
   z5?: {
     urteil: 'gut' | 'nacharbeit' | 'ausschuss'
     richtig: boolean
     korrigiert: boolean
+    endwert?: number
   }
   /**
    * Z7 — angesehene Karrierewege, in Reihenfolge des Öffnens.
@@ -283,6 +293,11 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
       urteil: z5.urteil,
       richtig: !!z5.richtig,
       korrigiert: !!z5.korrigiert,
+    }
+    // Nur eine echte Zahl übernehmen; alles andere fällt weg, und Z5 rechnet
+    // dann wieder mit seinem Ersatzwert.
+    if (typeof z5.endwert === 'number' && Number.isFinite(z5.endwert)) {
+      a.z5.endwert = z5.endwert
     }
   }
   const z7 = q.z7 as Antworten['z7']

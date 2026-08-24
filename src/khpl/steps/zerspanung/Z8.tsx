@@ -146,6 +146,15 @@ export function Z8() {
  *
  * `mix-blend-multiply` behält die Zeichnung des Fotos, statt es zuzukleistern —
  * eine Lage Orange, nicht zwei.
+ *
+ * ⚠️ **Das Motiv wird vor dem Multiplizieren aufgehellt.** Multiplizieren kann
+ * nur dunkler machen: `card.webp` ist ein dunkles Motiv — schwarze Shirts,
+ * Halle im Gegenlicht —, und darüber gelegtes Orange ergab ein Dunkelbraun
+ * statt einer orangen Fläche. Der Hüllenvertrag sagt für diesen Screen
+ * ausdrücklich „vollflächig orange“ (khpl-tage.md §3, „Ende“). Der Filter ist
+ * deshalb keine Stilzutat, sondern die Bedingung dafür, dass die Farbe an
+ * diesem Motiv überhaupt ankommt; Aufbau und Ebenen bleiben die des
+ * Dachdecker-Screens.
  */
 function Abschlussfeld() {
   const bild = useStepBild('Z8')
@@ -157,7 +166,10 @@ function Abschlussfeld() {
           src={bild.src}
           alt=""
           aria-hidden
-          style={{ objectPosition: bild.pos }}
+          style={{
+            objectPosition: bild.pos,
+            filter: 'brightness(1.75) contrast(0.82) saturate(0.85)',
+          }}
           className="size-full object-cover"
         />
       )}

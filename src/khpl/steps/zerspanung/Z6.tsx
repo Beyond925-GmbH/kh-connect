@@ -107,12 +107,27 @@ function rueckblick(f: Fortschritt): string[] {
   )
 }
 
-/** Wie voll die Kiste steht, wenn der Screen aufgeht — dein Teil und ein paar. */
-const KISTE_START = 0.12
-/** Sekunden je weiterem Teil. Langsam genug, dass es nebenbei passiert. */
-const TAKT = 2.4
+/**
+ * Wie voll die Kiste steht, wenn der Screen aufgeht.
+ *
+ * **Knapp halb voll, nicht fast leer.** Die erste Fassung fing mit zwei Teilen
+ * an und legte alle paar Sekunden eines nach; auf dem Screen stand damit eine
+ * fast leere Kiste, und die Pointe des Tages — *das erste von vierhundert, die
+ * Maschine macht weiter, wenn du gehst* — hatte kein Bild. Der Zählstand ist
+ * hier ohnehin nicht die Aussage: eine Schicht liegt hinter dem Besucher, und
+ * was zählt, ist, dass es **weitergeht**, während er hinsieht.
+ */
+const KISTE_START = 0.45
+/** Sekunden je weiterem Teil. Schnell genug, dass man es beim Lesen merkt. */
+const TAKT = 1.6
 /** Weiter füllt sie sich auf diesem Screen nicht. */
-const KISTE_MAX = 0.75
+const KISTE_MAX = 0.95
+/**
+ * Ein Platz je Takt. Die Kiste hat drei mal vier davon (`buehne/Kiste.tsx`) —
+ * ein kleinerer Schritt ließe zwei von drei Takten ohne sichtbares Teil
+ * verstreichen, und das Füllen wäre wieder ein Zählstand.
+ */
+const SCHRITT = 1 / 12
 
 export function Z6() {
   const { fortschritt } = useStepNavigation('Z6')
@@ -126,7 +141,7 @@ export function Z6() {
   const [fuellstand, setFuellstand] = useState(KISTE_START)
   useEffect(() => {
     const uhr = setInterval(
-      () => setFuellstand((f) => Math.min(KISTE_MAX, f + 0.02)),
+      () => setFuellstand((f) => Math.min(KISTE_MAX, f + SCHRITT)),
       TAKT * 1000,
     )
     return () => clearInterval(uhr)

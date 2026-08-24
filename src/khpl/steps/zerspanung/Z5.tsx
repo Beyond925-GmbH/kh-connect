@@ -137,11 +137,16 @@ const mass = (n: number) => n.toFixed(3).replace('.', ',')
  * Der Endwert, den der kleinste Korrektorstand in ganzen Schritten aus TEIL_2
  * macht — 20,015 − 2 × 0,01 = 19,995 mm, in der Toleranz.
  *
- * `answers.z5` persistiert den gemessenen Endwert nicht (Spec-Signatur, §6 Z5).
- * Beim Wiedereinstieg in ein abgeschlossenes Z5 muss die Anzeige trotzdem
- * einen Wert zeigen, der wirklich „gut“ ist — stünde dort TEIL_2 (20,015),
- * zeigte der Screen eine Zahl außerhalb der Toleranz im Gut-Ton: genau der
- * Fehlertyp, den die Spec bei 19,987 an sich selbst gefunden hat.
+ * Der **Ersatzwert** für Stände, die den erreichten Wert nicht mitbringen:
+ * alte `localStorage`-Sitzungen und der Fall, dass `endwert` aus der Prüfung
+ * gefallen ist. Regulär schreibt `laufenLassen` die eigene Zahl nach
+ * `answers.z5.endwert` und der Screen zeigt sie wieder — sie ist „deine Zahl“
+ * (§2), und eine andere nach dem Rücksprung wäre eine Unstimmigkeit an genau
+ * dem Fadenobjekt dieses Tages.
+ *
+ * Was der Ersatzwert leisten muss: wirklich „gut“ sein. Stünde dort TEIL_2
+ * (20,015), zeigte der Screen eine Zahl außerhalb der Toleranz im Gut-Ton —
+ * genau der Fehlertyp, den die Spec bei 19,987 an sich selbst gefunden hat.
  */
 const ENDWERT = genau(
   TEIL_2.wert -
@@ -173,7 +178,7 @@ export function Z5() {
   const [urteil, setUrteil] = useState<Urteil | null>(gespeichert?.urteil ?? null)
   const [korrektur, setKorrektur] = useState(0)
   const [ergebnis, setErgebnis] = useState(() =>
-    gespeichert?.korrigiert ? ENDWERT : TEIL_2.wert,
+    gespeichert?.korrigiert ? (gespeichert.endwert ?? ENDWERT) : TEIL_2.wert,
   )
   const [meldung, setMeldung] = useState<string | null>(null)
 
@@ -242,6 +247,9 @@ export function Z5() {
         urteil: urteil ?? TEIL_1.urteil,
         richtig,
         korrigiert: true,
+        // Die eigene Zahl, nicht die gerechnete: Wer weiter korrigiert hat,
+        // liest nach dem Rücksprung über „Dein Weg“ wieder seinen Wert.
+        endwert: neu,
       })
     } else if (neu > GROESSTMASS) {
       setMeldung('Immer noch zu dick. Stell den Korrektor weiter nach.')

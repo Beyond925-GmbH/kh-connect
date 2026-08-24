@@ -126,7 +126,16 @@ export function Z2() {
         <Wechsel takt={fertig ? 'fertig' : dran.id}>
           {fertig ? (
             <div className="flex flex-col items-start gap-2">
-              <p className="kh-titel-klein text-kh-signal">Die Maschine ist gerüstet.</p>
+              {/*
+                `pt-1.5` ist kein Abstand, sondern Platz für die Pünktchen.
+                `kh-titel-klein` setzt `line-height: 1`, Anton ragt damit über
+                seine Zeilenbox hinaus — und die aufklappende Hülle von
+                `Wechsel` fährt auf eine gemessene Höhe und hat `overflow:
+                clip`. Ohne die Zeile Luft stand hier „GERUSTET“.
+              */}
+              <p className="kh-titel-klein pt-1.5 text-kh-signal">
+                Die Maschine ist gerüstet.
+              </p>
               <p className="text-[1.0625rem] leading-snug text-kh-paper/80">
                 Und noch ist kein einziges Teil entstanden. Verschiebt sich der Nullpunkt
                 jetzt um einen Zehntelmillimeter, sind alle 400 Teile um einen Zehntel

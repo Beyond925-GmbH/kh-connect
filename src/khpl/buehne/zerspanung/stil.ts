@@ -19,9 +19,9 @@
  */
 export const STRICH = {
   /** Hilfs-, Maß- und Mittellinien. */
-  fein: 1,
+  fein: 1.25,
   /** Sichtbare Kanten, Werkzeugweg. Dieselbe Stärke in Z1 und Z3 — §6 Z3. */
-  voll: 2,
+  voll: 2.5,
 } as const
 
 /**
@@ -33,8 +33,13 @@ export const STRICH = {
  * **Kante**: eine helle Umrisslinie in `STRICH.voll`. Das ist zugleich die
  * Handschrift, die zum Tag gehört — die Werkzeuge dieses Berufs sind die
  * Zeichnung, der Werkzeugweg und die Zahl, und alle drei sind Linie.
+ *
+ * Die Deckkraft der Kante ist eine Stufe höher als in der ersten Fassung:
+ * auf der stehenden Stele, aus zwei Metern Abstand und unter Hallenlicht,
+ * verschwand ein Grauton auf Fast-Schwarz. Am Schreibtisch war er zu sehen —
+ * am Schreibtisch steht das Gerät aber nicht.
  */
-export const BAUTEIL = 'fill-kh-raised stroke-kh-paper/55'
+export const BAUTEIL = 'fill-kh-raised stroke-kh-paper/80'
 
 /**
  * Millimeter mit drei Stellen hinter dem Komma — der Satz, in dem `20,000` und

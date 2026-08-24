@@ -39,6 +39,14 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * „Bist du noch da?“ steht, übt genau den Druck aus, den sie wegnehmen soll —
  * die Änderung betrifft alle vier Tage und gehört nicht in einen
  * (khpl-tage.md §6.2).
+ *
+ * **Für die Zusammenführung**, damit die Meldung nicht bloß eine Haltung ist:
+ * `GEDULD` in `shell/KioskGuard.tsx` kennt heute nur `M5`, `M6`, `M8` und die
+ * drei `B9.x`. Kein einziges `Z` steht darin, und im Durchspielen setzt der
+ * Kiosk beim Lesen zurück — auf **Z4** (drei Antworttexte), **Z6**
+ * (Rückblick) und **Z7.1–Z7.3** (je vier Faktenblöcke). Fällig ist dort
+ * `Z4: 3, Z6: 3, 'Z7.1': 3, 'Z7.2': 3, 'Z7.3': 3` — dieselbe Zeile, die
+ * `M6` und `B9.x` schon haben, und dieselbe Begründung.
  */
 
 // ---------------------------------------------------------------------------
@@ -115,7 +123,7 @@ export function Z4() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 1.2 }}
+            transition={{ duration: 0.9, delay: 0.5 }}
             // Der eine Satz, der auf diesem Screen zählt — deshalb steht er in
             // Anton und nicht als dritte Zeile Fließtext.
             className="kh-titel-klein mt-4 text-kh-orange"
@@ -128,7 +136,10 @@ export function Z4() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 2 }}
+          // Staffeln ja, warten lassen nein. Zwei Sekunden waren auf der Stele
+          // zwei Sekunden leeres Panel unter einer Überschrift — und die drei
+          // Fragen sind der einzige Inhalt dieses Schritts.
+          transition={{ duration: 0.5, delay: 0.85 }}
           className="flex flex-col gap-2.5"
         >
           {!antwort && (
@@ -196,7 +207,7 @@ export function Z4() {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 3.2 }}
+            transition={{ duration: 0.8, delay: 1.6 }}
             data-testid="z4-kehrseite"
             className="border-t border-kh-line pt-3 text-[1rem] leading-snug text-kh-paper/60"
           >

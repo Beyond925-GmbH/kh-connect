@@ -235,8 +235,19 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
    * Kühlmittelzuführung); `gallery-1.webp` trägt seit dem Ausbau Z7.
    */
   bilder: {
-    // Bediener an der CNC-Maschine — der Screen, der `technik: 1` mit trägt.
-    'Z1.1': { src: '/medien/media/zerspanungsmechaniker/gallery-2.webp', pos: '50% 45%' },
+    /*
+      Bediener an der CNC-Maschine — der Screen, der `technik: 1` mit trägt.
+
+      **Der Ausschnitt sitzt links, nicht mittig.** Das Motiv ist 16 : 9; auf
+      der stehenden Stele bleibt davon ein Streifen von nicht einmal einem
+      Drittel der Bildbreite, und die untere Hälfte liegt unter dem Panel.
+      Mittig blieben davon die Linearführung und ein helles Brett übrig — das
+      liest sich nach Holz. Links steht die Frässpindel mit dem Werkzeug: der
+      einzige Ausschnitt dieses Bildes, der auch hochkant nach Maschine
+      aussieht. Der zweite Wert wirkt nicht — bei 16 : 9 in einem 9 : 16-Rahmen
+      deckt `cover` die volle Höhe ab, beschnitten wird ausschließlich seitlich.
+    */
+    'Z1.1': { src: '/medien/media/zerspanungsmechaniker/gallery-2.webp', pos: '22% 45%' },
     // Kühlmittel spritzt über das Werkstück. Genau das Motiv, das der
     // Abstecher erklärt.
     'Z2.1': { src: '/medien/media/zerspanungsmechaniker/gallery-3.webp', pos: '50% 50%' },
@@ -259,9 +270,23 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
     'Z7.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
     'Z7.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
     'Z7.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
-    // Zum Schluss Menschen, keine Maschine: hier soll jemand aufstehen und an
-    // den Stand gehen. „Team am Maschinenbildschirm“ ist das einzige Motiv im
-    // Bestand, auf dem in diesem Beruf jemand mit jemandem redet.
+    /*
+      Zum Schluss Menschen, keine Maschine: hier soll jemand aufstehen und an
+      den Stand gehen. „Team am Maschinenbildschirm“ ist das einzige Motiv im
+      Bestand, auf dem in diesem Beruf jemand mit jemandem redet.
+
+      **Der Ausschnitt bleibt mittig, und der zweite Wert wirkt nicht.** Das
+      Motiv ist 16 : 9; auf der stehenden Stele deckt `cover` damit die volle
+      Höhe ab und beschneidet ausschließlich seitlich — quer (16 : 9) fällt gar
+      kein Schnitt an. Was hochkant vom Bild bleibt, ist ein Streifen von einem
+      knappen Drittel der Breite, und mittig steht darin das Profil des
+      Kollegen mit Bart, davor der jüngere. Weiter nach rechts geschoben stehen
+      zwar zwei weitere Gesichter im Streifen, beide aber so hoch im Bild, dass
+      die Screenkante sie in der Mitte durchschneidet — ein halbes Kinn ist
+      kein Gesprächsangebot. Dass die Fläche nicht orange wirkte, lag nicht am
+      Ausschnitt, sondern am Multiplizieren über einem dunklen Motiv; das ist
+      in `Z8.tsx` behoben.
+    */
     Z8: { src: '/medien/media/zerspanungsmechaniker/card.webp', pos: '50% 45%' },
   } satisfies Partial<Record<Id, StepBild>>,
   /**
