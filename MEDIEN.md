@@ -37,8 +37,9 @@ Aus dem Altbestand (`public/medien/media/`) wird weiterhin benutzt:
 
 | Datei | Wo |
 | --- | --- |
-| `zimmerer/hero.mp4` + `hero-poster.webp` | Splash (S0) — Attract-Loop |
-| `zimmerer/hero-poster.webp` | Auftragsannahme (S1) |
+| `shared/start-loop.mp4` + `start-poster.webp` | Splash (S0) — Attract über alle Berufe. **Deckt nur drei Gewerke ab; Dachdecker fehlt.** |
+| `zimmerer/szenario.mp4` + `szenario-poster.webp` | Auftragsannahme (S1) des Zimmerers |
+| `zimmerer/hero.mp4` + `hero-poster.webp` | Karte und Vorschlag des Zimmerers |
 
 ## Was bei der Auswahl galt
 

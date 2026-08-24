@@ -151,7 +151,16 @@ export function Auftragsannahme() {
           </p>
         </div>
 
-        <div className="flex justify-start landscape:justify-end">
+        {/* Der Knopf atmet. Kein Blinken — eine Fläche, die sich hebt und
+            senkt, liest sich aus drei Metern als „hier anfassen“, eine
+            blinkende als Defekt. Skaliert wird der Rahmen, nicht der Knopf:
+            sein `active:translate-y` bliebe sonst gegen die Animation
+            wirkungslos. */}
+        <motion.div
+          animate={{ scale: [1, 1.035, 1] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex origin-left justify-start landscape:origin-right landscape:justify-end"
+        >
           <Button
             onClick={nimmAuftragAn}
             variant="weiter"
@@ -162,7 +171,7 @@ export function Auftragsannahme() {
             {text.knopf}
             <ArrowRight className="size-5" strokeWidth={2.5} />
           </Button>
-        </div>
+        </motion.div>
       </motion.div>
     </div>
   )

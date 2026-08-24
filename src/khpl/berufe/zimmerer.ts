@@ -240,10 +240,13 @@ export const ZIMMERER: BerufDef = {
     szenario: '/medien/media/zimmerer/szenario.mp4',
     szenarioPoster: '/medien/media/zimmerer/szenario-poster.webp',
   },
+  // TEXT: `GEPRÜFT` (24.08.2026). Wortlaut unverändert von dem Startscreen
+  // übernommen, auf dem er abgenommen wurde — er ist jetzt nur wieder ein
+  // eigener Screen, weil das Framing je Beruf ein anderes ist.
   auftrag: {
     etikett: 'Dein erster Auftrag',
-    titel: ['Du bist Azubi', 'in einer Zimmerei.'],
-    text: 'Der Chef legt das Telefon weg und dreht sich zu dir um. Altes Haus, das Dach muss neu. Er fragt, ob du mitkommst.',
+    titel: ['Bau heute', 'ein Dach.'],
+    text: 'Du bist Azubi in einer Zimmerei. Der Chef legt das Telefon weg und dreht sich zu dir um: altes Haus, das Dach muss neu. Er fragt, ob du mitkommst.',
     knopf: 'Auftrag annehmen',
   },
   graph: baueGraph(STEPS, {

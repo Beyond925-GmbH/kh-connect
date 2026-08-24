@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
-import { Hand } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Hand, RotateCcw } from 'lucide-react'
 import { Logo } from '@/components/ui/logo'
 import { step } from '@/khpl/flow/steps'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
@@ -16,10 +15,16 @@ import { useStaffAusgang } from './staffAusgang'
  * ganzen Ablauf, der **randlos** ist — kein Panel, keine Leiste, nur Bewegtbild
  * und drei Zeilen darauf.
  *
- * Marke, Titel, „Tippen zum Starten“ — und bei vorhandenem Fortschritt
- * **zusätzlich** Weitermachen / Neu starten. Zusätzlich, nicht anstelle: sonst
- * bekäme ein neuer Besucher als erstes eine Frage nach einem Schritt gestellt,
- * den er nie gesehen hat, und keinen offensichtlichen Weg hinein.
+ * Marke, Titel, „Tippen zum Starten“ — und bei vorhandenem Fortschritt oben
+ * links eine leise Pille *Weiter bei …*.
+ *
+ * **Er ist wieder vom Auftragsscreen getrennt, und diesmal zu Recht.** Beide
+ * waren kurzzeitig ein Screen, weil zwei randlose Videoscreens mit Plakatzeile
+ * direkt hintereinander aus Besuchersicht derselbe Screen zweimal sind. Mit
+ * den vier Berufen liegen sie nicht mehr hintereinander: dazwischen stehen
+ * Helm, Fragen, Vorschlag und Berufsliste. Und das Framing („Du bist Azubi in
+ * einer Zimmerei“) ist je Beruf ein anderes — es kann nicht auf einem Screen
+ * stehen, der für alle vier wirbt.
  *
  * Erststart-Budget: bis „Tippen zum Starten“ ≤ 1,5 MB (flow 8.5). Deshalb trägt
  * der Screen zuerst nur das Poster; der Loop wird erst **nach** dem ersten Frame
@@ -68,17 +73,14 @@ export function Splash() {
     return () => window.clearTimeout(id)
   }, [])
 
-  /**
-   * „Weitermachen bei …“ — mit Beruf davor, denn mit vier Berufen ist der
-   * Steptitel allein keine Adresse mehr. „Halb zwölf“ sagt nichts darüber,
-   * wessen Mittagspause gemeint ist.
-   */
-  const weitermachenText = (() => {
+  const weitermachen = (() => {
     if (!wiedereinstieg) return null
     const b = berufDef(wiedereinstieg.beruf)
     if (!b.graph) return null
-    const titel = step(b.graph, wiedereinstieg.fortschritt.currentStepId).titel
-    return `Weitermachen: ${b.kurz} — „${titel}“`
+    return {
+      beruf: b.kurz,
+      titel: step(b.graph, wiedereinstieg.fortschritt.currentStepId).titel,
+    }
   })()
 
   // Der Splash wird an einem Messetag dutzendfach auf- und abgebaut (jeder
@@ -148,21 +150,54 @@ export function Splash() {
       <div aria-hidden className="kh-warnband absolute inset-x-0 bottom-0 h-1.5" />
 
       <div className="relative flex min-h-0 flex-1 flex-col justify-between p-6 landscape:p-10">
-        {/* `self-start`, sonst zieht die Flex-Spalte das Bild auf volle Breite.
-            Auf dem Logo liegt der Staff-Ausgang — fünf schnelle Taps, wie in
-            ui-shell 8 beschrieben. `stopPropagation`, sonst startet der Tap
-            zugleich eine neue Sitzung. */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            staffTap()
-          }}
-          aria-label="Kreishandwerkerschaft Paderborn-Lippe"
-          className="w-fit self-start"
-        >
-          <Logo className="h-9 w-auto landscape:h-11" />
-        </button>
+        <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+          {/* Auf dem Logo liegt der Staff-Ausgang — fünf schnelle Taps, wie in
+              ui-shell 8 beschrieben. `stopPropagation`, sonst startet der Tap
+              zugleich eine neue Sitzung. */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              staffTap()
+            }}
+            aria-label="Kreishandwerkerschaft Paderborn-Lippe"
+            className="w-fit shrink-0"
+          >
+            <Logo className="h-9 w-auto landscape:h-11" />
+          </button>
+
+          {/* Der Wiedereinstieg. Er stand vorher als zweiter Absatz mit eigenem
+              Knopf unter dem Titel und stellte damit jedem neuen Besucher als
+              erstes eine Frage nach einem Schritt, den er nie gesehen hat.
+              Hier oben ist er das, was er ist: eine Ausnahme für den, der
+              gerade weggeschaut hat. Grau, klein, neben der Marke — er darf
+              dem Einstieg nicht ansatzweise Konkurrenz machen.
+
+              Mit vier Berufen steht der Beruf mit drin: „Halb zwölf“ allein
+              sagt nicht, wessen Mittagspause gemeint ist. */}
+          {weitermachen && (
+            <button
+              type="button"
+              data-testid="weitermachen"
+              onClick={(e) => {
+                e.stopPropagation()
+                machWeiter()
+              }}
+              className="flex h-11 min-w-0 items-center gap-2 rounded-kh-pill bg-black/35 px-3.5 text-[0.9375rem] font-medium text-kh-paper/55 backdrop-blur-md transition-transform active:scale-95"
+            >
+              <RotateCcw className="size-4 shrink-0" strokeWidth={2} />
+              {/* Unterhalb von 640 px bliebe vom Steptitel neben der Marke
+                  nichts als ein abgeschnittenes Wort übrig — dort steht nur
+                  „Weiter“, und die Pille rutscht unter das Logo
+                  (`flex-wrap` oben). Das Zielgerät ist ohnehin das iPad; das
+                  ist die Notlösung fürs Telefon. */}
+              <span className="shrink-0 sm:hidden">Weiter</span>
+              <span className="hidden truncate sm:inline">
+                Weiter: {weitermachen.beruf} — „{weitermachen.titel}“
+              </span>
+            </button>
+          )}
+        </div>
 
         <div className="flex flex-col items-start gap-6">
           <motion.h1
@@ -206,25 +241,6 @@ export function Splash() {
               Tippen zum Starten
             </span>
           </motion.div>
-
-          {weitermachenText && (
-            <div
-              className="flex flex-col items-start gap-2.5"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <p className="text-[1rem] text-kh-paper/50">
-                Oder da weiter, wo jemand aufgehört hat:
-              </p>
-              <Button
-                variant="neben"
-                onClick={machWeiter}
-                data-testid="weitermachen"
-                className="max-w-[min(34rem,86vw)] justify-start"
-              >
-                <span className="truncate">{weitermachenText}</span>
-              </Button>
-            </div>
-          )}
         </div>
       </div>
     </div>

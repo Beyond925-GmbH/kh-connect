@@ -29,8 +29,12 @@ abgelenkt war, wählt *Weitermachen*.
 
 | ID | Screen | Rolle |
 | --- | --- | --- |
-| **S0** | Splash / Attract | Ruhezustand des Standes. Marke, Titel, „Tippen zum Start". Bei vorhandenem Fortschritt zusätzlich *Weitermachen* / *Neu starten*. |
-| **S1** | Auftragsannahme | Der Framing-Screen. In-fiction, keine Meta-Erklärung, keine Dauer. Endet auf **[Auftrag annehmen]**. Trägt den ersten diskreten Karriere-Link. |
+| **S0** | Splash / Attract | Ruhezustand des Standes. Marke, Plakatzeile über alle vier Berufe, „Tippen zum Starten". Bei vorhandenem Fortschritt oben links eine leise Pille *Weiter bei …*. |
+| **S0.1** | Dein Helm | Personalisierung. Helmfarbe (Ausdruck) und Werkzeug (Merkmalssignal). Überspringbar. |
+| **S0.2** | Vier Fragen | Eine Frage je Screen, Antwort per Tap. Jede überspringbar. |
+| **S0.3** | Vorschlag | Der beste Treffer, mit Begründung und dem Zweitplatzierten. **Entfällt beim Kaltstart** — ohne Aussage kein Vorschlag. |
+| **S0.4** | Berufsliste | Alle vier nebeneinander. Daueradresse: aus dem Vorschlag, aus dem Sheet, vom Ende eines Tages. |
+| **S1** | Auftragsannahme | Der Framing-Screen, **je Beruf**. In-fiction, keine Meta-Erklärung, keine Dauer. Endet auf **[Auftrag annehmen]**. Trägt den ersten diskreten Karriere-Link. |
 | **S2** | Step-Screen | Das Arbeitspferd. Rendert jeden gelben Step (Haupt **und** Abstecher) aus den Daten. Anatomie → §5. |
 | **S3** | „Dein Weg" (Sheet) | Overlay über S2. Die ganze Hauptlinie als vertikale Liste mit ✓ / ● / ○, Abstecher eingerückt unter ihrem Elternschritt. Antwort auf „Was habe ich bisher gemacht?". |
 | **S4** | Karriere-Bereich | M9 + B9.1–B9.3 als Info-Screens. Erreichbar regulär über den Flow **oder** über den Skip. Im Skip-Modus mit persistenter Rückkehr-Leiste. |
@@ -48,12 +52,20 @@ Recap (M8) ist **kein** eigener Screen-Typ, sondern eine Variante von S2, die
 ```mermaid
 stateDiagram-v2
   [*] --> S0
-  S0 --> S1: Start / Neu starten
+  S0 --> S0_1: Tippen zum Starten
+  S0_1 --> S0_2: Helm gewählt / übersprungen
+  S0_2 --> S0_3: vier Fragen durch
+  S0_2 --> S0_4: alles übersprungen (Kaltstart)
+  S0_3 --> S1: Beruf starten
+  S0_3 --> S0_4: alle vier ansehen
+  S0_4 --> S1: Beruf gewählt (neu)
+  S0_4 --> S2: Beruf gewählt (schon angefangen)
   S0 --> S2: Weitermachen
   S1 --> S2: Auftrag annehmen
   S2 --> S2: Weiter / Zurück / Abstecher
   S2 --> S3: Rail antippen
   S3 --> S2: schließen · besuchten Schritt wählen
+  S3 --> S0_4: Beruf wechseln
   S1 --> S4: Karriere-Link (Skip)
   S2 --> S4: Karriere-Link (Skip)
   S4 --> S2: „Zurück zu deinem Tag"
