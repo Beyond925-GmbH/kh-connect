@@ -1,8 +1,8 @@
 import { useCallback } from 'react'
-import { STEPS, type StepId } from '@/khpl/flow/steps'
+import { step, type StepId } from '@/khpl/flow/steps'
 import { offeneAbstecher } from '@/khpl/flow/uebergaenge'
 import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
-import { geheZu, useFortschritt } from '@/khpl/store/fortschritt'
+import { geheZu, useFortschritt, useGraph } from '@/khpl/store/fortschritt'
 
 /**
  * Verdrahtet den Fuß eines Steps mit dem Store. Jeder Step benutzt dieselben
@@ -10,13 +10,14 @@ import { geheZu, useFortschritt } from '@/khpl/store/fortschritt'
  * Logik einmal hier und nicht fünfzehnmal in den Steps.
  */
 export function useStepNavigation(id: StepId) {
+  const graph = useGraph()
   const fortschritt = useFortschritt()
-  const offen = offeneAbstecher(id, fortschritt)
+  const offen = offeneAbstecher(graph, id, fortschritt)
 
   const weiter = useCallback(() => {
-    const ziel = STEPS[id].weiter
+    const ziel = step(graph, id).weiter
     if (ziel) geheZu(ziel)
-  }, [id])
+  }, [graph, id])
 
   const zumAbstecher = useCallback((ziel: StepId) => geheZu(ziel), [])
 
@@ -43,6 +44,7 @@ export function StepFuss({
   /** Solange die Übung ungelöst ist. Siehe `Verzweigung`. */
   uebungOffen?: boolean
 }) {
+  const graph = useGraph()
   const { offen, weiter, zumAbstecher } = useStepNavigation(id)
 
   return (
@@ -51,7 +53,7 @@ export function StepFuss({
       weiterVon={id}
       onAbstecher={zumAbstecher}
       onWeiter={weiter}
-      ohneWeiter={ohneWeiter ?? STEPS[id].weiter === null}
+      ohneWeiter={ohneWeiter ?? step(graph, id).weiter === null}
       geschafft={geschafft}
       aktion={aktion}
       uebungOffen={uebungOffen}

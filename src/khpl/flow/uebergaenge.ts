@@ -1,75 +1,28 @@
-import type { StepId } from './steps'
-import { STEPS, bezugsHauptschritt, railIndex } from './steps'
+import type { StepGraph, StepId } from './steps'
+import { bezugsHauptschritt, railIndex, step } from './steps'
 import type { Fortschritt } from '@/khpl/store/fortschritt'
 
 /**
- * Die Texte der Übergänge. Sie stehen hier und nicht im Step, weil ein Abstecher
- * von zwei Stellen aus angeboten wird: von seinem Elternschritt **und** von
- * seinem Geschwister-Abstecher.
+ * Die Regeln der Übergänge. Die **Texte** dazu liegen seit den vier Berufen im
+ * Graphen des jeweiligen Berufs (`graph.angebote`, `graph.weiterTexte`) — sie
+ * standen hier als Tabellen nach StepId, und jeder Beruf hat ein B3.1.
  *
  * khpl-ui-shell.md 5: „Hat ein Step mehrere Abstecher (M3 → B3.1, B3.2), werden
  * beide als Karten angeboten; nach dem ersten steht die zweite weiterhin zur
  * Wahl.“ Ein Abstecher mündet trotzdem immer vorwärts (Board-Regel 3) — der
  * Rückweg auf M3 existiert nicht, das Angebot wandert mit.
- *
- * Buttontexte wörtlich aus khpl-flow.md 11. „Keine generische
- * ‚Mehr erfahren‘-Schablone“ (6.7).
  */
 
-interface Angebot {
-  /** Das, was auf dem Button steht. */
-  einladung: string
-  /**
-   * Die Zeile darunter — im Wege-Dialog die Erklärung unter der Einladung.
-   * Ohne sie ist „Woher kommt das Holz?“ nur eine Frage; mit ihr steht
-   * daneben, was einen hinter dem Tap erwartet.
-   */
-  beschreibung: string
+export function einladung(graph: StepGraph, id: StepId): string {
+  return graph.angebote[id]?.einladung ?? step(graph, id).titel
 }
 
-const ANGEBOTE: Partial<Record<StepId, Angebot>> = {
-  'B3.1': {
-    einladung: 'Woher kommt das Holz?',
-    beschreibung: 'Schau dir an, wie das Material bestellt wird.',
-  },
-  'B3.2': {
-    einladung: 'Wie wird aus einem Plan ein Dach?',
-    beschreibung: 'Dreh einen Dachstuhl in 3D und tipp die Bauteile an.',
-  },
-  'B4.1': {
-    einladung: 'Wie kommt das Holz zur Baustelle?',
-    beschreibung: 'Belade den Transporter — und vergiss nichts.',
-  },
-  'B5.1': {
-    einladung: 'Warum arbeitet hier niemand allein?',
-    beschreibung: 'Eine Minute darüber, wie auf dem Dach gearbeitet wird.',
-  },
-  'B9.1': { einladung: 'Meister', beschreibung: 'Eigener Betrieb, eigene Azubis.' },
-  'B9.2': { einladung: 'Techniker', beschreibung: 'Planen und rechnen statt aufs Dach.' },
-  'B9.3': { einladung: 'Studium', beschreibung: 'Ja, das geht — auch ohne Abitur.' },
+export function beschreibung(graph: StepGraph, id: StepId): string | null {
+  return graph.angebote[id]?.beschreibung ?? null
 }
 
-/** Text der Hauptlinien-Fortsetzung. Ohne Eintrag schlicht „Weiter“. */
-const WEITER: Partial<Record<StepId, string>> = {
-  M3: 'Weiter in die Werkstatt',
-  'B3.1': 'Weiter zur Werkstatt',
-  'B3.2': 'Weiter zur Werkstatt',
-  M4: 'Weiter zur Baustelle',
-  'B4.1': 'Weiter zur Baustelle',
-  M5: 'Weiter zur Pause',
-  'B5.1': 'Weiter zur Pause',
-}
-
-export function einladung(id: StepId): string {
-  return ANGEBOTE[id]?.einladung ?? STEPS[id].titel
-}
-
-export function beschreibung(id: StepId): string | null {
-  return ANGEBOTE[id]?.beschreibung ?? null
-}
-
-export function weiterText(id: StepId): string {
-  return WEITER[id] ?? 'Weiter'
+export function weiterText(graph: StepGraph, id: StepId): string {
+  return graph.weiterTexte[id] ?? 'Weiter'
 }
 
 /**
@@ -81,10 +34,15 @@ export function weiterText(id: StepId): string {
  * regulär auf M9 landet, bekäme dort nur noch zwei Karten zu sehen — und flow 7
  * M9 verlangt das Gegenteil.
  */
-export function offeneAbstecher(id: StepId, fortschritt: Fortschritt): StepId[] {
-  const bezug = bezugsHauptschritt(id)
-  return STEPS[bezug].abstecher.filter(
-    (a) => a !== id && (STEPS[a].immerOffen || !fortschritt.branchesTaken.includes(a)),
+export function offeneAbstecher(
+  graph: StepGraph,
+  id: StepId,
+  fortschritt: Fortschritt,
+): StepId[] {
+  const bezug = bezugsHauptschritt(graph, id)
+  return step(graph, bezug).abstecher.filter(
+    (a) =>
+      a !== id && (step(graph, a).immerOffen || !fortschritt.branchesTaken.includes(a)),
   )
 }
 
@@ -101,8 +59,14 @@ export type Wegzustand = 'aktuell' | 'besucht' | 'offen'
  * was noch niemand gesehen hat — sonst bräche das Paar `Teach:` (M5) →
  * `Abfrage:` (M7) und die Pointe M9 → M10.
  */
-export function wegzustand(id: StepId, fortschritt: Fortschritt): Wegzustand {
+export function wegzustand(
+  graph: StepGraph,
+  id: StepId,
+  fortschritt: Fortschritt,
+): Wegzustand {
   if (id === fortschritt.currentStepId) return 'aktuell'
   if (!fortschritt.visited.includes(id)) return 'offen'
-  return railIndex(id) <= railIndex(fortschritt.hoechsterStep) ? 'besucht' : 'offen'
+  return railIndex(graph, id) <= railIndex(graph, fortschritt.hoechsterStep)
+    ? 'besucht'
+    : 'offen'
 }

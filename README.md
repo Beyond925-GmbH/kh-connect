@@ -11,6 +11,12 @@ Es hat die Website-Übersetzung abgelöst, die vorher hier stand — siehe
 in-fiction intro and all seventeen steps (M1–M10 plus the seven Abstecher) — built
 on the design system below. See [Der Flow](#der-flow-srckhpl).
 
+**Seit dem Umbau auf vier Berufe** liegt davor ein Trichter (Helm → Fragen →
+Vorschlag → Berufsliste), und der Tagesablauf ist Daten statt Konstanten. Genau
+**ein** Beruf hat bisher einen Tag: Zimmerer/Zimmerin. Die anderen drei sind
+angekündigt und begehbar, aber leer — siehe
+[Vier Berufe](#vier-berufe-srckhplberufe).
+
 ## Specs
 
 - [`khpl-flow.md`](./khpl-flow.md) — **what** is told: the M1–M10 main line, the
@@ -36,17 +42,24 @@ dieselbe Sprache wie die Spec, dieselbe wie das Board. Das Design-System darunte
 (`src/components/ui/`, `src/lib/`) bleibt englisch, wie es ist.
 
 ```
-flow/steps.ts        Der Step-Graph. Einzige Quelle für Reihenfolge, Abstecher
-                     und Rail-Segmentzahl — nichts davon steht als Konstante
-                     irgendwo sonst.
-flow/uebergaenge.ts  Buttontexte je Abstecher, plus `wegzustand` (✓ ● ○).
-store/fortschritt.ts localStorage v1, 30-Minuten-Verfall, Zurück-Historie,
-                     Hochwassermarke, Antworten, Karriere-Skip.
+berufe/              Ein Beruf ist Daten: Graph, Merkmale, Medien, Copy.
+                     zimmerer.ts trägt den einzigen fertigen Tag.
+match/               Merkmale, die vier Fragen, die Helm-Optionen und das
+                     Matching (portiert aus `kh-connect`, samt seiner Regeln).
+flow/steps.ts        Die *Form* eines Step-Graphen plus `baueGraph` — die
+                     Rechenregeln, die für jeden Beruf gelten. Die Daten
+                     stehen in `berufe/`.
+flow/uebergaenge.ts  `wegzustand` (✓ ● ○) und die offenen Abstecher. Die
+                     Buttontexte liegen am Graphen des Berufs.
+store/fortschritt.ts localStorage v2: Fortschritt **je Beruf**, dazu Helm und
+                     Fragen an der Sitzung. 30-Minuten-Verfall,
+                     Zurück-Historie, Hochwassermarke, Karriere-Skip.
 shell/               StepShell (Bühne · Fachtext · Interaktion · Aha · Fuß —
                      ein Layout für alle Steps), Rail, DeinWeg (S3),
-                     Splash (S0), Auftragsannahme (S1), KioskGuard,
-                     Wisch-Navigation.
-komponenten/         Begriff (Glossar-Popover), AhaKarte, Verzweigung.
+                     Splash (S0), der Trichter (Helmwahl, Fragen, Vorschlag,
+                     Berufsliste, BerufBald), Auftragsannahme, KioskGuard.
+komponenten/         Begriff (Glossar-Popover), AhaKarte, Verzweigung,
+                     Helm (SVG), BerufBild (Motiv mit Ersatz).
 glossar/begriffe.ts  Alle 20 Begriffe aus flow 12, plus `Stundensatz`.
 buehne/              Foto + SCHRITT_BILDER (welcher Step welches Motiv trägt),
                      Dachstuhl3D (die Lazy-Grenze um `three`),
@@ -115,6 +128,23 @@ stehen in [`MEDIEN.md`](./MEDIEN.md).
 Für eigene Fotos aus den Betrieben ist der Tausch eine Zeile je Motiv; die
 Dateinamen können bleiben.
 
+### Der Attract-Loop
+
+`shared/start-loop.mp4` trägt den Splash. Er deckt **drei** Gewerke ab, nicht
+vier, und ist mit 13 s kurz für seine Aufgabe. Was er braucht:
+
+- **Dachdecker fehlt** — dazu liegt im Repo kein Bewegtbild.
+- **30–60 s statt 13.** Der Erststart trägt das: der Loop lädt erst 400 ms nach
+  dem ersten Frame, bis dahin steht das Poster (flow 8.5).
+- **Die ersten acht Sekunden entscheiden.** So lange schaut jemand hin, der
+  vorbeigeht; alle vier Gewerke gehören hinein. Und jeder Idle-Rückfall startet
+  das Video neu — die zweite Hälfte eines langen Loops sieht an einem vollen
+  Standtag kaum jemand.
+- **Unsichtbarer Umbruch.** Erstes und letztes Bild angleichen oder beide auf
+  Schwarz enden lassen, sonst liest sich der Rücksprung als GIF.
+- **Poster = Bild 1 des neuen Schnitts.** Ein fremdes Standbild macht aus der
+  Überblendung einen harten Schnitt.
+
 ### Am Messetag zu füllen
 
 `public/stand.json` trägt den Namen für „Sprich jetzt mit … am Stand“:
@@ -134,6 +164,73 @@ sagt der Screen „Sprich jetzt mit uns am Stand“, nie `[Name]`.
   Der Fortschritt wird dabei **nicht** gelöscht; das erledigt die
   30-Minuten-Frist. Die Mittagspause (M6) bekommt die dreifache Geduld.
 - **`?demo=dachstuhl`** öffnet weiterhin den 3D-Prototyp.
+
+## Vier Berufe (`src/khpl/berufe/`)
+
+Zimmerer · Dachdecker · Zerspanungsmechaniker:in · Anlagenmechaniker:in SHK.
+
+**Ein Beruf ist eine Datei.** `BerufDef` trägt Name, Kurzform, die Zeile für die
+Karte, den Merkmalsvektor fürs Matching, die Medienpfade, die Copy des
+Auftragsscreens — und `graph`. Ist `graph` gleich `null`, ist der Beruf
+angekündigt und noch nicht gebaut; das ist absichtlich im Typ und nicht in einem
+Flag, damit jede Stelle, die einen Graphen braucht, den Fall behandeln **muss**.
+
+Einen der drei fertigstellen heißt: `graph` mit `baueGraph` füllen (Vorbild
+`zimmerer.ts`), `auftrag` schreiben, Medien nach `public/medien/media/<id>/`
+legen. Hat der Beruf eigene React-Module, kommen sie in
+`berufe/komponenten.tsx`; was dort fehlt, rendert der `Platzhalter`. **Die Hülle
+ändert sich nicht.**
+
+> ⚠️ Merkmale und Texte der drei angekündigten Berufe sind **gesetzt, nicht
+> recherchiert**. Sie reichen, um den Trichter zu bauen und zu bedienen; sie
+> sind nicht die Sorgfalt, die `khpl-flow.md` §10 für den Zimmerer aufbringt.
+
+### Der Trichter
+
+```
+S0 Splash → S1 Dein Helm → S2 Vier Fragen → S3 Vorschlag
+                                              ↘ S4 Berufsliste → Auftrag → Steps
+```
+
+**Budget: 45 Sekunden bis zum ersten Inhalt.** Jeder Screen des Trichters hat
+einen leisen Ausweg, und **beim Kaltstart entfällt S3** — wer nichts gesagt
+hat, bekommt die Liste statt eines „das passt zu dir“, für das es keine
+Grundlage gibt.
+
+**Personalisiert wird ein Gegenstand, nicht die Oberfläche.** Das System hält
+genau eine gefüllte orange Fläche pro Screen frei (*Weiter*) und Gelbgrün für
+„geschafft“ — beides sind Bedeutungen, keine Vorlieben. Die Farbwahl landet
+deshalb auf einem gezeichneten Helm. Das Merkmalssignal trägt daneben die Frage
+„Wonach greifst du zuerst?“; die Helmfarbe trägt bewusst keins.
+
+**Zwei Regeln aus dem Vorgänger-Repo sind mitportiert** und beide nicht
+naheliegend (`match/matching.ts`):
+
+1. Fragen wiegen doppelt gegenüber der Personalisierung.
+2. Zurückgesagt („Du magst …“) wird nur, was jemand ausdrücklich beantwortet
+   hat. Die Min-Max-Normierung kann sonst „nie erwähnt“ nicht von „ja gesagt“
+   unterscheiden.
+
+**Zimmerer und Dachdecker liegen im Merkmalsraum dicht beieinander** — beide
+draußen, beide oben, beide auf demselben Dach. Getrennt werden sie über Frage 3
+(*Tragwerk* gegen *Hülle*); der Vorschlag nennt zusätzlich immer den Zweiten,
+damit ein knappes Ergebnis als ehrlich statt als falsch liest.
+
+### Wechseln
+
+Der Fortschritt liegt **je Beruf** in der Sitzung. Das ist die Bedingung dafür,
+dass der Wechsel folgenlos ist: wer den Zimmerer bei M5 verlässt, findet ihn bei
+M5 wieder — und deshalb fragt der Wechsel nichts nach. Eine Rückfrage vor jedem
+Wechsel hieße, dass niemand wechselt.
+
+Erreichbar ist er über das Sheet „Dein Weg“: der Kopf trägt den aktiven Beruf
+und einen **Wechseln**-Chip auf die Berufsliste, unter der Schrittliste stehen
+die drei anderen als Kurzwege. Die Rail zeigt den Beruf als Kleinzeile über dem
+Zählstand — mit vier Berufen muss auf jedem Screen ohne Tap beantwortet sein,
+in welcher Welt man steckt, und in der Leiste ist hochkant kein Platz für einen
+weiteren Knopf.
+
+M10 endet nicht mehr auf dem Splash, sondern auf **„Noch einen Beruf“**.
 
 ## Abhängigkeiten für den Flow
 
@@ -168,8 +265,15 @@ manifest at build time; registration is injected automatically, so no app code
 imports it. This covers the spec's requirement that a WLAN dropout cannot stop
 the app.
 
-Two things are deliberately left open and commented in the config:
+Three things are deliberately left open:
 
+- **Videos sind gar nicht gecacht.** `globPatterns` listet `mp4` nicht, und eine
+  Runtime-Regel dafür gibt es nicht — Bewegtbild lebt allein vom HTTP-Cache.
+  Beim 13-Sekunden-Loop verkraftbar; sobald der Attract-Loop auf 30–60 s wächst
+  (siehe unten), bleibt der Splash ohne WLAN auf seinem Poster stehen. Fix:
+  `CacheFirst` plus `RangeRequestsPlugin` für `/medien/**/*.mp4`, so wie es
+  `kh-connect` mit seinem `kh-media-v1` gemacht hat.
+  `maximumFileSizeToCacheInBytes` gilt für Runtime-Caching nicht.
 - **No app icons.** The only brand mark in the repo is a 1000×248 wordmark. The
   manifest needs square 192/512 PNGs plus a maskable 512 before the app can be
   installed to an iPad home screen.

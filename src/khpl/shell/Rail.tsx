@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { HAUPTSCHRITTE, railIndex } from '@/khpl/flow/steps'
+import { railIndex, type StepGraph } from '@/khpl/flow/steps'
 import { wegzustand } from '@/khpl/flow/uebergaenge'
 import type { Fortschritt } from '@/khpl/store/fortschritt'
 
@@ -7,8 +7,15 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  * Die Progress-Rail aus khpl-ui-shell.md 4 — ein Segment pro **Hauptschritt**.
  * Abstecher bekommen kein Segment; sie erscheinen nur im Sheet „Dein Weg“.
  *
- * Die Segmentzahl kommt aus `HAUPTSCHRITTE.length`, nie aus einer Konstanten
- * (ui-shell 9, Punkt 1). Ein Tap öffnet S3.
+ * Die Segmentzahl kommt aus `graph.haupt.length`, nie aus einer Konstanten
+ * (ui-shell 9, Punkt 1) — und ist seit den vier Berufen zusätzlich je Beruf
+ * verschieden. Ein Tap öffnet S3.
+ *
+ * **Der Beruf steht in der Pille, nicht daneben.** Mit vier Berufen muss auf
+ * jedem Screen beantwortet sein, in welchem man gerade steckt; ein eigener
+ * Knopf dafür passt hochkant nicht mehr in die Leiste (60 px Zurück + Rail +
+ * Karriere-Link sind dort schon eng). Als Kleinzeile über dem Zählstand kostet
+ * die Antwort keine Breite und keinen Tap.
  *
  * **Der Zählstand ist jetzt das lauteste Element der Leiste.** Vorher stand
  * dort „4 / 10“ in 15 px Barlow 200 neben zehn 10-px-Strichen; das einzige
@@ -22,39 +29,49 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  * einem hellen Foto wäre sie sonst weg.
  */
 export function Rail({
+  graph,
+  beruf,
   fortschritt,
   onOeffnen,
 }: {
+  graph: StepGraph
+  /** Kurzname des aktiven Berufs — „Zimmerer“. */
+  beruf: string
   fortschritt: Fortschritt
   onOeffnen: () => void
 }) {
-  const jetzt = railIndex(fortschritt.currentStepId)
-  const gesamt = HAUPTSCHRITTE.length
+  const jetzt = railIndex(graph, fortschritt.currentStepId)
+  const gesamt = graph.haupt.length
 
   return (
     <button
       type="button"
       onClick={onOeffnen}
       data-testid="rail"
-      aria-label={`Dein Weg öffnen — Schritt ${jetzt + 1} von ${gesamt}`}
+      aria-label={`Dein Weg öffnen — ${beruf}, Schritt ${jetzt + 1} von ${gesamt}`}
       className="group flex h-[52px] min-w-0 shrink items-center gap-3 rounded-kh-pill bg-black/35 pr-4 pl-3 backdrop-blur-md transition-transform active:scale-95"
     >
-      <span className="flex items-baseline gap-0.5 font-display leading-none">
-        <motion.span
-          key={jetzt}
-          initial={{ y: -8, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-          className="text-[1.75rem] text-kh-orange tabular-nums"
-        >
-          {jetzt + 1}
-        </motion.span>
-        <span className="text-[1.125rem] text-kh-paper/45 tabular-nums">/{gesamt}</span>
+      <span className="flex min-w-0 flex-col items-start justify-center leading-none">
+        <span className="max-w-[9rem] truncate text-[0.6875rem] font-semibold tracking-[0.14em] text-kh-paper/45 uppercase">
+          {beruf}
+        </span>
+        <span className="flex items-baseline gap-0.5 font-display leading-none">
+          <motion.span
+            key={jetzt}
+            initial={{ y: -8, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+            className="text-[1.5rem] text-kh-orange tabular-nums"
+          >
+            {jetzt + 1}
+          </motion.span>
+          <span className="text-[1.125rem] text-kh-paper/45 tabular-nums">/{gesamt}</span>
+        </span>
       </span>
 
       <span className="flex items-center gap-[3px]" aria-hidden>
-        {HAUPTSCHRITTE.map((s, i) => {
-          const zustand = i === jetzt ? 'aktuell' : wegzustand(s.id, fortschritt)
+        {graph.haupt.map((s, i) => {
+          const zustand = i === jetzt ? 'aktuell' : wegzustand(graph, s.id, fortschritt)
           return (
             <motion.span
               key={s.id}

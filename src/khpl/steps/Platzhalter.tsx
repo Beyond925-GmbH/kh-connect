@@ -1,6 +1,7 @@
-import { STEPS, type StepId } from '@/khpl/flow/steps'
+import { step, type StepId } from '@/khpl/flow/steps'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { StepFuss } from '@/khpl/shell/StepFuss'
+import { useGraph } from '@/khpl/store/fortschritt'
 
 /**
  * Ein Step, dessen Inhalt noch nicht gebaut ist. Er hält den Graphen von der
@@ -11,7 +12,7 @@ import { StepFuss } from '@/khpl/shell/StepFuss'
  * dem letzten Step aus dem Bündel.
  */
 export function Platzhalter({ id }: { id: StepId }) {
-  const def = STEPS[id]
+  const def = step(useGraph(), id)
 
   return (
     <StepShell

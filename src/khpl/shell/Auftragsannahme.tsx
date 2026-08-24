@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowRight, ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
-import { nimmAuftragAn, starteKarriereSkip } from '@/khpl/store/fortschritt'
+import { beruf as berufDef } from '@/khpl/berufe/registry'
+import {
+  nimmAuftragAn,
+  starteKarriereSkip,
+  useAktiverBeruf,
+} from '@/khpl/store/fortschritt'
 
 /**
  * S1 — Auftragsannahme (khpl-ui-shell.md 2 + 1).
@@ -28,15 +33,29 @@ import { nimmAuftragAn, starteKarriereSkip } from '@/khpl/store/fortschritt'
  * TEXT: `ENTWURF – UNGEPRÜFT`. Die Spec gibt für diesen Screen nur die Haltung
  * vor („Du bist Azubi. Gerade kam eine Anfrage rein — nimmst du den Auftrag
  * an?“), keinen fertigen Wortlaut.
+ *
+ * **Text und Motiv kommen seit den vier Berufen aus `beruf.auftrag`.** Der
+ * Screen ist die Stelle, an der die Fiktion gesetzt wird, und die ist je Beruf
+ * eine andere: „Du bist Azubi in einer Zimmerei“ gilt nicht für die CNC-Halle.
+ * Ohne `auftrag` fällt er auf einen neutralen Wortlaut zurück — ein Beruf soll
+ * begehbar sein, sobald sein Graph steht, auch wenn die Copy noch fehlt.
  */
 
-const POSTER = '/medien/media/zimmerer/szenario-poster.webp'
-const LOOP = '/medien/media/zimmerer/szenario.mp4'
-
 export function Auftragsannahme() {
+  const berufId = useAktiverBeruf()
+  const beruf = berufId ? berufDef(berufId) : null
   const [videoBereit, setVideoBereit] = useState(false)
   const [ladeVideo, setLadeVideo] = useState(false)
   const video = useRef<HTMLVideoElement>(null)
+
+  const poster = beruf?.medien.szenarioPoster ?? beruf?.medien.heroPoster ?? ''
+  const loop = beruf?.medien.szenario ?? beruf?.medien.hero ?? null
+  const text = beruf?.auftrag ?? {
+    etikett: 'Dein erster Auftrag',
+    titel: ['Du bist Azubi', `— ${beruf?.kurz ?? ''}.`] as const,
+    text: 'Gerade kam eine Anfrage rein. Kommst du mit?',
+    knopf: 'Auftrag annehmen',
+  }
 
   useEffect(() => {
     const id = window.setTimeout(() => setLadeVideo(true), 250)
@@ -62,15 +81,15 @@ export function Auftragsannahme() {
       className="kh-screen flex flex-col overflow-hidden bg-kh-ink"
     >
       <img
-        src={POSTER}
+        src={poster}
         alt=""
         aria-hidden
         className="absolute inset-0 size-full object-cover"
       />
-      {ladeVideo && (
+      {ladeVideo && loop && (
         <video
           ref={video}
-          src={LOOP}
+          src={loop}
           autoPlay
           muted
           loop
@@ -117,19 +136,18 @@ export function Auftragsannahme() {
               ui-shell 1 ausdrücklich verbietet. */}
           <span className="kh-etikett flex items-center gap-2">
             <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
-            Dein erster Auftrag
+            {text.etikett}
           </span>
           <h1 className="kh-plakat">
-            Du bist Azubi
+            {text.titel[0]}
             <br />
-            <span className="text-kh-orange">in einer Zimmerei.</span>
+            <span className="text-kh-orange">{text.titel[1]}</span>
           </h1>
           {/* Bindet die Werkstattaufnahme an den Anruf, statt ein Haus zu
               versprechen, das nicht im Bild ist. Der Ortstermin selbst hat
               inzwischen ein eigenes Motiv — es steht in M1, wo er stattfindet. */}
           <p className="text-[clamp(1.125rem,1.02rem+0.55vw,1.4rem)] leading-[1.45] text-kh-paper/85">
-            Der Chef legt das Telefon weg und dreht sich zu dir um. Altes Haus, das Dach
-            muss neu. Er fragt, ob du mitkommst.
+            {text.text}
           </p>
         </div>
 
@@ -141,7 +159,7 @@ export function Auftragsannahme() {
             data-testid="auftrag-annehmen"
             className="px-10 text-[1.25rem]"
           >
-            Auftrag annehmen
+            {text.knopf}
             <ArrowRight className="size-5" strokeWidth={2.5} />
           </Button>
         </div>

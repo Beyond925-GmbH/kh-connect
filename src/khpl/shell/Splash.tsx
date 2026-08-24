@@ -3,7 +3,8 @@ import { motion } from 'motion/react'
 import { Hand } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
-import { STEPS } from '@/khpl/flow/steps'
+import { step } from '@/khpl/flow/steps'
+import { beruf as berufDef } from '@/khpl/berufe/registry'
 import { machWeiter, starteNeu, useWiedereinstieg } from '@/khpl/store/fortschritt'
 import { useStaffAusgang } from './staffAusgang'
 
@@ -27,14 +28,32 @@ import { useStaffAusgang } from './staffAusgang'
  */
 
 /**
- * Poster und Loop gehören zusammen — `hero-poster.webp` ist ausweislich
- * `INVENTAR.md` das Standbild genau zu `hero.mp4`. (Das naheliegendere
- * `shared/start-poster.webp` ist das Poster zum *Start-Loop* über alle drei
- * Gewerke und zeigt eine andere Szene; die Ueberblendung wäre ein harter
- * Schnitt zwischen zwei fremden Aufnahmen.)
+ * Der Attract-Loop über **alle** Berufe. Poster und Loop gehören zusammen:
+ * `start-poster.webp` ist ausweislich `MEDIEN-INVENTAR.md` das Standbild zu
+ * `start-loop.mp4`. Ein Poster aus einer anderen Aufnahme macht aus der
+ * Überblendung einen harten Schnitt zwischen zwei fremden Bildern.
+ *
+ * ⚠️ **Der Loop deckt drei Gewerke ab, nicht vier**, und er ist mit 13 s kurz
+ * für das, was er leisten soll. Was er braucht:
+ *
+ *  - **Dachdecker fehlt** — im ganzen Repo liegt dazu kein Bewegtbild.
+ *  - **30–60 s statt 13.** Der Erststart trägt das: der Loop lädt erst 400 ms
+ *    nach dem ersten Frame, bis dahin steht das Poster (flow 8.5).
+ *  - **Die ersten acht Sekunden entscheiden.** Nur so lange schaut jemand hin,
+ *    der vorbeigeht; alle vier Gewerke müssen darin vorkommen. Was danach
+ *    kommt, darf ruhiger werden. Dazu: jeder Idle-Rückfall startet das Video
+ *    neu, die zweite Hälfte eines langen Loops sieht an einem vollen Standtag
+ *    also kaum jemand.
+ *  - **Ein unsichtbarer Umbruch.** Erstes und letztes Bild aneinander
+ *    angleichen oder beide auf Schwarz enden lassen, sonst liest sich der
+ *    Rücksprung als GIF.
+ *
+ * Und: **`mp4` ist im Service Worker nirgends gecacht** (`vite.config.ts`,
+ * `globPatterns`, keine Runtime-Regel). Bei 13 s verkraftbar, bei 60 s nicht —
+ * ohne WLAN bleibt der Splash dann auf dem Poster stehen.
  */
-const POSTER = '/medien/media/zimmerer/hero-poster.webp'
-const LOOP = '/medien/media/zimmerer/hero.mp4'
+const POSTER = '/medien/media/shared/start-poster.webp'
+const LOOP = '/medien/media/shared/start-loop.mp4'
 
 export function Splash() {
   const wiedereinstieg = useWiedereinstieg()
@@ -48,6 +67,19 @@ export function Splash() {
     const id = window.setTimeout(() => setLadeVideo(true), 400)
     return () => window.clearTimeout(id)
   }, [])
+
+  /**
+   * „Weitermachen bei …“ — mit Beruf davor, denn mit vier Berufen ist der
+   * Steptitel allein keine Adresse mehr. „Halb zwölf“ sagt nichts darüber,
+   * wessen Mittagspause gemeint ist.
+   */
+  const weitermachenText = (() => {
+    if (!wiedereinstieg) return null
+    const b = berufDef(wiedereinstieg.beruf)
+    if (!b.graph) return null
+    const titel = step(b.graph, wiedereinstieg.fortschritt.currentStepId).titel
+    return `Weitermachen: ${b.kurz} — „${titel}“`
+  })()
 
   // Der Splash wird an einem Messetag dutzendfach auf- und abgebaut (jeder
   // Idle-Reset, jeder Sitzungsstart). WebKit gibt Decoder eines nur entfernten,
@@ -139,11 +171,15 @@ export function Splash() {
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
             className="kh-plakat"
           >
-            Bau heute
+            Vier Berufe.
             <br />
             {/* Die zweite Zeile in Markenorange: der Titel bekommt damit einen
-                Akzent, ohne dass irgendwo ein zweites Element nötig wäre. */}
-            <span className="text-kh-orange">ein Dach.</span>
+                Akzent, ohne dass irgendwo ein zweites Element nötig wäre.
+
+                „Ein Tag“ und nicht „vier Tage“: versprochen wird, was ein
+                Besucher am Stand tatsächlich tut — einer davon, ganz. Der
+                Rest steht daneben und wartet. */}
+            <span className="text-kh-orange">Ein Tag. Deiner.</span>
           </motion.h1>
 
           <motion.div
@@ -171,7 +207,7 @@ export function Splash() {
             </span>
           </motion.div>
 
-          {wiedereinstieg && (
+          {weitermachenText && (
             <div
               className="flex flex-col items-start gap-2.5"
               onClick={(e) => e.stopPropagation()}
@@ -185,9 +221,7 @@ export function Splash() {
                 data-testid="weitermachen"
                 className="max-w-[min(34rem,86vw)] justify-start"
               >
-                <span className="truncate">
-                  Weitermachen bei „{STEPS[wiedereinstieg.currentStepId].titel}“
-                </span>
+                <span className="truncate">{weitermachenText}</span>
               </Button>
             </div>
           )}

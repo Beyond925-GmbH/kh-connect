@@ -1,17 +1,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
-import { STEPS, type StepId } from '@/khpl/flow/steps'
+import { step, type StepId } from '@/khpl/flow/steps'
+import { beruf as berufDef } from '@/khpl/berufe/registry'
 import { DeinWeg } from './DeinWeg'
 import { Rail } from './Rail'
 import { SichtfeldMesser } from './SichtfeldKontext'
 import { useStaffAusgang } from './staffAusgang'
 import {
   beendeKarriereSkip,
+  betreteBeruf,
   geheZurueck,
   springeZuBesuchtem,
   starteKarriereSkip,
+  useAktiverBeruf,
+  useBesuchteBerufe,
   useFortschritt,
+  useGraph,
+  zeigeBerufe,
 } from '@/khpl/store/fortschritt'
 
 /**
@@ -52,18 +58,6 @@ import {
  * schlimmer als keine. Vor und zurück gehen ausschließlich über Knöpfe.
  */
 
-/**
- * Der Karriere-Link taucht auf S1 und danach auf jedem zweiten Hauptschritt auf
- * (khpl-ui-shell.md 6). Nie auf Abstecher-Screens, nie während eine Interaktion
- * offen ist. So begegnet er jedem Besucher mehrfach, ohne je zu drängen.
- *
- * **M8 fehlt hier bewusst**, obwohl ui-shell 6 ihn aufzählt: M9 *ist* der
- * nächste Schritt nach M8. Ein Abstecher, der einen Schritt vor sein Ziel
- * abkürzt, schickt den Besucher über M9 → M10 → zurück auf M8 → weiter zu M9
- * — derselbe Bereich zweimal, mit einer Rückkehr-Leiste dazwischen.
- */
-const SKIP_AUF: readonly StepId[] = ['M2', 'M4', 'M6']
-
 export function StepShell({
   id,
   buehne,
@@ -98,6 +92,9 @@ export function StepShell({
   /** Das Etikett über dem Titel, z. B. „Abstecher“. */
   titelZusatz?: string
 }) {
+  const graph = useGraph()
+  const berufId = useAktiverBeruf()
+  const besuchte = useBesuchteBerufe()
   const fortschritt = useFortschritt()
   const staffTap = useStaffAusgang()
   const [wegOffen, setWegOffen] = useState(false)
@@ -139,11 +136,12 @@ export function StepShell({
     }
   }, [messeUeberlauf])
 
-  const def = STEPS[id]
+  const def = step(graph, id)
+  const aktiver = berufId ? berufDef(berufId) : null
   const imSkip = fortschritt.detourReturnTo !== null
   const kannZurueck = fortschritt.visited.length > 1
   const offen = interaktionOffen ?? interaktion != null
-  const skipSichtbar = !imSkip && !offen && SKIP_AUF.includes(id)
+  const skipSichtbar = !imSkip && !offen && graph.karriereSkipAuf.includes(id)
 
   const zurueck = useCallback(() => {
     // Im Skip führt jeder Rückweg aus dem Abstecher heraus, nicht durch die
@@ -314,7 +312,12 @@ export function StepShell({
                 <ArrowLeft className="size-6" strokeWidth={2.25} />
               </button>
 
-              <Rail fortschritt={fortschritt} onOeffnen={() => setWegOffen(true)} />
+              <Rail
+                graph={graph}
+                beruf={aktiver?.kurz ?? ''}
+                fortschritt={fortschritt}
+                onOeffnen={() => setWegOffen(true)}
+              />
 
               {/* Die Dehnfuge zwischen Rail und Skip-Slot ist auf jedem Step
                   leer und trägt deshalb die Staff-Geste (fünf schnelle Taps).
@@ -345,9 +348,20 @@ export function StepShell({
 
         <DeinWeg
           offen={wegOffen}
+          graph={graph}
+          aktiverBeruf={berufId}
+          besuchteBerufe={besuchte}
           fortschritt={fortschritt}
           onSchliessen={() => setWegOffen(false)}
           onSpringe={springeZuBesuchtem}
+          onBeruf={(ziel) => {
+            setWegOffen(false)
+            betreteBeruf(ziel)
+          }}
+          onAlleBerufe={() => {
+            setWegOffen(false)
+            zeigeBerufe()
+          }}
         />
       </div>
     </>
@@ -361,6 +375,7 @@ export function StepShell({
  * Tag, nicht zum Abstecher.
  */
 function RueckkehrLeiste({ ziel }: { ziel: StepId }) {
+  const graph = useGraph()
   return (
     <header className="kh-leiste absolute inset-x-0 top-0 z-20 flex items-center px-2 sm:px-3">
       <button
@@ -372,7 +387,7 @@ function RueckkehrLeiste({ ziel }: { ziel: StepId }) {
         <ChevronLeft className="size-5 shrink-0" strokeWidth={2.25} />
         <span className="truncate">
           Zurück zu deinem Tag
-          <span className="text-kh-paper/50"> — {STEPS[ziel].titel}</span>
+          <span className="text-kh-paper/50"> — {step(graph, ziel).titel}</span>
         </span>
       </button>
     </header>

@@ -1,34 +1,29 @@
 /**
- * Der Step-Graph aus khpl-flow.md 2–4. Einzige Quelle der Wahrheit für
- * Reihenfolge, Abstecher und Rail-Segmentzahl.
+ * Die **Form** eines Berufs-Graphen aus khpl-flow.md 2–4 — nicht mehr seine
+ * Daten.
  *
- * Regel 3 des Boards: ein Abstecher springt nicht zurück, sondern mündet in
- * denselben nächsten Hauptschritt wie sein Elternschritt. Deshalb trägt jeder
- * Step nur ein `weiter` — der Unterschied zwischen Haupt und Abstecher steckt
- * allein in `art`.
+ * Bis zur Einführung der vier Berufe stand hier der Zimmerer-Graph als
+ * Konstante. Er liegt jetzt in `berufe/zimmerer.ts`, und diese Datei trägt nur
+ * noch die Typen und die Rechenregeln, die für **jeden** Beruf gelten. Was
+ * dabei ausdrücklich erhalten bleibt:
  *
- * Die Rail zählt `HAUPTSCHRITTE.length`, nie eine Konstante: khpl-ui-shell.md 9
- * hält ausdrücklich fest, dass die Segmentzahl datengetrieben bleiben muss.
+ * - Regel 3 des Boards: ein Abstecher springt nicht zurück, sondern mündet in
+ *   denselben nächsten Hauptschritt wie sein Elternschritt. Deshalb trägt jeder
+ *   Step nur ein `weiter` — der Unterschied zwischen Haupt und Abstecher steckt
+ *   allein in `art`.
+ * - Die Rail zählt `graph.haupt.length`, nie eine Konstante: khpl-ui-shell.md 9
+ *   hält ausdrücklich fest, dass die Segmentzahl datengetrieben bleiben muss.
+ *   Mit vier Berufen ist sie zusätzlich pro Beruf verschieden.
+ *
+ * **`StepId` ist jetzt `string`, und das ist kein Nachlassen.** Die
+ * Ausschöpfungsprüfung, die die Vorfassung über eine geschlossene Union hatte,
+ * wandert dorthin, wo die Daten liegen: `berufe/zimmerer.ts` deklariert seine
+ * eigene Union und prüft die Steps mit `satisfies` dagegen. Eine gemeinsame
+ * Union über vier Berufe wäre dagegen keine Prüfung, sondern eine Kollision —
+ * jeder Beruf hat ein M5, und keines davon ist dasselbe.
  */
 
-export type StepId =
-  | 'M1'
-  | 'M2'
-  | 'M3'
-  | 'B3.1'
-  | 'B3.2'
-  | 'M4'
-  | 'B4.1'
-  | 'M5'
-  | 'B5.1'
-  | 'M6'
-  | 'M7'
-  | 'M8'
-  | 'M9'
-  | 'B9.1'
-  | 'B9.2'
-  | 'B9.3'
-  | 'M10'
+export type StepId = string
 
 export type StepArt = 'haupt' | 'abstecher'
 
@@ -50,7 +45,7 @@ export interface StepDef {
    */
   kurz: string
   art: StepArt
-  /** Nächster Step. `null` nur am Ende der Hauptlinie (M10). */
+  /** Nächster Step. `null` nur am Ende der Hauptlinie. */
   weiter: StepId | null
   /** Abstecher, die von diesem Step abzweigen (Reihenfolge = Anzeigereihenfolge). */
   abstecher: readonly StepId[]
@@ -68,191 +63,129 @@ export interface StepDef {
 }
 
 /**
- * Als Objektliteral mit `satisfies`, nicht als Liste plus
- * `Object.fromEntries(...) as Record<…>`: die Zuweisung würde einen fehlenden
- * Eintrag verschweigen. Kommt der in ui-shell 9.1 angekündigte `GAP` zwischen
- * M7 und M8 dazu, soll das ein Typfehler sein und nicht zur Laufzeit
- * `undefined`.
+ * Der Text eines Abstecher-Angebots.
+ *
+ * Er steht am Graphen und nicht am Step, weil ein Abstecher von zwei Stellen
+ * aus angeboten wird: von seinem Elternschritt **und** von seinem
+ * Geschwister-Abstecher (khpl-ui-shell.md 5).
  */
-export const STEPS: Record<StepId, StepDef> = {
-  M1: {
-    id: 'M1',
-    titel: 'Der erste Termin',
-    kurz: 'Anfrage & Ortstermin',
-    art: 'haupt',
-    weiter: 'M2',
-    abstecher: [],
-    eltern: null,
-  },
-  M2: {
-    id: 'M2',
-    titel: 'Was kostet dieses Dach?',
-    kurz: 'Angebots-Kalkulation, Vertrag',
-    art: 'haupt',
-    weiter: 'M3',
-    abstecher: [],
-    eltern: null,
-  },
-  M3: {
-    id: 'M3',
-    titel: 'Aus dem Angebot wird ein Auftrag',
-    kurz: 'Auftrag & Planung',
-    art: 'haupt',
-    weiter: 'M4',
-    abstecher: ['B3.1', 'B3.2'],
-    eltern: null,
-  },
-  'B3.1': {
-    id: 'B3.1',
-    titel: 'Bestellt wird nach Plan',
-    kurz: 'Material bestellen',
-    art: 'abstecher',
-    weiter: 'M4',
-    abstecher: [],
-    eltern: 'M3',
-  },
-  'B3.2': {
-    id: 'B3.2',
-    titel: 'Vom Plan in den Kopf',
-    kurz: '3D-Visualisierung',
-    art: 'abstecher',
-    weiter: 'M4',
-    abstecher: [],
-    eltern: 'M3',
-  },
-  M4: {
-    id: 'M4',
-    titel: 'Ein Balken, ein Maß',
-    kurz: 'Material vorbereiten',
-    art: 'haupt',
-    weiter: 'M5',
-    abstecher: ['B4.1'],
-    eltern: null,
-  },
-  'B4.1': {
-    id: 'B4.1',
-    titel: 'Beladen',
-    kurz: 'Lagerhalle, Beladen',
-    art: 'abstecher',
-    weiter: 'M5',
-    abstecher: [],
-    eltern: 'M4',
-  },
-  M5: {
-    id: 'M5',
-    titel: 'Aufrichten',
-    kurz: 'Dach aufrichten I',
-    art: 'haupt',
-    weiter: 'M6',
-    abstecher: ['B5.1'],
-    eltern: null,
-  },
-  'B5.1': {
-    id: 'B5.1',
-    titel: 'Niemand macht das allein',
-    kurz: 'Teamarbeit',
-    art: 'abstecher',
-    weiter: 'M6',
-    abstecher: [],
-    eltern: 'M5',
-  },
-  M6: {
-    id: 'M6',
-    titel: 'Halb zwölf',
-    kurz: 'Mittagspause',
-    art: 'haupt',
-    weiter: 'M7',
-    abstecher: [],
-    eltern: null,
-  },
-  M7: {
-    id: 'M7',
-    titel: 'Jetzt du',
-    kurz: 'Dach aufrichten II',
-    art: 'haupt',
-    weiter: 'M8',
-    abstecher: [],
-    eltern: null,
-  },
-  M8: {
-    id: 'M8',
-    titel: 'Feierabend',
-    kurz: 'Feierabend',
-    art: 'haupt',
-    weiter: 'M9',
-    abstecher: [],
-    eltern: null,
-  },
-  M9: {
-    id: 'M9',
-    titel: 'Und danach?',
-    kurz: 'Karriere-Schritte',
-    art: 'haupt',
-    weiter: 'M10',
-    abstecher: ['B9.1', 'B9.2', 'B9.3'],
-    eltern: null,
-  },
-  'B9.1': {
-    id: 'B9.1',
-    titel: 'Meister',
-    kurz: 'Meister',
-    art: 'abstecher',
-    weiter: 'M10',
-    abstecher: [],
-    eltern: 'M9',
-    immerOffen: true,
-  },
-  'B9.2': {
-    id: 'B9.2',
-    titel: 'Techniker',
-    kurz: 'Techniker',
-    art: 'abstecher',
-    weiter: 'M10',
-    abstecher: [],
-    eltern: 'M9',
-    immerOffen: true,
-  },
-  'B9.3': {
-    id: 'B9.3',
-    titel: 'Studium',
-    kurz: 'Studium',
-    art: 'abstecher',
-    weiter: 'M10',
-    abstecher: [],
-    eltern: 'M9',
-    immerOffen: true,
-  },
-  M10: {
-    id: 'M10',
-    titel: 'Dein nächster Schritt',
-    // Nicht 'CTA': `kurz` steht im Sheet und auf dem Weitermachen-Knopf des
-    // Splash. „Weitermachen bei ‚CTA‘“ ist Board-Sprache, keine Besuchersprache.
-    kurz: 'Dein nächster Schritt',
-    art: 'haupt',
-    weiter: null,
-    abstecher: [],
-    eltern: null,
-  },
+export interface Angebot {
+  /** Das, was auf dem Button steht. */
+  einladung: string
+  /**
+   * Die Zeile darunter — im Wege-Dialog die Erklärung unter der Einladung.
+   * Ohne sie ist „Woher kommt das Holz?“ nur eine Frage; mit ihr steht
+   * daneben, was einen hinter dem Tap erwartet.
+   */
+  beschreibung: string
 }
 
-/** Alle Steps in Board-Reihenfolge — Abstecher direkt hinter ihrem Elternschritt. */
-export const ALLE_STEPS: StepDef[] = Object.values(STEPS)
-
-/** Die Hauptlinie in Erzählreihenfolge. Länge = Segmentzahl der Rail. */
-export const HAUPTSCHRITTE: StepDef[] = ALLE_STEPS.filter((s) => s.art === 'haupt')
-
-export const ERSTER_STEP: StepId = 'M1'
-
-export function istStepId(wert: unknown): wert is StepId {
-  return typeof wert === 'string' && Object.hasOwn(STEPS, wert)
+/**
+ * Ein fertig gerechneter Tagesablauf. Wird einmal je Beruf über `baueGraph`
+ * erzeugt und danach nur noch gelesen.
+ */
+export interface StepGraph {
+  steps: Readonly<Record<StepId, StepDef>>
+  /** Alle Steps in Board-Reihenfolge — Abstecher direkt hinter ihrem Elternschritt. */
+  alle: readonly StepDef[]
+  /** Die Hauptlinie in Erzählreihenfolge. Länge = Segmentzahl der Rail. */
+  haupt: readonly StepDef[]
+  erster: StepId
+  /**
+   * Hauptschritte, auf denen der Karriere-Link erscheint (khpl-ui-shell.md 6).
+   *
+   * Stand vorher als `SKIP_AUF` in `StepShell` — also in der Hülle, obwohl es
+   * eine Aussage über den Tagesablauf eines bestimmten Berufs ist. Ein Beruf
+   * mit fünf Stationen will den Link nicht an denselben Stellen wie einer mit
+   * zehn.
+   */
+  karriereSkipAuf: readonly StepId[]
+  /**
+   * Der Karriere-Bereich — der Teil des Graphen, den der Skip öffnet. Wer ihn
+   * verlässt, hat den Skip beendet (siehe `skipStand` im Store).
+   */
+  karriereBereich: readonly StepId[]
+  /** Wo der Karriere-Skip landet. */
+  karriereEinstieg: StepId
+  /**
+   * Einladungstexte der Abstecher.
+   *
+   * Lagen bis zu den vier Berufen als Tabelle in `uebergaenge.ts`, nach
+   * StepId geschlüsselt — und jeder Beruf hat ein B3.1. Der Dachdecker hätte
+   * dort „Woher kommt das Holz?“ geerbt, ohne dass irgendwo etwas rot wird.
+   */
+  angebote: Readonly<Record<StepId, Angebot>>
+  /** Text der Hauptlinien-Fortsetzung. Ohne Eintrag schlicht „Weiter“. */
+  weiterTexte: Readonly<Record<StepId, string>>
 }
 
-export function step(id: StepId): StepDef {
-  return STEPS[id]
+export interface GraphKonfig {
+  erster: StepId
+  karriereSkipAuf: readonly StepId[]
+  karriereBereich: readonly StepId[]
+  karriereEinstieg: StepId
+  angebote: Readonly<Record<StepId, Angebot>>
+  weiterTexte: Readonly<Record<StepId, string>>
 }
 
-export function istHaupt(id: StepId): boolean {
-  return STEPS[id].art === 'haupt'
+/**
+ * Baut den Graphen aus einer Step-Liste. Die Reihenfolge der Liste **ist** die
+ * Board-Reihenfolge; `haupt` und die Segmentzahl der Rail fallen daraus ab.
+ *
+ * **Und prüft ihn.** Die Vorfassung hielt den Graphen als
+ * `Record<StepId, StepDef>` und ließ den Compiler einen fehlenden Eintrag
+ * melden. Mit vier Berufen gibt es diese eine Union nicht mehr — dafür prüft
+ * das hier jetzt, was der Compiler nie geprüft hat: ein `weiter`, ein `eltern`
+ * oder ein `abstecher`, der ins Leere zeigt. Genau das ist der Fehler, den man
+ * beim Schreiben eines neuen Berufs macht, und er fällt beim ersten Rendern
+ * auf, nicht erst bei dem Besucher, der den Abstecher nimmt.
+ */
+export function baueGraph(alle: readonly StepDef[], konfig: GraphKonfig): StepGraph {
+  const steps: Record<StepId, StepDef> = {}
+  for (const s of alle) steps[s.id] = s
+
+  const pruefe = (id: StepId | null, wo: string) => {
+    if (id !== null && !Object.hasOwn(steps, id)) {
+      throw new Error(`${wo} zeigt auf den unbekannten Step „${id}“.`)
+    }
+  }
+  for (const s of alle) {
+    pruefe(s.weiter, `${s.id}.weiter`)
+    pruefe(s.eltern, `${s.id}.eltern`)
+    s.abstecher.forEach((a) => pruefe(a, `${s.id}.abstecher`))
+  }
+  Object.keys(konfig.angebote).forEach((id) => pruefe(id, 'angebote'))
+  Object.keys(konfig.weiterTexte).forEach((id) => pruefe(id, 'weiterTexte'))
+  pruefe(konfig.erster, 'erster')
+  pruefe(konfig.karriereEinstieg, 'karriereEinstieg')
+  konfig.karriereSkipAuf.forEach((id) => pruefe(id, 'karriereSkipAuf'))
+  konfig.karriereBereich.forEach((id) => pruefe(id, 'karriereBereich'))
+
+  return {
+    steps,
+    alle,
+    haupt: alle.filter((s) => s.art === 'haupt'),
+    ...konfig,
+  }
+}
+
+export function istStepId(graph: StepGraph, wert: unknown): wert is StepId {
+  return typeof wert === 'string' && Object.hasOwn(graph.steps, wert)
+}
+
+/**
+ * Ein Step im Graphen. Eine unbekannte Id ist ein Datenfehler und keine
+ * Situation, aus der sich sinnvoll weiterrechnen ließe — lieber laut scheitern,
+ * solange noch jemand zusieht.
+ */
+export function step(graph: StepGraph, id: StepId): StepDef {
+  const def = graph.steps[id]
+  if (!def) throw new Error(`Unbekannter Step „${id}“.`)
+  return def
+}
+
+export function istHaupt(graph: StepGraph, id: StepId): boolean {
+  return step(graph, id).art === 'haupt'
 }
 
 /**
@@ -262,10 +195,10 @@ export function istHaupt(id: StepId): boolean {
  * Ein Abstecher ohne Elternschritt ist ein Datenfehler und keine Situation, aus
  * der sich sinnvoll weiterrechnen ließe: `railIndex` gäbe -1 zurück, die Leiste
  * zeigte „Schritt 0 von 10“, und `wegzustand` hielte plötzlich jeden Step für
- * besucht. Lieber laut scheitern, solange noch jemand zusieht.
+ * besucht.
  */
-export function bezugsHauptschritt(id: StepId): StepId {
-  const def = STEPS[id]
+export function bezugsHauptschritt(graph: StepGraph, id: StepId): StepId {
+  const def = step(graph, id)
   if (def.art === 'haupt') return def.id
   if (def.eltern === null) {
     throw new Error(`Abstecher ${id} hat keinen Elternschritt.`)
@@ -277,7 +210,7 @@ export function bezugsHauptschritt(id: StepId): StepId {
  * Position in der Rail. Ein Abstecher hat kein eigenes Segment und zählt
  * deshalb wie sein Elternschritt (khpl-ui-shell.md 4).
  */
-export function railIndex(id: StepId): number {
-  const bezug = bezugsHauptschritt(id)
-  return HAUPTSCHRITTE.findIndex((s) => s.id === bezug)
+export function railIndex(graph: StepGraph, id: StepId): number {
+  const bezug = bezugsHauptschritt(graph, id)
+  return graph.haupt.findIndex((s) => s.id === bezug)
 }

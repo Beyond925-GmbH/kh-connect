@@ -1,4 +1,4 @@
-import { ChevronLeft, RotateCcw } from 'lucide-react'
+import { ChevronLeft, LayoutGrid, RotateCcw } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
@@ -9,6 +9,7 @@ import {
   beendeKarriereSkip,
   setzeZurueck,
   useFortschritt,
+  zeigeBerufe,
 } from '@/khpl/store/fortschritt'
 import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
 
@@ -38,6 +39,14 @@ import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
  * Wer im Karriere-Skip bis hierher durchgeht, bekommt zusätzlich
  * **[ Zurück zu deinem Tag ]** (ui-shell 6) — der Skip bleibt ein Abstecher,
  * auch wenn er bis ans Ende führt.
+ *
+ * **Mit vier Berufen ist das Ende kein Ende mehr.** Der Weg nach vorn heißt
+ * hier „Noch einen Beruf“ und führt auf die Liste — wer einen ganzen Tag
+ * durchgespielt hat, ist der Besucher mit der höchsten Wahrscheinlichkeit,
+ * einen zweiten anzufangen, und ihn stattdessen auf den Splash zu werfen wäre
+ * das Gegenteil eines Angebots. „Von vorn“ bleibt daneben stehen: es ist der
+ * Knopf des Standpersonals für den nächsten Besucher, nicht der des
+ * Besuchers.
  */
 export function M10() {
   const fortschritt = useFortschritt()
@@ -112,13 +121,19 @@ export function M10() {
               Zurück zu deinem Tag
             </Button>
           ) : null}
-          {/* Der einzige Knopf auf dem Screen, der etwas tut — also trägt er
-              auch die Farbe dafür. Vorher war er `ghost` und damit das
-              leiseste Element auf seinem eigenen Screen. */}
-          <Button variant="weiter" onClick={setzeZurueck} data-testid="m10-neu-starten">
+          {/* Ein Orange pro Screen, und das ist der Weg nach vorn. „Von vorn“
+              räumt die Sitzung ab und gehört damit nicht dem, der gerade
+              fertig geworden ist. */}
+          <Button variant="neben" onClick={setzeZurueck} data-testid="m10-neu-starten">
             <RotateCcw className="size-5" strokeWidth={2.25} />
             Von vorn
           </Button>
+          {!imSkip && (
+            <Button variant="weiter" onClick={zeigeBerufe} data-testid="m10-noch-einen">
+              <LayoutGrid className="size-5" strokeWidth={2.25} />
+              Noch einen Beruf
+            </Button>
+          )}
         </div>
       }
     />

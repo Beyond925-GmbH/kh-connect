@@ -1,9 +1,12 @@
 import { useSyncExternalStore } from 'react'
-import type { StepId } from '@/khpl/flow/steps'
-import { ERSTER_STEP, istStepId, railIndex, step } from '@/khpl/flow/steps'
+import type { StepGraph, StepId } from '@/khpl/flow/steps'
+import { istStepId, railIndex, step } from '@/khpl/flow/steps'
+import { beruf, istBerufId } from '@/khpl/berufe/registry'
+import type { BerufId } from '@/khpl/berufe/typen'
+import type { HelmWahl } from '@/khpl/match/helm'
 
 /**
- * Sitzungszustand nach khpl-ui-shell.md 7.
+ * Sitzungszustand nach khpl-ui-shell.md 7, erweitert um die vier Berufe.
  *
  * Bewusst gegen khpl-flow.md 5 entschieden. Die Flow-Spec verlangt „kein Zustand
  * überlebt einen Reset“, die UI-Shell-Spec löst genau diesen Widerspruch später
@@ -11,6 +14,16 @@ import { ERSTER_STEP, istStepId, railIndex, step } from '@/khpl/flow/steps'
  * Splash zurück. Der nächste Besucher wählt dort „Neu starten“, wer nur kurz
  * abgelenkt war „Weitermachen“. Die 30-Minuten-Verfallszeit sorgt dafür, dass
  * ein Stand von heute früh niemandem mehr gehört.
+ *
+ * **Was sich mit den vier Berufen ändert.** Der Fortschritt hängt nicht mehr an
+ * der Sitzung, sondern **je Beruf** an ihr. Das ist die Bedingung dafür, dass
+ * der Wechsel im Sheet „Dein Weg“ folgenlos ist: wer den Zimmerer bei M5
+ * verlässt, findet ihn bei M5 wieder. Ohne das bräuchte jeder Wechsel eine
+ * Rückfrage — und eine Rückfrage vor jedem Wechsel heißt, dass niemand
+ * wechselt.
+ *
+ * Helm und Antworten liegen dagegen **an der Sitzung**, nicht am Beruf: sie
+ * gehören dem Besucher, nicht dem Tag, und speisen den Vorschlag genau einmal.
  */
 
 const SPEICHER_SCHLUESSEL = 'khpl-progress'
@@ -18,15 +31,14 @@ const SPEICHER_SCHLUESSEL = 'khpl-progress'
 /** Älter als das, gehört der Stand niemandem mehr (khpl-ui-shell.md 7). */
 export const VERFALL_MS = 30 * 60 * 1000
 
-/** Welcher der Screens aus khpl-ui-shell.md 2 gerade läuft. Nie persistiert. */
-export type Bildschirm = 'splash' | 'intro' | 'step'
-
-/** M9 und alles darunter — der Karriere-Bereich S4/S5. */
-const KARRIERE: readonly StepId[] = ['M9', 'B9.1', 'B9.2', 'B9.3', 'M10']
-
-function imKarriereBereich(id: StepId): boolean {
-  return KARRIERE.includes(id)
-}
+/**
+ * Welcher Screen gerade läuft. Nie persistiert.
+ *
+ * Die ersten fünf sind der Trichter (S0–S4), danach beginnt die Anwendung, die
+ * es vorher schon gab. `bald` ist der Ausgang für einen Beruf ohne Graph.
+ */
+export type Bildschirm =
+  'splash' | 'helm' | 'fragen' | 'vorschlag' | 'berufe' | 'intro' | 'step' | 'bald'
 
 /** Typisierte Sicht auf `answers`. Bleibt zur Laufzeit ein reines JSON-Objekt. */
 export interface Antworten {
@@ -46,8 +58,8 @@ export interface Antworten {
   m9?: { angesehen: StepId[] }
 }
 
+/** Der Stand **eines** Berufs. */
 export interface Fortschritt {
-  version: 1
   currentStepId: StepId
   /** Reihenfolge = Zurück-Historie. Kann denselben Step mehrfach enthalten. */
   visited: StepId[]
@@ -66,18 +78,38 @@ export interface Fortschritt {
   branchesTaken: StepId[]
   answers: Antworten
   detourReturnTo: StepId | null
+}
+
+export interface Sitzung {
+  version: 2
+  /** Der Beruf, in dem der Besucher gerade steckt. `null` = noch im Trichter. */
+  aktiverBeruf: BerufId | null
+  /** Angelegt wird ein Eintrag erst, wenn ein Beruf betreten wird. */
+  berufe: Partial<Record<BerufId, Fortschritt>>
+  helm: HelmWahl | null
+  /** Frage-Id → Antwort-Id. Übersprungene Fragen fehlen schlicht. */
+  gefragt: Record<string, string>
   updatedAt: number
 }
 
-function leer(): Fortschritt {
+function leererFortschritt(graph: StepGraph): Fortschritt {
   return {
-    version: 1,
-    currentStepId: ERSTER_STEP,
+    currentStepId: graph.erster,
     visited: [],
-    hoechsterStep: ERSTER_STEP,
+    hoechsterStep: graph.erster,
     branchesTaken: [],
     answers: {},
     detourReturnTo: null,
+  }
+}
+
+function leereSitzung(): Sitzung {
+  return {
+    version: 2,
+    aktiverBeruf: null,
+    berufe: {},
+    helm: null,
+    gefragt: {},
     updatedAt: Date.now(),
   }
 }
@@ -85,14 +117,18 @@ function leer(): Fortschritt {
 /**
  * Prüft die gespeicherten Antworten oberflächlich nach.
  *
- * `version` allein reicht nicht: sie bleibt `1`, während sich die Form von
+ * `version` allein reicht nicht: sie bleibt gleich, während sich die Form von
  * `answers` mit jedem neuen Step ändert. Der reale Fall ist ein Deploy am
  * Messemorgen — ein iPad, das zehn Minuten vorher benutzt wurde, lädt den
  * alten Stand, `version` passt, und der Rückblick in M8 stolpert vor einem
  * Besucher über ein Feld, das es nicht mehr gibt. Was nicht passt, fliegt
  * einzeln raus statt den ganzen Stand mitzureißen.
+ *
+ * Die Felder sind Zimmerer-Felder — bis hierhin hat kein anderer Beruf eine
+ * Interaktion. Bekommt ein zweiter welche, gehört diese Prüfung neben seinen
+ * Graphen und nicht in eine gemeinsame Liste, die alle vier gleichzeitig führt.
  */
-function pruefeAntworten(roh: unknown): Antworten {
+function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   if (typeof roh !== 'object' || roh === null) return {}
   const q = roh as Record<string, unknown>
   const a: Antworten = {}
@@ -129,21 +165,43 @@ function pruefeAntworten(roh: unknown): Antworten {
   }
   const m9 = q.m9 as Antworten['m9']
   if (m9 && Array.isArray(m9.angesehen)) {
-    // Fällt eine StepId aus der Union, darf sie nicht als `STEPS[id].titel`
-    // wieder auftauchen.
-    a.m9 = { angesehen: m9.angesehen.filter(istStepId) }
+    // Fällt eine StepId aus dem Graphen, darf sie nicht als `titel` wieder
+    // auftauchen.
+    a.m9 = { angesehen: m9.angesehen.filter((x) => istStepId(graph, x)) }
   }
   return a
 }
 
+function pruefeFortschritt(graph: StepGraph, roh: unknown): Fortschritt | null {
+  if (typeof roh !== 'object' || roh === null) return null
+  const p = roh as Partial<Fortschritt>
+  if (!istStepId(graph, p.currentStepId)) return null
+
+  const visited = Array.isArray(p.visited)
+    ? p.visited.filter((x) => istStepId(graph, x))
+    : []
+
+  return {
+    currentStepId: p.currentStepId,
+    visited,
+    hoechsterStep: istStepId(graph, p.hoechsterStep) ? p.hoechsterStep : p.currentStepId,
+    branchesTaken: Array.isArray(p.branchesTaken)
+      ? p.branchesTaken.filter((x) => istStepId(graph, x))
+      : [],
+    answers: pruefeAntworten(graph, p.answers),
+    detourReturnTo: istStepId(graph, p.detourReturnTo) ? p.detourReturnTo : null,
+  }
+}
+
 /**
  * Liest den gespeicherten Stand. Alles, was nicht exakt passt — falsche
- * `version`, kaputtes JSON, unbekannte StepId — wird still verworfen. Ein
- * Datenmodell-Wechsel darf am Messestand nicht crashen.
+ * `version`, kaputtes JSON, unbekannte Id — wird still verworfen. Ein
+ * Datenmodell-Wechsel darf am Messestand nicht crashen. Die Fassung mit einem
+ * einzigen Beruf trug `version: 1` und fällt hier ohne Umweg auf den Boden.
  *
  * Der **Verfall wird hier nicht geprüft**: siehe `pruefeVerfall`.
  */
-function lade(): Fortschritt | null {
+function lade(): Sitzung | null {
   let roh: string | null
   try {
     roh = localStorage.getItem(SPEICHER_SCHLUESSEL)
@@ -155,34 +213,63 @@ function lade(): Fortschritt | null {
   try {
     const daten: unknown = JSON.parse(roh)
     if (typeof daten !== 'object' || daten === null) return null
-    const p = daten as Partial<Fortschritt>
-    if (p.version !== 1) return null
-    if (!istStepId(p.currentStepId)) return null
-    if (typeof p.updatedAt !== 'number') return null
+    const s = daten as Partial<Sitzung>
+    if (s.version !== 2) return null
+    if (typeof s.updatedAt !== 'number') return null
 
-    const visited = Array.isArray(p.visited) ? p.visited.filter(istStepId) : []
+    const berufe: Partial<Record<BerufId, Fortschritt>> = {}
+    for (const [id, wert] of Object.entries(s.berufe ?? {})) {
+      if (!istBerufId(id)) continue
+      const graph = beruf(id).graph
+      if (!graph) continue
+      const f = pruefeFortschritt(graph, wert)
+      if (f) berufe[id] = f
+    }
+
+    const aktiv = istBerufId(s.aktiverBeruf) ? s.aktiverBeruf : null
 
     return {
-      version: 1,
-      currentStepId: p.currentStepId,
-      visited,
-      hoechsterStep: istStepId(p.hoechsterStep) ? p.hoechsterStep : p.currentStepId,
-      branchesTaken: Array.isArray(p.branchesTaken)
-        ? p.branchesTaken.filter(istStepId)
-        : [],
-      answers: pruefeAntworten(p.answers),
-      detourReturnTo: istStepId(p.detourReturnTo) ? p.detourReturnTo : null,
-      updatedAt: p.updatedAt,
+      version: 2,
+      // Ein aktiver Beruf ohne Stand ist kein Wiedereinstieg, sondern ein
+      // Zeiger ins Leere — er käme als „Weitermachen bei …“ auf den Splash und
+      // landete auf dem ersten Step eines Tages, den nie jemand angefangen hat.
+      aktiverBeruf: aktiv && berufe[aktiv] ? aktiv : null,
+      berufe,
+      helm: pruefeHelm(s.helm),
+      gefragt: pruefeGefragt(s.gefragt),
+      updatedAt: s.updatedAt,
     }
   } catch {
     return null
   }
 }
 
-let fortschritt: Fortschritt = lade() ?? leer()
+function pruefeHelm(roh: unknown): HelmWahl | null {
+  if (typeof roh !== 'object' || roh === null) return null
+  const h = roh as Partial<HelmWahl>
+  if (typeof h.farbe !== 'string' || typeof h.werkzeug !== 'string') return null
+  return { farbe: h.farbe, werkzeug: h.werkzeug }
+}
+
+function pruefeGefragt(roh: unknown): Record<string, string> {
+  if (typeof roh !== 'object' || roh === null) return {}
+  const raus: Record<string, string> = {}
+  for (const [k, v] of Object.entries(roh)) {
+    if (typeof v === 'string') raus[k] = v
+  }
+  return raus
+}
+
+let sitzung: Sitzung = lade() ?? leereSitzung()
 /** Ob ein Stand zum Weitermachen bereitliegt. */
-let hatWiedereinstieg = fortschritt.visited.length > 0
+let hatWiedereinstieg = wiedereinstiegMoeglich(sitzung)
 let bildschirm: Bildschirm = 'splash'
+
+function wiedereinstiegMoeglich(s: Sitzung): boolean {
+  const aktiv = s.aktiverBeruf
+  if (!aktiv) return false
+  return (s.berufe[aktiv]?.visited.length ?? 0) > 0
+}
 
 const hoerer = new Set<() => void>()
 
@@ -191,7 +278,7 @@ function melde() {
 }
 
 function vergiss() {
-  fortschritt = leer()
+  sitzung = leereSitzung()
   hatWiedereinstieg = false
   try {
     localStorage.removeItem(SPEICHER_SCHLUESSEL)
@@ -212,7 +299,7 @@ function vergiss() {
  */
 export function pruefeVerfall(): boolean {
   if (!hatWiedereinstieg) return false
-  if (Date.now() - fortschritt.updatedAt <= VERFALL_MS) return false
+  if (Date.now() - sitzung.updatedAt <= VERFALL_MS) return false
   vergiss()
   melde()
   return true
@@ -220,7 +307,7 @@ export function pruefeVerfall(): boolean {
 
 function sichere() {
   try {
-    localStorage.setItem(SPEICHER_SCHLUESSEL, JSON.stringify(fortschritt))
+    localStorage.setItem(SPEICHER_SCHLUESSEL, JSON.stringify(sitzung))
   } catch {
     // Speicher gesperrt oder voll (privater Modus, Sandbox) — die Sitzung läuft
     // trotzdem, sie überlebt nur keinen Reload.
@@ -230,21 +317,49 @@ function sichere() {
 /** Reißleine gegen eine Historie, die durch Hin-und-Her-Tappen davonläuft. */
 const MAX_HISTORIE = 300
 
-function aendere(f: (alt: Fortschritt) => Fortschritt) {
-  const neu = f(fortschritt)
+function aendere(f: (alt: Sitzung) => Sitzung) {
+  const neu = f(sitzung)
   // Wirkungslose Aktionen — ← auf dem ersten Step, ein Sprung ins Gesperrte —
   // dürfen weder speichern noch `updatedAt` auffrischen: sonst hält ein
   // Besucher, der auf dem ersten Screen herumtippt, den Verfall ewig offen.
-  if (neu === fortschritt) return
+  if (neu === sitzung) return
 
-  fortschritt = {
-    ...neu,
-    visited:
-      neu.visited.length > MAX_HISTORIE ? neu.visited.slice(-MAX_HISTORIE) : neu.visited,
-    updatedAt: Date.now(),
-  }
+  sitzung = { ...neu, updatedAt: Date.now() }
+  hatWiedereinstieg = wiedereinstiegMoeglich(sitzung)
   sichere()
   melde()
+}
+
+/**
+ * Ändert den Stand **des aktiven Berufs**. Ohne aktiven Beruf wirkungslos —
+ * jede dieser Aktionen kommt von einem Step-Screen, und ohne Beruf gibt es
+ * keinen.
+ */
+function aendereFortschritt(f: (alt: Fortschritt, graph: StepGraph) => Fortschritt) {
+  aendere((s) => {
+    const id = s.aktiverBeruf
+    if (!id) return s
+    const graph = beruf(id).graph
+    const alt = s.berufe[id]
+    if (!graph || !alt) return s
+
+    const neu = f(alt, graph)
+    if (neu === alt) return s
+
+    return {
+      ...s,
+      berufe: {
+        ...s.berufe,
+        [id]: {
+          ...neu,
+          visited:
+            neu.visited.length > MAX_HISTORIE
+              ? neu.visited.slice(-MAX_HISTORIE)
+              : neu.visited,
+        },
+      },
+    }
+  })
 }
 
 function setzeBildschirm(neu: Bildschirm) {
@@ -253,9 +368,11 @@ function setzeBildschirm(neu: Bildschirm) {
 }
 
 /** Hochwassermarke fortschreiben — nur auf der Hauptlinie, nie im Skip. */
-function marke(alt: Fortschritt, ziel: StepId): StepId {
+function marke(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId {
   if (alt.detourReturnTo !== null) return alt.hoechsterStep
-  return railIndex(ziel) > railIndex(alt.hoechsterStep) ? ziel : alt.hoechsterStep
+  return railIndex(graph, ziel) > railIndex(graph, alt.hoechsterStep)
+    ? ziel
+    : alt.hoechsterStep
 }
 
 /**
@@ -264,34 +381,115 @@ function marke(alt: Fortschritt, ziel: StepId): StepId {
  * stehen, zeigte die App für den Rest der Sitzung die Skip-Leiste statt der
  * Rail, und ui-shell 4 („auf **jedem** S2-Screen“) wäre gebrochen.
  */
-function skipStand(alt: Fortschritt, ziel: StepId): StepId | null {
+function skipStand(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId | null {
   if (alt.detourReturnTo === null) return null
-  return imKarriereBereich(ziel) ? alt.detourReturnTo : null
+  return graph.karriereBereich.includes(ziel) ? alt.detourReturnTo : null
 }
 
 // ---------------------------------------------------------------------------
-// Aktionen
+// Trichter (S0–S4)
 // ---------------------------------------------------------------------------
 
 /** S0 → S1. Verwirft einen alten Stand vollständig. */
 export function starteNeu() {
   vergiss()
   sichere()
-  setzeBildschirm('intro')
+  setzeBildschirm('helm')
 }
 
-/** S0 → S2 an der Stelle, an der der letzte Besucher aufgehört hat. */
+/** S0 → dorthin, wo der letzte Besucher aufgehört hat. */
 export function machWeiter() {
   if (pruefeVerfall()) return
-  setzeBildschirm('step')
+  setzeBildschirm(sitzung.aktiverBeruf ? 'step' : 'berufe')
 }
 
-/** S1 → S2. „Auftrag annehmen“ ist der erste Besuch von M1. */
+export function merkeHelm(wahl: HelmWahl) {
+  aendere((s) => ({ ...s, helm: wahl }))
+}
+
+export function merkeFrage(frageId: string, antwortId: string) {
+  aendere((s) => ({ ...s, gefragt: { ...s.gefragt, [frageId]: antwortId } }))
+}
+
+export function zeigeFragen() {
+  setzeBildschirm('fragen')
+}
+
+export function zeigeVorschlag() {
+  setzeBildschirm('vorschlag')
+}
+
+export function zeigeBerufe() {
+  setzeBildschirm('berufe')
+}
+
+export function zeigeHelm() {
+  setzeBildschirm('helm')
+}
+
+/**
+ * Einen Beruf betreten — aus dem Vorschlag, aus der Liste, aus dem Sheet.
+ *
+ * Drei Ausgänge, und der mittlere ist der, an dem der Wechsel steht und fällt:
+ * wer diesen Beruf schon angefangen hat, landet **da, wo er war**. Ohne das
+ * wäre jeder Wechsel ein Verlust, und die Liste eine Falle statt eines
+ * Angebots.
+ */
+export function betreteBeruf(id: BerufId) {
+  const graph = beruf(id).graph
+  if (!graph) {
+    // `aktiverBeruf` bleibt stehen. Ein Blick auf einen angekündigten Beruf
+    // ist ein Blick, kein Wechsel — wer mitten im Zimmerer-Tag neugierig auf
+    // Dachdecker tippt, soll danach ohne Umweg weitermachen können.
+    merkeAngesehen(id)
+    setzeBildschirm('bald')
+    return
+  }
+
+  const schonDa = (sitzung.berufe[id]?.visited.length ?? 0) > 0
+  aendere((s) => ({
+    ...s,
+    aktiverBeruf: id,
+    berufe: s.berufe[id] ? s.berufe : { ...s.berufe, [id]: leererFortschritt(graph) },
+  }))
+  setzeBildschirm(schonDa ? 'step' : 'intro')
+}
+
+/**
+ * Welcher angekündigte Beruf gerade auf dem „bald“-Screen liegt.
+ *
+ * Bewusst **kein** Teil der gespeicherten Sitzung: das ist die Adresse eines
+ * Screens, kein Stand. Nach einem Reload wieder dort zu landen wäre falsch.
+ */
+let angesehenerBeruf: BerufId | null = null
+
+function merkeAngesehen(id: BerufId) {
+  angesehenerBeruf = id
+  melde()
+}
+
+/** S5 → S6. „Auftrag annehmen“ ist der erste Besuch des ersten Steps. */
 export function nimmAuftragAn() {
-  // Vollständiger Reset, nicht nur der Zeiger: sonst erbte eine neue Sitzung
-  // Abstecher und Antworten der vorigen, sobald S1 von woanders erreichbar wird.
-  aendere(() => ({ ...leer(), currentStepId: ERSTER_STEP, visited: [ERSTER_STEP] }))
-  hatWiedereinstieg = true
+  const id = sitzung.aktiverBeruf
+  if (!id || !beruf(id).graph) return
+
+  aendere((s) => {
+    const graph = beruf(id).graph
+    if (!graph) return s
+    // Vollständiger Reset **dieses Berufs**, nicht nur des Zeigers: sonst erbt
+    // ein zweiter Durchlauf Abstecher und Antworten des ersten. Die anderen
+    // Berufe bleiben unberührt — sie gehören demselben Besucher.
+    return {
+      ...s,
+      berufe: {
+        ...s.berufe,
+        [id]: {
+          ...leererFortschritt(graph),
+          visited: [graph.erster],
+        },
+      },
+    }
+  })
   setzeBildschirm('step')
 }
 
@@ -306,13 +504,17 @@ export function setzeZurueck() {
   setzeBildschirm('splash')
 }
 
+// ---------------------------------------------------------------------------
+// Innerhalb eines Berufs
+// ---------------------------------------------------------------------------
+
 /**
  * Ein Schritt vorwärts. Ein Abstecher wird zusätzlich in `branchesTaken`
  * vermerkt — daraus speist sich der Rückblick in M8.
  */
 export function geheZu(ziel: StepId) {
-  aendere((alt) => {
-    const def = step(ziel)
+  aendereFortschritt((alt, graph) => {
+    const def = step(graph, ziel)
     // `immerOffen` sind die drei Karrierekarten. Sie zählen nicht als
     // genommener Abstecher: sie sollen im Angebot bleiben (flow 7 M9), und sie
     // gehören nicht in den Rückblick von M8 — „du hast heute … eine Info-Seite
@@ -322,8 +524,8 @@ export function geheZu(ziel: StepId) {
       ...alt,
       currentStepId: ziel,
       visited: [...alt.visited, ziel],
-      hoechsterStep: marke(alt, ziel),
-      detourReturnTo: skipStand(alt, ziel),
+      hoechsterStep: marke(graph, alt, ziel),
+      detourReturnTo: skipStand(graph, alt, ziel),
       branchesTaken:
         zaehlt && !alt.branchesTaken.includes(ziel)
           ? [...alt.branchesTaken, ziel]
@@ -334,7 +536,7 @@ export function geheZu(ziel: StepId) {
 
 /** Merkt einen angesehenen Karriereweg — Grundlage für den CTA in M10. */
 export function merkeKarriereweg(ziel: StepId) {
-  aendere((alt) => {
+  aendereFortschritt((alt) => {
     const bisher = alt.answers.m9?.angesehen ?? []
     if (bisher[bisher.length - 1] === ziel) return alt
     return {
@@ -351,7 +553,7 @@ export function merkeKarriereweg(ziel: StepId) {
 
 /** Ein Schritt zurück in der besuchten Historie. Auf dem ersten Step wirkungslos. */
 export function geheZurueck() {
-  aendere((alt) => {
+  aendereFortschritt((alt, graph) => {
     if (alt.visited.length < 2) return alt
     const historie = alt.visited.slice(0, -1)
     const ziel = historie[historie.length - 1]
@@ -359,7 +561,7 @@ export function geheZurueck() {
       ...alt,
       currentStepId: ziel,
       visited: historie,
-      detourReturnTo: skipStand(alt, ziel),
+      detourReturnTo: skipStand(graph, alt, ziel),
     }
   })
 }
@@ -376,25 +578,25 @@ export function geheZurueck() {
  * Darstellung des Sheets: eine Regel, die nur im Rendern lebt, ist keine.
  */
 export function springeZuBesuchtem(ziel: StepId) {
-  aendere((alt) => {
+  aendereFortschritt((alt, graph) => {
     if (!alt.visited.includes(ziel)) return alt
-    if (railIndex(ziel) > railIndex(alt.hoechsterStep)) return alt
+    if (railIndex(graph, ziel) > railIndex(graph, alt.hoechsterStep)) return alt
     return {
       ...alt,
       currentStepId: ziel,
       visited: [...alt.visited, ziel],
-      detourReturnTo: skipStand(alt, ziel),
+      detourReturnTo: skipStand(graph, alt, ziel),
     }
   })
 }
 
 /** Karriere-Skip: merkt den aktuellen Schritt und öffnet den Karriere-Bereich. */
 export function starteKarriereSkip() {
-  aendere((alt) => ({
+  aendereFortschritt((alt, graph) => ({
     ...alt,
     detourReturnTo: alt.currentStepId,
-    currentStepId: 'M9',
-    visited: [...alt.visited, 'M9'],
+    currentStepId: graph.karriereEinstieg,
+    visited: [...alt.visited, graph.karriereEinstieg],
   }))
 }
 
@@ -408,7 +610,7 @@ export function starteKarriereSkip() {
  * Abstecher: danach soll alles aussehen wie davor (ui-shell 6).
  */
 export function beendeKarriereSkip() {
-  aendere((alt) => {
+  aendereFortschritt((alt) => {
     if (!alt.detourReturnTo) return alt
     const ziel = alt.detourReturnTo
     const index = alt.visited.lastIndexOf(ziel)
@@ -425,7 +627,10 @@ export function merkeAntwort<K extends keyof Antworten>(
   schluessel: K,
   wert: Antworten[K],
 ) {
-  aendere((alt) => ({ ...alt, answers: { ...alt.answers, [schluessel]: wert } }))
+  aendereFortschritt((alt) => ({
+    ...alt,
+    answers: { ...alt.answers, [schluessel]: wert },
+  }))
 }
 
 // ---------------------------------------------------------------------------
@@ -439,17 +644,71 @@ function abonniere(hoerer_: () => void) {
   }
 }
 
-export function useFortschritt(): Fortschritt {
-  return useSyncExternalStore(abonniere, () => fortschritt)
+export function useSitzung(): Sitzung {
+  return useSyncExternalStore(abonniere, () => sitzung)
 }
 
 export function useBildschirm(): Bildschirm {
   return useSyncExternalStore(abonniere, () => bildschirm)
 }
 
+/** Der Beruf, in dem der Besucher steckt — oder der zuletzt angesehene. */
+export function useAktiverBeruf(): BerufId | null {
+  return useSyncExternalStore(abonniere, () => sitzung.aktiverBeruf)
+}
+
+export function useAngesehenerBeruf(): BerufId | null {
+  return useSyncExternalStore(abonniere, () => angesehenerBeruf)
+}
+
+/**
+ * Der Graph des aktiven Berufs. Auf jedem Step-Screen vorhanden — ohne
+ * aktiven Beruf wird kein Step gerendert.
+ */
+export function useGraph(): StepGraph {
+  const id = useAktiverBeruf()
+  const graph = id ? beruf(id).graph : null
+  if (!graph) throw new Error('Kein aktiver Beruf — hier darf kein Step stehen.')
+  return graph
+}
+
+/**
+ * Der Stand des aktiven Berufs.
+ *
+ * Gibt es keinen, kommt ein leerer Stand statt `null` zurück: die Alternative
+ * wäre, jeden Step-Screen und den KioskGuard mit einer Fallunterscheidung zu
+ * versehen, die auf einem Step-Screen nie eintreten kann.
+ */
+export function useFortschritt(): Fortschritt {
+  const s = useSitzung()
+  const id = s.aktiverBeruf
+  const stand = id ? s.berufe[id] : undefined
+  return stand ?? LEER_ERSATZ
+}
+
+const LEER_ERSATZ: Fortschritt = {
+  currentStepId: '',
+  visited: [],
+  hoechsterStep: '',
+  branchesTaken: [],
+  answers: {},
+  detourReturnTo: null,
+}
+
 /** Für S0: gibt es überhaupt etwas zum Weitermachen? */
-export function useWiedereinstieg(): Fortschritt | null {
-  const p = useSyncExternalStore(abonniere, () => fortschritt)
+export function useWiedereinstieg(): { beruf: BerufId; fortschritt: Fortschritt } | null {
+  const s = useSitzung()
   const moeglich = useSyncExternalStore(abonniere, () => hatWiedereinstieg)
-  return moeglich && p.visited.length > 0 ? p : null
+  const id = s.aktiverBeruf
+  const stand = id ? s.berufe[id] : undefined
+  if (!moeglich || !id || !stand) return null
+  return { beruf: id, fortschritt: stand }
+}
+
+/** Welche Berufe der Besucher in dieser Sitzung schon betreten hat. */
+export function useBesuchteBerufe(): BerufId[] {
+  const s = useSitzung()
+  return (Object.keys(s.berufe) as BerufId[]).filter(
+    (id) => (s.berufe[id]?.visited.length ?? 0) > 0,
+  )
 }

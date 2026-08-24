@@ -5,6 +5,7 @@ import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import type { StepId } from '@/khpl/flow/steps'
 import { beschreibung, einladung, weiterText } from '@/khpl/flow/uebergaenge'
+import { useGraph } from '@/khpl/store/fortschritt'
 
 /**
  * Der Fuß eines Step-Screens (khpl-ui-shell.md 5).
@@ -70,6 +71,7 @@ export function Verzweigung({
    */
   uebungOffen?: boolean
 }) {
+  const graph = useGraph()
   const [wahlOffen, setWahlOffen] = useState(false)
   const hatAngebot = offen.length > 0
 
@@ -119,7 +121,7 @@ export function Verzweigung({
             className="min-w-[9rem]"
             data-testid="weiter"
           >
-            {weiterText(weiterVon)}
+            {weiterText(graph, weiterVon)}
             <ArrowRight className="size-5" strokeWidth={2.5} />
           </Button>
         )
@@ -170,6 +172,7 @@ function WegeDialog({
   onAbstecher: (id: StepId) => void
   onWeiter: () => void
 }) {
+  const graph = useGraph()
   return (
     <BaseDialog.Root open={offen} onOpenChange={(auf) => !auf && onSchliessen()}>
       <BaseDialog.Portal>
@@ -187,7 +190,7 @@ function WegeDialog({
 
           <div className="mt-4 flex flex-col gap-2">
             {angebote.map((id) => {
-              const zeile = beschreibung(id)
+              const zeile = beschreibung(graph, id)
               return (
                 <button
                   key={id}
@@ -198,7 +201,7 @@ function WegeDialog({
                 >
                   <span className="min-w-0 flex-1">
                     <span className="block text-[1.0625rem] leading-tight font-semibold text-kh-paper">
-                      {einladung(id)}
+                      {einladung(graph, id)}
                     </span>
                     {zeile && (
                       <span className="mt-0.5 block text-[0.9375rem] leading-snug text-kh-mute">
@@ -218,7 +221,7 @@ function WegeDialog({
 
           <div className="mt-4 flex justify-end border-t border-kh-line pt-4">
             <Button onClick={onWeiter} variant="weiter" data-testid="wege-weiter">
-              {weiterText(weiterVon)}
+              {weiterText(graph, weiterVon)}
               <ArrowRight className="size-5" strokeWidth={2.5} />
             </Button>
           </div>
