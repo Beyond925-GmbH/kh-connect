@@ -229,6 +229,14 @@ export interface Wandelement3DProps {
   einweisen?: boolean
   /** Feuert, wenn das Element abgesetzt ist. */
   onAbgesetzt?: () => void
+  /**
+   * Beim Wiedereinstieg über „Dein Weg“: das Element steht schon auf der
+   * Bodenplatte, ohne Absetz-Blende und ohne Pendel. Den Zustand kennt nur der
+   * Step — die Bühne hält ihn sonst als eigenen Frame-State und hinge nach der
+   * Rückkehr wieder am Haken, während Panel und Fuß „Element sitzt“ sagen.
+   * Dasselbe Muster wie `holzGefunden` in C1.
+   */
+  abgesetzt?: boolean
 
   // -- gemeinsam ------------------------------------------------------------
   /**
@@ -464,6 +472,7 @@ export default function Wandelement3D(props: Wandelement3DProps) {
               lage={props.lage}
               onLage={props.onLage}
               einweisen={props.einweisen}
+              abgesetzt={props.abgesetzt}
               onAbgesetzt={props.onAbgesetzt}
               ausschnitt={spaeterAusschnitt}
               marke={spaeteMarke}

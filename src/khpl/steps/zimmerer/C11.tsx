@@ -82,14 +82,19 @@ export function C11() {
 
           {/* Zitat, nicht Merksatz: der Satz gehört der Person, die ihn gesagt
               hat. Deshalb Anführungszeichen, Sprecherzeile und die orange
-              Kante links statt einer Aussage im Fließtext. */}
+              Kante links statt einer Aussage im Fließtext.
+
+              Dialekt behutsam geglättet („’n“ → „einen“) — dieselbe Linie wie in
+              C5 und C5.1, und die, die die Spec selbst fährt, wenn sie den
+              Sicherheitssatz aus dem Transkript („is“) als „ist“ zitiert. Nichts
+              hinzugefügt, nichts weggelassen. */}
           <figure
             data-testid="c11-zitat"
             className="border-l-4 border-kh-orange/60 pt-1 pb-1 pl-4"
           >
             <blockquote className="text-[1.125rem] leading-[1.45] text-kh-paper sm:text-[1.1875rem]">
               „Das Aufschlagen eines Daches, das wird wahrscheinlich nie irgendwo die KI
-              oder ’n 3D-Drucker übernehmen. Das wird immer Handarbeit bleiben.“
+              oder einen 3D-Drucker übernehmen. Das wird immer Handarbeit bleiben.“
             </blockquote>
             <figcaption className="mt-1.5 text-[0.9375rem] text-kh-mute">
               Ein erfahrener Zimmerer, im Gespräch

@@ -212,6 +212,11 @@ export function C6() {
             // auf denselben Zustand, statt auf zwei.
             onLage={uebernimm}
             einweisen={takt === 'einweisen'}
+            // Der Endzustand muss auf die Bühne, sonst hängt das Element beim
+            // Wiedereinstieg wieder am Haken, während der Fuß „Element sitzt“
+            // trägt — `einweisen` ist dann längst false und die Bühne wüsste
+            // von nichts.
+            abgesetzt={takt === 'fertig'}
             onAbgesetzt={abgesetzt}
           />
         </Suspense>
@@ -305,18 +310,6 @@ export function C6() {
                 text={meldung ? meldung.text : null}
                 testid="c6-meldung"
               />
-
-              {versuche >= HILFE_AB && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <Button
-                    variant="leise"
-                    onClick={zeigMirWie}
-                    data-testid="c6-zeig-mir-wie"
-                  >
-                    Zeig mir wie
-                  </Button>
-                </motion.div>
-              )}
             </div>
           )}
         </Wechsel>
@@ -337,16 +330,35 @@ export function C6() {
           geschafft={takt === 'fertig' ? 'Element sitzt' : null}
           // Nur Beat 1 hat eine Aktion im Fuß. In Beat 2 ist die Bühne die
           // Handlung — siehe oben.
+          //
+          // „Zeig mir wie“ steht **neben** „So absetzen“ und nicht in der
+          // scrollenden Fläche (khpl-tage.md 3, wie in C4): im Hochformat läge
+          // es dort unter zwei Optionsgruppen und der Rückmeldung, also
+          // womöglich unter der Scrollkante — ausgerechnet das Angebot nach
+          // zwei Fehlversuchen.
           aktion={
             takt === 'lage' ? (
-              <Button
-                variant="aktion"
-                onClick={absetzen}
-                disabled={!vollstaendig}
-                data-testid="c6-absetzen"
-              >
-                So absetzen
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="aktion"
+                  onClick={absetzen}
+                  disabled={!vollstaendig}
+                  data-testid="c6-absetzen"
+                >
+                  So absetzen
+                </Button>
+                {versuche >= HILFE_AB && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <Button
+                      variant="leise"
+                      onClick={zeigMirWie}
+                      data-testid="c6-zeig-mir-wie"
+                    >
+                      Zeig mir wie
+                    </Button>
+                  </motion.div>
+                )}
+              </div>
             ) : undefined
           }
         />

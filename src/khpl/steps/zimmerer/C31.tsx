@@ -19,6 +19,13 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * Was danach übrig bleibt, ist stark genug: Holz bindet CO₂, solange es verbaut
  * ist, und ein Haus aus Holz ist auf Jahrzehnte ein Lager.
  *
+ * ⚠️ **Die Korrektur darf ihre eigene Figur nicht wiederholen.** Was den
+ * durchgestrichenen Satz ersetzt, steht wörtlich so im Beleg: „einer der besten“
+ * CO₂-Speicher und „der mit Abstand wichtigste nachwachsende
+ * Konstruktionsbaustoff“ (`belege/zimmerer.md` 3). Ein zweites „der einzige …“
+ * wäre auf genau diesem Screen unbelegt **und** angreifbar — lasttragenden
+ * Strohballenbau gibt es hierzulande.
+ *
  * ⚠️ **Die Zahlen stehen als Spanne da und werden nie ausmultipliziert**
  * (`TEILWEISE BELEGT`, `belege/zimmerer.md` 3): rund 1 t CO₂ je m³ verbautem
  * Holz, real 0,6–1,7 t; 30 bis 70 m³ in einem Einfamilienhaus. „Ein Holzhaus
@@ -60,8 +67,8 @@ export function C31() {
             Stimmt so nicht. Nachwachsen tut auch eine ganze Reihe anderer. Richtig ist:
             Holz ist{' '}
             <strong className="font-semibold text-kh-paper">einer der besten</strong>{' '}
-            CO₂-Speicher, die ein Haus haben kann — und der einzige, aus dem man
-            hierzulande ein ganzes Tragwerk baut.
+            CO₂-Speicher, die ein Haus haben kann — und der mit Abstand wichtigste
+            nachwachsende Baustoff, aus dem man ein ganzes Tragwerk baut.
           </p>
         </>
       }

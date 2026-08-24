@@ -150,8 +150,13 @@ interface Antwort {
 export function C4() {
   const gespeichert = useFortschritt().answers.c4
   const fertigLautStore = !!gespeichert?.getroffen
+  // Beim Wiedereinstieg zählt **der eigene** Ausschnitt, nicht das Planmaß: die
+  // Toleranz ist eine Spanne, und ein Sprung auf `ZIEL` zeigte hier andere
+  // Zahlen als beim ersten Durchgang — und ein anderes Fenster als C5, C6 und
+  // C7, die den gespeicherten nehmen. `ZIEL` bleibt der Rückfall für einen
+  // Treffer aus einer Sitzung, die den Ausschnitt noch nicht mitgespeichert hat.
   const [ausschnitt, setAusschnitt] = useState<Fensterausschnitt>(() =>
-    fertigLautStore ? ZIEL : START,
+    fertigLautStore ? (gespeichert?.ausschnitt ?? ZIEL) : START,
   )
   const [versuche, setVersuche] = useState(() => gespeichert?.versuche ?? 0)
   const [antwort, setAntwort] = useState<Antwort | null>(() =>
@@ -292,9 +297,12 @@ export function C4() {
       }
       aha={
         <>
+          {/* Zwei Regeln, kein Rechenweg: 1,5 mm/m und die Deckelung auf 3 mm
+              stehen im Beleg nebeneinander (belege/zimmerer.md 5). „1,5 × 3 = 3“
+              wäre ein Rechenfehler — auf einem Präzisionsscreen der teuerste. */}
           <AhaKarte sichtbar={geloest} eyebrow="Wie genau muss so ein Ausschnitt sitzen?">
-            Wasserwaagengenauigkeit: höchstens anderthalb Millimeter Abweichung je Meter,
-            bei einem drei Meter hohen Element also drei Millimeter auf die ganze Höhe.
+            Wasserwaagengenauigkeit: höchstens anderthalb Millimeter Abweichung je Meter —
+            und bei Elementen bis drei Meter nie mehr als drei Millimeter insgesamt.
           </AhaKarte>
           <AhaKarte
             sichtbar={geloest}

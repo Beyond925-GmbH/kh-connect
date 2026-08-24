@@ -340,6 +340,18 @@ export interface ZugEingabe {
 
 const SEIL_L = 2.6
 const PX_JE_M = 0.011
+/** Höhe der Elementunterkante, wenn es auf der Bodenplatte steht. */
+const ABGESETZT_Y = 0.02
+/** Schwebehöhe in Beat 1 — das Element hängt und wartet auf seine Lage. */
+const SCHWEBE_Y = 2.3
+/**
+ * Wie träge die Last der Hakenlage folgt. Das ist das **Bewegungsgefühl Masse**
+ * (khpl-tage.md 2): der Wechsel von Beat 1 auf Beat 2 versetzt das Ziel um rund
+ * 1,4 m seitlich — ungefiltert wäre das ein Sprung in einem einzigen Frame, kein
+ * Fahren. Die Pendelphysik hängt an derselben Größe und würde von einem Sprung
+ * sofort in die Klemmung geschlagen.
+ */
+const HAKEN_NACHLAUF = 5
 
 function naechsteHalbe(winkel: number, geradzahlig: boolean): number {
   // Nächstes Vielfaches von π mit passender Parität (gerade = 0, 2π, …).
@@ -357,11 +369,17 @@ function naechsteHalbe(winkel: number, geradzahlig: boolean): number {
  * und meldet die nächstliegende Lage. Beat 2: Pendelphysik im Frame-Loop —
  * Trägheit, Nachlauf, Ausschwingen. Kein `motion`-Spring: die Last hängt in
  * der Szene, nicht im DOM (khpl-tag-zimmerer.md 6, C6).
+ *
+ * `abgesetzt` ist der dritte Zustand und **kein Beat**: das Element steht schon.
+ * Ohne ihn hinge es beim Wiedereinstieg wieder 2,3 m über der Bodenplatte,
+ * während Panel und Fuß „Element sitzt“ sagen — derselbe Fall, den `holzGefunden`
+ * in C1 löst.
  */
 export function AmHaken({
   lage,
   onLage,
   einweisen = false,
+  abgesetzt = false,
   onAbgesetzt,
   ausschnitt,
   marke,
@@ -372,6 +390,7 @@ export function AmHaken({
   lage?: Elementlage | null
   onLage?: (lage: Elementlage) => void
   einweisen?: boolean
+  abgesetzt?: boolean
   onAbgesetzt?: () => void
   ausschnitt: Fensterausschnitt
   marke: boolean
@@ -388,20 +407,30 @@ export function AmHaken({
   // vorn/hinten. Sichtbar ist die Holzfaserseite genau dann, wenn Gieren und
   // Rollen **dieselbe** Parität haben — Melde- und Ziel-Mapping unten rechnen
   // deshalb mit dem Paritätsvergleich, nie mit psi allein.
+  // Nur der Wert beim Mount zählt — `useRef` behält die erste Belegung. Genau
+  // das ist hier gewollt: wer über „Dein Weg“ in ein gelöstes C6 zurückkommt,
+  // findet das Element stehend vor, nicht am Haken.
   const z = useRef({
-    psi: 0.6, // Gieren; Parität(psi) == Parität(phi) = Holzfaser nach außen
-    phi: Math.PI, // Rollen; 0 = Rähm oben — es hängt zunächst falsch herum
+    psi: abgesetzt ? 0 : 0.6, // Gieren; Parität(psi) == Parität(phi) = Holzfaser nach außen
+    phi: abgesetzt ? 0 : Math.PI, // Rollen; 0 = Rähm oben — es hängt zunächst falsch herum
     flipVon: Math.PI,
     flipStart: -10,
     naechsterFlip: 4,
     schnapp: null as { psi: number; phi: number; seit: number } | null,
-    hx: 1.4,
-    hy: 1.7, // Zielhöhe der Elementunterkante beim Einweisen
+    hx: abgesetzt ? 0 : 1.4,
+    hy: abgesetzt ? ABGESETZT_Y : 1.7, // Zielhöhe der Elementunterkante beim Einweisen
     theta: 0,
     thetaV: 0,
     hxAlt: null as number | null,
-    setztSeit: null as number | null,
-    abgemeldet: false,
+    // Die geglättete Hakenlage. Im ersten Frame rastet sie auf das Ziel ein,
+    // statt aus dem Nichts heranzufahren.
+    rx: 0,
+    ry: 0,
+    rGesetzt: false,
+    // Vorbelegt: die Absetz-Blende ist längst durchgelaufen (`u >= 1`), das
+    // Element liegt auf, und gemeldet wurde es in der Sitzung davor.
+    setztSeit: abgesetzt ? -100 : (null as number | null),
+    abgemeldet: abgesetzt,
   })
 
   const melder = useRef({ onLage, onAbgesetzt })
@@ -478,6 +507,8 @@ export function AmHaken({
       const k = reduziert ? 1 : 1 - Math.exp(-dt * 7)
       s.psi += (zielPsi - s.psi) * k
       s.phi += (zielPhi - s.phi) * k
+    } else if (abgesetzt) {
+      // Steht. Eine Wand auf der Bodenplatte dreht sich nicht mehr.
     } else if (reduziert) {
       // Ohne Animation: alle 2,2 s die nächste der vier Lagen, ohne Drehweg.
       const schritt = Math.floor(t / 2.2)
@@ -495,8 +526,20 @@ export function AmHaken({
     }
 
     // ---- Höhe und Pendel -------------------------------------------------
-    const bodenY = einweisen ? s.hy : 2.3
-    const hookX = einweisen ? s.hx : Math.sin(t * 0.5) * 0.12
+    // Ziel und gezeigte Lage sind zweierlei: der Beat-Wechsel versetzt das Ziel
+    // in einem Frame, die Last fährt mit Nachlauf hinterher.
+    const zielY = einweisen ? s.hy : abgesetzt ? ABGESETZT_Y : SCHWEBE_Y
+    const zielX = einweisen ? s.hx : abgesetzt ? 0 : Math.sin(t * 0.5) * 0.12
+    if (!s.rGesetzt) {
+      s.rGesetzt = true
+      s.rx = zielX
+      s.ry = zielY
+    }
+    const kHaken = reduziert ? 1 : 1 - Math.exp(-dt * HAKEN_NACHLAUF)
+    s.rx += (zielX - s.rx) * kHaken
+    s.ry += (zielY - s.ry) * kHaken
+    const bodenY = s.ry
+    const hookX = s.rx
 
     if (reduziert) {
       s.theta = 0
@@ -523,7 +566,7 @@ export function AmHaken({
     }
     if (s.setztSeit !== null) {
       const u = reduziert ? 1 : glatt((t - s.setztSeit) / 0.8)
-      y = bodenY * (1 - u) + 0.02 * u
+      y = bodenY * (1 - u) + ABGESETZT_Y * u
       s.hx += (0 - s.hx) * (reduziert ? 1 : 1 - Math.exp(-dt * 4))
       s.theta *= 1 - u
       if (u >= 1 && !s.abgemeldet) {
@@ -549,7 +592,10 @@ export function AmHaken({
   })
 
   return (
-    <group ref={aussen} position={[0, 2.3 + H, WANDACHSE_Z]}>
+    <group
+      ref={aussen}
+      position={[0, (abgesetzt ? ABGESETZT_Y : SCHWEBE_Y) + H + 0.1, WANDACHSE_Z]}
+    >
       {/* Kranseil und Unterflasche — der Kran selbst bleibt aus dem Bild */}
       <mesh ref={seil} position={[0, 2, 0]}>
         <cylinderGeometry args={[0.02, 0.02, 1, 6]} />
