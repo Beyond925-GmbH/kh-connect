@@ -133,6 +133,21 @@ const genau = (n: number) => Number(n.toFixed(3))
 /** `19.987` → `19,987`. Deutsch, mit Komma, wie auf jeder Anzeige in der Halle. */
 const mass = (n: number) => n.toFixed(3).replace('.', ',')
 
+/**
+ * Der Endwert, den der kleinste Korrektorstand in ganzen Schritten aus TEIL_2
+ * macht — 20,015 − 2 × 0,01 = 19,995 mm, in der Toleranz.
+ *
+ * `answers.z5` persistiert den gemessenen Endwert nicht (Spec-Signatur, §6 Z5).
+ * Beim Wiedereinstieg in ein abgeschlossenes Z5 muss die Anzeige trotzdem
+ * einen Wert zeigen, der wirklich „gut“ ist — stünde dort TEIL_2 (20,015),
+ * zeigte der Screen eine Zahl außerhalb der Toleranz im Gut-Ton: genau der
+ * Fehlertyp, den die Spec bei 19,987 an sich selbst gefunden hat.
+ */
+const ENDWERT = genau(
+  TEIL_2.wert -
+    Math.ceil((TEIL_2.wert - GROESSTMASS) / KORREKTUR_SCHRITT) * KORREKTUR_SCHRITT,
+)
+
 const labelFuer = (u: Urteil | null) => URTEILE.find((x) => x.id === u)?.label ?? ''
 const grundFuer = (u: Urteil) => URTEILE.find((x) => x.id === u)?.grund ?? ''
 
@@ -157,7 +172,9 @@ export function Z5() {
   const [drehung, setDrehung] = useState(() => (gespeichert ? 100 : 0))
   const [urteil, setUrteil] = useState<Urteil | null>(gespeichert?.urteil ?? null)
   const [korrektur, setKorrektur] = useState(0)
-  const [ergebnis, setErgebnis] = useState(TEIL_2.wert)
+  const [ergebnis, setErgebnis] = useState(() =>
+    gespeichert?.korrigiert ? ENDWERT : TEIL_2.wert,
+  )
   const [meldung, setMeldung] = useState<string | null>(null)
 
   const fertig = takt === 'fertig'
@@ -416,11 +433,12 @@ export function Z5() {
 function Anzeige({ wert, ton }: { wert: number; ton: 'offen' | 'steht' | 'gut' }) {
   return (
     <div className="flex items-baseline gap-2.5">
+      {/* Die Anzeige rastet ein — hart, ohne Überschwingen (§7). */}
       <motion.span
         key={ton}
         initial={ton === 'gut' ? { scale: 0.92 } : false}
         animate={{ scale: 1 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 24 }}
+        transition={{ duration: 0.4, ease: RASTER }}
         data-testid="z5-anzeige"
         className={`kh-zahl ${
           ton === 'offen' ? 'text-kh-paper/45' : ton === 'steht' ? 'text-kh-paper' : ''

@@ -48,6 +48,18 @@ import { Begriff } from './Begriff'
  * schreibt Klartext, Siemens ShopTurn ist grafisch. „So sieht jedes
  * CNC-Programm aus“ wäre falsch. Programm, Fehlerzeile und Dialekt kommen aus
  * `buehne/zerspanung/kanon.ts`; der Code ist **fachlich abzunehmen**.
+ *
+ * ⚠️ **Gemeldeter Widerspruch in der Spec, nicht gelöst** (khpl-tage.md §3).
+ * §11 ersetzt den eingebauten Fehler durch das fehlende Minuszeichen
+ * (`G1 Z35.` fährt vom Teil **weg**, ins Leere); §6 Z3 trägt aber weiter die
+ * Folge der alten Fassung („fährt das Werkzeug in die Spannbacke“, das Bild
+ * friert am Aufprall). Beide sind so gebaut, wie sie validiert sind — und
+ * physikalisch unvereinbar: derselbe Fehler kann nicht zugleich ins Leere und
+ * in die Backe führen. Kandidaten zur Abstimmung: die Folge des blinden
+ * Starts an den Minus-Fehler anpassen (Luftschnitt, das Teil bleibt ungedreht)
+ * oder einen Fehler wählen, der wirklich in die Backe fährt. `KOLLISION_TEXT`,
+ * `AUFPRALL` (Werkzeugweg.tsx) und `FEHLER_CODE` müssen danach zur selben
+ * Physik gehören.
  */
 
 /** Nach zwei Fehlversuchen bietet die App die Lösung an (flow 6.6). */
@@ -344,7 +356,10 @@ function Programmliste({
                 onClick={() => onZeile(i)}
                 whileTap={{ scale: 0.985 }}
                 data-testid={`z3-zeile-${i}`}
-                className={`${grund} min-h-[40px] w-full text-left`}
+                // 52 px wie die kleinsten Ziele des Dachdecker-Tages: sechs
+                // Zeilen dicht untereinander, und ein Fehltipp erzeugt hier
+                // eine „falsch“-Rückmeldung.
+                className={`${grund} min-h-[52px] w-full text-left`}
               >
                 {inhalt}
               </motion.button>

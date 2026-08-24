@@ -12,6 +12,7 @@ import {
   GROESSTMASS,
   KLEINSTMASS,
   NENNMASS,
+  RASTER_KURVE,
   TOLERANZ,
 } from '@/khpl/buehne/zerspanung/kanon'
 import { Werkstueck } from '@/khpl/buehne/zerspanung/Werkstueck'
@@ -81,6 +82,13 @@ function anteil(wert: number): number {
 }
 
 const mm = (n: number) => `${n.toFixed(3).replace('.', ',')} mm`
+
+/**
+ * Die Rasterkurve dieses Tages: Ziffern rasten, nichts federt (§7 — „keine
+ * Springs“). `kanon.ts` hält sie `as const`; `motion` verlangt ein
+ * beschreibbares Vierertupel.
+ */
+const RASTER = [...RASTER_KURVE] as [number, number, number, number]
 
 export function Z1() {
   const gespeichert = useFortschritt().answers.z1
@@ -224,10 +232,11 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
   return (
     <div className="flex flex-col gap-4 landscape:grid landscape:grid-cols-[1fr_1.05fr] landscape:items-start landscape:gap-x-7">
       <div className="flex flex-col gap-2.5">
+        {/* Die Signaturzahl rastet ein — hart, ohne Überschwingen (§7). */}
         <motion.span
           initial={{ opacity: 0, y: 18, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+          transition={{ duration: 0.4, ease: RASTER }}
           data-testid="z1-zahl"
           className="kh-zahl text-kh-orange"
         >
@@ -319,7 +328,7 @@ function Vergleich({ schaetzung }: { schaetzung: number }) {
         <motion.span
           initial={{ opacity: 0, scaleY: 0.3 }}
           animate={{ opacity: 1, scaleY: 1 }}
-          transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 24 }}
+          transition={{ delay: 0.2, duration: 0.4, ease: RASTER }}
           style={{ left: `${anteil(TOLERANZ)}%` }}
           className="absolute top-[-10px] bottom-[-10px] w-[7px] -translate-x-1/2 rounded-full bg-kh-orange shadow-[0_0_12px_rgba(255,159,42,0.6)]"
           aria-hidden

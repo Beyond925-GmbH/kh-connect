@@ -1,7 +1,5 @@
-import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { StepFoto } from '@/khpl/buehne/Foto'
-import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { Begriff } from './Begriff'
@@ -22,6 +20,11 @@ import { Begriff } from './Begriff'
  * `interaktionOffen={false}`: die Kette ist Darstellung, keine Aufgabe. Ohne
  * die Angabe gälte jeder Step mit `interaktion` als offene Übung, und der Fuß
  * würde einen Ausweg anbieten, den es hier nicht zu nehmen gibt.
+ *
+ * **Keine Aha-Karte.** Der Kandidat („Geht das auch ohne Computer?“ —
+ * konventionelle Maschinen, Handräder) ist INTERVIEW-gedeckt, steht aber in
+ * §12 ausdrücklich unter „Nicht aufgenommen — Material für spätere
+ * Ausbaustufen“. Er lebt im Glossareintrag `CNC` weiter, nicht auf dem Screen.
  */
 
 const KETTE = [
@@ -43,13 +46,6 @@ const KETTE = [
 ] as const
 
 export function Z11() {
-  const [aha, setAha] = useState(false)
-
-  useEffect(() => {
-    const id = window.setTimeout(() => setAha(true), 800)
-    return () => window.clearTimeout(id)
-  }, [])
-
   return (
     <StepShell
       id="Z1.1"
@@ -109,12 +105,6 @@ export function Z11() {
             )
           })}
         </motion.ol>
-      }
-      aha={
-        <AhaKarte sichtbar={aha} eyebrow="Geht das auch ohne Computer?">
-          Es gibt sie noch, die konventionellen Maschinen: Handräder mit Zahlen darauf,
-          kein Bildschirm. In der Ausbildung kommen beide vor.
-        </AhaKarte>
       }
       fuss={<StepFuss id="Z1.1" />}
     />
