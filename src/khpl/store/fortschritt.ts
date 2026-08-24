@@ -89,7 +89,33 @@ export interface Antworten {
   // Zerspanung — Schlüssel `z*`
   // -------------------------------------------------------------------------
 
-  // (noch keine Interaktion)
+  /** Z1 — geschätzte Toleranz in mm, und ob die echte Zahl schon stand. */
+  z1?: { schaetzung: number; aufgeloest: boolean }
+  /** Z2 — welche der vier Rüst-Handgriffe erledigt sind. */
+  z2?: { geruestet: string[]; fertig: boolean }
+  /**
+   * Z3 — wie weit der Besucher sich durch das Programm getippt hat, ob er die
+   * falsche Zeile gefunden hat und ob er in die Spannbacke gefahren ist.
+   */
+  z3?: { zeilen: number; gefunden: boolean; kollision: boolean }
+  /** Z4 — welche der drei Entdeckungen im Messraum aufgedeckt wurden. */
+  z4?: { gelesen: string[] }
+  /** Z5 — das Urteil über den Messwert, ob es stimmte, und ob korrigiert wurde. */
+  z5?: {
+    urteil: 'gut' | 'nacharbeit' | 'ausschuss'
+    richtig: boolean
+    korrigiert: boolean
+  }
+  /**
+   * Z7 — angesehene Karrierewege, in Reihenfolge des Öffnens.
+   *
+   * Das Gegenstück zu `m9`. Es gibt dafür bewusst **keinen** gemeinsamen
+   * Schlüssel: `merkeKarriereweg` schreibt fest nach `m9` und ist damit trotz
+   * V5 ein Dachdecker-Stück in gemeinsamem Code — dieser Tag schreibt über
+   * `merkeAntwort` in seinen eigenen. Gemeldet, nicht gelöst
+   * (khpl-tage.md §6.2).
+   */
+  z7?: { angesehen: StepId[] }
 
   // -------------------------------------------------------------------------
   // Anlagenmechanik — Schlüssel `a*`
@@ -227,7 +253,39 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   // Zerspanung — Schlüssel `z*`
   // ---------------------------------------------------------------------
 
-  // (noch keine Interaktion)
+  const z1 = q.z1 as Antworten['z1']
+  if (z1 && typeof z1.schaetzung === 'number' && Number.isFinite(z1.schaetzung)) {
+    a.z1 = { schaetzung: z1.schaetzung, aufgeloest: !!z1.aufgeloest }
+  }
+  const z2 = q.z2 as Antworten['z2']
+  if (z2 && stringListe(z2.geruestet)) {
+    a.z2 = { geruestet: stringListe(z2.geruestet) as string[], fertig: !!z2.fertig }
+  }
+  const z3 = q.z3 as Antworten['z3']
+  if (z3 && typeof z3.zeilen === 'number' && Number.isFinite(z3.zeilen)) {
+    a.z3 = { zeilen: z3.zeilen, gefunden: !!z3.gefunden, kollision: !!z3.kollision }
+  }
+  const z4 = q.z4 as Antworten['z4']
+  if (z4 && stringListe(z4.gelesen)) {
+    a.z4 = { gelesen: stringListe(z4.gelesen) as string[] }
+  }
+  const URTEILE: readonly string[] = ['gut', 'nacharbeit', 'ausschuss']
+  const z5 = q.z5 as Antworten['z5']
+  // Ein Urteil, das es nicht mehr gibt, darf nicht als „falsch beantwortet“
+  // wieder auftauchen — der ganze Eintrag fliegt dann raus.
+  if (z5 && URTEILE.includes(z5.urteil)) {
+    a.z5 = {
+      urteil: z5.urteil,
+      richtig: !!z5.richtig,
+      korrigiert: !!z5.korrigiert,
+    }
+  }
+  const z7 = q.z7 as Antworten['z7']
+  if (z7 && Array.isArray(z7.angesehen)) {
+    // Fällt eine StepId aus dem Graphen, darf sie in Z8 nicht als Aufhänger
+    // wieder auftauchen.
+    a.z7 = { angesehen: z7.angesehen.filter((x) => istStepId(graph, x)) }
+  }
 
   // ---------------------------------------------------------------------
   // Anlagenmechanik — Schlüssel `a*`
