@@ -15,6 +15,19 @@ import { M8 } from '@/khpl/steps/dachdecker/M8'
 import { M9 } from '@/khpl/steps/dachdecker/M9'
 import { B9 } from '@/khpl/steps/dachdecker/B9'
 import { M10 } from '@/khpl/steps/dachdecker/M10'
+import { A1 } from '@/khpl/steps/anlagenmechanik/A1'
+import { A11 } from '@/khpl/steps/anlagenmechanik/A11'
+import { A2 } from '@/khpl/steps/anlagenmechanik/A2'
+import { A3 } from '@/khpl/steps/anlagenmechanik/A3'
+import { A31 } from '@/khpl/steps/anlagenmechanik/A31'
+import { A4 } from '@/khpl/steps/anlagenmechanik/A4'
+import { A41 } from '@/khpl/steps/anlagenmechanik/A41'
+import { A5 } from '@/khpl/steps/anlagenmechanik/A5'
+import { A6 } from '@/khpl/steps/anlagenmechanik/A6'
+import { A7 } from '@/khpl/steps/anlagenmechanik/A7'
+import { A8 } from '@/khpl/steps/anlagenmechanik/A8'
+import { A8Weg } from '@/khpl/steps/anlagenmechanik/A8Weg'
+import { A9 } from '@/khpl/steps/anlagenmechanik/A9'
 
 /**
  * Welcher Step welches Modul rendert — je Beruf.
@@ -74,5 +87,22 @@ export const BERUF_KOMPONENTEN: Partial<
   // ---------------------------------------------------------------------
   // Anlagenmechanik — Ids `A*` · Steps in `steps/anlagenmechanik/`
   // ---------------------------------------------------------------------
-  anlagenmechaniker: {},
+  anlagenmechaniker: {
+    A1: () => <A1 />,
+    'A1.1': () => <A11 />,
+    A2: () => <A2 />,
+    A3: () => <A3 />,
+    'A3.1': () => <A31 />,
+    A4: () => <A4 />,
+    'A4.1': () => <A41 />,
+    A5: () => <A5 />,
+    A6: () => <A6 />,
+    A7: () => <A7 />,
+    A8: () => <A8 />,
+    // Drei Karrierewege, eine Komponente — wie `B9` beim Dachdecker.
+    'A8.1': () => <A8Weg id="A8.1" />,
+    'A8.2': () => <A8Weg id="A8.2" />,
+    'A8.3': () => <A8Weg id="A8.3" />,
+    A9: () => <A9 />,
+  },
 }
