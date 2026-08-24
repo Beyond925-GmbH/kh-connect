@@ -45,6 +45,8 @@ const IDLE_RESET_MS = 15_000
  * C5, Z4 und A5 sind die Zäsuren der drei anderen Tage (die Fahrt mit dem
  * Element, der Messraum, der Mittag im Transporter) — alle drei mit demselben
  * Argument wie M6, von den Tagen gemeldet statt gebaut (khpl-tage.md 6.2).
+ * Z6 und Z7.1–Z7.3 sind Rückblick und Karriere-Faktenblöcke der Zerspanung —
+ * dieselben Lesescreens wie M8 und B9.1–B9.3.
  */
 const GEDULD: Partial<Record<string, number>> = {
   M6: 3,
@@ -56,6 +58,10 @@ const GEDULD: Partial<Record<string, number>> = {
   C5: 3,
   Z4: 3,
   A5: 3,
+  Z6: 3,
+  'Z7.1': 3,
+  'Z7.2': 3,
+  'Z7.3': 3,
 }
 
 /** Wie oft der Splash prüft, ob der gespeicherte Stand abgelaufen ist. */
