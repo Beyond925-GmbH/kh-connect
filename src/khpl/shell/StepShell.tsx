@@ -116,13 +116,38 @@ export function StepShell({
    * seinen Auslauf-Verlauf. Gemessen bei jedem Scroll und bei jeder
    * Größenänderung von Fläche oder Inhalt — eine Übung, die sich auflöst,
    * ändert die Höhe, ohne dass gescrollt wird.
+   *
+   * **Gemessen wird am letzten Kind, nicht an `scrollHeight`.** Die
+   * Vorfassung verglich `scrollHeight` mit `clientHeight`, und das meldet
+   * einen Überlauf, den es gar nicht gibt: Anton läuft mit `line-height`
+   * unter 1 über seine Zeilenbox hinaus, und Chrome zählt das in
+   * `scrollHeight` mit. Auf M10 waren das zehn Pixel — genug, um den
+   * Auslauf-Verlauf einzublenden und damit ausgerechnet „Sprich jetzt mit
+   * uns am Stand." halb wegzublenden, obwohl das Panel vier Zeilen trägt
+   * und nichts zu scrollen hat. Die Unterkante des letzten Kindes ist eine
+   * Layout-Größe und kennt diesen Effekt nicht.
+   *
+   * Zwei Werte, weil sie zwei Fragen beantworten: `ueberlauf` heißt „unter
+   * der **aktuellen** Kante liegt noch etwas“ und schaltet den Verlauf,
+   * `scrollbar` heißt „es gibt überhaupt etwas zu scrollen“ und schaltet die
+   * Scrollfläche. Aus einem Wert beides zu ziehen hieße, dass das Panel beim
+   * Erreichen des Endes das Scrollen abschaltet und nach oben zurückspringt.
    */
   const scrollFlaeche = useRef<HTMLDivElement>(null)
   const [ueberlauf, setUeberlauf] = useState(false)
+  const [scrollbar, setScrollbar] = useState(false)
   const messeUeberlauf = useCallback(() => {
     const el = scrollFlaeche.current
-    if (!el) return
-    setUeberlauf(el.scrollHeight - el.scrollTop - el.clientHeight > 6)
+    const letztes = el?.lastElementChild
+    if (!el || !letztes) {
+      setUeberlauf(false)
+      setScrollbar(false)
+      return
+    }
+    const kante = el.getBoundingClientRect()
+    const unten = letztes.getBoundingClientRect().bottom
+    setUeberlauf(unten - kante.bottom > 6)
+    setScrollbar(unten - kante.top + el.scrollTop > el.clientHeight + 6)
   }, [])
   useEffect(() => {
     messeUeberlauf()
@@ -232,11 +257,17 @@ export function StepShell({
           unsichtbare.
         */}
         <div className="relative flex min-h-0 flex-1 flex-col">
+          {/* `overflow-hidden`, solange es nichts zu scrollen gibt: sonst
+              steht auf jedem Panel mit einer Anton-Zeile am Ende ein
+              Scrollbalken für zehn Pixel Schriftüberhang — und das Panel
+              lässt sich um genau diese zehn Pixel verschieben. */}
           <div
             ref={scrollFlaeche}
             data-scroll
             onScroll={messeUeberlauf}
-            className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain pr-0.5"
+            className={`flex min-h-0 flex-1 flex-col gap-4 overscroll-contain pr-0.5 ${
+              scrollbar ? 'overflow-y-auto' : 'overflow-y-hidden'
+            }`}
           >
             {fachtext && <div className="kh-fachtext">{fachtext}</div>}
             {interaktion}

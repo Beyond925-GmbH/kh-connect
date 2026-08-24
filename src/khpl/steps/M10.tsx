@@ -171,19 +171,35 @@ function Abschlussfeld() {
           dem Foto Detail, und der Verlauf nach unten legt den Grund fest, auf
           dem das dunkle Panel steht. Ohne ihn schwimmt es auf einer Fläche, die
           genauso hell ist wie sein eigener Rand. */}
+      {/* **Eine Lage Orange, nicht zwei.** Hier lagen `mix-blend-multiply`
+          und darüber noch einmal `bg-kh-orange/40`. Das Multiply allein trägt
+          die Markenzone schon; die zweite Lage legte sich als Deckfarbe
+          darüber und machte aus dem Foto einen orangen Fleck, in dem kein
+          Gesicht mehr zu erkennen war — auf dem Screen, der von Menschen am
+          Stand handelt. Der Rest ist jetzt Tiefe statt Deckung. */}
       <div className="absolute inset-0 bg-kh-orange mix-blend-multiply" aria-hidden />
-      <div className="absolute inset-0 bg-kh-orange/40" aria-hidden />
+      <div className="absolute inset-0 bg-kh-orange/15" aria-hidden />
       <div
         className="absolute inset-0 bg-gradient-to-t from-[#0E0D0B]/75 via-transparent to-[#0E0D0B]/25"
         aria-hidden
       />
+      {/* Die Paderborner Silhouette. Sie endet an ihrer eigenen Unterkante
+          mit einer waagerechten Kante — die Grafik trägt dort eine
+          Standlinie, und in `brightness-0` bei 22 % zog die quer durch den
+          halben Screen. Die Maske lässt sie in den Grund auslaufen, statt
+          abzubrechen. */}
       <motion.img
         src="/brand/kh-pb-lippe.png"
         alt=""
         aria-hidden
         initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 0.22, y: 0 }}
+        animate={{ opacity: 0.18, y: 0 }}
         transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        style={{
+          maskImage: 'linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%)',
+        }}
         className="absolute inset-x-0 top-[5%] mx-auto h-[38%] w-auto max-w-none object-contain brightness-0"
       />
     </div>
