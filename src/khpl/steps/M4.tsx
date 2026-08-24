@@ -7,6 +7,7 @@ import type { Zuschnitt3DProps } from '@/khpl/buehne/Zuschnitt3D'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
+import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
@@ -174,20 +175,15 @@ export function M4() {
                 <p className="text-[1.0625rem] text-kh-mute">Und der Winkel am First:</p>
                 <div className="flex gap-2">
                   {WINKEL.map((w) => (
-                    <button
+                    <Wahlflaeche
                       key={w}
-                      type="button"
                       onClick={() => {
                         setWinkel(w)
                         setErgebnis(null)
                       }}
                       data-testid={`m4-winkel-${w}`}
-                      aria-pressed={winkel === w}
-                      className={`flex h-[52px] flex-1 items-center justify-center gap-2 rounded-kh border-2 text-[1.0625rem] font-semibold transition-transform active:scale-95 ${
-                        winkel === w
-                          ? 'border-kh-signal bg-kh-signal text-[#0E0D0B]'
-                          : 'border-kh-line-strong bg-white/5 text-kh-paper'
-                      }`}
+                      gewaehlt={winkel === w}
+                      className="flex-1 justify-center gap-2 font-semibold"
                     >
                       <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
                         <path
@@ -197,7 +193,7 @@ export function M4() {
                         />
                       </svg>
                       {w}°
-                    </button>
+                    </Wahlflaeche>
                   ))}
                 </div>
               </div>

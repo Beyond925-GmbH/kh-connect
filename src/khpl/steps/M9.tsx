@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
+import { wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { KARRIEREWEGE } from './karrierewege'
@@ -64,11 +65,16 @@ export function M9() {
                 }}
                 onClick={() => zumAbstecher(weg.id)}
                 data-testid={`m9-${weg.id}`}
-                className="relative flex min-h-[112px] w-full flex-col justify-between gap-2 overflow-hidden rounded-kh border-2 border-kh-line-strong bg-white/6 p-4 text-left"
+                className={`${wahlflaeche({ form: 'karte' })} min-h-[112px] overflow-hidden`}
               >
+                {/* Die Schattenziffer stand halb außerhalb der Karte und wurde
+                    an der Kante abgeschnitten — bei `overflow-hidden` sieht
+                    das nach Fehler aus, nicht nach Absicht. Jetzt steht sie
+                    ganz drin, oben rechts, und der Titel läuft nicht mehr
+                    hinein. */}
                 <span
                   aria-hidden
-                  className="absolute -top-3 right-2 font-display text-[3.5rem] leading-none text-white/8"
+                  className="absolute top-1 right-3 font-display text-[3rem] leading-none text-white/8"
                 >
                   {i + 1}
                 </span>

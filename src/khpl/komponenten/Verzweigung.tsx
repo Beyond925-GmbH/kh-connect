@@ -3,6 +3,7 @@ import { Dialog as BaseDialog } from '@base-ui/react/dialog'
 import { ArrowRight, Check } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
+import { Wahlflaeche } from './Wahlflaeche'
 import type { StepId } from '@/khpl/flow/steps'
 import { beschreibung, einladung, weiterText } from '@/khpl/flow/uebergaenge'
 import { useGraph } from '@/khpl/store/fortschritt'
@@ -192,12 +193,11 @@ function WegeDialog({
             {angebote.map((id) => {
               const zeile = beschreibung(graph, id)
               return (
-                <button
+                <Wahlflaeche
                   key={id}
-                  type="button"
                   onClick={() => onAbstecher(id)}
                   data-testid={`abstecher-${id}`}
-                  className="flex min-h-[60px] items-center gap-3 rounded-kh border-2 border-kh-line-strong bg-white/6 px-4 py-2.5 text-left transition-transform active:scale-[0.97]"
+                  className="min-h-[60px] px-4 py-2.5"
                 >
                   <span className="min-w-0 flex-1">
                     <span className="block text-[1.0625rem] leading-tight font-semibold text-kh-paper">
@@ -214,7 +214,7 @@ function WegeDialog({
                     strokeWidth={2.5}
                     aria-hidden
                   />
-                </button>
+                </Wahlflaeche>
               )
             })}
           </div>

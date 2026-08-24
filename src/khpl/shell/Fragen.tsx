@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
+import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { FRAGEN } from '@/khpl/match/fragen'
 import { merkeFrage, zeigeVorschlag } from '@/khpl/store/fortschritt'
 
@@ -96,23 +97,34 @@ export function Fragen() {
           >
             <h1 className="kh-plakat shrink-0">{frage.frage}</h1>
 
-            <div className="flex shrink-0 flex-col gap-2.5">
+            {/*
+              Die Antworten sind schmaler als die Frage. Über die volle
+              Plakatbreite gesetzt, stand „Mal so, mal so.“ links in einem
+              830 px breiten Kasten und sah aus wie ein Layoutfehler — der
+              Punkt daneben liegt bei einer kurzen Antwort einen halben
+              Bildschirm entfernt. Der Marker rechts schließt die Zeile ab und
+              sagt zugleich, dass sie antippbar ist.
+            */}
+            <div className="flex shrink-0 flex-col gap-2.5 landscape:max-w-[40rem]">
               {frage.antworten.map((a) => {
                 const ist = gewaehlt === a.id
                 return (
-                  <button
+                  <Wahlflaeche
                     key={a.id}
-                    type="button"
                     data-testid={`antwort-${a.id}`}
                     onClick={() => antworte(a.id)}
-                    className={`flex min-h-[68px] items-center rounded-kh border-2 px-5 py-3 text-left text-[1.125rem] font-semibold transition-all duration-150 active:scale-[0.98] ${
-                      ist
-                        ? 'border-kh-signal bg-kh-signal text-[#0E0D0B]'
-                        : 'border-kh-line-strong bg-white/6 text-kh-paper'
-                    } ${gewaehlt && !ist ? 'opacity-35' : ''}`}
+                    gewaehlt={ist}
+                    gedaempft={Boolean(gewaehlt) && !ist}
+                    className="min-h-[68px] px-5 py-3 text-[1.125rem] font-semibold"
                   >
-                    {a.text}
-                  </button>
+                    <span className="min-w-0 flex-1">{a.text}</span>
+                    <span
+                      aria-hidden
+                      className={`size-2.5 shrink-0 rounded-full transition-colors ${
+                        ist ? 'bg-[#0E0D0B]' : 'bg-kh-orange'
+                      }`}
+                    />
+                  </Wahlflaeche>
                 )
               })}
             </div>

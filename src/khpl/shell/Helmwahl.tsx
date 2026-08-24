@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Helm } from '@/khpl/komponenten/Helm'
+import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { HELM_FARBEN, WERKZEUGE, type WerkzeugIcon } from '@/khpl/match/helm'
 import { merkeHelm, useSitzung, zeigeFragen } from '@/khpl/store/fortschritt'
 
@@ -149,27 +150,22 @@ export function Helmwahl() {
                   const Icon = ICONS[w.icon]
                   const gewaehlt = werkzeug === w.id
                   return (
-                    <button
+                    <Wahlflaeche
                       key={w.id}
-                      type="button"
-                      aria-pressed={gewaehlt}
+                      form="kachel"
+                      gewaehlt={gewaehlt}
                       data-testid={`werkzeug-${w.id}`}
                       onClick={() => setWerkzeug(gewaehlt ? '' : w.id)}
-                      className={`flex min-h-[104px] flex-col items-center justify-center gap-2 rounded-kh border-2 px-2 py-3 text-center transition-transform active:scale-[0.96] ${
-                        gewaehlt
-                          ? 'border-kh-signal bg-kh-signal/12'
-                          : 'border-kh-line bg-white/5'
-                      }`}
                     >
                       <Icon
-                        className={`size-9 ${gewaehlt ? 'text-kh-signal' : 'text-kh-paper/70'}`}
+                        className={gewaehlt ? 'size-9' : 'size-9 text-kh-paper/70'}
                         strokeWidth={1.75}
                         aria-hidden
                       />
-                      <span className="text-[0.9375rem] leading-tight font-semibold text-kh-paper/85">
+                      <span className="text-[0.9375rem] leading-tight font-semibold">
                         {w.name}
                       </span>
-                    </button>
+                    </Wahlflaeche>
                   )
                 })}
               </div>

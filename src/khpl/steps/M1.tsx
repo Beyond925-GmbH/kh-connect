@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
+import { wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
@@ -272,11 +273,11 @@ function Liste({
                 data-testid={`m1-${p.id}`}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 600, damping: 26 }}
-                className={`flex min-h-[56px] w-full items-center gap-3 rounded-kh border-2 px-3.5 py-1.5 text-left text-[1.0625rem] leading-tight transition-colors ${
-                  an
-                    ? 'border-kh-orange bg-kh-orange font-semibold text-[#0E0D0B]'
-                    : 'border-kh-line-strong bg-white/5 text-kh-paper/85'
-                }`}
+                // `ton="orange"`: hier ist das Antippen **vorläufig**. Die
+                // Auswertung danach färbt die Treffer in Signalfarbe, und die
+                // wäre verbraucht, wenn schon das Auswählen sie benutzte
+                // (siehe `Wahlflaeche`).
+                className={wahlflaeche({ ton: 'orange', gewaehlt: an })}
               >
                 <span
                   aria-hidden
