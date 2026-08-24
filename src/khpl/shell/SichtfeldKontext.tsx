@@ -63,14 +63,28 @@ function grob(x: number): number {
  * einen Sicherheitsstreifen.
  *
  * **Der Wert ist gemessen, nicht hergeleitet.** Die Einpassung rechnet gegen
- * `huelle` aus `berechneMasse`; auf dem Schirm ragt das fertig gelattete Dach
- * sichtbar darüber hinaus. Mit 5 % und mit 10 % stand der Dachstuhl weiter an
- * der rechten Kante an, erst ab knapp 18 % steht er frei. Wer die Hülle in
+ * `huelle` aus `berechneMasse`; auf dem Schirm ragen die gelattete Dachfläche
+ * und — bei Kulisse — die Front des Gespanns sichtbar darüber hinaus. Bei 5 %
+ * und bei 10 % wird das Modell seitlich angeschnitten (bei 10 % hochkant an
+ * der linken Kante, gemessen an M8), ab 14 % steht es frei. Wer die Hülle in
  * `mass.ts` einmal an die tatsächlich gezeichnete Geometrie angleicht, kann
  * diesen Wert wieder senken — bis dahin ist er der Preis dafür, dass auf keinem
  * der vier 3D-Screens ein angeschnittenes Dach steht.
  */
-const LUFT = 0.18
+const LUFT = 0.14
+
+/**
+ * Luft an den **waagerechten** Kanten — oben und unten.
+ *
+ * `LUFT` gleicht aus, dass die gezeichnete Dachfläche breiter ist als die
+ * gerechnete Hülle; das ist ein Problem der **Seiten**. Nach oben endet das
+ * Modell am First, und der steht in `huelle.max[1]`; nach unten an der
+ * Rohdecke, und die steht in `huelle.min[1]`. Oben dieselben 14 % abzuziehen
+ * hat deshalb nichts abgefangen, sondern nur das freie Fenster verkürzt — und
+ * seit das Panel quer wie hochkant **unten** Platz nimmt, ist die Höhe genau
+ * die Kante, an der es knapp wird.
+ */
+const LUFT_WAAGERECHT = 0.06
 
 function gleich(a: Sichtfeld, b: Sichtfeld): boolean {
   return (
@@ -86,18 +100,26 @@ function gleich(a: Sichtfeld, b: Sichtfeld): boolean {
  * bereit.
  *
  * Die Karte klebt unten links. Welche Kante sie dem Modell wegnimmt, hängt
- * davon ab, wie breit sie ist:
+ * davon ab, **wie hoch** sie ist:
  *
- * - Füllt sie die Breite (hochkant, Handy), nimmt sie **unten** weg. Das Modell
- *   rückt in den freien Streifen darüber.
- * - Bleibt sie schmal (quer, auf 40rem gedeckelt), nimmt sie **links** weg und
- *   das Modell bekommt die volle Höhe der rechten Hälfte. Senkrecht Platz zu
- *   nehmen wäre hier falsch: dann bliebe dem Dachstuhl nur ein flacher Streifen
- *   über der Karte, obwohl rechts daneben die halbe Fläche frei steht.
+ * - Bleibt sie flach (weniger als 55 % der Höhe), nimmt sie **unten** weg. Das
+ *   Modell bekommt den ganzen Streifen darüber, über die volle Breite.
+ * - Ist sie hoch (M1 mit zehn Chips, M4 mit Soll, Maß und Winkeln), nimmt sie
+ *   **links** weg; über ihr bliebe sonst nur ein Spalt.
  *
- * Der Streifen links *über* der Karte wird dabei als verdeckt gerechnet, obwohl
- * er frei ist — ein Modell, das in einen L-förmigen Rest hineinragt, sieht aus
- * wie ein Fehler.
+ * **Warum die Höhe entscheidet und nicht die Breite.** Die erste Fassung
+ * teilte quer immer seitlich: die Karte links, das Modell rechts daneben, über
+ * die volle Höhe. Das ist richtig für ein hohes Modell und falsch für dieses.
+ * Der Dachstuhl ist gut zweieinhalbmal so breit wie hoch, mit Gespann noch
+ * mehr; in einem hochkant stehenden Fenster bindet die Breite, die Höhe bleibt
+ * ungenutzt. Auf dem iPad quer war das Ergebnis ein 390 px breites Modell mit
+ * 330 px Schwarz darüber und 330 px darunter — auf M8, dem Screen, auf dem das
+ * fertige Dach die ganze Aussage ist. Über der Karte, über die volle Breite,
+ * passt dasselbe Modell doppelt so groß in denselben Screen.
+ *
+ * Der Streifen rechts *neben* der Karte wird dabei als verdeckt gerechnet,
+ * obwohl er frei ist — ein Modell, das in einen L-förmigen Rest hineinragt,
+ * sieht aus wie ein Fehler.
  */
 export function SichtfeldMesser({
   flaeche,
@@ -127,10 +149,13 @@ export function SichtfeldMesser({
     if (k) {
       const quer = f.width > f.height
       const karteBreit = k.width / f.width > 0.9
-      if (quer && !karteBreit) {
+      const untenAnteil = grob((f.bottom - k.top) / f.height)
+      // Seitlich teilen nur, wenn die Karte quer **und** schmal **und hoch**
+      // ist — sonst bleibt über ihr genug Streifen für das ganze Modell.
+      if (quer && !karteBreit && untenAnteil > 0.55) {
         roh.links = grob((k.right - f.left) / f.width)
       } else {
-        roh.unten = grob((f.bottom - k.top) / f.height)
+        roh.unten = untenAnteil
       }
     }
 
@@ -140,8 +165,8 @@ export function SichtfeldMesser({
         ? {
             links: roh.links || LUFT,
             rechts: roh.rechts || LUFT,
-            oben: roh.oben || LUFT,
-            unten: roh.unten || LUFT,
+            oben: roh.oben || LUFT_WAAGERECHT,
+            unten: roh.unten || LUFT_WAAGERECHT,
           }
         : { ...roh }
       setSichtfeld({ mitLuft, roh })
