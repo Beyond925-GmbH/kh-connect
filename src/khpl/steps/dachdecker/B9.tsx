@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { motion } from 'motion/react'
 import type { StepId } from '@/khpl/flow/steps'
-import { SCHRITT_BILDER, StepFoto } from '@/khpl/buehne/Foto'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeKarriereweg } from '@/khpl/store/fortschritt'
@@ -35,11 +35,9 @@ export function B9({ id }: { id: StepId }) {
       // Die drei Karriere-Screens hatten vorher überhaupt kein Bild: weiße
       // Fläche, eine Definitionsliste, ein Knopf. Genau die drei Screens, die
       // den Ausschlag geben sollen, ob jemand am Stand stehen bleibt.
-      buehne={
-        id in SCHRITT_BILDER ? (
-          <StepFoto id={id as keyof typeof SCHRITT_BILDER} />
-        ) : undefined
-      }
+      // Ohne Motiv für diese Id rendert `StepFoto` nichts — dasselbe Ergebnis
+      // wie vorher die Abfrage gegen die Motivliste.
+      buehne={<StepFoto id={id} />}
       interaktion={
         <dl className="flex flex-col gap-2.5">
           {weg.abschnitte.map((a, i) => (

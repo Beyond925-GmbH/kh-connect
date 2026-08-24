@@ -1,5 +1,5 @@
 import { baueGraph, type Angebot, type StepDef } from '@/khpl/flow/steps'
-import type { BerufDef } from './typen'
+import type { BerufDef, StepBild } from './typen'
 
 /**
  * Dachdecker/Dachdeckerin — der gebaute Tag. Siebzehn Steps, M1 bis M10 plus
@@ -21,7 +21,7 @@ import type { BerufDef } from './typen'
  * Deutschland, die AusbauBAusbV von 2026, „Zimmerermeister:in" als
  * Aufstiegstitel, der Stundensatz „im Zimmererhandwerk". Was davon für
  * Dachdecker:innen anders ist, ist **noch nicht nachgezogen** — die Stellen
- * stehen in `steps/karrierewege.ts` und `glossar/begriffe.ts` und sind dort
+ * stehen in `steps/dachdecker/karrierewege.ts` und `glossar/begriffe.ts` und sind dort
  * markiert. Bis dahin trägt dieser Beruf einen Dachdecker-Namen über
  * Zimmerer-Zahlen.
  */
@@ -250,6 +250,41 @@ export const DACHDECKER: BerufDef = {
     szenario: '/medien/media/zimmerer/szenario.mp4',
     szenarioPoster: '/medien/media/zimmerer/szenario-poster.webp',
   },
+  /**
+   * Die Motivliste dieses Tages — am Stück, wie es eine Redaktionsentscheidung
+   * verlangt. Steps ohne Eintrag tragen keine Foto-Bühne, sondern das
+   * 3D-Modell: B3.2, M5, M7. Dort *ist* die Bühne die Interaktion.
+   */
+  bilder: {
+    // Der Einstieg bleibt beim Werkstatt-Standbild: der Text dort handelt vom
+    // Chef, der das Telefon weglegt, und das ist eine Werkstattszene.
+    intro: { src: '/medien/media/zimmerer/hero-poster.webp', pos: '50% 40%' },
+    M1: { src: '/medien/schritte/m1-ortstermin.webp', pos: '50% 40%' },
+    M2: { src: '/medien/schritte/m2-kalkulation.webp', pos: '50% 55%' },
+    M3: { src: '/medien/schritte/m3-cad.webp', pos: '60% 50%' },
+    'B3.1': { src: '/medien/schritte/b31-lager.webp', pos: '50% 45%' },
+    M4: { src: '/medien/schritte/m4-zuschnitt.webp', pos: '55% 45%' },
+    // Regal voller Konstruktionsvollholz in der Halle — genau das, wovon der
+    // Fachtext spricht („In der Halle liegt mehr, als du brauchst“).
+    //
+    // Nicht das naheliegende `schaetzen-balken.webp`, obwohl es Material zeigt,
+    // das von Hand bewegt wird: darauf ist ein Firmenlogo auf dem Polohemd
+    // lesbar. MEDIEN-INVENTAR führt genau das als Ausschlusskriterium und hat
+    // aus demselben Grund schon zwei andere Motive aussortiert.
+    'B4.1': { src: '/medien/schritte/b41-lagerhalle.webp', pos: '50% 50%' },
+    'B5.1': { src: '/medien/schritte/b51-team.webp', pos: '50% 45%' },
+    M6: { src: '/medien/schritte/m6-pause.webp', pos: '50% 45%' },
+    M8: { src: '/medien/schritte/m8-feierabend.webp', pos: '50% 55%' },
+    M9: { src: '/medien/schritte/m9-karriere.webp', pos: '50% 45%' },
+    'B9.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
+    'B9.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
+    'B9.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
+    // Der Abschluss zeigt einen Menschen und ein fertiges Sparrenwerk, keine
+    // Skyline: hier soll jemand aufstehen und an den Stand gehen. Bewusst nicht
+    // dasselbe Motiv wie der Einstieg — Anfang und Ende sollen sich nicht
+    // spiegeln, sondern auseinanderliegen.
+    M10: { src: '/medien/schritte/intro-aufrichten.webp', pos: '50% 45%' },
+  } satisfies Partial<Record<Id | 'intro', StepBild>>,
   // TEXT: `ENTWURF`. Der Wortlaut war am 24.08.2026 abgenommen — aber für eine
   // Zimmerei („Du bist Azubi in einer Zimmerei"). Der Betrieb ist hier
   // ausgetauscht, der Rest steht unverändert; damit ist die Abnahme offen.

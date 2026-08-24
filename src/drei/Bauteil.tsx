@@ -1,13 +1,13 @@
 import { useMemo } from 'react'
 import * as THREE from 'three'
 import type { ThreeEvent } from '@react-three/fiber'
-import type { Bauteil as BauteilDaten } from './teileliste'
+import type { Bauteil as BauteilDaten } from '@/dachstuhl/teileliste'
 import {
   ABDUNKLUNG_ANTEIL,
   ABDUNKLUNG_ZIEL,
   AUSWAHL_EMISSIV,
   AUSWAHL_INTENSITAET,
-} from './bauteil-texte'
+} from '@/dachstuhl/bauteil-texte'
 import type { TapErkennung } from './useTapErkennung'
 
 const SCHWARZ = new THREE.Color('#000000')

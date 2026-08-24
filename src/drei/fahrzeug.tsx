@@ -2,9 +2,9 @@ import { useEffect, useMemo, useRef } from 'react'
 import type { ReactNode, RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import { STANDARD_PARAMETER } from './parameter'
-import { berechneMasse } from './mass'
-import { FAHRZEUG_FARBEN, SIGNAL_MARKE, SPARREN_FARBEN } from './bauteil-texte'
+import { STANDARD_PARAMETER } from '@/dachstuhl/parameter'
+import { berechneMasse } from '@/dachstuhl/mass'
+import { FAHRZEUG_FARBEN, SIGNAL_MARKE, SPARREN_FARBEN } from '@/dachstuhl/bauteil-texte'
 
 /**
  * Fahrzeug-Kanon: Transporter + Langholz-Anhaenger als parametrische

@@ -17,8 +17,8 @@
 
 import { KAMERA, FOV, passeEin } from './kamera'
 import type { Ansicht, Sichtfeld } from './kamera'
-import { berechneMasse } from './mass'
-import { STANDARD_PARAMETER } from './parameter'
+import { berechneMasse } from '../dachstuhl/mass'
+import { STANDARD_PARAMETER } from '../dachstuhl/parameter'
 
 type V3 = [number, number, number]
 const sub = (a: V3, b: V3): V3 => [a[0] - b[0], a[1] - b[1], a[2] - b[2]]

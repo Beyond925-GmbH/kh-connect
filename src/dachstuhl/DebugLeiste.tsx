@@ -1,7 +1,7 @@
 import type { RefObject } from 'react'
 import { Pause, Play, RotateCcw } from 'lucide-react'
-import type { Ansicht } from './kamera'
-import { ANSICHTEN, KAMERA } from './kamera'
+import type { Ansicht } from '@/drei/kamera'
+import { ANSICHTEN, KAMERA } from '@/drei/kamera'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 /**

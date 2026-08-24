@@ -1,20 +1,20 @@
 import type { StepId } from '@/khpl/flow/steps'
 import type { BerufId } from './typen'
-import { M1 } from '@/khpl/steps/M1'
-import { M2 } from '@/khpl/steps/M2'
-import { M3 } from '@/khpl/steps/M3'
-import { B31 } from '@/khpl/steps/B31'
-import { B32 } from '@/khpl/steps/B32'
-import { M4 } from '@/khpl/steps/M4'
-import { B41 } from '@/khpl/steps/B41'
-import { M5 } from '@/khpl/steps/M5'
-import { B51 } from '@/khpl/steps/B51'
-import { M6 } from '@/khpl/steps/M6'
-import { M7 } from '@/khpl/steps/M7'
-import { M8 } from '@/khpl/steps/M8'
-import { M9 } from '@/khpl/steps/M9'
-import { B9 } from '@/khpl/steps/B9'
-import { M10 } from '@/khpl/steps/M10'
+import { M1 } from '@/khpl/steps/dachdecker/M1'
+import { M2 } from '@/khpl/steps/dachdecker/M2'
+import { M3 } from '@/khpl/steps/dachdecker/M3'
+import { B31 } from '@/khpl/steps/dachdecker/B31'
+import { B32 } from '@/khpl/steps/dachdecker/B32'
+import { M4 } from '@/khpl/steps/dachdecker/M4'
+import { B41 } from '@/khpl/steps/dachdecker/B41'
+import { M5 } from '@/khpl/steps/dachdecker/M5'
+import { B51 } from '@/khpl/steps/dachdecker/B51'
+import { M6 } from '@/khpl/steps/dachdecker/M6'
+import { M7 } from '@/khpl/steps/dachdecker/M7'
+import { M8 } from '@/khpl/steps/dachdecker/M8'
+import { M9 } from '@/khpl/steps/dachdecker/M9'
+import { B9 } from '@/khpl/steps/dachdecker/B9'
+import { M10 } from '@/khpl/steps/dachdecker/M10'
 
 /**
  * Welcher Step welches Modul rendert — je Beruf.
@@ -28,10 +28,19 @@ import { M10 } from '@/khpl/steps/M10'
  *
  * Ein Beruf, dessen Stationen aus wiederverwendbaren Übungen bestehen, taucht
  * hier gar nicht auf: was fehlt, rendert der `Platzhalter`.
+ *
+ * **Geteilte Datei, vier Blöcke** (khpl-tage.md §6.1 V6 und §6.2). Alle vier
+ * Schlüssel stehen schon da, die drei ungebauten als leeres Objekt. Jeder
+ * Agent trägt **nur in seinem Block** ein und rührt die anderen drei nicht an;
+ * die Step-Ids kollidieren dank der Präfixe aus V4 nicht (`M`/`B`, `C`, `Z`,
+ * `A`). Die Import-Zeilen oben gehören zum jeweiligen Block.
  */
 export const BERUF_KOMPONENTEN: Partial<
   Record<BerufId, Readonly<Record<StepId, () => React.ReactNode>>>
 > = {
+  // ---------------------------------------------------------------------
+  // Dachdecker — Ids `M*` / `B*` · Steps in `steps/dachdecker/`
+  // ---------------------------------------------------------------------
   dachdecker: {
     M1: () => <M1 />,
     M2: () => <M2 />,
@@ -51,4 +60,19 @@ export const BERUF_KOMPONENTEN: Partial<
     'B9.3': () => <B9 id="B9.3" />,
     M10: () => <M10 />,
   },
+
+  // ---------------------------------------------------------------------
+  // Zimmerer — Ids `C*` · Steps in `steps/zimmerer/`
+  // ---------------------------------------------------------------------
+  zimmerer: {},
+
+  // ---------------------------------------------------------------------
+  // Zerspanung — Ids `Z*` · Steps in `steps/zerspanung/`
+  // ---------------------------------------------------------------------
+  zerspanungsmechaniker: {},
+
+  // ---------------------------------------------------------------------
+  // Anlagenmechanik — Ids `A*` · Steps in `steps/anlagenmechanik/`
+  // ---------------------------------------------------------------------
+  anlagenmechaniker: {},
 }

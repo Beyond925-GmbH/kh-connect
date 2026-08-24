@@ -44,13 +44,16 @@ pnpm format     # prettier --write .
 
 ## Der Flow (`src/khpl/`)
 
-Kommentare und Bezeichner in `src/khpl/` und `src/dachstuhl/` sind auf Deutsch —
+Kommentare und Bezeichner in `src/khpl/`, `src/dachstuhl/` und `src/drei/` sind
+auf Deutsch —
 dieselbe Sprache wie die Spec, dieselbe wie das Board. Das Design-System darunter
 (`src/components/ui/`, `src/lib/`) bleibt englisch, wie es ist.
 
 ```
-berufe/              Ein Beruf ist Daten: Graph, Merkmale, Medien, Copy.
-                     zimmerer.ts trägt den einzigen fertigen Tag.
+berufe/              Ein Beruf ist Daten: Graph, Merkmale, Medien, Motive,
+                     Copy — eine Datei je Beruf. dachdecker.ts trägt den
+                     einzigen fertigen Tag; zimmerer.ts, zerspanung.ts und
+                     anlagenmechanik.ts sind angekündigt (`graph: null`).
 match/               Merkmale, die vier Fragen, die Helm-Optionen und das
                      Matching (portiert aus `kh-connect`, samt seiner Regeln).
 flow/steps.ts        Die *Form* eines Step-Graphen plus `baueGraph` — die
@@ -68,14 +71,22 @@ shell/               StepShell (Bühne · Fachtext · Interaktion · Aha · Fuß
 komponenten/         Begriff (Glossar-Popover), AhaKarte, Verzweigung,
                      Helm (SVG), BerufBild (Motiv mit Ersatz).
 glossar/begriffe.ts  Alle 20 Begriffe aus flow 12, plus `Stundensatz`.
-buehne/              Foto + SCHRITT_BILDER (welcher Step welches Motiv trägt),
+buehne/              Foto + StepFoto (das Motiv kommt aus `BerufDef.bilder`),
                      drei Lazy-Grenzen um `three` — Dachstuhl3D (M3, M5–M8,
                      B3.2), Zuschnitt3D (M4), Beladen3D (B4.1) —,
                      Dachstuhl3DFallback + kanon.ts (beide three-frei),
                      aufbauabschnitte.ts.
-steps/               Ein Modul je Step. Der Text steht gebündelt oben in der
-                     Datei (flow 8.4).
+steps/<beruf>/       Ein Modul je Step, nach Beruf getrennt. Der Text steht
+                     gebündelt oben in der Datei (flow 8.4).
 ```
+
+Die 3D-Teile liegen daneben in zwei Ordnern. `src/dachstuhl/` ist **das
+Dachstuhl-Modell** des Dachdecker-Tags (Geometrien, Teileliste, Maße, Riss,
+Schnitt, Zeitachse) und gilt als schreibgeschützt: wer dort etwas ändert, ändert
+den einzigen fertigen Tag. `src/drei/` trägt die **allgemeine Szenentechnik** —
+`Szene`, `Beleuchtung`, `Kamerasteuerung`, `kamera.ts`, `Bauteil`, `fahrzeug`,
+`useTapErkennung`, `useAufbau` — und ist gemeinsam, aber nur additiv änderbar:
+neue Parameter mit Default, keine geänderte Signatur (khpl-tage.md §6.1 V7).
 
 **Zwei Regeln, an denen viel hängt.**
 
@@ -138,14 +149,14 @@ scrollen, sah eine Aufgabe ohne Antwortknopf.
 ### Fotos
 
 Jeder Screen, der kein 3D-Modell zeigt, trägt ein echtes Foto. Welcher Step
-welches Motiv bekommt, steht gebündelt in `SCHRITT_BILDER`
-(`buehne/Foto.tsx`) — zusammen mit dem Bildmittelpunkt, denn `object-fit: cover`
+welches Motiv bekommt, steht gebündelt am Beruf (`bilder` in
+`berufe/<beruf>.ts`) — zusammen mit dem Bildmittelpunkt, denn `object-fit: cover`
 schneidet quer und hoch verschieden zu. Herkunft und Urheber:innen aller Dateien
 stehen in [`MEDIEN.md`](./MEDIEN.md).
 
 Nach dem 3D-Umbau der Handwerksstrecke ziehen nur noch M1, M2, M9, M10, B3.1,
-B5.1 und B9 ein Foto. Die Einträge `M3`, `M4`, `M6` und `B4.1` bleiben in
-`SCHRITT_BILDER` stehen, werden aber von keinem Step mehr referenziert.
+B5.1 und B9 ein Foto. Die Einträge `M3`, `M4`, `M6` und `B4.1` bleiben in der
+Motivliste stehen, werden aber von keinem Step mehr referenziert.
 
 Für eigene Fotos aus den Betrieben ist der Tausch eine Zeile je Motiv; die
 Dateinamen können bleiben.
@@ -217,7 +228,7 @@ trägt das (ein Dach entsteht, von der Anfrage bis zum Feierabend), die
 
 | Wo | Was | Warum es zählt |
 | --- | --- | --- |
-| `steps/karrierewege.ts` | „rund 45.000 Euro" für den Meister ist der **Zimmerer**-Wert | Eine Zahl vor einem Vierzehnjährigen. Belegen oder streichen. |
+| `steps/dachdecker/karrierewege.ts` | „rund 45.000 Euro" für den Meister ist der **Zimmerer**-Wert | Eine Zahl vor einem Vierzehnjährigen. Belegen oder streichen. |
 | `glossar/begriffe.ts` | Stundensatz 50–90 € stammt aus dem **Zimmerer**handwerk | dito, steht im Glossar-Popover |
 | `khpl-flow.md` §1, §10 | die ganze Quellenlage (AusbauBAusbV, Holzbau Deutschland, Zimmererzentrum) | jede Aussage der App hängt daran |
 | `berufe/dachdecker.ts` | `auftrag`-Copy war für eine Zimmerei abgenommen, Betrieb ist getauscht | Abnahme ist damit offen |

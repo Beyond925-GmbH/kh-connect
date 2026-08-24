@@ -1,4 +1,4 @@
-import type { Sichtfeld } from '@/dachstuhl/kamera'
+import type { Sichtfeld } from '@/drei/kamera'
 
 /**
  * Der Schein, in dem ein 3D-Modell steht.

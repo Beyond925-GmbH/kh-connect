@@ -3,7 +3,7 @@ import type { ComponentRef } from 'react'
 import { useThree } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
-import type { Huelle } from './mass'
+import type { Huelle } from '@/dachstuhl/mass'
 import type { Ansicht, Sichtfeld } from './kamera'
 import { KAMERA, START_ANSICHT, passeEin } from './kamera'
 

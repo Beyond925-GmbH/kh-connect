@@ -12,8 +12,8 @@ zuordnen kann.
 eines Steps lädt `eager`, weil sie das Wichtigste auf dem Screen ist; ins
 Erststart-Budget zählt nur das Motiv des Splash (flow 8.5).
 
-Welcher Step welches Motiv trägt, steht **im Code** in `SCHRITT_BILDER`
-(`src/khpl/buehne/Foto.tsx`) — dort zusammen mit dem Bildmittelpunkt. Diese
+Welcher Step welches Motiv trägt, steht **im Code** am Beruf (`bilder` in
+`src/khpl/berufe/<beruf>.ts`) — dort zusammen mit dem Bildmittelpunkt. Diese
 Datei ist die Herkunftsliste, nicht die Zuordnung.
 
 | Datei | Step | Pexels | Urheber:in | Motiv |
@@ -62,7 +62,7 @@ Das hier ersetzt keinen Fototermin, es macht ihn nur weniger dringend:
 1. **Es ist Stock, nicht OWL.** Kein Motiv zeigt einen Betrieb aus Paderborn
    oder Lippe, keine echten Azubis, keine Werkstatt, die jemand am Stand
    wiedererkennt. Sobald es eigene Fotos gibt, ist der Tausch eine Zeile je
-   Motiv in `SCHRITT_BILDER` — die Dateinamen können bleiben.
+   Motiv in der Motivliste des Berufs — die Dateinamen können bleiben.
 2. **PSA bleibt uneinheitlich.** `b51-team.webp` zeigt Arbeit auf dem
    Sparrenwerk ohne Helm. Für B5.1 (Teamarbeit) ist das vertretbar, für M5 und
    M7 nicht — dort baut der Aha-Moment auf Absturzsicherung und PSA auf, und ein

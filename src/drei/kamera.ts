@@ -1,4 +1,4 @@
-import type { Huelle } from './mass'
+import type { Huelle } from '../dachstuhl/mass'
 
 /** Feste Kamerapositionen der Debug-Schnittstelle (Bauplan 6.2). */
 

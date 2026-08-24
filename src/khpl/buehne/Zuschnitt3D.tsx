@@ -12,8 +12,8 @@ import {
   SZENE_FARBEN,
 } from '@/dachstuhl/bauteil-texte'
 import { keil, versatz } from '@/dachstuhl/schnitt'
-import { Gespann, SparrenBand } from '@/dachstuhl/fahrzeug'
-import { FOV, passeEin } from '@/dachstuhl/kamera'
+import { Gespann, SparrenBand } from '@/drei/fahrzeug'
+import { FOV, passeEin } from '@/drei/kamera'
 import type { Huelle } from '@/dachstuhl/mass'
 import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
 import { Hallenlicht } from '@/khpl/buehne/Hallenlicht'

@@ -1,5 +1,9 @@
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import type { StepId } from '@/khpl/flow/steps'
+import type { StepBild } from '@/khpl/berufe/typen'
+import { beruf } from '@/khpl/berufe/registry'
+import { useAktiverBeruf } from '@/khpl/store/fortschritt'
 
 /**
  * Die Foto-Bühne. Ein Motiv, vollflächig.
@@ -12,7 +16,7 @@ import { cn } from '@/lib/utils'
  * **`pos` ist kein Stil, sondern Bildinhalt.** `object-fit: cover` schneidet
  * quer und hoch unterschiedlich zu: ein Motiv, dessen Person am rechten Rand
  * steht, verliert sie auf dem Handy hochkant. Deshalb steht der Bildmittelpunkt
- * je Foto in `SCHRITT_BILDER` und nicht im Layout.
+ * je Foto in der Motivliste des Berufs (`BerufDef.bilder`) und nicht im Layout.
  *
  * `aria-hidden`, weil das Foto den Screen stimmt und nichts erzählt, was nicht
  * im Fachtext daneben steht — ein Alt-Text wäre hier eine Dopplung, die jeder
@@ -62,49 +66,29 @@ export function Foto({
 }
 
 /**
- * Welches Motiv welcher Step trägt, mit Bildmittelpunkt.
+ * Das Motiv eines Steps — aus der Liste des **aktiven** Berufs.
  *
- * Steht hier gebündelt und nicht je Step-Datei: die Motivliste ist eine
- * Redaktionsentscheidung, die man am Stück überblicken können muss — welcher
- * Screen hat noch kein eigenes Bild, wo doppelt sich ein Motiv. Herkunft und
- * Urheber:innen jeder Datei stehen in `MEDIEN.md`.
+ * Die Liste lag bis zum Parallelbau als flacher `SCHRITT_BILDER`-Record hier
+ * in der Datei. Das ging genau so lange gut, wie es einen gebauten Beruf gab:
+ * vier Berufe haben vier verschiedene `M1`, und ein gemeinsamer Record darüber
+ * ist keine Übersicht, sondern eine Kollision. Die Liste hängt deshalb am
+ * Beruf (`BerufDef.bilder`, khpl-tage.md §6.1 V3), und diese Datei bleibt, was
+ * sie war: die eine Stelle, an der ein Motiv in den Screen kommt.
  *
- * Steps ohne Eintrag tragen keine Foto-Bühne, sondern das 3D-Modell: B3.2, M5,
- * M7. Dort *ist* die Bühne die Interaktion.
+ * Ohne aktiven Beruf oder ohne Eintrag: `undefined`. Beides ist kein Fehler,
+ * sondern der Normalfall der 3D-Schritte, deren Bühne die Interaktion ist.
  */
-export const SCHRITT_BILDER = {
-  // Der Einstieg bleibt beim Werkstatt-Standbild: der Text dort handelt vom
-  // Chef, der das Telefon weglegt, und das ist eine Werkstattszene.
-  intro: { src: '/medien/media/zimmerer/hero-poster.webp', pos: '50% 40%' },
-  M1: { src: '/medien/schritte/m1-ortstermin.webp', pos: '50% 40%' },
-  M2: { src: '/medien/schritte/m2-kalkulation.webp', pos: '50% 55%' },
-  M3: { src: '/medien/schritte/m3-cad.webp', pos: '60% 50%' },
-  'B3.1': { src: '/medien/schritte/b31-lager.webp', pos: '50% 45%' },
-  M4: { src: '/medien/schritte/m4-zuschnitt.webp', pos: '55% 45%' },
-  // Regal voller Konstruktionsvollholz in der Halle — genau das, wovon der
-  // Fachtext spricht („In der Halle liegt mehr, als du brauchst“).
-  //
-  // Nicht das naheliegende `schaetzen-balken.webp`, obwohl es Material zeigt,
-  // das von Hand bewegt wird: darauf ist ein Firmenlogo auf dem Polohemd
-  // lesbar. MEDIEN-INVENTAR führt genau das als Ausschlusskriterium und hat
-  // aus demselben Grund schon zwei andere Motive aussortiert.
-  'B4.1': { src: '/medien/schritte/b41-lagerhalle.webp', pos: '50% 50%' },
-  'B5.1': { src: '/medien/schritte/b51-team.webp', pos: '50% 45%' },
-  M6: { src: '/medien/schritte/m6-pause.webp', pos: '50% 45%' },
-  M8: { src: '/medien/schritte/m8-feierabend.webp', pos: '50% 55%' },
-  M9: { src: '/medien/schritte/m9-karriere.webp', pos: '50% 45%' },
-  'B9.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
-  'B9.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
-  'B9.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
-  // Der Abschluss zeigt einen Menschen und ein fertiges Sparrenwerk, keine
-  // Skyline: hier soll jemand aufstehen und an den Stand gehen. Bewusst nicht
-  // dasselbe Motiv wie der Einstieg — Anfang und Ende sollen sich nicht
-  // spiegeln, sondern auseinanderliegen.
-  M10: { src: '/medien/schritte/intro-aufrichten.webp', pos: '50% 45%' },
-} as const
+export function useStepBild(id: StepId): StepBild | undefined {
+  const berufId = useAktiverBeruf()
+  return berufId ? beruf(berufId).bilder[id] : undefined
+}
 
-/** Fertige Foto-Bühne für einen Step aus `SCHRITT_BILDER`. */
-export function StepFoto({ id }: { id: keyof typeof SCHRITT_BILDER }) {
-  const b = SCHRITT_BILDER[id]
+/**
+ * Fertige Foto-Bühne für einen Step. Ohne Motiv bleibt die Bühne leer — das
+ * ist derselbe Zustand wie ein Step ganz ohne `buehne`.
+ */
+export function StepFoto({ id }: { id: StepId }) {
+  const b = useStepBild(id)
+  if (!b) return null
   return <Foto src={b.src} pos={b.pos} />
 }

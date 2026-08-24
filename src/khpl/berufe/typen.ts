@@ -14,8 +14,42 @@ import type { MerkmalVektor } from '@/khpl/match/merkmale'
  * Medien unter `public/medien/media/<id>/` — kein Eingriff in die Hülle.
  */
 
+/**
+ * **Jeder Beruf hat sein eigenes Step-Id-Präfix** (khpl-tage.md §6.1 V4).
+ *
+ * | Beruf | Präfix | Beispiel |
+ * | --- | --- | --- |
+ * | Dachdecker | `M` / `B` | `M5`, `B5.1` |
+ * | Zimmerer | `C` | `C5`, `C5.1` |
+ * | Zerspanung | `Z` | `Z5`, `Z5.1` |
+ * | Anlagenmechanik | `A` | `A5`, `A5.1` |
+ *
+ * Der Grund ist nicht Ordnungsliebe. Vier Berufe mit vier verschiedenen `M5`
+ * sind in Logs, im `answers`-Objekt und in jedem Debug-Blick nicht
+ * auseinanderzuhalten — und `store/fortschritt.ts` führt `Antworten` und
+ * `pruefeAntworten` für alle vier gemeinsam. Erst disjunkte Präfixe machen
+ * `m1`, `c1`, `z1` und `a1` zu vier Schlüsseln statt zu einem Streit.
+ *
+ * Der Dachdecker behält `M`/`B`: er ist gebaut, und es gibt keinen Grund, den
+ * einzigen fertigen Tag dafür anzufassen. Sichtbar ist davon ohnehin nichts —
+ * die Rail zeigt „Schritt 4 von 9“, nie eine Id.
+ */
 export type BerufId =
   'zimmerer' | 'dachdecker' | 'zerspanungsmechaniker' | 'anlagenmechaniker'
+
+/**
+ * Ein Motiv für einen Step, mit Bildmittelpunkt.
+ *
+ * **`pos` ist kein Stil, sondern Bildinhalt.** `object-fit: cover` schneidet
+ * quer und hoch unterschiedlich zu: ein Motiv, dessen Person am rechten Rand
+ * steht, verliert sie auf dem Handy hochkant. Deshalb steht der Bildmittelpunkt
+ * je Foto hier und nicht im Layout.
+ */
+export interface StepBild {
+  src: string
+  /** `object-position`, z. B. `'50% 40%'`. Ohne Angabe: mittig. */
+  pos?: string
+}
 
 export interface BerufMedien {
   /** Standbild für die Karte in der Berufsliste. 16:9. */
@@ -49,6 +83,23 @@ export interface BerufDef {
    */
   merkmale: MerkmalVektor
   medien: BerufMedien
+  /**
+   * Welches Motiv welcher Step trägt — die Motivliste dieses Berufs.
+   *
+   * Stand bis zum Parallelbau als flacher `Record<StepId, Bild>` in
+   * `buehne/Foto.tsx`. Vier Berufe mit je einem `M1` sprengen das, deshalb
+   * hängt die Liste jetzt am Beruf und `StepFoto` liest sie über den aktiven
+   * (khpl-tage.md §6.1 V3). Das redaktionelle Argument bleibt gewahrt: je
+   * Beruf steht die Liste weiterhin an einem Stück, nur eben in seiner Datei —
+   * man muss überblicken können, welcher Screen noch kein eigenes Bild hat und
+   * wo sich ein Motiv doppelt. Herkunft und Urheber:innen jeder Datei stehen
+   * in `MEDIEN.md`.
+   *
+   * Ein Step ohne Eintrag trägt keine Foto-Bühne. Beim Dachdecker sind das
+   * B3.2, M5 und M7: dort *ist* die Bühne die Interaktion, nämlich das
+   * 3D-Modell.
+   */
+  bilder: Readonly<Record<string, StepBild>>
   /**
    * Der Tagesablauf. **`null` heißt: angekündigt, aber noch nicht gebaut.**
    *

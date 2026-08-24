@@ -40,8 +40,25 @@ export const VERFALL_MS = 30 * 60 * 1000
 export type Bildschirm =
   'splash' | 'helm' | 'fragen' | 'vorschlag' | 'berufe' | 'intro' | 'step' | 'bald'
 
-/** Typisierte Sicht auf `answers`. Bleibt zur Laufzeit ein reines JSON-Objekt. */
+/**
+ * Typisierte Sicht auf `answers`. Bleibt zur Laufzeit ein reines JSON-Objekt.
+ *
+ * **Vier Abschnitte, einer je Beruf** (khpl-tage.md §6.1 V5). Der Fortschritt
+ * liegt zwar schon je Beruf (`berufe: Partial<Record<BerufId, Fortschritt>>`),
+ * zur Laufzeit kollidiert also nichts — das *Interface* ist aber gemeinsam,
+ * und drei Tage entstehen gleichzeitig. Die Abschnitte sind die Naht, an der
+ * drei Agenten dieselbe Datei anfassen können, ohne einander zu überschreiben:
+ * **jeder trägt nur in seinem Abschnitt ein.**
+ *
+ * Die Schlüssel selbst sind dank der Id-Präfixe aus V4 disjunkt — `m*` gehört
+ * dem Dachdecker, `c*` dem Zimmerer, `z*` der Zerspanung, `a*` der
+ * Anlagenmechanik (siehe `berufe/typen.ts`).
+ */
 export interface Antworten {
+  // -------------------------------------------------------------------------
+  // Dachdecker — Schlüssel `m*` / `b*`
+  // -------------------------------------------------------------------------
+
   /** M1 — angetippte Checklistenpunkte und ob schon ausgewertet wurde. */
   m1?: { gewaehlt: string[]; ausgewertet: boolean }
   /** M2 — geschätzter Dachpreis in Euro, und ob die echte Zahl schon stand. */
@@ -61,6 +78,24 @@ export interface Antworten {
   m7?: { gesetzt: string[]; fertig: boolean }
   /** M9 — angesehene Karrierewege, in Reihenfolge des Öffnens. */
   m9?: { angesehen: StepId[] }
+
+  // -------------------------------------------------------------------------
+  // Zimmerer — Schlüssel `c*`
+  // -------------------------------------------------------------------------
+
+  // (noch keine Interaktion)
+
+  // -------------------------------------------------------------------------
+  // Zerspanung — Schlüssel `z*`
+  // -------------------------------------------------------------------------
+
+  // (noch keine Interaktion)
+
+  // -------------------------------------------------------------------------
+  // Anlagenmechanik — Schlüssel `a*`
+  // -------------------------------------------------------------------------
+
+  // (noch keine Interaktion)
 }
 
 /** Der Stand **eines** Berufs. */
@@ -129,9 +164,10 @@ function leereSitzung(): Sitzung {
  * Besucher über ein Feld, das es nicht mehr gibt. Was nicht passt, fliegt
  * einzeln raus statt den ganzen Stand mitzureißen.
  *
- * Die Felder sind Zimmerer-Felder — bis hierhin hat kein anderer Beruf eine
- * Interaktion. Bekommt ein zweiter welche, gehört diese Prüfung neben seinen
- * Graphen und nicht in eine gemeinsame Liste, die alle vier gleichzeitig führt.
+ * **Vier Abschnitte, einer je Beruf** — dieselbe Naht wie im Interface
+ * `Antworten` (khpl-tage.md §6.1 V5). Jeder Agent prüft nur seine eigenen
+ * Schlüssel; dank der Id-Präfixe aus V4 überschneiden sie sich nicht. Ein
+ * Beruf, der hier nichts stehen hat, hat schlicht noch keine Interaktion.
  */
 function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   if (typeof roh !== 'object' || roh === null) return {}
@@ -140,6 +176,10 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
 
   const stringListe = (w: unknown) =>
     Array.isArray(w) ? w.filter((x): x is string => typeof x === 'string') : null
+
+  // ---------------------------------------------------------------------
+  // Dachdecker — Schlüssel `m*` / `b*`
+  // ---------------------------------------------------------------------
 
   const m1 = q.m1 as Antworten['m1']
   if (m1 && stringListe(m1.gewaehlt)) {
@@ -176,6 +216,25 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
     // auftauchen.
     a.m9 = { angesehen: m9.angesehen.filter((x) => istStepId(graph, x)) }
   }
+
+  // ---------------------------------------------------------------------
+  // Zimmerer — Schlüssel `c*`
+  // ---------------------------------------------------------------------
+
+  // (noch keine Interaktion)
+
+  // ---------------------------------------------------------------------
+  // Zerspanung — Schlüssel `z*`
+  // ---------------------------------------------------------------------
+
+  // (noch keine Interaktion)
+
+  // ---------------------------------------------------------------------
+  // Anlagenmechanik — Schlüssel `a*`
+  // ---------------------------------------------------------------------
+
+  // (noch keine Interaktion)
+
   return a
 }
 

@@ -1,10 +1,17 @@
 import { DACHDECKER } from './dachdecker'
-import { ANLAGENMECHANIKER, ZERSPANUNGSMECHANIKER, ZIMMERER } from './angekuendigt'
+import { ZIMMERER } from './zimmerer'
+import { ZERSPANUNGSMECHANIKER } from './zerspanung'
+import { ANLAGENMECHANIKER } from './anlagenmechanik'
 import type { BerufDef, BerufId } from './typen'
 
 /**
  * Das Angebot. Die Reihenfolge hier **ist** die Reihenfolge in der
  * Berufsliste — sortiert wird sie dort nur, wenn ein Vorschlag vorliegt.
+ *
+ * **Vier Dateien, eine je Beruf, und diese Liste wird nicht mehr angefasst**
+ * (khpl-tage.md §6.1 V6). Solange drei Tage gleichzeitig entstehen, ist jede
+ * Zeile hier ein Merge-Konflikt zwischen Leuten, die nichts voneinander
+ * wissen — der Import steht deshalb schon da, bevor der Beruf etwas kann.
  *
  * Der Dachdecker steht vorn, weil er als einziger einen Tag hat. Sobald ein
  * zweiter fertig ist, gehört die Reihenfolge auf den Prüfstand: an einem Stand

@@ -1,7 +1,7 @@
 import type { BauteilTyp } from './bauteil-texte'
 import { BAUTEIL_TEXTE } from './bauteil-texte'
-import type { Ansicht } from './kamera'
-import { ANSICHTEN } from './kamera'
+import type { Ansicht } from '@/drei/kamera'
+import { ANSICHTEN } from '@/drei/kamera'
 import { klemme } from './zeitachse'
 
 /**

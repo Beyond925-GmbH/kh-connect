@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react'
 import type { ReactNode, RefObject } from 'react'
-import type { Sichtfeld } from '@/dachstuhl/kamera'
+import type { Sichtfeld } from '@/drei/kamera'
 
 /**
  * Was die Bühne von ihrer Fläche wirklich sehen darf.

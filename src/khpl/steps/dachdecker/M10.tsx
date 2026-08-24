@@ -2,7 +2,7 @@ import { ChevronLeft, LayoutGrid, RotateCcw } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
-import { SCHRITT_BILDER } from '@/khpl/buehne/Foto'
+import { useStepBild } from '@/khpl/buehne/Foto'
 import { useStand } from '@/khpl/stand'
 import { StepShell } from '@/khpl/shell/StepShell'
 import {
@@ -156,17 +156,19 @@ export function M10() {
  * die Zeichnung des Fotos, statt es zuzukleistern.
  */
 function Abschlussfeld() {
-  const bild = SCHRITT_BILDER.M10
+  const bild = useStepBild('M10')
 
   return (
     <div className="relative size-full overflow-hidden bg-kh-orange">
-      <img
-        src={bild.src}
-        alt=""
-        aria-hidden
-        style={{ objectPosition: bild.pos }}
-        className="size-full object-cover"
-      />
+      {bild && (
+        <img
+          src={bild.src}
+          alt=""
+          aria-hidden
+          style={{ objectPosition: bild.pos }}
+          className="size-full object-cover"
+        />
+      )}
       {/* Drei Schichten: `multiply` färbt ein, die halbdeckende darüber nimmt
           dem Foto Detail, und der Verlauf nach unten legt den Grund fest, auf
           dem das dunkle Panel steht. Ohne ihn schwimmt es auf einer Fläche, die

@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import type { RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { SZENE_FARBEN } from './bauteil-texte'
+import { SZENE_FARBEN } from '@/dachstuhl/bauteil-texte'
 
 /**
  * Beleuchtung nach Bauplan 5.4. Genau ein schattenwerfendes Licht —

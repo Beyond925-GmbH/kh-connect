@@ -5,15 +5,15 @@ import { useFrame } from '@react-three/fiber'
 import type { DachstuhlMasse } from './mass'
 import type { Bauteil as BauteilDaten, Einheit } from './teileliste'
 import { erzeugeGeometrien } from './geometrien'
-import { Bauteil } from './Bauteil'
+import { Bauteil } from '@/drei/Bauteil'
 import { Dachflaeche } from './Dachflaeche'
 import { Aufbau } from './Aufbau'
 import { AUSWAHL_EMISSIV, ROHDECKE_FARBE, SIGNAL_MARKE } from './bauteil-texte'
-import { Gespann, GespannFahrt, PARKPLATZ } from './fahrzeug'
+import { Gespann, GespannFahrt, PARKPLATZ } from '@/drei/fahrzeug'
 import { LETZTE_BAUPHASE, klemme, sichtbar } from './zeitachse'
 import type { Auswahl } from './debug'
 import { passt } from './debug'
-import type { TapErkennung } from './useTapErkennung'
+import type { TapErkennung } from '@/drei/useTapErkennung'
 
 /**
  * „Dein Sparren“: die aeusserste kamerazugewandte Achse. Die iso-Kamera steht
