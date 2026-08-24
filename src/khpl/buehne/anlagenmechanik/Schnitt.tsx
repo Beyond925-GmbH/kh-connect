@@ -4,6 +4,8 @@ import type {
   KnotenId,
   PruefungId,
 } from '@/khpl/buehne/anlagenmechanik/kanon'
+import { Anlage } from './Anlage'
+import { Haus } from './Haus'
 
 /**
  * Die Bühne dieses Tages — **der Schnitt**.
@@ -15,27 +17,36 @@ import type {
  * (A7). Welcher Zustand gerade dran ist, sagt `zustand`; die Fälle stehen als
  * `BuehnenZustand` in `kanon.ts`, mit der Zuordnung zu den Steps.
  *
+ * **Es sind zwei Zeichnungen und nicht sechs.** A1 hat den Anlagenausschnitt
+ * für sich — er zeigt eine fremde Anlage, in der gesucht wird, und hat mit dem
+ * Haus des zweiten Auftrags nichts zu tun. Alles andere spielt in **einer**
+ * Welt (`Haus`): dieselbe `viewBox`, dieselben Koordinaten, nur ein anderer
+ * Kamerarahmen. Deshalb ist der Keller in A4 sichtbar derselbe wie in A2 und
+ * nicht ein zweiter, der ihm ähnelt — „eine Welt, viele Zustände"
+ * (khpl-tage.md 1, Mechanismus 2), gezeichnet statt gebaut.
+ *
  * **Dieser Tag hat kein `three`** (Spec 7). Nicht als Verzicht, sondern als
  * Beweis, dass die Hülle nicht am 3D hängt. Diese Datei darf deshalb ganz
  * normal statisch importiert werden — sie hat keine lazy-Grenze und braucht
  * keine.
  *
  * **Bewegungsgefühl: Fluss.** Lange Easings, Verläufe, die an Pfaden
- * entlanglaufen (`stroke-dashoffset` oder ein Gradient entlang der Linie). Bei
+ * entlanglaufen (`pathLength` über die gezogene Leitung). Bei
  * `prefers-reduced-motion` stehen die Endzustände sofort, die Wanderung
  * entfällt.
  *
  * **Farbe:** ausschließlich `KALT` und `WARM` aus `kanon.ts`. Kein Token, kein
  * Eingriff in `src/index.css`, und keine gefüllte orange Fläche — die eine pro
- * Screen ist *Weiter* (khpl-tage.md 3).
+ * Screen ist *Weiter* (khpl-tage.md 3). Warm erscheint hier als Strich, als
+ * Verlauf und als sehr flacher Schein, nie als Fläche.
  *
- * ---
- *
- * ⚠️ **Stub.** Diese Fassung hält die Schnittstelle und malt noch nichts. Sie
- * steht hier, damit der Steps-Agent und der Bühnen-Agent gegen dieselben Props
- * bauen können; die Zeichnungen sind die eigentliche Medienarbeit dieses Tages
- * (Spec 10) und kommen von der Bühnenseite. Wer sie ersetzt, ändert den Inhalt
- * dieser Datei — **nicht** die Props: an ihnen hängen die Steps.
+ * **Wo die Zeichnung im Screen sitzt.** Nicht bildfüllend: die `StepShell`
+ * legt Titel und Panel über die Bühne, quer unten links, hoch unten. Ein
+ * Schnitt, der mittig sitzt, verliert genau die Hälfte, auf die es ankommt —
+ * den Keller. Deshalb hat der Rahmen hier eine Vorspannung: hoch nach oben,
+ * quer nach rechts. Das ist die 2D-Entsprechung zum `SichtfeldMesser` der
+ * 3D-Bühnen, nur ohne Messung, weil eine Zeichnung keine Kamera nachführen
+ * muss.
  */
 export interface SchnittProps {
   /** Welche Zeichnung, in welchem Zustand. */
@@ -63,12 +74,35 @@ export interface SchnittProps {
   onWaermeAngekommen?: () => void
 }
 
-export function Schnitt(props: SchnittProps) {
+export function Schnitt({
+  zustand,
+  onPruefpunkt,
+  onBauteil,
+  onPfad,
+  onAbgewiesen,
+  onWaermeAngekommen,
+}: SchnittProps) {
   return (
-    <div
-      className="size-full bg-kh-surface"
-      data-testid="anlagen-buehne"
-      data-szene={props.zustand.szene}
-    />
+    <div className="size-full" data-testid="anlagen-buehne" data-szene={zustand.szene}>
+      <div className="absolute inset-x-3 top-[76px] bottom-[32%] landscape:inset-y-[7%] landscape:right-[3%] landscape:left-[30%]">
+        {zustand.szene === 'anlage' ? (
+          <Anlage
+            geprueft={zustand.geprueft}
+            laeuft={zustand.laeuft}
+            ursache={zustand.ursache}
+            geloest={zustand.geloest}
+            onPruefpunkt={onPruefpunkt}
+          />
+        ) : (
+          <Haus
+            zustand={zustand}
+            onBauteil={onBauteil}
+            onPfad={onPfad}
+            onAbgewiesen={onAbgewiesen}
+            onWaermeAngekommen={onWaermeAngekommen}
+          />
+        )}
+      </div>
+    </div>
   )
 }

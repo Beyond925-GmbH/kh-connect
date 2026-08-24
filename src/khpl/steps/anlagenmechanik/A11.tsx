@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import { StepFoto } from '@/khpl/buehne/Foto'
+import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 
@@ -7,29 +9,64 @@ import { StepShell } from '@/khpl/shell/StepShell'
  *
  * **Warum der Abstecher da ist:** ein Vierzehnjähriger, der später erfährt,
  * dass zum Beruf Bereitschaft gehört, fühlt sich verkauft. Ein Screen, der es
- * von selbst sagt, ist glaubwürdiger als zehn, die es weglassen.
+ * von selbst sagt, ist glaubwürdiger als zehn, die es weglassen. Vgl. den
+ * Dachdecker-Umgang mit Absturz: die Zahlen bleiben draußen, die Sache nicht.
  *
- * ⚠️ **Es gibt keinen Bundestarif für Rufbereitschaft** (Spec 6 und 11),
- * `TEILWEISE BELEGT`. Belegt ist ein Beispiel aus Niedersachsen; **die
- * NRW-Sätze fehlen, und dieser Kiosk steht in NRW.** Der Abstecher nennt
- * deshalb **keinen Betrag**, sondern nur die Sache: dass es Bereitschaft gibt,
- * dass sie reihum geht und dass sie zusätzlich vergütet wird. Wer die Zahl
- * will, fragt den Fachverband SHK NRW.
+ * ⚠️ **Dieser Screen nennt keinen Betrag** (Spec 6 und 11, `TEILWEISE
+ * BELEGT`). Es gibt **keinen bundesweiten SHK-Tarifvertrag**; belegt ist ein
+ * Beispiel aus Niedersachsen, und dieser Kiosk steht in NRW — die NRW-Sätze
+ * konnten nicht belegt werden. Gesagt wird deshalb nur die Sache: dass es
+ * Bereitschaft gibt, dass sie reihum geht und dass sie zusätzlich vergütet
+ * wird. Wer die Zahl will, fragt den Fachverband SHK NRW.
  *
- * ⚠️ **Stub.** Bühne: Foto — es fehlt noch eins (Spec 10), deshalb bleibt die
- * Bühne vorerst leer.
+ * Belegt und deshalb sagbar (`belege/anlagenmechanik.md` 7): dass die Rotation
+ * **betrieblich** und nicht tariflich geregelt ist, dass in kleinen Betrieben
+ * oft der Chef selbst fährt, und dass Bereithalten und Einsatz getrennt
+ * vergütet werden — der Einsatz als Arbeitszeit mit Zuschlägen.
+ *
+ * ⚠️ **Bühne: Foto — es fehlt noch eins** (Spec 10). `StepFoto` rendert ohne
+ * Eintrag in der Motivliste nichts; die Bühne bleibt dunkel, statt ein
+ * fremdes Motiv zu leihen.
  */
+
 export function A11() {
+  const [aha, setAha] = useState(false)
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setAha(true), 800)
+    return () => window.clearTimeout(id)
+  }, [])
+
   return (
     <StepShell
       id="A1.1"
       titelZusatz="Abstecher"
       buehne={<StepFoto id="A1.1" />}
       fachtext={
-        <p>
-          Notdienst, Bereitschaft, Wochenende. Ehrlich: es gehört dazu, es ist nicht jeden
-          Tag, und es wird bezahlt.
-        </p>
+        <>
+          <p>
+            Notdienst, Bereitschaft, Wochenende. Ehrlich: es gehört dazu, es ist nicht
+            jeden Tag, und es wird bezahlt.
+          </p>
+          <p className="mt-3">
+            Wenn samstags die Heizung ausfällt, ruft niemand eine Zentrale an — es fährt
+            jemand aus dem Team. Wer dran ist, wechselt reihum, meist wochenweise. Wie die
+            Rotation läuft, legt der Betrieb fest und kein Tarifvertrag; in kleinen
+            Betrieben fährt oft der Chef selbst.
+          </p>
+          <p className="mt-3">
+            Bezahlt wird beides getrennt: das Erreichbarsein und der Einsatz. Der Einsatz
+            zählt als Arbeitszeit, mit Zuschlägen. Was das je Stunde ist, steht in keinem
+            bundesweiten Tarif — das regelt jedes Bundesland für sich.
+          </p>
+        </>
+      }
+      aha={
+        <AhaKarte sichtbar={aha} eyebrow="Muss das jeder machen?">
+          Bereitschaft ist ein Dienst im Team, der reihum geht — nicht jede Woche und
+          nicht allein. Sie ist der Grund, warum am Sonntagabend überhaupt jemand ans
+          Telefon geht, wenn ein Haus kalt wird.
+        </AhaKarte>
       }
       fuss={<StepFuss id="A1.1" />}
     />
