@@ -94,7 +94,7 @@ export function C11() {
           >
             <blockquote className="text-[1.125rem] leading-[1.45] text-kh-paper sm:text-[1.1875rem]">
               „Das Aufschlagen eines Daches, das wird wahrscheinlich nie irgendwo die KI
-              oder einen 3D-Drucker übernehmen. Das wird immer Handarbeit bleiben.“
+              oder ein 3D-Drucker übernehmen. Das wird immer Handarbeit bleiben.“
             </blockquote>
             <figcaption className="mt-1.5 text-[0.9375rem] text-kh-mute">
               Ein erfahrener Zimmerer, im Gespräch
