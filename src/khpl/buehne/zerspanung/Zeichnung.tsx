@@ -19,8 +19,8 @@ import { KONTUR } from './weg'
  * ein Kreis auf der Kontur, daneben dieselbe Stelle stark überhöht. Deshalb
  * fährt die Zeichnung auf den Kreis zu *und* die Einzelheit fährt ein.
  *
- * ⚠️ Die Überhöhung steht als Wort im Bild („stark überhöht"). Ein Maßstab
- * („M 1000:1") stünde da als Zahl, die niemand nachgerechnet hat — und dieser
+ * ⚠️ Die Überhöhung steht als Wort im Bild („stark überhöht“). Ein Maßstab
+ * („M 1000:1“) stünde da als Zahl, die niemand nachgerechnet hat — und dieser
  * Tag erfindet keine Zahlen (§11).
  */
 
@@ -178,7 +178,7 @@ export function Zeichnung({
  * Einzelheit X — die Mantellinie, stark überhöht.
  *
  * Oben das **Größtmaß**, unten das **Kleinstmaß**, dazwischen der ganze
- * Spielraum, den dieses Teil hat. Die Zone ist gelbgrün, weil „liegt drin" im
+ * Spielraum, den dieses Teil hat. Die Zone ist gelbgrün, weil „liegt drin“ im
  * ganzen System diese Farbe hat (Z5 setzt sie im Panel genauso ein) — und weil
  * Rot in diesem Produkt nicht vorkommt.
  *

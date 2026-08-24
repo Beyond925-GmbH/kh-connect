@@ -6,7 +6,7 @@ import { FASE, GROESSTMASS, KLEINSTMASS, NENNMASS, TOLERANZ } from './kanon'
  * Z5 — ganz nah: Mikrometerschraube, Teil, Ziffern.
  *
  * **Sie heißt hier Mikrometerschraube.** Im Betrieb sagt niemand
- * „Bügelmessschraube"; zwei der vier Gespräche nennen sie so, und der Screen
+ * „Bügelmessschraube“; zwei der vier Gespräche nennen sie so, und der Screen
  * folgt den Gesprächen (khpl-tag-zerspanung.md §6 Z5).
  *
  * **Die Zahl steht im Panel, nicht auf der Bühne.** Z5 trägt den Messwert in
@@ -93,7 +93,7 @@ export function Messschraube({
         strokeWidth={STRICH.voll}
         vectorEffect="non-scaling-stroke"
       />
-      {/* Die Fasenkante: dieselbe Fase, die Z1 mit „2 × 45°" bemaßt. */}
+      {/* Die Fasenkante: dieselbe Fase, die Z1 mit „2 × 45°“ bemaßt. */}
       <circle
         cx={TEIL[0]}
         cy={TEIL[1]}
@@ -210,7 +210,7 @@ function Trommelstriche({ wert }: { wert: number }) {
 /**
  * Die Toleranzzone über der gemessenen Fläche — die Antwort auf eine falsche
  * Eingabe, und kein Tadel: Man sieht, wo die Fläche liegt. Gelbgrün, weil
- * „liegt drin" im ganzen Produkt diese Farbe hat; die Marke ist orange, weil
+ * „liegt drin“ im ganzen Produkt diese Farbe hat; die Marke ist orange, weil
  * sie der eigene Messwert ist. Rot kommt nicht vor (khpl-tage.md §3).
  */
 function Toleranzzone({

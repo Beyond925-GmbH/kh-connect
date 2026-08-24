@@ -1,11 +1,11 @@
-import { PROFIL, PROGRAMM, ROHLING_DURCHMESSER } from './kanon'
+import { FEHLERZEILE, FEHLER_CODE, PROFIL, PROGRAMM, ROHLING_DURCHMESSER } from './kanon'
 
 /**
  * Der Werkzeugweg — **aus dem Programm gerechnet, nicht danebengelegt.**
  *
  * Z3 zeigt links den Code und rechts den Weg, und der Reiz des Screens hängt
  * daran, dass beides dasselbe ist: „mit jeder Zeile zeichnet sich ein Stück
- * Kontur" (khpl-tag-zerspanung.md §6 Z3). Läge der Weg als zweite Punktliste
+ * Kontur“ (khpl-tag-zerspanung.md §6 Z3). Läge der Weg als zweite Punktliste
  * neben `PROGRAMM`, wäre die Aussage des Screens beim ersten Tippfehler falsch
  * — und niemand würde es merken, weil beide Listen für sich plausibel
  * aussähen. Deshalb liest diese Datei die Fahrbefehle aus demselben Code, den
@@ -103,6 +103,43 @@ export const SCHNITT: readonly Wegpunkt[] = schnitt
 /** Der Rückzug als Strecke: zwei Punkte, oder leer, wenn keiner folgt. */
 export const RUECKZUG: readonly Wegpunkt[] = rueckzug.length === 2 ? rueckzug : []
 
+/**
+ * **Was die falsche Zeile wirklich fährt.**
+ *
+ * Der eingebaute Fehler ist das fehlende Minuszeichen (`belege/zerspanung.md`
+ * 7, khpl-tag-zerspanung.md §11): `G1 Z35.` statt `G1 Z-35.`. Ohne das Minus
+ * fährt das Werkzeug nicht ins Material, sondern **vom Werkstück weg** — an
+ * der Drehbank zeigt `Z+` von der Spannung fort. Es wird kein Span abgenommen,
+ * die Kontur entsteht nicht.
+ *
+ * **Aus demselben Code gerechnet wie der richtige Weg.** `FEHLER_CODE` läuft
+ * durch dieselben drei Ausdrücke wie `PROGRAMM`; die Achsen bleiben modal, X
+ * steht also da, wo die Fase geendet hat. Eine zweite, danebengelegte
+ * Punktliste würde beim ersten Tippfehler etwas anderes behaupten als der
+ * Code, den der Besucher liest — und niemand würde es merken (§7, „eine
+ * Quelle, zwei Ansichten“).
+ */
+const fehlweg = (() => {
+  const bis = SCHNITT.findIndex((p, i) => i > 0 && p.zeile === FEHLERZEILE)
+  const befehl = FAHRBEFEHL.exec(FEHLER_CODE)
+  if (bis < 1 || !befehl) return []
+  const von = SCHNITT[bis - 1]
+  const x = X_WERT.exec(FEHLER_CODE)
+  const zw = Z_WERT.exec(FEHLER_CODE)
+  return [
+    von,
+    {
+      zeile: FEHLERZEILE,
+      z: zw ? Number(zw[1]) : von.z,
+      r: x ? Number(x[1]) / 2 : von.r,
+      eilgang: befehl[1] === '0',
+    },
+  ]
+})()
+
+/** Die Fahrt der falschen Zeile: zwei Punkte, oder leer, wenn sie nicht fährt. */
+export const FEHLWEG: readonly Wegpunkt[] = fehlweg
+
 const LAENGEN = SCHNITT.slice(1).map((p, i) =>
   Math.hypot(p.z - SCHNITT[i].z, p.r - SCHNITT[i].r),
 )
@@ -114,7 +151,7 @@ const GESAMTLAENGE = LAENGEN.reduce((a, b) => a + b, 0)
  * **Anteil an der Strecke, nicht an den Zeilen.** Bei gleicher Vorschub-
  * geschwindigkeit dauert `G1 Z-35.` deutlich länger als die Fase davor, und
  * genau so soll es aussehen: der Weg zeichnet sich „in gleichmäßigen
- * Schritten" (§7), nicht in gleich langen Zeilen.
+ * Schritten“ (§7), nicht in gleich langen Zeilen.
  */
 export function schnittAnteil(zeile: number): number {
   if (GESAMTLAENGE === 0) return 0
@@ -124,6 +161,13 @@ export function schnittAnteil(zeile: number): number {
   })
   return gefahren / GESAMTLAENGE
 }
+
+/**
+ * Wie weit die Kontur gediehen ist, wenn die falsche Zeile an der Reihe ist —
+ * der Stand, auf dem das Bild beim blinden Start stehen bleibt. Steht hier und
+ * nicht oben bei `FEHLWEG`, weil `schnittAnteil` die Streckenlängen braucht.
+ */
+export const ANTEIL_VOR_FEHLER = schnittAnteil(FEHLERZEILE - 1)
 
 /** Der Schnittweg bis zum Anteil `anteil` (0…1), letzter Punkt interpoliert. */
 export function schnittBis(anteil: number): { z: number; r: number }[] {

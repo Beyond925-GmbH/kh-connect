@@ -275,9 +275,9 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
         </dl>
 
         {/*
-          Der Größenvergleich. „So fein wie ein Haar" wäre falsch — die
+          Der Größenvergleich. „So fein wie ein Haar“ wäre falsch — die
           Toleranz ist deutlich feiner (belege/zerspanung.md 2, Haar 50–70 µm).
-          Deshalb „ungefähr" und „ein Drittel", nie „genau dreimal feiner":
+          Deshalb „ungefähr“ und „ein Drittel“, nie „genau dreimal feiner“:
           Haardicke streut um den Faktor drei.
         */}
         <motion.p
@@ -346,7 +346,7 @@ function Vergleich({ schaetzung }: { schaetzung: number }) {
 
 /**
  * Der Abstand in Worten. Ein Faktor sagt hier mehr als eine Differenz: 0,479 mm
- * daneben klingt nach wenig, „dreiundzwanzigmal so viel" nicht.
+ * daneben klingt nach wenig, „dreiundzwanzigmal so viel“ nicht.
  */
 function abstand(verhaeltnis: number): string {
   if (verhaeltnis >= 1.6) return `${Math.round(verhaeltnis)}-mal so viel`
@@ -362,7 +362,9 @@ function abstand(verhaeltnis: number): string {
 function Papier() {
   return (
     <Dialog>
-      <DialogTrigger className="rounded-kh-pill border-2 border-kh-line-strong bg-white/5 px-4 py-2.5 text-[1rem] font-medium text-kh-paper/85 transition-transform active:scale-95">
+      {/* `min-h-[52px]`: dieselbe Untergrenze, die `button.tsx` für jede
+          Trefferfläche im Bestand setzt (khpl-tage.md §3). */}
+      <DialogTrigger className="min-h-[52px] rounded-kh-pill border-2 border-kh-line-strong bg-white/5 px-4 py-2.5 text-[1rem] font-medium text-kh-paper/85 transition-transform active:scale-95">
         Und wenn ich mir nichts darunter vorstellen kann?
       </DialogTrigger>
       <DialogContent>

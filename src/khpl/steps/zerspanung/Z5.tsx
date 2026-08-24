@@ -180,17 +180,28 @@ export function Z5() {
   const fertig = takt === 'fertig'
   const richtig = urteil === TEIL_1.urteil
 
-  /** Was auf der Anzeige steht — je Takt eine andere Zahl, immer dieselbe Uhr. */
+  /**
+   * Was auf der Anzeige steht — je Takt eine andere Zahl, immer dieselbe Uhr.
+   *
+   * **In Beat 2 steht dort der zuletzt gemessene Wert, nicht der gerechnete.**
+   * Der Korrektor ist eine Einstellung an der Maschine, kein Messgerät: Wer am
+   * Korrektor tippt, verändert das nächste Teil, nicht das Teil, das in der
+   * Mikrometerschraube liegt. Liefe die Anzeige beim Tippen mit, zeigte der
+   * Screen das Messergebnis eines Teils, das noch gar nicht gelaufen ist — die
+   * Übung wäre durch Ablesen lösbar, „Noch eins laufen lassen“ bewirkte
+   * sichtbar nichts mehr, und die Bühne vermäße ein Teil, das es nicht gibt.
+   * Erst `laufenLassen` setzt `ergebnis` und damit Anzeige, Toleranzband und
+   * Bühne neu. So trägt der Knopf die Handlung, und aus messen, korrigieren,
+   * messen wird wirklich ein Kreislauf.
+   */
   const angezeigt =
     takt === 'zudrehen'
       ? drehung >= 100
         ? TEIL_1.wert
         : rasten(TEIL_1.wert + (1 - drehung / 100) * OFFEN_UM)
-      : takt === 'korrigieren'
-        ? genau(TEIL_2.wert - korrektur)
-        : takt === 'fertig'
-          ? ergebnis
-          : TEIL_1.wert
+      : takt === 'korrigieren' || takt === 'fertig'
+        ? ergebnis
+        : TEIL_1.wert
 
   /**
    * Zudrehen. Sobald sie anliegt, steht der Wert — und damit die Frage. Kein

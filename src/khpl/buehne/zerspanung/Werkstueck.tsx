@@ -45,7 +45,7 @@ import { Zeichnung } from './Zeichnung'
  * Laufzeitwerte kommen weiterhin aus `kanon.ts` (§7, khpl-tage.md §3).
  *
  * Gebaut ist er nicht, und das ist eine Entscheidung: Die Spec erlaubt den
- * Rückfall ausdrücklich („die Beweislast liegt bei 3D, nicht bei 2D", §7).
+ * Rückfall ausdrücklich („die Beweislast liegt bei 3D, nicht bei 2D“, §7).
  * Ein gerenderter Drehkörper wäre der einzige Screen des Tages mit einer
  * anderen Handschrift — ausgerechnet der, auf dem man lesen soll, was wo
  * sitzt. Solange die 2D-Maschine das trägt, kostet 3D nur Startzeit.
@@ -95,12 +95,17 @@ export interface WerkstueckProps {
   /** Angetippte Zeile — die, die der Besucher für falsch hält. */
   markierteZeile?: number | null
   /**
-   * Blind bis ans Ende gefahren und Start gedrückt: das Werkzeug fährt in die
-   * Spannbacke, das Bild friert. Der Preis dieses Tages ist nicht Material und
-   * nicht Zeit, sondern das Werkzeug, die Spannung — und der Vertrauensverlust,
-   * denn danach muss alles neu vermessen werden.
+   * Blind bis ans Ende gelesen und Start gedrückt: die falsche Zeile fährt das
+   * Werkzeug am Teil vorbei ins Leere, das Bild friert. Kein Span, keine
+   * Kontur — der Rohling hängt ungedreht im Futter.
+   *
+   * **Der Name sagt, was passiert, und nicht, was einmal in der Spec stand.**
+   * Der gebaute Fehler ist das fehlende Minuszeichen (§11); `Z+` fährt an der
+   * Drehbank von der Spannung fort, eine Kollision mit der Backe kann daraus
+   * nicht werden. Das Antwortfeld heißt weiterhin `answers.z3.kollision` —
+   * seine Signatur steht in der Spec (§6 Z3) und wird hier nicht umbenannt.
    */
-  kollision?: boolean
+  luftschnitt?: boolean
 
   // -- Z5 -------------------------------------------------------------------
   /**
@@ -144,7 +149,7 @@ const MASSSTAB: Record<Zoomstufe, number> = { fern: 1, nah: 1.6, makro: 2.8 }
  * Die Zoomfahrt der Bühne. Kurve und Dauer stehen **nicht** als Literal hier,
  * sondern kommen aus `kanon.ts` — dort liegen die Laufzeitwerte dieses Tages an
  * einer Stelle, und der Zoom ist die eine Bewegung, die alle sechs Zustände
- * teilen (khpl-tage.md §3, „Laufzeitkonstanten einer Bühne liegen three-frei").
+ * teilen (khpl-tage.md §3, „Laufzeitkonstanten einer Bühne liegen three-frei“).
  */
 const ZOOMFAHRT = `transform 0.7s cubic-bezier(${RASTER_KURVE.join(', ')})`
 
@@ -186,7 +191,7 @@ export function Werkstueck(props: WerkstueckProps) {
           <Werkzeugweg
             zeile={props.zeile}
             markierteZeile={props.markierteZeile}
-            kollision={props.kollision}
+            luftschnitt={props.luftschnitt}
           />
         )}
         {props.zustand === 'messraum' && <Messraum />}

@@ -32,34 +32,38 @@ import { Begriff } from './Begriff'
  *
  * **Die eine Entscheidung dieses Screens sitzt im Fuß.** Sobald das Programm
  * durchgelesen ist, stehen dort zwei Wege: die falsche Zeile suchen — oder
- * *Start drücken*. Wer blind startet, fährt das Werkzeug in die Spannbacke.
- * Der Preis dieses Tages ist nicht Material und nicht Zeit, sondern Werkzeug,
- * Spannung und Vertrauen: danach muss alles neu vermessen werden. Genau
- * deshalb wird an einer CNC nie ohne Simulation gestartet, und genau das ist
- * die Lektion.
- *
- * ⚠️ **Der Crash ist der Extremfall, nicht der Alltag.** Kein Befragter nennt
- * ihn; genannt werden nicht haltbare Toleranzen, Termindruck und ein defekter
- * Späneförderer. Der Screen darf ihn zeigen, weil er die Lektion trägt — der
- * Fachtext erzählt ihn nicht als Normalfall, und der Einwurf danach rückt ihn
- * gerade.
+ * *Start drücken*. Wer blind startet, lässt die falsche Zeile fahren: das
+ * Werkzeug geht am Teil vorbei ins Leere, es wird kein Span abgenommen, und
+ * der Rohling hängt ungedreht im Futter. Genau deshalb wird an einer CNC nie
+ * ohne Simulation gestartet, und genau das ist die Lektion.
  *
  * ⚠️ **Der Steuerungsdialekt steht sichtbar dabei** (§6 Z3, §11): Heidenhain
  * schreibt Klartext, Siemens ShopTurn ist grafisch. „So sieht jedes
  * CNC-Programm aus“ wäre falsch. Programm, Fehlerzeile und Dialekt kommen aus
  * `buehne/zerspanung/kanon.ts`; der Code ist **fachlich abzunehmen**.
  *
- * ⚠️ **Gemeldeter Widerspruch in der Spec, nicht gelöst** (khpl-tage.md §3).
- * §11 ersetzt den eingebauten Fehler durch das fehlende Minuszeichen
- * (`G1 Z35.` fährt vom Teil **weg**, ins Leere); §6 Z3 trägt aber weiter die
- * Folge der alten Fassung („fährt das Werkzeug in die Spannbacke“, das Bild
- * friert am Aufprall). Beide sind so gebaut, wie sie validiert sind — und
- * physikalisch unvereinbar: derselbe Fehler kann nicht zugleich ins Leere und
- * in die Backe führen. Kandidaten zur Abstimmung: die Folge des blinden
- * Starts an den Minus-Fehler anpassen (Luftschnitt, das Teil bleibt ungedreht)
- * oder einen Fehler wählen, der wirklich in die Backe fährt. `KOLLISION_TEXT`,
- * `AUFPRALL` (Werkzeugweg.tsx) und `FEHLER_CODE` müssen danach zur selben
- * Physik gehören.
+ * ⚠️ **Gemeldeter Spec-Widerspruch, aufgelöst zugunsten des Belegs.** §6 Z3
+ * trägt an einer Stelle noch die Folge der ersten Fassung („eine Zustellung zu
+ * tief“ → „fährt das Werkzeug in die Spannbacke“). Derselbe Abschnitt und §11
+ * ersetzen den eingebauten Fehler aber ausdrücklich durch das **fehlende
+ * Minuszeichen** (`BELEGT`, `belege/zerspanung.md` 7), und damit fährt das
+ * Werkzeug **vom Teil weg**: `Z+` zeigt an der Drehbank von der Spannung fort.
+ * Ein Screen, der dazu „in die Spannbacke“ sagt, behauptet eine falsche
+ * Konsequenz — genau der Fehlertyp, den die Spec bei `19,987` an sich selbst
+ * gefunden hat.
+ *
+ * Gebaut ist deshalb die Fassung, die zum belegten Fehler gehört: der
+ * **Luftschnitt**. `FEHLER_CODE`, `LUFTSCHNITT_TEXT` und der Weg auf der Bühne
+ * (`weg.ts` `FEHLWEG`) kommen jetzt aus derselben Zeile und gehören zur selben
+ * Physik. Was der Screen dabei **nicht** verliert, ist seine Lektion: das
+ * Programm einmal durchgehen, bevor man es laufen lässt.
+ *
+ * ⚠️ **Der große Knall ist damit weg, und das entspricht den Interviews**
+ * (§6 Z3, §12): Kein Befragter nennt einen Crash; genannt werden nicht
+ * haltbare Toleranzen, Termindruck und ein defekter Späneförderer. Der
+ * Satz aus §6 Z3, der den Preis dieses Tages als „Werkzeug und Spannung“
+ * beschreibt, gehört zur gestrichenen Fassung und ist **zur Abnahme
+ * gemeldet**, nicht heimlich weitergebaut.
  */
 
 /** Nach zwei Fehlversuchen bietet die App die Lösung an (flow 6.6). */
@@ -68,8 +72,8 @@ const HILFE_AB = 2
 const TREFFER_TEXT =
   'Gefunden. Ohne das Minus fährt das Werkzeug vom Teil weg statt an ihm entlang.'
 
-const KOLLISION_TEXT =
-  'Das Werkzeug ist in die Spannbacke gefahren. Schneide hin, Spannung hin — und alles, was du gerüstet hast, musst du neu vermessen. Deshalb geht an einer CNC niemand ohne Simulation auf Start.'
+const LUFTSCHNITT_TEXT =
+  'Ohne das Minus fährt das Werkzeug am Teil vorbei ins Leere. Kein Span, keine Kontur — der Rohling hängt ungedreht im Futter, und der Durchlauf war umsonst. Deshalb geht an einer CNC niemand ohne Simulation auf Start.'
 
 /** Wie die Zeile auf dem Steuerungsbildschirm steht — vor und nach der Korrektur. */
 function codeVon(zeile: Programmzeile, index: number, korrigiert: boolean): string {
@@ -84,7 +88,11 @@ export function Z3() {
     vorbei ? PROGRAMM.length : (gespeichert?.zeilen ?? 0),
   )
   const [gefunden, setGefunden] = useState(() => !!gespeichert?.gefunden)
-  const [kollision, setKollision] = useState(() => !!gespeichert?.kollision)
+  /**
+   * Blind gestartet. Das Antwortfeld heißt nach der Spec-Signatur weiter
+   * `kollision` (§6 Z3) — was daraus in der Welt wird, ist der Luftschnitt.
+   */
+  const [luftschnitt, setLuftschnitt] = useState(() => !!gespeichert?.kollision)
   const [versuche, setVersuche] = useState(0)
   /** Die zuletzt angetippte Zeile — auch die falsche bleibt markiert stehen. */
   const [markiert, setMarkiert] = useState<number | null>(() =>
@@ -97,14 +105,14 @@ export function Z3() {
       gespeichert?.gefunden
         ? { treffer: true, text: TREFFER_TEXT }
         : gespeichert?.kollision
-          ? { treffer: false, text: KOLLISION_TEXT }
+          ? { treffer: false, text: LUFTSCHNITT_TEXT }
           : null,
   )
 
   const gelesenFertig = gelesen >= PROGRAMM.length
-  const erledigt = gefunden || kollision
-  const takt = kollision
-    ? 'kollision'
+  const erledigt = gefunden || luftschnitt
+  const takt = luftschnitt
+    ? 'luftschnitt'
     : gefunden
       ? 'gefunden'
       : gelesenFertig
@@ -134,9 +142,9 @@ export function Z3() {
   }
 
   const startDruecken = () => {
-    setKollision(true)
+    setLuftschnitt(true)
     setMarkiert(FEHLERZEILE)
-    setErgebnis({ treffer: false, text: KOLLISION_TEXT })
+    setErgebnis({ treffer: false, text: LUFTSCHNITT_TEXT })
     merkeAntwort('z3', { zeilen: gelesen, gefunden: false, kollision: true })
   }
 
@@ -159,7 +167,7 @@ export function Z3() {
           // ausschließlich dieser Zeile.
           zeile={gelesen}
           markierteZeile={markiert}
-          kollision={kollision}
+          luftschnitt={luftschnitt}
         />
       }
       fachtext={
@@ -204,7 +212,7 @@ export function Z3() {
                   testid="z3-rueckmeldung"
                 />
                 <p className="text-[1.0625rem] leading-snug text-kh-paper/80">
-                  {kollision
+                  {luftschnitt
                     ? 'Die Zeile ist korrigiert. Jetzt darfst du starten.'
                     : 'Ein Zeichen, und das Werkzeug fährt am Teil entlang statt daran vorbei. Jetzt darfst du starten.'}
                 </p>
@@ -219,13 +227,14 @@ export function Z3() {
             sichtbar={erledigt}
             eyebrow="Warum drückt hier niemand einfach Start?"
           >
-            Weil ein Programm einmal durchzugehen billiger ist als ein Werkzeug. An einer
-            CNC wird erst simuliert und dann gestartet — das ist keine Vorsicht, das ist
-            das Verfahren.
+            Weil ein Programm einmal durchzugehen billiger ist als ein Durchlauf, der
+            nichts bringt. An einer CNC wird erst simuliert und dann gestartet — das ist
+            keine Vorsicht, das ist das Verfahren.
           </AhaKarte>
-          <AhaKarte sichtbar={kollision} eyebrow="Passiert das jeden Tag?">
-            Selten. Was im Alltag wirklich anstrengt, sind Toleranzen, die sich nicht
-            halten lassen, und Termindruck — nicht der große Knall.
+          <AhaKarte sichtbar={luftschnitt} eyebrow="Passiert das jeden Tag?">
+            Ein falsches Vorzeichen findet jeder mal. Was im Alltag wirklich anstrengt,
+            ist anderes: Toleranzen, die sich nicht halten lassen, Termindruck — und ein
+            Späneförderer, der ausfällt.
           </AhaKarte>
           <AhaKarte sichtbar={versuche > 0} eyebrow="Und wenn du ihn nicht findest?">
             Dann sucht ihn jemand mit dir. Fehlersuche ist in der Halle nichts, was man
@@ -267,7 +276,7 @@ export function Z3() {
               </div>
             ) : null
           }
-          // Nach der Kollision kein Stempel: der Screen ist zu Ende, aber
+          // Nach dem Luftschnitt kein Stempel: der Screen ist zu Ende, aber
           // „geschafft“ wäre er nicht. Gelbgrün heißt in diesem System genau
           // eine Sache, und das hier ist sie nicht.
           geschafft={gefunden ? 'Fehler gefunden' : null}
@@ -296,6 +305,12 @@ export function Z3() {
  * bewegen. Das halbiert die Zahl der Ziele und macht sie groß genug für einen
  * ausgestreckten Arm — ohne die Aufgabe zu verraten, denn welche der sechs es
  * ist, steht nirgends.
+ *
+ * **60 px hoch, mit Abstand dazwischen** (khpl-tage.md §3). Sechs Ziele
+ * unmittelbar aneinander wären am Messekiosk ein Fehltipp mit Folgen: Er
+ * erzeugt sofort eine „falsch“-Rückmeldung und zählt den Versuchszähler für
+ * „Zeig mir wie“ hoch. Die Rüstzeilen bleiben kompakt — sie sind nicht
+ * antippbar und brauchen keine Trefferfläche.
  */
 function Programmliste({
   gelesen,
@@ -315,7 +330,7 @@ function Programmliste({
   const suchen = takt === 'suchen'
 
   return (
-    <ol className="kh-feld flex flex-col px-2 py-2" data-testid="z3-programm">
+    <ol className="kh-feld flex flex-col gap-1.5 px-2 py-2" data-testid="z3-programm">
       {PROGRAMM.map((zeile, i) => {
         const dran = i === gelesen && takt === 'lesen'
         const offen = i >= gelesen && takt === 'lesen'
@@ -356,10 +371,7 @@ function Programmliste({
                 onClick={() => onZeile(i)}
                 whileTap={{ scale: 0.985 }}
                 data-testid={`z3-zeile-${i}`}
-                // 52 px wie die kleinsten Ziele des Dachdecker-Tages: sechs
-                // Zeilen dicht untereinander, und ein Fehltipp erzeugt hier
-                // eine „falsch“-Rückmeldung.
-                className={`${grund} min-h-[52px] w-full text-left`}
+                className={`${grund} min-h-[60px] w-full text-left`}
               >
                 {inhalt}
               </motion.button>
@@ -374,7 +386,7 @@ function Programmliste({
         Welche Steuerung der Screen annimmt, gehört sichtbar dazu — sonst
         behauptet er, jedes CNC-Programm sähe so aus (§6 Z3).
       */}
-      <li className="mt-1.5 border-t border-kh-line px-2 pt-1.5 text-[0.8125rem] leading-snug text-kh-mute/70">
+      <li className="border-t border-kh-line px-2 pt-1.5 text-[0.8125rem] leading-snug text-kh-mute/70">
         {STEUERUNG}
       </li>
     </ol>

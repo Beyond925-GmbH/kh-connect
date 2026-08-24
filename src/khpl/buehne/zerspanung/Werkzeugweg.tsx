@@ -1,15 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Achse, Bild } from './Bild'
+import { Achse, Bild, Pfeilspitze } from './Bild'
 import { STRICH } from './stil'
-import { BACKEN_STIRN, Futter, Rohteil } from './Maschine'
+import { Futter, Rohteil } from './Maschine'
 import { NENNMASS, PROGRAMM, ZEILEN_DAUER } from './kanon'
-import { RUECKZUG, SCHNITT, alsPfad, koerperPfad, schnittAnteil, schnittBis } from './weg'
+import {
+  ANTEIL_VOR_FEHLER,
+  FEHLWEG,
+  RUECKZUG,
+  SCHNITT,
+  alsPfad,
+  koerperPfad,
+  schnittAnteil,
+  schnittBis,
+} from './weg'
 
 /**
  * Z3 — der Werkzeugweg. **Der Screen, an dem dieser Tag hängt.**
  *
  * „Mit jeder Zeile zeichnet sich ein Stück Kontur, und das ist der Reiz des
- * Screens — aus Text wird eine Form, und man hat sie selbst entstehen lassen"
+ * Screens — aus Text wird eine Form, und man hat sie selbst entstehen lassen“
  * (khpl-tag-zerspanung.md §6 Z3). Hier ist der Satz gebaut, und er besteht aus
  * drei Dingen, die zusammen laufen müssen:
  *
@@ -38,21 +47,25 @@ const SICHT = '-50 -30 70 52'
 const GESAMT_DAUER = ZEILEN_DAUER * Math.max(1, SCHNITT.length - 1)
 
 /**
- * Wo das Werkzeug aufsetzt, wenn blind bis ans Ende gefahren wird: an der
- * Stirnfläche der Spannbacke, ein gutes Stück hinter dem Teil. Der Halter ist
- * breiter als die Schneide, und deshalb trifft er, bevor die Spitze vorbei
- * ist.
+ * Wohin das Werkzeug läuft, wenn blind bis ans Ende gefahren wird.
+ *
+ * **Nicht in die Spannbacke.** Der eingebaute Fehler ist das fehlende
+ * Minuszeichen (§11, `belege/zerspanung.md` 7), und `Z+` zeigt an der Drehbank
+ * von der Spannung **fort**: das Werkzeug fährt am Teil vorbei ins Leere. Der
+ * Endpunkt der falschen Zeile (`Z35.`) liegt weit außerhalb dieser Ansicht —
+ * gezeigt wird deshalb der letzte Punkt, an dem die Schneide noch im Bild ist,
+ * und die Pfeilspitze am Rand sagt, dass es dort hinausgeht.
  */
-const AUFPRALL = [BACKEN_STIRN, -NENNMASS / 2 - 1.5] as const
+const HALT = [14, -NENNMASS / 2] as const
 
 export function Werkzeugweg({
   zeile = PROGRAMM.length - 1,
   markierteZeile = null,
-  kollision = false,
+  luftschnitt = false,
 }: {
   zeile?: number
   markierteZeile?: number | null
-  kollision?: boolean
+  luftschnitt?: boolean
 }) {
   const wegRef = useRef<SVGPathElement>(null)
   const koerperRef = useRef<SVGPathElement>(null)
@@ -73,16 +86,14 @@ export function Werkzeugweg({
   useEffect(() => {
     const ziel = schnittAnteil(zeile)
 
-    // Bei der Kollision friert das Bild: der Weg steht sofort bis zur Zeile
-    // da, an der es geknallt hat, und das Werkzeug steckt in der Backe. Kein
-    // Nachzeichnen — wer hier ankommt, hat schon zugesehen.
-    if (kollision) {
-      stand.current = ziel
-      zeichne(ziel)
-      werkzeugRef.current?.setAttribute(
-        'transform',
-        `translate(${AUFPRALL[0]} ${AUFPRALL[1]})`,
-      )
+    // Beim blinden Start friert das Bild: die Kontur steht nur bis zu der
+    // Zeile da, an der es schiefging, der Rest ist nie geschnitten worden —
+    // der Rohling steht noch, wie er eingespannt wurde. Das Werkzeug ist
+    // draußen. Kein Nachzeichnen: wer hier ankommt, hat schon zugesehen.
+    if (luftschnitt) {
+      stand.current = ANTEIL_VOR_FEHLER
+      zeichne(ANTEIL_VOR_FEHLER)
+      werkzeugRef.current?.setAttribute('transform', `translate(${HALT[0]} ${HALT[1]})`)
       return
     }
 
@@ -105,22 +116,26 @@ export function Werkzeugweg({
     }
     bild = requestAnimationFrame(takt)
     return () => cancelAnimationFrame(bild)
-  }, [zeile, kollision, reduziert, zeichne])
+  }, [zeile, luftschnitt, reduziert, zeichne])
 
+  // Nach dem blinden Start keine Hervorhebung: Die falsche Zeile hat ihren
+  // eigenen Weg im Bild, und ein zweiter Strich über einem Schnitt, den es
+  // nicht gegeben hat, wäre genau die Behauptung, um die es hier geht.
   const markiert = useMemo(() => {
-    if (markierteZeile === null) return null
+    if (markierteZeile === null || luftschnitt) return null
     const bis = SCHNITT.findIndex((p, i) => i > 0 && p.zeile === markierteZeile)
     return bis > 0 ? alsPfad([SCHNITT[bis - 1], SCHNITT[bis]]) : null
-  }, [markierteZeile])
+  }, [markierteZeile, luftschnitt])
 
   const angefahren = zeile >= (SCHNITT[0]?.zeile ?? Infinity)
-  const zurueckgezogen = RUECKZUG.length === 2 && zeile >= RUECKZUG[1].zeile && !kollision
+  const zurueckgezogen =
+    RUECKZUG.length === 2 && zeile >= RUECKZUG[1].zeile && !luftschnitt
 
   return (
     <Bild viewBox={SICHT}>
       <g
         style={{
-          opacity: kollision ? 0.6 : 1,
+          opacity: luftschnitt ? 0.75 : 1,
           transition: 'opacity 0.25s cubic-bezier(0.2, 0, 0, 1)',
         }}
       >
@@ -187,11 +202,16 @@ export function Werkzeugweg({
           />
         )}
 
+        {/* Der Weg, den die falsche Zeile wirklich fährt — aus `FEHLER_CODE`
+            gerechnet wie jeder andere Weg auch. Er läuft am Teil vorbei und
+            aus dem Bild hinaus, und unter ihm bleibt der Rohling stehen. */}
+        {luftschnitt && FEHLWEG.length === 2 && <Luftschnitt />}
+
         <g
           ref={werkzeugRef}
           transform={
-            kollision
-              ? `translate(${AUFPRALL[0]} ${AUFPRALL[1]})`
+            luftschnitt
+              ? `translate(${HALT[0]} ${HALT[1]})`
               : spitzenVersatz(stand.current)
           }
           style={{ opacity: angefahren ? 1 : 0, transition: 'opacity 0.3s' }}
@@ -199,8 +219,6 @@ export function Werkzeugweg({
           <Schneide />
         </g>
       </g>
-
-      {kollision && <Aufprall />}
     </Bild>
   )
 }
@@ -241,28 +259,27 @@ function Schneide() {
 }
 
 /**
- * Der Aufprall. **Kein Rot** — Rot kommt in diesem Produkt nicht vor
- * (khpl-tage.md §3); der Preis dieses Fehlers ist ohnehin kein Alarm, sondern
- * ein stehendes Bild: Werkzeug hin, Spannung hin, und alles muss neu
- * vermessen werden.
+ * Der Luftschnitt. **Kein Knall und kein Rot** — Rot kommt in diesem Produkt
+ * nicht vor (khpl-tage.md §3), und der Preis dieses Fehlers ist ohnehin kein
+ * Alarm, sondern ein stehendes Bild: der Rohling hängt ungedreht im Futter,
+ * und das Werkzeug ist auf der falschen Seite unterwegs.
+ *
+ * Dieselbe Strichstärke wie der Schnittweg, denn es ist dieselbe Bewegung —
+ * nur eine, die nichts abträgt. Die Pfeilspitze am Rand sagt, dass es dort
+ * weitergeht: `Z35.` liegt weit außerhalb dieser Ansicht.
  */
-function Aufprall() {
-  const strahlen = Array.from({ length: 9 }, (_, i) => {
-    const w = (i / 9) * Math.PI * 2 + 0.4
-    const [innen, aussen] = [2.4, i % 2 === 0 ? 7.5 : 5]
-    return `M ${AUFPRALL[0] + Math.cos(w) * innen} ${AUFPRALL[1] + Math.sin(w) * innen} L ${AUFPRALL[0] + Math.cos(w) * aussen} ${AUFPRALL[1] + Math.sin(w) * aussen}`
-  }).join(' ')
-
+function Luftschnitt() {
   return (
     <g className="text-kh-orange">
       <path
-        d={strahlen}
+        d={alsPfad(FEHLWEG)}
+        fill="none"
         stroke="currentColor"
         strokeWidth={STRICH.voll}
         strokeLinecap="round"
         vectorEffect="non-scaling-stroke"
       />
-      <circle cx={AUFPRALL[0]} cy={AUFPRALL[1]} r={1.6} fill="currentColor" />
+      <Pfeilspitze x={19} y={-NENNMASS / 2} winkel={0} />
     </g>
   )
 }

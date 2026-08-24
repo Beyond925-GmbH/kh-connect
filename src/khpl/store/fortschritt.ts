@@ -95,7 +95,12 @@ export interface Antworten {
   z2?: { geruestet: string[]; fertig: boolean }
   /**
    * Z3 — wie weit der Besucher sich durch das Programm getippt hat, ob er die
-   * falsche Zeile gefunden hat und ob er in die Spannbacke gefahren ist.
+   * falsche Zeile gefunden hat und ob er blind gestartet ist.
+   *
+   * `kollision` heißt so, weil die Spec die Signatur so festlegt (§6 Z3). Was
+   * der Screen daraus macht, ist der **Luftschnitt**: der eingebaute Fehler ist
+   * das fehlende Minuszeichen, und damit fährt das Werkzeug am Teil vorbei ins
+   * Leere statt in die Spannbacke (§11, `belege/zerspanung.md` 7).
    */
   z3?: { zeilen: number; gefunden: boolean; kollision: boolean }
   /** Z4 — welche der drei Entdeckungen im Messraum aufgedeckt wurden. */

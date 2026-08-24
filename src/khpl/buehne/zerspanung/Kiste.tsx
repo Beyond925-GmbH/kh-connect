@@ -6,7 +6,7 @@ import { FASE, LAENGE, NENNMASS } from './kanon'
  * Z6 — die Sichtkiste, und **eins ist markiert.**
  *
  * „Sie füllt sich, während man hinsieht — die Maschine läuft weiter, auch ohne
- * den Besucher" (khpl-tag-zerspanung.md §6 Z6). Deshalb kommen die Teile
+ * den Besucher“ (khpl-tag-zerspanung.md §6 Z6). Deshalb kommen die Teile
  * gestaffelt herein und nicht auf einen Schlag: Der Screen zeigt nicht einen
  * Füllstand, er zeigt ein Füllen.
  *

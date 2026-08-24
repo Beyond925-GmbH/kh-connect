@@ -15,7 +15,7 @@ import { LAENGE, NENNMASS, ROHLING_DURCHMESSER } from './kanon'
  * der Rohling wird gespannt, das Werkzeug kommt in den Revolver, seine Länge
  * wird vermessen, der Nullpunkt wird gesetzt. Der erste Screen zeigt deshalb
  * nicht nichts, sondern **eine Maschine, in der noch nichts ist** — genau das
- * ist die Aussage: „wie viel passiert, bevor irgendetwas passiert" (§6 Z2).
+ * ist die Aussage: „wie viel passiert, bevor irgendetwas passiert“ (§6 Z2).
  *
  * **Die Maße hier sind Bühnenmaße.** Futter, Backen und Revolver haben keine
  * Zahl, die irgendwo belegt wäre, und dürfen deshalb auf keinem Screen als
@@ -27,7 +27,7 @@ import { LAENGE, NENNMASS, ROHLING_DURCHMESSER } from './kanon'
  * **Der Nullpunkt ist der Höhepunkt des Screens** (§6 Z2). Wo ist Null? Nicht
  * in der Maschine — am Werkstück, von dir festgelegt. Deshalb sitzt das
  * Zeichen an der Stirnfläche auf der Achse und leuchtet auf, wenn es steht:
- * gelbgrün, die Farbe, die im ganzen Produkt „das hast du geschafft" heißt.
+ * gelbgrün, die Farbe, die im ganzen Produkt „das hast du geschafft“ heißt.
  * Z zeigt nach rechts aus dem Material heraus, X nach oben — dieselbe
  * Richtungsangabe, mit der das Programm in Z3 dann `Z-35.` schreibt.
  */
@@ -37,7 +37,7 @@ const SICHT = '-68 -49 105 78'
 const [SICHT_X, SICHT_Y] = [68, 49]
 
 /** Stirnfläche der Spannbacken. Ab hier nach links ist Futter, kein Werkstück. */
-export const BACKEN_STIRN = -37
+const BACKEN_STIRN = -37
 
 const ROHLING_R = ROHLING_DURCHMESSER / 2
 
@@ -77,9 +77,10 @@ export function Maschine({
  * Futter und Backen im Längsschnitt. Die Backen fahren beim Spannen zu — fünf
  * Millimeter, die man sieht, und danach liegt der Rohling an.
  *
- * Exportiert, weil Z3 dieselbe Maschine zeigt: der Werkzeugweg läuft auf
- * genau diese Backen zu, und die Kollision hat nur dann einen Ort, wenn es
- * derselbe Ort ist.
+ * Exportiert, weil Z3 dieselbe Maschine zeigt: der Werkzeugweg entsteht in
+ * genau dieser Spannung, und der Rohling, der beim Luftschnitt ungedreht
+ * stehen bleibt, hängt nur dann glaubwürdig im Futter, wenn es dasselbe
+ * Futter ist.
  */
 export function Futter({ offen = false }: { offen?: boolean }) {
   const versatz = offen ? 5 : 0

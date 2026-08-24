@@ -5,7 +5,7 @@ import { STRICH } from './stil'
  * Der Rahmen, in dem jede Ansicht dieses Tages steht.
  *
  * **Warum alle sechs Zustände denselben Rahmen benutzen.** „Der Zoom ist die
- * Klammer" (khpl-tag-zerspanung.md §7): die Kamera geht den ganzen Tag in eine
+ * Klammer“ (khpl-tag-zerspanung.md §7): die Kamera geht den ganzen Tag in eine
  * Richtung, Zeichnung → Maschine → Messschraube. Das liest sich nur dann als
  * *eine* Kamera, wenn die Bilder auch gleich sitzen. Läge die Bildmitte je
  * Screen woanders, wäre jeder Wechsel ein Schnitt statt einer Fahrt.
