@@ -24,7 +24,11 @@ export function BerufBild({ beruf, className }: { beruf: BerufDef; className?: s
         aria-hidden
         className={cn('grid size-full place-items-center bg-kh-raised', className)}
       >
-        <span className="font-display text-[clamp(2.5rem,8vw,5rem)] leading-none text-kh-paper/12">
+        {/* 12 % war schon auf dem vollen Motiv leise; seit die Karten der
+            angekündigten Berufe zusätzlich auf 55 % Deckkraft stehen, blieb
+            davon nichts übrig — eine Karte ohne Bild und ohne sichtbaren
+            Ersatz sieht aus, als fehle sie. */}
+        <span className="font-display text-[clamp(2.5rem,8vw,5rem)] leading-none text-kh-paper/35">
           {beruf.kurz.slice(0, 2).toUpperCase()}
         </span>
       </div>

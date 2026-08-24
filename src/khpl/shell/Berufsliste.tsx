@@ -127,9 +127,21 @@ function Karte({
         empfohlen ? 'border-kh-orange' : 'border-kh-line'
       }`}
     >
+      {/*
+        „Bald“ heißt entsättigt, nicht abgedunkelt.
+
+        Vorher lag das Motiv der angekündigten Berufe auf 40 % Deckkraft unter
+        einem Verlauf, der links bei vollem Schwarz beginnt — drei von vier
+        Karten waren damit praktisch leer und lasen sich als fehlendes Bild,
+        nicht als „kommt noch“. Grau und ruhig sagt dasselbe, ohne nach Defekt
+        auszusehen: das Motiv ist da, es ist nur noch nicht dran.
+      */}
       <div aria-hidden className="absolute inset-0">
-        <BerufBild beruf={beruf} className={bald ? 'opacity-40' : 'opacity-70'} />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0E0D0B] via-[#0E0D0B]/85 to-[#0E0D0B]/45" />
+        <BerufBild
+          beruf={beruf}
+          className={bald ? 'opacity-55 grayscale-[0.85]' : 'opacity-75'}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0E0D0B] via-[#0E0D0B]/80 to-[#0E0D0B]/35" />
       </div>
 
       <div className="relative flex min-w-0 flex-1 flex-col justify-end gap-1.5 p-4">
@@ -153,19 +165,25 @@ function Karte({
           )}
         </div>
 
-        <h2 className="kh-titel-klein">{beruf.kurz}</h2>
+        {/*
+          Der Pfeil stand in einer eigenen 56-px-Spalte rechts, senkrecht
+          mittig — einen halben Screen von der Überschrift entfernt, zu der er
+          gehört, und auf einer „Bald“-Karte ein Versprechen, das sie nicht
+          einlösen kann. Jetzt steht er in der Titelzeile, und wo es noch
+          nichts zu betreten gibt, steht dort gar nichts.
+        */}
+        <h2 className="flex items-center gap-2">
+          <span className="kh-titel-klein">{beruf.kurz}</span>
+          {!bald && (
+            <ArrowRight
+              aria-hidden
+              className={`size-6 shrink-0 ${empfohlen ? 'text-kh-orange' : 'text-kh-paper/50'}`}
+              strokeWidth={2.5}
+            />
+          )}
+        </h2>
         <p className="text-[0.9375rem] leading-snug text-kh-paper/70">{beruf.zeile}</p>
       </div>
-
-      <span
-        aria-hidden
-        className="relative grid w-14 shrink-0 place-items-center self-stretch"
-      >
-        <ArrowRight
-          className={`size-6 ${empfohlen ? 'text-kh-orange' : 'text-kh-paper/45'}`}
-          strokeWidth={2.5}
-        />
-      </span>
     </motion.button>
   )
 }
