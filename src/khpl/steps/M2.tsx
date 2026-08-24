@@ -261,21 +261,28 @@ function Vergleich({
 }) {
   const von = Math.min(anteil(schaetzung), anteil(ECHT))
   const bis = Math.max(anteil(schaetzung), anteil(ECHT))
+  const abstand = Math.abs(ECHT - schaetzung)
 
   return (
-    <div className="flex flex-col gap-1.5" data-testid="m2-vergleich">
-      <div className="relative h-3 w-full rounded-full border border-kh-line bg-white/10">
+    <div className="flex flex-col gap-2" data-testid="m2-vergleich">
+      {/* Die Skala trug den Abstand vorher als 12-px-Streifen mit zwei
+          4-px-Strichen und darunter eine 15-px-Zeile in `kh-mute`. Der
+          Abstand zwischen der geratenen und der echten Zahl **ist** die
+          Aussage dieses Screens, und er war das Leiseste darauf. Jetzt:
+          höhere Skala, dickere Marken — und der Abstand steht als Zahl da,
+          statt aus zwei Positionen abgelesen werden zu müssen. */}
+      <div className="relative h-4 w-full rounded-full border border-kh-line bg-white/10">
         <motion.div
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           style={{ left: `${von}%`, width: `${bis - von}%`, transformOrigin: 'left' }}
-          className="absolute inset-y-0 bg-kh-orange/25"
+          className="absolute inset-y-0 bg-kh-orange/30"
           aria-hidden
         />
         <span
           style={{ left: `${anteil(schaetzung)}%` }}
-          className="absolute top-[-5px] bottom-[-5px] w-[4px] -translate-x-1/2 rounded-full bg-kh-mute"
+          className="absolute top-[-7px] bottom-[-7px] w-[6px] -translate-x-1/2 rounded-full bg-kh-paper/70"
           aria-hidden
         />
         <motion.span
@@ -283,12 +290,19 @@ function Vergleich({
           animate={{ opacity: 1, scaleY: 1 }}
           transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 24 }}
           style={{ left: `${anteil(ECHT)}%` }}
-          className="absolute top-[-7px] bottom-[-7px] w-[5px] -translate-x-1/2 rounded-full bg-kh-orange"
+          className="absolute top-[-10px] bottom-[-10px] w-[7px] -translate-x-1/2 rounded-full bg-kh-orange shadow-[0_0_12px_rgba(255,159,42,0.6)]"
           aria-hidden
         />
       </div>
-      <p className="text-[0.9375rem] text-kh-mute tabular-nums">
-        deine Schätzung: {euro(schaetzung)}
+      <p className="text-[1rem] tabular-nums">
+        <span className="text-kh-mute">Deine Schätzung </span>
+        <span className="font-semibold text-kh-paper/85">{euro(schaetzung)}</span>
+        {abstand > 0 && (
+          <>
+            <span className="text-kh-mute"> — </span>
+            <span className="font-semibold text-kh-orange">{euro(abstand)} daneben</span>
+          </>
+        )}
       </p>
     </div>
   )

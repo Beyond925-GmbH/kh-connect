@@ -242,11 +242,7 @@ export function M7() {
       interaktion={
         <Wechsel takt={takt === 'bauen' ? (fertig ? 'fertig' : 'bauen') : 'vorfuehrung'}>
           {takt !== 'bauen' ? (
-            <Vorfuehrung
-              label={gezeigt}
-              zurueck={takt === 'zurueck'}
-              onUeberspringen={() => setTakt('zurueck')}
-            />
+            <Vorfuehrung label={gezeigt} zurueck={takt === 'zurueck'} />
           ) : fertig ? null : (
             <DndContext
               sensors={sensoren}
@@ -347,6 +343,22 @@ export function M7() {
           id="M7"
           uebungOffen={!fertig}
           geschafft={fertig ? 'Dach steht' : null}
+          // Während die Vorführung läuft, ist „Kenn ich schon“ die einzige
+          // Handlung, die der Screen anbietet — also gehört sie an die
+          // Primärposition unten rechts und nicht als grauer Text mitten ins
+          // Panel. Vorher stand dort ein `variant="leise"`-Knopf ohne Kante
+          // und ohne Fläche, während der Fuß daneben leer blieb.
+          aktion={
+            takt === 'zeigen' ? (
+              <Button
+                variant="aktion"
+                onClick={() => setTakt('zurueck')}
+                data-testid="m7-vorfuehrung-aus"
+              >
+                Kenn ich schon — los geht’s
+              </Button>
+            ) : undefined
+          }
         />
       }
     />
@@ -357,18 +369,10 @@ export function M7() {
  * Was während der Vorführung im Panel steht.
  *
  * Nur der Name dessen, was gerade einfliegt — das ist der Inhalt, den der
- * Besucher gleich abrufen soll. Dazu ein Ausweg: wer die Reihenfolge schon
- * kennt, soll nicht zwanzig Sekunden zusehen müssen.
+ * Besucher gleich abrufen soll. Der Ausweg für den, der die Reihenfolge schon
+ * kennt, steht im Fuß an der Primärposition, nicht hier.
  */
-function Vorfuehrung({
-  label,
-  zurueck,
-  onUeberspringen,
-}: {
-  label: string
-  zurueck: boolean
-  onUeberspringen: () => void
-}) {
+function Vorfuehrung({ label, zurueck }: { label: string; zurueck: boolean }) {
   return (
     <div className="flex flex-col items-start gap-2.5" data-testid="m7-vorfuehrung">
       <div className="flex w-fit items-center gap-3 rounded-kh-pill border-2 border-kh-orange/40 bg-kh-orange/12 py-2.5 pr-5 pl-3">
@@ -385,15 +389,6 @@ function Vorfuehrung({
           </p>
         </span>
       </div>
-      {!zurueck && (
-        <Button
-          variant="leise"
-          onClick={onUeberspringen}
-          data-testid="m7-vorfuehrung-aus"
-        >
-          Kenn ich schon — los geht's
-        </Button>
-      )}
     </div>
   )
 }

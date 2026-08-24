@@ -60,6 +60,8 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
   const [hinweis, setHinweis] = useState(false)
   const [staff, setStaff] = useState(false)
   const uhr = useRef(0)
+  /** Sekunden bis zum Rücksprung — läuft nur, solange der Hinweis steht. */
+  const [rest, setRest] = useState(IDLE_RESET_MS / 1000)
 
   // Die Geste selbst hängt an den Screens (leere Dehnfuge in der Leiste, Logo
   // auf dem Splash) — hier liegt nur das Fenster, das sie öffnet.
@@ -72,10 +74,19 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
     setHinweis(false)
     window.clearTimeout(uhr.current)
     uhr.current = window.setTimeout(() => {
+      setRest(IDLE_RESET_MS / 1000)
       setHinweis(true)
       uhr.current = window.setTimeout(zumSplash, IDLE_RESET_MS)
     }, IDLE_HINWEIS_MS * geduld)
   }, [geduld])
+
+  // Der Zählstand hängt am Hinweis, nicht an der Uhr oben: die entscheidet,
+  // wann zurückgesprungen wird, diese hier sagt es nur an.
+  useEffect(() => {
+    if (!hinweis) return
+    const takt = window.setInterval(() => setRest((s) => Math.max(0, s - 1)), 1000)
+    return () => window.clearInterval(takt)
+  }, [hinweis])
 
   useEffect(() => {
     // Auf dem Splash läuft keine Idle-Uhr: dort ist Stillstand der Normalzustand.
@@ -112,7 +123,24 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
         >
           <div className="flex flex-col items-center gap-6 px-6 text-center">
             <p className="kh-titel">Bist du noch da?</p>
-            <p className="kh-fachtext">Tipp irgendwo hin, dann geht es weiter.</p>
+            {/*
+              Was passiert, wenn man nichts tut, stand nicht da. „Tipp irgendwo
+              hin, dann geht es weiter“ beschreibt nur den einen Ausgang; der
+              andere — in wenigen Sekunden ist der Screen weg — war eine
+              Überraschung. Der Zählstand ist eine Zahl und keine Animation:
+              die CSS-Regel für „Bewegung reduzieren“ setzt jede Laufzeit auf
+              0,01 ms, ein laufender Ring wäre dort sofort leer und würde
+              lügen.
+            */}
+            <p className="kh-fachtext">
+              Tipp irgendwo hin, dann geht es weiter.
+              <br />
+              <span className="text-kh-paper/55">
+                Sonst fängt der Stand in{' '}
+                <span className="tabular-nums text-kh-orange">{rest}</span> Sekunden von
+                vorn an.
+              </span>
+            </p>
             <Button onClick={zuruecksetzen} variant="weiter" size="lg">
               Ja, weiter
             </Button>

@@ -118,6 +118,17 @@ export function M6() {
           transition={{ duration: 0.6, delay: 2 }}
           className="flex flex-col gap-2.5"
         >
+          {/* Die Anleitung stand unter den drei Fragen — also hinter dem, was
+              sie erklärt. Wer schon getippt hat, braucht sie nicht mehr; wer
+              noch nicht getippt hat, hat sie nicht gelesen. Jetzt steht sie
+              davor, und sobald eine Antwort offen ist, macht sie ihr Platz. */}
+          {!antwort && (
+            <p className="px-1 text-[1rem] text-kh-paper/55">
+              Drei Sachen, die kaum jemand über diesen Beruf weiß. Tipp an, was dich
+              interessiert.
+            </p>
+          )}
+
           <div className="flex flex-wrap gap-2">
             {FRAGEN.map((f) => {
               const aktiv = offen === f.id
@@ -164,12 +175,7 @@ export function M6() {
               >
                 {antwort.antwort}
               </p>
-            ) : (
-              <p className="px-1 text-[1rem] text-kh-paper/45">
-                Drei Sachen, die kaum jemand über diesen Beruf weiß. Tipp an, was dich
-                interessiert.
-              </p>
-            )}
+            ) : null}
           </Wechsel>
         </motion.div>
       }
