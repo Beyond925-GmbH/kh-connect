@@ -636,10 +636,11 @@ function BauteilFigur({
       {angetippt && !offen && (
         <circle cx={o.x + o.b - 2} cy={o.y + 2} r={3.4} fill={KALT.linie} opacity={0.9} />
       )}
-      {/* Trefferfläche: großzügig, unabhängig davon, wie klein das Symbol ist. */}
+      {/* Trefferfläche: großzügig, unabhängig davon, wie klein das Symbol ist —
+          und um das Symbol zentriert, auch wenn es größer als das Minimum ist. */}
       <rect
-        x={o.x + o.b / 2 - 16}
-        y={o.y + o.h / 2 - 16}
+        x={o.x + o.b / 2 - Math.max(32, o.b) / 2}
+        y={o.y + o.h / 2 - Math.max(32, o.h) / 2}
         width={Math.max(32, o.b)}
         height={Math.max(32, o.h)}
         fill="transparent"

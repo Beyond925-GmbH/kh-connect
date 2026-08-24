@@ -6,6 +6,7 @@ import {
   zaehleBoegen,
   type KnotenId,
 } from '@/khpl/buehne/anlagenmechanik/kanon'
+import { ZIEL } from '@/khpl/buehne/anlagenmechanik/zeichnung'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
@@ -63,6 +64,11 @@ export function A4() {
   const boegen = zaehleBoegen(pfad)
   const verlust = druckverlust(pfad)
   const gezogen = pfad.length >= 2
+  // „Leitung liegt" gibt es erst, wenn die Leitung wirklich am Verteiler
+  // ankommt — sonst ließe sich ein Stummel als fertig erklären, und in A6/A7
+  // liefe die Wärme eine Leitung entlang, die im Nichts endet. *Weiter* bleibt
+  // davon unberührt; nur die Übungsaktion wartet (Hüllenvertrag: kein Blockieren).
+  const angekommen = gezogen && pfad.at(-1) === ZIEL
 
   const ziehen = (neu: readonly KnotenId[]) => {
     setPfad([...neu])
@@ -151,7 +157,7 @@ export function A4() {
               <Button
                 variant="aktion"
                 onClick={legen}
-                disabled={!gezogen}
+                disabled={!angekommen}
                 data-testid="a4-legen"
               >
                 Leitung liegt
