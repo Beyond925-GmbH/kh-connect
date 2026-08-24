@@ -67,14 +67,18 @@ export function Helmwahl() {
 
       <div className="relative flex min-h-0 flex-1 flex-col gap-4 p-5 landscape:flex-row landscape:gap-8 landscape:p-8">
         {/* Der Helm. Quer links neben der Wahl, hochkant darüber — er ist das
-            Ergebnis und muss im Blick bleiben, während man wählt. */}
-        <div className="flex shrink-0 flex-col items-center justify-center gap-3 landscape:w-[34%]">
+            Ergebnis und muss im Blick bleiben, während man wählt.
+
+            Er war in der ersten Fassung auf 15 rem gedeckelt und stand damit
+            als Daumennagel in einer 34-%-Spalte: das Ergebnis der Wahl war das
+            kleinste Element des Screens. Jetzt füllt er seine Spalte. */}
+        <div className="flex shrink-0 flex-col items-center justify-center gap-3 landscape:w-[36%]">
           <motion.div
             key={farbe}
             initial={{ scale: 0.9, opacity: 0, rotate: -4 }}
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 420, damping: 22 }}
-            className="w-[12rem] landscape:w-full landscape:max-w-[15rem]"
+            className="w-[13rem] landscape:w-full landscape:max-w-[23rem]"
           >
             <Helm
               farbe={farbe}
@@ -84,21 +88,36 @@ export function Helmwahl() {
         </div>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 landscape:max-w-[40rem]">
-          <header className="flex shrink-0 flex-col gap-1.5">
-            <span className="kh-etikett flex items-center gap-2">
-              <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
-              Bevor du anfängst
-            </span>
-            <h1 className="kh-titel">Dein Helm</h1>
-          </header>
+          {/*
+            Überschrift und Wahl sind **ein** Block, und der steht quer mittig
+            neben dem Helm.
 
+            Vorher hing die Überschrift oben fest und `justify-center` schob
+            nur die Wahl in die Mitte — das ergab ein Loch zwischen beiden und
+            ein zweites darunter, während der Helm daneben zentriert stand.
+            Hochkant bleibt es bei Oberkante: dort ist der Platz knapp, und ein
+            zentrierter Block in einem scrollenden Container schneidet oben ab.
+          */}
           <div
             data-scroll
-            className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto overscroll-contain pr-0.5 landscape:justify-center"
+            className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain pr-0.5 landscape:justify-center"
           >
+            <header className="flex shrink-0 flex-col gap-1.5">
+              <span className="kh-etikett flex items-center gap-2">
+                <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
+                Bevor du anfängst
+              </span>
+              <h1 className="kh-titel">Dein Helm</h1>
+            </header>
+
             <section>
-              <h2 className="text-[1rem] font-semibold text-kh-mute">Welche Farbe?</h2>
-              <div className="mt-2 flex flex-wrap gap-2.5">
+              {/*
+                Die beiden Fragen sind die einzige Wegweisung auf diesem
+                Screen und standen in `kh-mute` — dem leisesten Ton des
+                Systems. Als Etikett tragen sie so weit wie der Rest.
+              */}
+              <h2 className="kh-etikett">Welche Farbe?</h2>
+              <div className="mt-3 flex flex-wrap gap-3">
                 {HELM_FARBEN.map((f) => (
                   <button
                     key={f.id}
@@ -106,10 +125,14 @@ export function Helmwahl() {
                     aria-pressed={farbe === f.id}
                     data-testid={`helm-farbe-${f.id}`}
                     onClick={() => setFarbe(f.id)}
-                    className={`size-[60px] rounded-kh-pill border-4 transition-transform active:scale-90 ${
+                    // Der gewählte Zustand liegt **außerhalb** der Farbe: eine
+                    // weiße Kante im Kreis war auf dem weißen Helm unsichtbar,
+                    // und genau der ist die Voreinstellung. Ein abgesetzter
+                    // Ring in Signalfarbe trägt auf allen vier Farben.
+                    className={`size-[64px] rounded-kh-pill transition-transform active:scale-90 ${
                       farbe === f.id
-                        ? 'border-kh-paper scale-105'
-                        : 'border-transparent opacity-70'
+                        ? 'scale-105 ring-3 ring-kh-signal ring-offset-3 ring-offset-kh-ink'
+                        : 'opacity-65'
                     }`}
                     style={{ backgroundColor: f.farbe }}
                   >
@@ -120,10 +143,8 @@ export function Helmwahl() {
             </section>
 
             <section>
-              <h2 className="text-[1rem] font-semibold text-kh-mute">
-                Wonach greifst du zuerst?
-              </h2>
-              <div className="mt-2 grid grid-cols-3 gap-2">
+              <h2 className="kh-etikett">Wonach greifst du zuerst?</h2>
+              <div className="mt-3 grid grid-cols-3 gap-2.5">
                 {WERKZEUGE.map((w) => {
                   const Icon = ICONS[w.icon]
                   const gewaehlt = werkzeug === w.id
@@ -134,18 +155,18 @@ export function Helmwahl() {
                       aria-pressed={gewaehlt}
                       data-testid={`werkzeug-${w.id}`}
                       onClick={() => setWerkzeug(gewaehlt ? '' : w.id)}
-                      className={`flex min-h-[84px] flex-col items-center justify-center gap-1.5 rounded-kh border-2 px-2 py-2.5 text-center transition-transform active:scale-[0.96] ${
+                      className={`flex min-h-[104px] flex-col items-center justify-center gap-2 rounded-kh border-2 px-2 py-3 text-center transition-transform active:scale-[0.96] ${
                         gewaehlt
                           ? 'border-kh-signal bg-kh-signal/12'
                           : 'border-kh-line bg-white/5'
                       }`}
                     >
                       <Icon
-                        className={`size-7 ${gewaehlt ? 'text-kh-signal' : 'text-kh-paper/70'}`}
-                        strokeWidth={2}
+                        className={`size-9 ${gewaehlt ? 'text-kh-signal' : 'text-kh-paper/70'}`}
+                        strokeWidth={1.75}
                         aria-hidden
                       />
-                      <span className="text-[0.8125rem] leading-tight font-semibold text-kh-paper/85">
+                      <span className="text-[0.9375rem] leading-tight font-semibold text-kh-paper/85">
                         {w.name}
                       </span>
                     </button>
