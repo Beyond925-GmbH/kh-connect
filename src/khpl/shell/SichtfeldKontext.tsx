@@ -135,6 +135,8 @@ export function SichtfeldMesser({
     roh: {},
   })
   const letztes = useRef<Sichtfeld>({})
+  /** Welche Teilung gerade gilt — Eingang fürs Totband unten. */
+  const seitlichRef = useRef(false)
 
   const messen = useCallback(() => {
     const f = flaeche.current?.getBoundingClientRect()
@@ -150,9 +152,26 @@ export function SichtfeldMesser({
       const quer = f.width > f.height
       const karteBreit = k.width / f.width > 0.9
       const untenAnteil = grob((f.bottom - k.top) / f.height)
-      // Seitlich teilen nur, wenn die Karte quer **und** schmal **und hoch**
-      // ist — sonst bleibt über ihr genug Streifen für das ganze Modell.
-      if (quer && !karteBreit && untenAnteil > 0.55) {
+      /*
+        Seitlich teilen nur, wenn die Karte quer **und** schmal **und hoch**
+        ist — sonst bleibt über ihr genug Streifen für das ganze Modell.
+
+        **Mit Totband.** Die Kamera wird gesetzt, nicht gefahren
+        (`Kamerasteuerung`, `kamera.position.set`): jeder Wechsel der Teilung
+        ist ein Sprung. Karten wachsen und schrumpfen aber im laufenden Step —
+        M5 tauscht seine Bauteilkarte, M7 nimmt beim Ziehen Karten weg. Ohne
+        Totband stünde die Schwelle mitten in diesem Bereich und die Kamera
+        spränge bei jeder zweiten Textzeile. 0,45 / 0,58 sind rund 110 px auf
+        dem iPad quer — so viel ändert sich nur, wenn ein Step wirklich von
+        Zuschauen auf Mitmachen umschaltet, und dort ist der Wechsel gewollt.
+      */
+      const seitlich =
+        quer &&
+        !karteBreit &&
+        (seitlichRef.current ? untenAnteil > 0.45 : untenAnteil > 0.58)
+      seitlichRef.current = seitlich
+
+      if (seitlich) {
         roh.links = grob((k.right - f.left) / f.width)
       } else {
         roh.unten = untenAnteil
