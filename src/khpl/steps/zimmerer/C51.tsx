@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { Begriff } from './Begriff'
@@ -34,9 +35,16 @@ import { Begriff } from './Begriff'
  * `INTERVIEW` und werden auch so benannt.
  *
  * **Kein Übungselement** — ein Lesescreen mit Begriffs-Popovern, wie B5.1 beim
- * Dachdecker. Und keine Bühne: die Medienliste (khpl-tag-zimmerer.md 10) führt
- * für diesen Screen kein Motiv, und ein 3D-Element am Haken nähme C6 seinen
- * Auftritt vorweg. Gemeldeter Medienbedarf.
+ * Dachdecker.
+ *
+ * ⚠️ **Die Bühne ist ein Platzhalter.** Die Medienliste
+ * (khpl-tag-zimmerer.md 10) führt für diesen Screen kein Motiv, und ein
+ * 3D-Element am Haken nähme C6 seinen Auftritt vorweg — deshalb hatte er
+ * zunächst gar keine Bühne. Hochkant ist das ein schwarzes Feld über zwei
+ * Dritteln der Höhe, ausgerechnet unter dem stärksten Zitat des Tages. Bis ein
+ * eigenes Motiv da ist, steht hier `quiz-abbund.webp`: Maßnehmen am Sparren,
+ * mit Helm und Handschuh. Die PSA ist das, wovon der Screen handelt; der Kran
+ * bleibt C6. Der Medienbedarf ist gemeldet, nicht erledigt.
  */
 export function C51() {
   return (
@@ -44,6 +52,7 @@ export function C51() {
       id="C5.1"
       titelZusatz="Abstecher"
       interaktionOffen={false}
+      buehne={<StepFoto id="C5.1" />}
       fachtext={
         <p>
           Wer die <Begriff id="anschlagmittel">Anschlagmittel</Begriff> einhängt, arbeitet

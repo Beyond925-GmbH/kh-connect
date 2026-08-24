@@ -21,6 +21,14 @@ import { Begriff } from './Begriff'
  * über Rohboden. Beides sind die beiden Achsen der Zieh-Interaktion; die Höhe
  * der Öffnung geben die Wechselhölzer vor und wird nicht gezogen.
  *
+ * **Der Zug ist untersetzt, das Zielfenster nicht aufgeweicht.** Ein Zentimeter
+ * Fingerweg verstellt das Maß um einen Millimeter (`ZIEH_UNTERSETZUNG` in der
+ * Bühne). Eins zu eins übertragen war das Trefferfenster vier Bildpunkte breit
+ * und nur mit einer pixelgenauen Maus zu treffen — der „Fehler mit Preis“ kippt
+ * dann in „Fehler immer“, und wer nach zwei Versuchen „Zeig mir wie“ tippt, hat
+ * die Übung nicht gemacht, sondern zugesehen. Die Fuge bleibt bei 10 bis 30 mm:
+ * das ist die belegte Zahl, und die wird nicht verhandelt.
+ *
  * **Der Preis unterscheidet sich vom Dachdecker.** Dort kostet ein Fehler
  * *Material* (der Balken ist Ausschuss). Hier kostet er **Zeit** — und zwar in
  * einer Halle, in der um elf der Lkw steht. Das ist die Ökonomie der
@@ -95,8 +103,19 @@ const RAHMEN_BREITE_MM = ZIEL_BREITE_MM - 2 * FUGE_MIN_MM
  */
 const ZIEL_Y_MM = 1000
 
-/** Wie weit die Unterkante daneben liegen darf, bevor der Screen etwas sagt. */
-const TOLERANZ_Y_MM = 20
+/**
+ * Wie weit die Unterkante daneben liegen darf, bevor der Screen etwas sagt.
+ *
+ * **Spielmaß, keine Vorschrift** — die belegte Einbautoleranz (1,5 mm je Meter)
+ * gilt für den Rahmen *im* Ausschnitt und steht in der Aha-Karte, nicht hier.
+ * Fünf Zentimeter Brüstungshöhe sieht man im fertigen Haus noch, und genau das
+ * sagt der Fehlertext auch. Enger war es nicht Genauigkeit, sondern
+ * Unerreichbarkeit: zusammen mit der 1:1-Übersetzung des Ziehwegs lag das
+ * Trefferfenster bei vier Bildpunkten (siehe `ZIEH_UNTERSETZUNG` in der
+ * Bühne). Beide Werte zusammen ergeben jetzt das, was die Spec verlangt —
+ * zufällig trifft es niemand, frustrierend ist es auch nicht.
+ */
+const TOLERANZ_Y_MM = 50
 
 /** Ziehweg der Breite. Weit genug für einen groben Fehlgriff in beide Richtungen. */
 const MIN_BREITE_MM = 1000
@@ -442,7 +461,7 @@ function Istmass({ ausschnitt }: { ausschnitt: Fensterausschnitt }) {
           {f > 0 ? `${f} mm Fuge` : 'kein Platz'}
         </span>
         <span className="text-[1.0625rem] text-kh-mute">
-          Zieh den Ausschnitt auf — direkt am Element.
+          Zieh den Ausschnitt zurecht — direkt am Element.
         </span>
       </div>
       <p className="text-[1rem] text-kh-paper/60 tabular-nums">

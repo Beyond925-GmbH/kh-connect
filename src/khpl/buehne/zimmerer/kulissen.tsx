@@ -165,15 +165,25 @@ function Kontaktschatten({
  * Die Halle: Boden, Abbundtisch, Stützenreihen im Dunst. `mitAuflage` legt die
  * beiden Kanthölzer unter das schwebende Ständerwerk — in der Praxis liegt ein
  * Rahmen nie direkt auf der Tischplatte.
+ *
+ * **Und `mitAuflage` rückt den Tisch mit.** C1 legt einen Stapel um z = 0 aus;
+ * C2 bis C4 legen das Element flach hin, und das reicht von z = −H bis z = 0,
+ * weil es aus der Senkrechten nach hinten geklappt ist. Ein Tisch, der in
+ * beiden Fällen um z = 0 steht, trägt in der Draufsicht nur die untere Hälfte
+ * des Elements: oben ragt das Rähmwerk über die Tischkante, unten bleibt ein
+ * breiter Streifen Platte leer. Perspektivisch erklärbar, gelesen wird es als
+ * „das Element rutscht vom Tisch“. Die Auflagen liegen ohnehin schon auf der
+ * Elementmitte — der Tisch zieht jetzt nach.
  */
 export function Halle({ mitAuflage = false }: { mitAuflage?: boolean }) {
+  const tischZ = mitAuflage ? -H / 2 : 0
   const beine: [number, number][] = [
-    [-4.2, -1.5],
-    [-4.2, 1.5],
-    [0, -1.5],
-    [0, 1.5],
-    [4.2, -1.5],
-    [4.2, 1.5],
+    [-4.2, tischZ - 1.5],
+    [-4.2, tischZ + 1.5],
+    [0, tischZ - 1.5],
+    [0, tischZ + 1.5],
+    [4.2, tischZ - 1.5],
+    [4.2, tischZ + 1.5],
   ]
   return (
     <group>
@@ -182,7 +192,7 @@ export function Halle({ mitAuflage = false }: { mitAuflage?: boolean }) {
         <meshStandardMaterial color={SZENE_FARBEN.dunkel.boden} roughness={1} />
       </mesh>
       {/* Abbundtisch */}
-      <mesh position={[0, TISCH_OBEN - 0.06, 0]}>
+      <mesh position={[0, TISCH_OBEN - 0.06, tischZ]}>
         <boxGeometry args={[9.4, 0.12, 3.8]} />
         <meshStandardMaterial color="#4A4E54" roughness={0.8} flatShading />
       </mesh>
@@ -192,7 +202,7 @@ export function Halle({ mitAuflage = false }: { mitAuflage?: boolean }) {
           <meshStandardMaterial color="#3C4046" roughness={0.8} flatShading />
         </mesh>
       ))}
-      <Kontaktschatten position={[0, 0.012, 0]} groesse={[9.8, 4.1]} />
+      <Kontaktschatten position={[0, 0.012, tischZ]} groesse={[9.8, 4.1]} />
       {mitAuflage &&
         [-3, 3].map((x) => (
           <mesh key={x} position={[x, TISCH_OBEN + 0.08, -1.5]}>
@@ -402,6 +412,9 @@ export function AmHaken({
   const pendel = useRef<THREE.Group>(null)
   const dreher = useRef<THREE.Group>(null)
   const seil = useRef<THREE.Mesh>(null)
+  /** Seil und Unterflasche · Traverse und Anschlagmittel — das Gehänge. */
+  const gehaenge = useRef<THREE.Group>(null)
+  const traverse = useRef<THREE.Group>(null)
 
   // Die beiden Achsen koppeln: Rx(π) (Rollen) spiegelt neben oben/unten auch
   // vorn/hinten. Sichtbar ist die Holzfaserseite genau dann, wenn Gieren und
@@ -431,6 +444,10 @@ export function AmHaken({
     // Element liegt auf, und gemeldet wurde es in der Sitzung davor.
     setztSeit: abgesetzt ? -100 : (null as number | null),
     abgemeldet: abgesetzt,
+    // Ausgehängt: sobald die Wand steht, holt der Kran sein Gehänge hoch. Beim
+    // Wiedereinstieg ist das längst passiert, deshalb der Wert in der
+    // Vergangenheit.
+    loesenSeit: abgesetzt ? -100 : (null as number | null),
   })
 
   const melder = useRef({ onLage, onAbgesetzt })
@@ -589,6 +606,26 @@ export function AmHaken({
       seilMesh.scale.y = len
       seilMesh.position.y = 0.5 + len / 2
     }
+
+    // ---- Aushängen -------------------------------------------------------
+    // Eine Wand, die steht, hängt nicht mehr am Kran. Blieben Seil und
+    // Traverse darüber stehen, sähe der Schlussbild von C6 aus, als sei der
+    // Kranführer mitten in der Bewegung eingeschlafen.
+    if (s.abgemeldet) {
+      if (s.loesenSeit === null) s.loesenSeit = t
+      const u = reduziert ? 1 : glatt((t - s.loesenSeit) / 1.2)
+      const hoch = u * 6
+      const g = gehaenge.current
+      if (g) {
+        g.position.y = hoch
+        g.visible = u < 1
+      }
+      const tr = traverse.current
+      if (tr) {
+        tr.position.y = hoch
+        tr.visible = u < 1
+      }
+    }
   })
 
   return (
@@ -597,30 +634,34 @@ export function AmHaken({
       position={[0, (abgesetzt ? ABGESETZT_Y : SCHWEBE_Y) + H + 0.1, WANDACHSE_Z]}
     >
       {/* Kranseil und Unterflasche — der Kran selbst bleibt aus dem Bild */}
-      <mesh ref={seil} position={[0, 2, 0]}>
-        <cylinderGeometry args={[0.02, 0.02, 1, 6]} />
-        <meshStandardMaterial color="#5A5E64" roughness={0.6} flatShading />
-      </mesh>
-      <mesh position={[0, 0.42, 0]}>
-        <boxGeometry args={[0.28, 0.34, 0.18]} />
-        <meshStandardMaterial color="#4A4E54" roughness={0.7} flatShading />
-      </mesh>
+      <group ref={gehaenge}>
+        <mesh ref={seil} position={[0, 2, 0]}>
+          <cylinderGeometry args={[0.02, 0.02, 1, 6]} />
+          <meshStandardMaterial color="#5A5E64" roughness={0.6} flatShading />
+        </mesh>
+        <mesh position={[0, 0.42, 0]}>
+          <boxGeometry args={[0.28, 0.34, 0.18]} />
+          <meshStandardMaterial color="#4A4E54" roughness={0.7} flatShading />
+        </mesh>
+      </group>
       <group ref={pendel}>
         {/* Traverse und zwei Anschlagmittel zu den Elementecken */}
-        <mesh position={[0, 0.16, 0]}>
-          <boxGeometry args={[3.2, 0.1, 0.12]} />
-          <meshStandardMaterial color="#C77A2E" roughness={0.7} flatShading />
-        </mesh>
-        {[-1.5, 1.5].map((x) => (
-          <mesh
-            key={x}
-            position={[x * 0.9, 0.05, 0]}
-            rotation={[0, 0, x > 0 ? -0.25 : 0.25]}
-          >
-            <cylinderGeometry args={[0.015, 0.015, 0.42, 6]} />
-            <meshStandardMaterial color="#23262A" roughness={0.8} flatShading />
+        <group ref={traverse}>
+          <mesh position={[0, 0.16, 0]}>
+            <boxGeometry args={[3.2, 0.1, 0.12]} />
+            <meshStandardMaterial color="#C77A2E" roughness={0.7} flatShading />
           </mesh>
-        ))}
+          {[-1.5, 1.5].map((x) => (
+            <mesh
+              key={x}
+              position={[x * 0.9, 0.05, 0]}
+              rotation={[0, 0, x > 0 ? -0.25 : 0.25]}
+            >
+              <cylinderGeometry args={[0.015, 0.015, 0.42, 6]} />
+              <meshStandardMaterial color="#23262A" roughness={0.8} flatShading />
+            </mesh>
+          ))}
+        </group>
         <group ref={dreher} position={[0, -H / 2 - 0.1, 0]}>
           <group position={[0, -H / 2, T / 2]}>
             <Tafel ausschnitt={ausschnitt} marke={marke} />

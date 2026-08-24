@@ -542,6 +542,26 @@ function Holzstueck({
   }
 
   const kerbe = 0.4
+
+  /**
+   * **Aus der Draufsicht trägt nur Fläche.** Das Anheben — der eigentliche
+   * Mechanismus von C1 — zeigt in die Blickachse und ist von oben kaum zu
+   * sehen; ein Marker von zwölf Zentimetern an der Ausklinkung ebenso wenig.
+   * Deshalb leuchtet das **ganze** Holz: grün, wenn es gefunden ist, in der
+   * Hinweisfarbe, wenn „Zeig mir wie“ es zeigt. Gezeigt bekommen ist nicht
+   * geschafft, und die beiden Farben sagen das weiterhin auseinander.
+   */
+  const leuchten = gefunden ? SIGNAL_MARKE : hinweis ? AUSWAHL_EMISSIV : null
+  const holzStoff = (
+    <meshStandardMaterial
+      color={leuchten ?? farbe}
+      emissive={leuchten ?? '#000000'}
+      emissiveIntensity={leuchten ? 0.55 : 0}
+      roughness={0.85}
+      flatShading
+    />
+  )
+
   return (
     <group
       ref={gruppe}
@@ -555,31 +575,19 @@ function Holzstueck({
           {/* Hauptholz plus ausgeklinktes Ende: halbe Breite über `kerbe` */}
           <mesh position={[-kerbe / 2, 0, 0]}>
             <boxGeometry args={[holz.laenge - kerbe, h, b]} />
-            <meshStandardMaterial color={farbe} roughness={0.85} flatShading />
+            {holzStoff}
           </mesh>
           <mesh position={[holz.laenge / 2 - kerbe / 2, 0, -b / 4]}>
             <boxGeometry args={[kerbe, h, b / 2]} />
-            <meshStandardMaterial color={farbe} roughness={0.85} flatShading />
+            {holzStoff}
           </mesh>
         </group>
       ) : (
         <mesh>
           <boxGeometry args={[holz.laenge, h, b]} />
-          <meshStandardMaterial color={farbe} roughness={0.85} flatShading />
+          {holzStoff}
         </mesh>
       )}
-      {gefunden ? (
-        <mesh position={[-holz.laenge * 0.32, 0, 0]}>
-          <boxGeometry args={[0.12, h + 0.04, b + 0.04]} />
-          <meshBasicMaterial color={SIGNAL_MARKE} />
-        </mesh>
-      ) : hinweis ? (
-        // Hinweisfarbe, nicht Signalgrün: gezeigt bekommen ist nicht geschafft.
-        <mesh position={[-holz.laenge * 0.32, 0, 0]}>
-          <boxGeometry args={[0.12, h + 0.04, b + 0.04]} />
-          <meshBasicMaterial color={AUSWAHL_EMISSIV} />
-        </mesh>
-      ) : null}
       <Html
         center
         distanceFactor={9}
@@ -883,9 +891,45 @@ export function Sandwichaufbau({
 // ---------------------------------------------------------------------------
 
 /**
+ * **Die Untersetzung des Ziehwegs** — und der Grund, warum es sie gibt.
+ *
+ * Die Draufsicht bildet das acht Meter breite Element auf gut achthundert
+ * Bildpunkte ab: ein Punkt ist damit rund ein Zentimeter am Bauteil. Eins zu
+ * eins übertragen wäre das Trefferfenster dieser Übung — vier Zentimeter
+ * Breite (Fuge 10 bis 30 mm) und vier Zentimeter Höhe — **vier Pixel breit**.
+ * Mit einer pixelgenauen Maus zu treffen, mit dem Finger nicht.
+ *
+ * Die Spec verlangt das Gegenteil: „eng genug, dass Ziehen mit dem Finger es
+ * nicht zufällig trifft, und weit genug, dass es niemanden frustriert“
+ * (khpl-tag-zimmerer.md 6, C4). Aufgeweicht wird deshalb **nicht die Toleranz,
+ * sondern die Übersetzung**: ein Zentimeter Fingerweg verstellt das Maß um
+ * einen Millimeter. Aus vier Pixeln werden vierzig, das Fugenfenster bleibt
+ * exakt das, was der Beleg hergibt.
+ *
+ * Das macht aus dem Aufziehen ein Zurechtziehen: der Ausschnitt liegt von
+ * Anfang an da (zu weit, mit Absicht), und der Zug verstellt ihn, statt ihn
+ * neu aufzuspannen. Der Druckpunkt ist damit **kein Maß mehr** — vorher legte
+ * er die Unterkante pixelgenau fest, und keine Untersetzung der Welt hätte
+ * daran etwas geändert.
+ */
+const ZIEH_UNTERSETZUNG = 0.1
+
+/** Das Maß rastet in Zentimetern. Feiner ist am Finger nicht mehr zu lesen. */
+const ZIEH_RASTER_MM = 10
+
+/**
+ * Die unsichtbare Ziehfläche ist deutlich größer als das Element. Sie muss
+ * es sein: untersetzt braucht der Finger ein Vielfaches des Weges, und ein
+ * Zug, der an der Elementkante aufhört, hört mitten in der Bewegung auf.
+ */
+const ZIEHFLAECHE = 2.6
+
+/**
  * Das fertige Sandwich, flach; der Besucher zieht den Ausschnitt direkt auf
- * der Bühne auf (Vorbild `Zuschnitt3D`: Bühne liefert Geometrie, der Step
- * entscheidet über Treffer und Toleranz). `aufrichtenZeigen` kippt das Element
+ * der Bühne zurecht (Vorbild `Zuschnitt3D`: Bühne liefert Geometrie, der Step
+ * entscheidet über Treffer und Toleranz). Der Zug ist **untersetzt** und geht
+ * vom bestehenden Ausschnitt aus, nicht vom Druckpunkt — warum, steht bei
+ * `ZIEH_UNTERSETZUNG`. `aufrichtenZeigen` kippt das Element
  * um die Schwellenkante in die Senkrechte — der erste Blick nach oben, die
  * halbe Miete für C6. Oben angekommen **steht** es `AUFRICHTEN_STANDZEIT`
  * lang (erst dann feuert `onAufrichtenEnde`), und zurück legt es sich mit
@@ -911,7 +955,8 @@ export function FensterElement({
   const von = useRef(-Math.PI / 2)
   const obenSeit = useRef<number | null>(null)
   const gemeldet = useRef(false)
-  const zieht = useRef<{ xMm: number; yMm: number } | null>(null)
+  /** Der Griff: Weltpunkt beim Aufsetzen plus der Ausschnitt, wie er da lag. */
+  const zieht = useRef<{ x: number; z: number; von: Fensterausschnitt } | null>(null)
   const [umriss, setUmriss] = useState(false)
   const melder = useRef(onAufrichtenEnde)
   useEffect(() => {
@@ -951,21 +996,25 @@ export function FensterElement({
     melder.current?.()
   })
 
-  const punktZuMm = (p: THREE.Vector3): { xMm: number; yMm: number } => ({
-    xMm: klemm(Math.round(((p.x - X0) * 1000) / 10) * 10, 100, B * 1000 - 100),
-    yMm: klemm(Math.round((-p.z * 1000) / 10) * 10, 100, H * 1000 - 100),
-  })
+  /** Weltweg in Metern → Maßänderung in Millimetern, untersetzt und gerastet. */
+  const wegMm = (meter: number) =>
+    Math.round((meter * 1000 * ZIEH_UNTERSETZUNG) / ZIEH_RASTER_MM) * ZIEH_RASTER_MM
 
-  const melden = (bis: { xMm: number; yMm: number }) => {
-    const von = zieht.current
-    if (!von || !onAusschnitt) return
-    const xMm = Math.min(von.xMm, bis.xMm)
-    const yMm = Math.min(von.yMm, bis.yMm)
+  const melden = (p: THREE.Vector3) => {
+    const griff = zieht.current
+    if (!griff || !onAusschnitt) return
+    const { von } = griff
     onAusschnitt({
-      xMm,
-      yMm,
-      breiteMm: Math.max(Math.abs(bis.xMm - von.xMm), 120),
-      hoeheMm: Math.max(Math.abs(bis.yMm - von.yMm), 120),
+      // Die linke Kante bleibt liegen, die rechte folgt dem Finger: der
+      // Ausschnitt wird breiter und schmaler, nicht verschoben. Auf dem
+      // Planmaß steht er damit genau mittig auf dem Element — `xMm` ist für
+      // die Planbreite berechnet.
+      xMm: von.xMm,
+      // Draufsicht: das Element liegt nach hinten geklappt, die Höhe über
+      // Rohboden läuft also gegen die z-Achse. Nach oben ziehen heißt: höher.
+      yMm: Math.max(von.yMm + wegMm(griff.z - p.z), 0),
+      breiteMm: Math.max(von.breiteMm + wegMm(p.x - griff.x), 120),
+      hoeheMm: von.hoeheMm,
     })
   }
 
@@ -987,30 +1036,30 @@ export function FensterElement({
       <group ref={kipp} rotation={[-Math.PI / 2, 0, 0]}>
         <Tafel ausschnitt={ausschnitt} umriss={umriss} marke={marke} />
       </group>
-      {!aufrichtenZeigen && onAusschnitt && (
+      {!aufrichtenZeigen && onAusschnitt && ausschnitt && (
         <mesh
           position={[0, 0.04, -H / 2]}
           rotation={[-Math.PI / 2, 0, 0]}
           onPointerDown={(e: ThreeEvent<PointerEvent>) => {
             if (!e.isPrimary) return
             e.stopPropagation()
-            zieht.current = punktZuMm(e.point)
+            zieht.current = { x: e.point.x, z: e.point.z, von: ausschnitt }
             setUmriss(true)
           }}
           onPointerMove={(e: ThreeEvent<PointerEvent>) => {
             if (!zieht.current || !e.isPrimary) return
             e.stopPropagation()
-            melden(punktZuMm(e.point))
+            melden(e.point)
           }}
           onPointerUp={(e: ThreeEvent<PointerEvent>) => {
             if (!zieht.current) return
             e.stopPropagation()
-            melden(punktZuMm(e.point))
+            melden(e.point)
             zieht.current = null
             setUmriss(false)
           }}
         >
-          <planeGeometry args={[B, H]} />
+          <planeGeometry args={[B * ZIEHFLAECHE, H * ZIEHFLAECHE]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
       )}

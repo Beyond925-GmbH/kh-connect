@@ -28,10 +28,13 @@ import { KARRIEREWEGE } from './karrierewege'
  * *sind* das Angebot. Beides nebeneinander wären dieselben drei Wege zweimal
  * auf einem Screen.
  *
- * ⚠️ **Für die Übersicht selbst liegt kein Motiv im Repo.** Die Medienliste
- * (khpl-tag-zimmerer.md 10) führt unter „vorhanden“ nur `b91`–`b93` für
- * C8.**x**. `StepFoto` rendert ohne Eintrag nichts — gemeldeter Medienbedarf,
- * kein Versehen.
+ * ⚠️ **Für die Übersicht selbst liegt kein eigenes Motiv im Repo.** Die
+ * Medienliste (khpl-tag-zimmerer.md 10) führt unter „vorhanden“ nur `b91`–`b93`
+ * für C8.**x**. Der Screen trägt deshalb einen **Platzhalter** aus demselben
+ * gemeinsamen `schritte/`-Bestand: `m9-karriere.webp`, Blick von unten ins
+ * Sparrenwerk. Ohne Eintrag rendert `StepFoto` nichts, und der Einstieg in den
+ * Karrierebereich fing hochkant mit einem schwarzen Feld an — auf der Stele
+ * sieht das nach Ladefehler aus. Der Medienbedarf bleibt gemeldet.
  */
 export function C8() {
   const { weiter, zumAbstecher } = useStepNavigation('C8')

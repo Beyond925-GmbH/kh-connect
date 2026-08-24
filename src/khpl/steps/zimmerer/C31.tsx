@@ -36,9 +36,13 @@ import { StepShell } from '@/khpl/shell/StepShell'
  *
  * **Kein Übungselement.** Lesescreen.
  *
- * ⚠️ **Für diesen Screen liegt kein Motiv im Repo** (khpl-tag-zimmerer.md 10) —
- * `StepFoto` rendert deshalb nichts, die Bühne bleibt dunkel. Gemeldeter
- * Medienbedarf, kein Versehen.
+ * ⚠️ **Für diesen Screen liegt kein eigenes Motiv im Repo**
+ * (khpl-tag-zimmerer.md 10). Er trägt deshalb einen **Platzhalter** —
+ * `gallery-3.webp`, ein Mann auf einem Balken beim Verschrauben: verbautes
+ * Holz, und genau davon handelt der Screen. Die leere Bühne der ersten Fassung
+ * war der ehrlichere, aber schlechtere Zustand: hochkant ist sie ein schwarzes
+ * Feld über zwei Dritteln der Höhe und liest sich als Ladefehler, nicht als
+ * Absicht. Der Medienbedarf bleibt gemeldet.
  */
 
 // ---------------------------------------------------------------------------

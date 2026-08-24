@@ -242,12 +242,18 @@ export const ZIMMERER: BerufDef = {
    * Redaktionsentscheidung und passiert, wenn Dachdecker-Motive vorliegen —
    * dieser Tag nimmt sie ihm nicht weg.
    *
-   * **`karte` zeigt deshalb auf einen Pfad, den es nicht gibt**, und
-   * `BerufBild` fängt ihn mit seinem typografischen Ersatz ab — genau der Weg,
-   * den khpl-tag-zimmerer.md 10 vorschreibt („arbeitet bis zur Klärung mit
-   * `BerufBild`-Ersatz und meldet den Bedarf“). Auf `card.webp` zu zeigen wäre
-   * hier keine Lösung, sondern ein zweiter Fehler: in der Berufsliste stünden
-   * dann zwei Karten mit demselben Foto nebeneinander.
+   * **`karte` nimmt deshalb ein anderes Motiv aus demselben Ordner.**
+   * `card.webp` bleibt beim gebauten Tag — zwei Karten mit demselben Foto
+   * nebeneinander wären ein zweiter Fehler. Ein Pfad ins Leere ist aber auch
+   * keiner: `BerufBild` fängt ihn zwar mit seinem typografischen Ersatz ab,
+   * am Stand steht dann jedoch die einzige neu spielbare Karte ohne Motiv
+   * neben der vollflächig bebilderten — und der Browser holt bei jedem
+   * Listenaufruf eine 404. `gallery-2.webp` (Blick von unten in den
+   * Holzrahmenbau, junger Mann auf dem Sparrenwerk) liegt seit jeher im Repo,
+   * wird von keinem Beruf benutzt und zeigt genau das, was dieser Tag baut.
+   * `public/medien/media/zimmerer/**` gehört ohnehin diesem Tag
+   * (khpl-tage.md 6.2) — es wird also niemandem etwas weggenommen. Ein eigenes
+   * Zimmerer-Motiv steht trotzdem weiter auf der Medienliste.
    *
    * ⚠️ **`heroPoster` darf das nicht.** `shell/Auftragsannahme.tsx` liest
    * `szenarioPoster ?? heroPoster` und rendert es als nacktes `<img>` ohne
@@ -259,7 +265,7 @@ export const ZIMMERER: BerufDef = {
    * geändert (khpl-tage.md 6.2).
    */
   medien: {
-    karte: '/medien/media/zimmerer-tag/card.webp',
+    karte: '/medien/media/zimmerer/gallery-2.webp',
     heroPoster: '/medien/media/zimmerer/hero-poster.webp',
   },
   /**
@@ -268,21 +274,37 @@ export const ZIMMERER: BerufDef = {
    *
    * **Sie ist kurz, und das ist die Ansage des Tages:** der Kern ist 3D, C1 bis
    * C7 tragen das Wandelement in seinen sieben Zuständen. Fotos braucht dieser
-   * Tag nur an vier Stellen (khpl-tag-zimmerer.md 10), und zwei davon sind
-   * offen:
+   * Tag nur an wenigen Stellen (khpl-tag-zimmerer.md 10).
    *
-   * - **C3.1 (Holz und Klima) fehlt** — kein passendes Motiv im Bestand.
-   * - **C8 (Karriere-Übersicht) fehlt** — die Spec führt unter „vorhanden“ nur
-   *   `b91`–`b93` für C8.**x** auf, kein Motiv für die Übersicht selbst.
-   *
-   * Beides ist gemeldeter Medienbedarf, kein Versehen. Ein Step ohne Eintrag
-   * trägt schlicht keine Foto-Bühne.
+   * ⚠️ **Drei davon tragen einen Platzhalter, keinen Eigenbedarf.** Für C3.1,
+   * C5.1 und C8 führt die Spec kein eigenes Motiv; die erste Fassung ließ die
+   * Bühne dort deshalb leer. Auf der hochkanten Stele ist das ein schwarzes
+   * Feld über zwei Dritteln der Höhe — es sieht nicht nach Absicht aus,
+   * sondern nach einem Bild, das nicht geladen hat, und es trifft
+   * ausgerechnet den Sicherheits-Abstecher mit dem stärksten Zitat des Tages
+   * und den Einstieg in den Karrierebereich. Bis die Fotoliste abgearbeitet
+   * ist, steht dort deshalb je ein vorhandenes, thematisch tragendes Motiv.
+   * **Der Medienbedarf bleibt gemeldet** (khpl-tag-zimmerer.md 10: Halle mit
+   * Abbundtisch und liegendem Element · Element am Kran, von unten · fertiges
+   * Holzrahmenhaus am selben Tag).
    */
   bilder: {
     // CNC-Fräser trägt Holz ab, Späne fliegen — maschineller Abbund. Das Motiv
     // liegt seit jeher im Repo und wird von keinem Beruf benutzt; die Spec
     // nennt es für diesen Screen „passt exakt“.
     'C1.1': { src: '/medien/media/zimmerer/gallery-1.webp', pos: '50% 50%' },
+    // PLATZHALTER. Holz und Klima: ein Mann sitzt auf einem Balken und
+    // verschraubt ihn — verbautes Holz, und darum geht es auf dem Screen. Kein
+    // Klimamotiv, aber das Gegenteil eines schwarzen Rechtecks.
+    'C3.1': { src: '/medien/media/zimmerer/gallery-3.webp', pos: '50% 45%' },
+    // PLATZHALTER. Sicherheit am Kran: Maßnehmen am Sparren, mit Helm und
+    // Handschuh. Die PSA ist das, was der Screen erzählt; das Element am Haken
+    // bleibt C6 vorbehalten und wird hier ausdrücklich nicht vorweggenommen.
+    'C5.1': { src: '/medien/media/zimmerer/quiz-abbund.webp', pos: '50% 45%' },
+    // PLATZHALTER. Karriere-Übersicht: Blick von unten ins Sparrenwerk, aus dem
+    // gemeinsamen `schritte/`-Bestand wie b91–b93 — dieselbe Rolle wie beim
+    // gebauten Tag, und kein Screen zeigt zwei Berufe nebeneinander.
+    C8: { src: '/medien/schritte/m9-karriere.webp', pos: '50% 45%' },
     // Die drei Karrierefotos bleiben gemeinsam: sie zeigen niemandes Gewerk
     // (khpl-tage.md §6.1 V2).
     'C8.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
