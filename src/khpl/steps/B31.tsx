@@ -55,8 +55,8 @@ export function B31() {
         </p>
       }
       aha={
-        <div className="flex flex-col gap-2">
-          <AhaKarte sichtbar={aha} eyebrow="Nicht auf dem Schirm">
+        <>
+          <AhaKarte sichtbar={aha} eyebrow="Einkaufen — gehört das wirklich zum Beruf?">
             Einkaufen gehört zum Beruf. „Arbeiten planen“ und „Baustoffe auswählen“ stehen
             wörtlich im Ausbildungsberufsbild — und seit dem 1. August 2026 gilt dafür
             eine neue Ausbildungsordnung. Wer diesen Sommer anfängt, ist der erste
@@ -64,13 +64,17 @@ export function B31() {
           </AhaKarte>
           {/* Eigene Beschriftung statt `null`: die Karte klappt jetzt auf, und
               ein Streifen braucht etwas, worauf man tippt. */}
-          <AhaKarte sichtbar={aha} eyebrow="Fünf Tonnen CO₂" verzoegerung={1.8}>
+          <AhaKarte
+            sichtbar={aha}
+            eyebrow="Wie viel CO₂ steckt in diesem Dach?"
+            verzoegerung={1.8}
+          >
             In dem Dachstuhl von eben stecken rund fünf Kubikmeter Holz — und damit etwa
             fünf Tonnen CO₂, die dort die nächsten hundert Jahre bleiben. Holz ist einer
             der wenigen Baustoffe, die nachwachsen, und der einzige, aus dem man
             hierzulande ein Dach tragen lässt.
           </AhaKarte>
-        </div>
+        </>
       }
       fuss={<StepFuss id="B3.1" />}
     />

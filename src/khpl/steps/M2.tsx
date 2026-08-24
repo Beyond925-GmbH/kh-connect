@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
+import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -13,6 +13,7 @@ import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
@@ -83,20 +84,23 @@ export function M2() {
       }
       interaktion={<Schaetzung wert={wert} onWert={setWert} aufgeloest={aufgeloest} />}
       aha={
-        // `empty:hidden`: solange beide Karten unsichtbar sind, ist die Huelle
-        // im DOM leer — ohne das zaehlte sie als Flex-Kind und der `gap` des
-        // Scrollbereichs erzeugte in der Schaetzphase einen sichtbaren
-        // Leerstreifen unter dem Regler.
-        <div className="flex flex-col gap-2 empty:hidden">
-          <AhaKarte sichtbar={aufgeloest} eyebrow="Der eigentliche Punkt">
+        <>
+          <AhaKarte
+            sichtbar={aufgeloest}
+            eyebrow="Warum ist Holz nicht der teuerste Posten?"
+          >
             Mehr als die Hälfte davon ist Arbeitszeit, nicht Holz. Bezahlt wird nicht das
             Material — bezahlt wird, dass jemand weiß, wie es zusammengehört.
           </AhaKarte>
-          <AhaKarte sichtbar={aufgeloest} eyebrow="Und trotzdem" verzoegerung={1.6}>
-            Und dann kommt der Satz, den jeder Betrieb kennt: Viele Angebote führen nie
-            zum Auftrag. Gerechnet hast du trotzdem.
+          <AhaKarte
+            sichtbar={aufgeloest}
+            eyebrow="Und wenn der Bauherr nein sagt?"
+            verzoegerung={1.6}
+          >
+            Dann kommt der Satz, den jeder Betrieb kennt: Viele Angebote führen nie zum
+            Auftrag. Gerechnet hast du trotzdem.
           </AhaKarte>
-        </div>
+        </>
       }
       fuss={
         <StepFuss
@@ -127,139 +131,169 @@ function Schaetzung({
 }) {
   const anteil = (n: number) => ((n - MIN) / (MAX - MIN)) * 100
 
+  /*
+    Zwei Takte, kein Stapel.
+
+    Vorher blieb nach der Auflösung alles stehen — Anweisung, Regler,
+    Reglerbeschriftung — und darunter kamen Kostenaufstellung, Mathe-Knopf und
+    zwei Aha-Karten dazu. Das Panel war am Ende doppelt so hoch wie am Anfang
+    und hatte eine Scrollkante, obwohl der Screen fertig war.
+
+    Jetzt wird die Schätzung durch ihre Auflösung **ersetzt**. Der Regler geht
+    mit: gezogen wird nichts mehr, und aus dem 52-px-Griff wird ein flacher
+    Vergleichsbalken, der genau das zeigt, worum es geht — den Abstand
+    zwischen deiner Zahl und der echten.
+  */
   return (
-    // Kein `h-full justify-center`: die Übung hinge dadurch in der Mitte einer
-    // hohen leeren Spalte, mit einem Loch über und unter sich.
-    //
-    // Nach der Auflösung wird aus der Spalte quer ein Zweispalter: links
-    // bleiben Zahl und Regler stehen (das ist die Schätzung, die gerade
-    // korrigiert wurde), rechts fährt die Kostenaufstellung ein wie eine
-    // Lösungskarte. Untereinander schob die Aufstellung den Regler aus dem
-    // Panel und der Screen musste scrollen — dabei war rechts die halbe
-    // Breite frei. Hochkant bleibt alles gestapelt.
-    <div
-      className={
-        aufgeloest
-          ? 'flex flex-col gap-3 landscape:grid landscape:grid-cols-[1fr_1.1fr] landscape:items-start landscape:gap-x-7'
-          : 'flex flex-col gap-3'
-      }
-    >
-      <div className="flex flex-col gap-3">
-        {!aufgeloest && (
+    <Wechsel takt={aufgeloest ? 'aufgeloest' : 'schaetzen'}>
+      {aufgeloest ? (
+        <div className="flex flex-col gap-3 landscape:grid landscape:grid-cols-[1fr_1.1fr] landscape:items-start landscape:gap-x-7">
+          <div className="flex flex-col gap-2.5">
+            <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+              <motion.span
+                initial={{ opacity: 0, y: 18, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+                data-testid="m2-zahl"
+                className="kh-zahl text-kh-orange"
+              >
+                {euro(ECHT)}
+              </motion.span>
+            </div>
+
+            <Vergleich schaetzung={wert} anteil={anteil} />
+          </div>
+
+          <motion.div
+            initial="aus"
+            animate="an"
+            variants={{
+              an: { transition: { staggerChildren: 0.09, delayChildren: 0.35 } },
+            }}
+            className="flex flex-col"
+            data-testid="m2-posten"
+          >
+            {POSTEN.map((p) => (
+              <motion.div
+                key={p.was}
+                variants={{ aus: { opacity: 0, x: -12 }, an: { opacity: 1, x: 0 } }}
+                className="flex items-baseline justify-between gap-3 border-b border-kh-line py-2 text-[1.0625rem] last:border-0"
+              >
+                <span className="min-w-0 text-kh-paper">
+                  {p.was}
+                  {p.detail && <span className="text-kh-mute"> · {p.detail}</span>}
+                </span>
+                <span className="shrink-0 text-kh-mute tabular-nums">
+                  {euro(p.betrag)}
+                </span>
+              </motion.div>
+            ))}
+            {/* Die Summenzeile stand vorher nirgends — die vier Posten mussten im
+                Kopf addiert werden, um auf die Zahl darüber zu kommen. */}
+            <motion.div
+              variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
+              className="mt-1 flex items-baseline justify-between gap-3 border-t-2 border-kh-line-strong pt-2 text-[1.125rem]"
+            >
+              <span className="font-semibold text-kh-paper">Dachstuhl gesamt</span>
+              <span className="font-display text-[1.5rem] text-kh-orange tabular-nums">
+                {euro(ECHT)}
+              </span>
+            </motion.div>
+            <motion.div
+              variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
+              className="pt-2.5"
+            >
+              <Mathe />
+            </motion.div>
+          </motion.div>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3">
           <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
             Zieh, bis du glaubst, es passt.
           </p>
-        )}
 
-        {/*
-          Der Zahlenwechsel ist die Übung. Erst die eigene Zahl, dann die echte.
+          {/*
+            Die Zahl trägt Anton und ist so groß, wie das Panel es zulässt — sie
+            ist der Inhalt dieses Screens, nicht seine Beschriftung. Solange
+            geschätzt wird, steht sie in Warnwestengelb: sie gehört dem Besucher.
+            Nach der Auflösung wechselt sie auf Markenorange — das ist dann die
+            Zahl des Betriebs, nicht mehr die eigene.
+          */}
+          <span data-testid="m2-zahl" className="kh-zahl">
+            {euro(wert)}
+          </span>
 
-          Die Zahl trägt Anton und ist so groß, wie das Panel es zulässt — sie
-          ist der Inhalt dieses Screens, nicht seine Beschriftung. Solange
-          geschätzt wird, steht sie in Warnwestengelb: sie gehört dem Besucher.
-          Nach der Auflösung wechselt sie auf Markenorange — das ist dann die
-          Zahl des Betriebs, nicht mehr die eigene.
-        */}
-        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.span
-              key={aufgeloest ? 'echt' : 'schaetzung'}
-              initial={{ opacity: 0, y: 18, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -18 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 26 }}
-              data-testid="m2-zahl"
-              className={`kh-zahl ${aufgeloest ? 'text-kh-orange' : ''}`}
-            >
-              {euro(aufgeloest ? ECHT : wert)}
-            </motion.span>
-          </AnimatePresence>
-          {aufgeloest && (
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-[1rem] text-kh-mute"
-            >
-              deine Schätzung: {euro(wert)}
-            </motion.span>
-          )}
-        </div>
-
-        {/* Regler bleibt nach der Auflösung stehen und bekommt die echte Zahl
-            als zweite Marke — der Abstand ist der Aha-Moment, nicht eine Note. */}
-        <div className="relative" data-wisch="aus">
-          <input
-            type="range"
-            min={MIN}
-            max={MAX}
-            step={SCHRITT}
-            value={wert}
-            disabled={aufgeloest}
-            onChange={(e) => onWert(Number(e.target.value))}
-            data-testid="m2-regler"
-            aria-label="Was kostet dieses Dach?"
-            className="kh-regler w-full"
-          />
-          {aufgeloest && (
-            <motion.div
-              initial={{ opacity: 0, scaleY: 0 }}
-              animate={{ opacity: 1, scaleY: 1 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 24 }}
-              className="pointer-events-none absolute top-1 bottom-2 w-[4px] -translate-x-1/2 rounded-full bg-kh-orange"
-              style={{ left: `${anteil(ECHT)}%` }}
-              aria-hidden
+          <div className="relative" data-wisch="aus">
+            <input
+              type="range"
+              min={MIN}
+              max={MAX}
+              step={SCHRITT}
+              value={wert}
+              onChange={(e) => onWert(Number(e.target.value))}
+              data-testid="m2-regler"
+              aria-label="Was kostet dieses Dach?"
+              className="kh-regler w-full"
             />
-          )}
-          <div className="flex justify-between text-[0.9375rem] text-kh-mute/70 tabular-nums">
-            <span>{euro(MIN)}</span>
-            <span>{euro(MAX)}</span>
+            <div className="flex justify-between text-[0.9375rem] text-kh-mute/70 tabular-nums">
+              <span>{euro(MIN)}</span>
+              <span>{euro(MAX)}</span>
+            </div>
           </div>
         </div>
-      </div>
-
-      {aufgeloest && (
-        <motion.div
-          initial="aus"
-          animate="an"
-          variants={{
-            an: { transition: { staggerChildren: 0.09, delayChildren: 0.35 } },
-          }}
-          className="flex flex-col"
-          data-testid="m2-posten"
-        >
-          {POSTEN.map((p) => (
-            <motion.div
-              key={p.was}
-              variants={{ aus: { opacity: 0, x: -12 }, an: { opacity: 1, x: 0 } }}
-              className="flex items-baseline justify-between gap-3 border-b border-kh-line py-2 text-[1.0625rem] last:border-0"
-            >
-              <span className="min-w-0 text-kh-paper">
-                {p.was}
-                {p.detail && <span className="text-kh-mute"> · {p.detail}</span>}
-              </span>
-              <span className="shrink-0 text-kh-mute tabular-nums">{euro(p.betrag)}</span>
-            </motion.div>
-          ))}
-          {/* Die Summenzeile stand vorher nirgends — die vier Posten mussten im
-              Kopf addiert werden, um auf die Zahl darüber zu kommen. */}
-          <motion.div
-            variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
-            className="mt-1 flex items-baseline justify-between gap-3 border-t-2 border-kh-line-strong pt-2 text-[1.125rem]"
-          >
-            <span className="font-semibold text-kh-paper">Dachstuhl gesamt</span>
-            <span className="font-display text-[1.5rem] text-kh-orange tabular-nums">
-              {euro(ECHT)}
-            </span>
-          </motion.div>
-          <motion.div
-            variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
-            className="pt-2.5"
-          >
-            <Mathe />
-          </motion.div>
-        </motion.div>
       )}
+    </Wechsel>
+  )
+}
+
+/**
+ * Der Abstand zwischen der eigenen Zahl und der echten — flach statt als
+ * Regler.
+ *
+ * Nach der Auflösung ist nichts mehr zu ziehen. Ein deaktivierter 52-px-Griff
+ * sähe trotzdem aus wie ein Bedienelement und kostete den Platz von einem: das
+ * hier ist eine Skala mit zwei Marken und einer Strecke dazwischen. Die
+ * Strecke ist die Aussage des Screens.
+ */
+function Vergleich({
+  schaetzung,
+  anteil,
+}: {
+  schaetzung: number
+  anteil: (n: number) => number
+}) {
+  const von = Math.min(anteil(schaetzung), anteil(ECHT))
+  const bis = Math.max(anteil(schaetzung), anteil(ECHT))
+
+  return (
+    <div className="flex flex-col gap-1.5" data-testid="m2-vergleich">
+      <div className="relative h-3 w-full rounded-full border border-kh-line bg-white/10">
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
+          transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          style={{ left: `${von}%`, width: `${bis - von}%`, transformOrigin: 'left' }}
+          className="absolute inset-y-0 bg-kh-orange/25"
+          aria-hidden
+        />
+        <span
+          style={{ left: `${anteil(schaetzung)}%` }}
+          className="absolute top-[-5px] bottom-[-5px] w-[4px] -translate-x-1/2 rounded-full bg-kh-mute"
+          aria-hidden
+        />
+        <motion.span
+          initial={{ opacity: 0, scaleY: 0.3 }}
+          animate={{ opacity: 1, scaleY: 1 }}
+          transition={{ delay: 0.2, type: 'spring', stiffness: 300, damping: 24 }}
+          style={{ left: `${anteil(ECHT)}%` }}
+          className="absolute top-[-7px] bottom-[-7px] w-[5px] -translate-x-1/2 rounded-full bg-kh-orange"
+          aria-hidden
+        />
+      </div>
+      <p className="text-[0.9375rem] text-kh-mute tabular-nums">
+        deine Schätzung: {euro(schaetzung)}
+      </p>
     </div>
   )
 }

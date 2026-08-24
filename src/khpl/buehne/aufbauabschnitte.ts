@@ -45,6 +45,77 @@ export const M5_ENDE = phase('Sparrenpaare').von - HAARBREIT
 /** M7 macht genau dort weiter. */
 export const M7_START = M5_ENDE
 
+/**
+ * Was M5 der Reihe nach einbauen lässt — der Unterbau, Teil für Teil.
+ *
+ * **Warum überhaupt eine Liste.** M5 war eine Vorführung: 26 Sekunden
+ * Animation, daneben eine Pille, die mitlas, was gerade einflog. Wer am Stand
+ * dreißig Sekunden investiert, schaut dabei nicht auf den Namen — er wartet,
+ * bis es vorbei ist. Jetzt setzt der Besucher jedes Teil selbst, mit einer
+ * Vorschau davor: **er kann nichts falsch machen**, die Reihenfolge ist
+ * vorgegeben. Genau das ist der Unterschied zu M7, wo dieselbe Reihenfolge
+ * ohne Ansage abgefragt wird — geführt üben, dann aus dem Kopf.
+ *
+ * Die Sätze sind aus `dachstuhl/bauteil-texte.ts` auf eine Zeile gekürzt
+ * (`ENTWURF – UNGEPRÜFT`, wie das übrige Glossar): auf einer Karte, die man
+ * antippt, um weiterzukommen, liest niemand vier Zeilen.
+ */
+export interface Lehrschritt {
+  /** Phasenlabel in `zeitachse.ts`. */
+  label: string
+  /** Was auf der Karte steht. */
+  name: string
+  /** Der eine Satz dazu. */
+  was: string
+  /** Zeitpunkt, bis zu dem die Animation nach dem Antippen läuft. */
+  zielT: number
+}
+
+export const M5_SCHRITTE: Lehrschritt[] = [
+  {
+    label: 'Fußpfetten',
+    name: 'Fußpfetten',
+    was: 'Das unterste Holz, direkt auf der Mauerkrone. Darauf sitzt später jeder Sparrenfuß.',
+    zielT: phase('Fußpfetten').bis - HAARBREIT,
+  },
+  {
+    label: 'Bundbalken',
+    name: 'Bundbalken',
+    was: 'Quer über das Haus. Er hält die Wände zusammen, damit das Dach sie nicht auseinanderdrückt.',
+    zielT: phase('Bundbalken').bis - HAARBREIT,
+  },
+  {
+    label: 'Stuhlschwellen',
+    name: 'Stuhlschwellen',
+    was: 'Die liegenden Hölzer unter den Säulen. Sie verteilen die Last auf mehrere Deckenbalken.',
+    zielT: phase('Stuhlschwellen').bis - HAARBREIT,
+  },
+  {
+    label: 'Stuhlsäulen',
+    name: 'Stuhlsäulen',
+    was: 'Die Pfosten, die die Pfetten tragen. Sie leiten die Last nach unten in die Decke.',
+    zielT: phase('Stuhlsäulen').bis - HAARBREIT,
+  },
+  {
+    label: 'Mittelpfetten',
+    name: 'Mittelpfetten',
+    was: 'Der Längsbalken auf halber Dachfläche. Er halbiert, was ein Sparren frei überspannen muss.',
+    zielT: phase('Mittelpfetten').bis - HAARBREIT,
+  },
+  {
+    label: 'Firstpfette',
+    name: 'Firstpfette',
+    was: 'Der oberste Längsbalken, direkt unter der Spitze. Auf ihm treffen sich alle Sparren.',
+    zielT: phase('Firstpfette').bis - HAARBREIT,
+  },
+  {
+    label: 'Kopfbänder',
+    name: 'Kopfbänder',
+    was: 'Die kurzen Schrägen zwischen Säule und Pfette. Aus dem rechten Winkel wird ein Dreieck — und Dreiecke kippen nicht.',
+    zielT: phase('Kopfbänder').bis - HAARBREIT,
+  },
+]
+
 export interface Bauschritt {
   /** Phasenlabel in `zeitachse.ts`. */
   label: string

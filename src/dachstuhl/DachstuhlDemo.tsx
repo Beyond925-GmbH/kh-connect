@@ -63,6 +63,18 @@ export default function DachstuhlDemo() {
       console.warn('[dachstuhl] Endbild unvollstaendig:\n' + maengel.join('\n'))
   }, [teile, schritte])
 
+  // Abnahme-Flags des 3D-Remodels, bewusst nur hier und nicht in `debug.ts`:
+  // ?marke=1 zeigt „deinen Sparren“, ?kulisse=1 das geparkte Gespann,
+  // ?riss=1 die Planansicht (M3).
+  const extras = useMemo(() => {
+    const p = new URLSearchParams(window.location.search)
+    return {
+      deinSparren: p.has('marke'),
+      kulisse: p.has('kulisse'),
+      riss: p.has('riss'),
+    }
+  }, [])
+
   const [auswahl, setAuswahl] = useState<Auswahl | null>(debug.teil)
   const [ansicht, setAnsicht] = useState<Ansicht | null>(debug.ansicht)
   const [pausiert, setPausiert] = useState(false)
@@ -121,6 +133,9 @@ export default function DachstuhlDemo() {
         dpr={debug.dpr}
         dunkel={dunkel}
         reduziert={reduziert}
+        deinSparren={extras.deinSparren}
+        kulisse={extras.kulisse ? { gespann: true, ladungAusFortschritt: true } : null}
+        darstellung={extras.riss ? 'riss' : 'koerper'}
         tap={tap}
         onTap={onTap}
         onDaneben={() => setAuswahl(null)}

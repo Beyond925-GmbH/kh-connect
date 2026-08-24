@@ -18,7 +18,13 @@ import {
  * S2 — das Arbeitspferd (khpl-ui-shell.md 2 + 5). Rendert jeden Step, Haupt wie
  * Abstecher, aus denselben Slots:
  *
- *   Bühne · Titel · Fachtext · Interaktion · Aha · Fuß
+ *   Bühne · Titel · Aha · Fachtext · Interaktion · Fuß
+ *
+ * `aha` steht seit dem Umbau der Einwürfe **außerhalb** des Panels, in einem
+ * eigenen Slot zwischen Titel und Panel: die Karten klappen von dort nach oben
+ * in die Bühne auf. Vorher hingen sie unten im Scrollbereich und machten das
+ * Panel bei jeder gelösten Übung höher — der Screen wuchs genau dann, wenn er
+ * fertig war.
  *
  * **Was sich gegenüber der Vorfassung geändert hat, und warum.**
  *
@@ -199,6 +205,21 @@ export function StepShell({
       </motion.header>
 
       {/*
+        Der Einwurf-Slot. Er liegt **zwischen** Titel und Panel und ist der
+        Grund, warum die Aha-Karten das Panel nicht mehr wachsen lassen: sie
+        klappen von hier aus nach oben in die Bühne auf, statt unten im
+        Scrollbereich eine Zeile anzuhängen. `empty:hidden`, damit der `gap`
+        der Spalte auf Screens ohne Einwurf keinen Leerstreifen erzeugt.
+      */}
+      {aha && (
+        <div
+          className={`pointer-events-none flex w-full shrink-0 flex-col items-start gap-2 empty:hidden ${spaltenbreite}`}
+        >
+          {aha}
+        </div>
+      )}
+
+      {/*
         Das Panel kommt einen Takt nach dem Titel. Ein Screen, der alles auf
         einmal hinstellt, liest sich als Wand — erst der Ort, dann der Inhalt
         ist die kleinste Staffelung, die diesen Eindruck bricht, ohne dass
@@ -234,7 +255,6 @@ export function StepShell({
           >
             {fachtext && <div className="kh-fachtext">{fachtext}</div>}
             {interaktion}
-            {aha}
           </div>
           {/*
             Auslauf nach unten — aber nur, wenn tatsächlich etwas darunter

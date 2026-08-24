@@ -20,12 +20,15 @@ export function Kamerasteuerung({
   huelle,
   attraktor,
   sichtfeld,
+  gesperrt = false,
 }: {
   ansicht: Ansicht | null
   huelle: Huelle
   attraktor: boolean
   /** Verdeckte Anteile der Leinwand — s. `Sichtfeld` in `kamera.ts`. */
   sichtfeld?: Sichtfeld
+  /** Haelt die freie Drehung an, ohne die Ansicht zu wechseln — z. B. waehrend der Fahrt (M5). */
+  gesperrt?: boolean
 }) {
   const kamera = useThree((zustand) => zustand.camera)
   const breite = useThree((zustand) => zustand.size.width)
@@ -60,6 +63,18 @@ export function Kamerasteuerung({
     setDistanz(lage.distanz)
     const s = steuerung.current
     if (s) {
+      // Die Zoomgrenzen muessen VOR dem `update()` stehen, nicht erst im
+      // naechsten Rendern: `update()` klemmt die Kamera sofort auf die noch
+      // geltenden Grenzen. Beim ersten Lauf sind das die des Startwerts
+      // (18 m → hoechstens 24,3 m) — die eingepasste Distanz liegt in einem
+      // Step aber bei ueber 30 m, weil das Modell nur die freie Flaeche neben
+      // dem Panel bekommt. Ergebnis war ein um ein Drittel zu nah stehendes
+      // Modell, das rechts aus dem Bild lief; der Nachzug ueber den State kam
+      // zu spaet, weil `update()` nur klemmt und nie wieder aufmacht.
+      if (ansicht === null) {
+        s.minDistance = lage.distanz * 0.5
+        s.maxDistance = lage.distanz * 1.35
+      }
       s.target.copy(ziel)
       s.update()
     }
@@ -89,7 +104,7 @@ export function Kamerasteuerung({
     <OrbitControls
       ref={steuerung}
       makeDefault
-      enabled={ansicht === null}
+      enabled={ansicht === null && !gesperrt}
       enableDamping
       dampingFactor={0.08}
       enablePan={false}

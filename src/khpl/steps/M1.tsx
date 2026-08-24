@@ -201,7 +201,7 @@ export function M1() {
         )
       }
       aha={
-        <AhaKarte sichtbar={ausgewertet} eyebrow="Der eigentliche Punkt">
+        <AhaKarte sichtbar={ausgewertet} eyebrow="Was kauft der Kunde eigentlich?">
           Der Kunde kauft kein Holz. Er kauft Sicherheit über seinem Kopf. Deshalb ist der
           Ortstermin halbe Detektivarbeit — und deshalb fährst du als Azubi oft mit.
         </AhaKarte>

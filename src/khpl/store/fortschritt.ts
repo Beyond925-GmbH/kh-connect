@@ -36,8 +36,13 @@ export interface Antworten {
   m2?: { schaetzung: number; aufgeloest: boolean }
   /** B3.2 — welche Bauteile am 3D-Modell angetippt wurden. */
   b32?: { angetippt: string[] }
-  /** M4 — Zuschnitt getroffen, mit Zahl der Versuche. */
-  m4?: { getroffen: boolean; versuche: number }
+  /**
+   * M4 — Zuschnitt getroffen, mit Zahl der Versuche. `verladen` ist Protokoll
+   * des 3D-Finales (Sparren auf dem Anhänger) und **optional**: alte
+   * localStorage-Stände und der Fehlversuch-Zweig kennen es nicht, und die
+   * Anzeige hängt allein an `getroffen`.
+   */
+  m4?: { getroffen: boolean; versuche: number; verladen?: boolean }
   /** B4.1 — korrekt verladene Teile. */
   b41?: { geladen: string[]; fertig: boolean }
   /** M7 — wie weit die Reihenfolge-Abfrage kam. */
@@ -118,6 +123,8 @@ function pruefeAntworten(roh: unknown): Antworten {
   const m4 = q.m4 as Antworten['m4']
   if (m4 && typeof m4.versuche === 'number') {
     a.m4 = { getroffen: !!m4.getroffen, versuche: m4.versuche }
+    // Nur ein echtes `true` übernehmen — alles andere bleibt weg.
+    if (m4.verladen === true) a.m4.verladen = true
   }
   const b41 = q.b41 as Antworten['b41']
   if (b41 && stringListe(b41.geladen)) {

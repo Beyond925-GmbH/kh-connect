@@ -5,10 +5,13 @@ import { bildeEinheiten, erzeugeTeile, schritteJePhase } from '@/dachstuhl/teile
 import type { Bauteil } from '@/dachstuhl/teileliste'
 import type { Auswahl } from '@/dachstuhl/debug'
 import type { Ansicht } from '@/dachstuhl/kamera'
+import type { KulisseProps } from '@/dachstuhl/Dachstuhl'
+import type { Lichtstimmung } from '@/dachstuhl/Beleuchtung'
 import { phaseAt } from '@/dachstuhl/zeitachse'
 import { useTapErkennung } from '@/dachstuhl/useTapErkennung'
 import { Szene } from '@/dachstuhl/Szene'
 import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
+import { ANFAHRT_DAUER } from '@/khpl/buehne/kanon'
 
 /**
  * Der parametrische Dachstuhl als Bühne — einmal gebaut, viermal benutzt:
@@ -55,7 +58,26 @@ export interface Dachstuhl3DProps {
   onPhase?: (label: string) => void
   /** Feuert, wenn `zielT` erreicht ist. */
   onAngekommen?: () => void
+  /** 'riss' = Planansicht (M3): Kantenzeichnung statt Koerper. */
+  darstellung?: 'koerper' | 'riss'
+  /** Lichtstimmung. M6 = 'mittag'. */
+  stimmung?: Lichtstimmung
+  /** Geparktes Gespann neben der Rohdecke; die Ladung folgt der Zeitachse. */
+  kulisse?: boolean
+  /**
+   * Anfahrt vor dem Aufbau (M5): `ANFAHRT_DAUER` Sekunden Kurvenfahrt, Tipp
+   * ueberspringt, `prefers-reduced-motion` springt sofort ans Ende. Solange
+   * die Fahrt laeuft, steht der Aufbau-Treiber komplett still — weder
+   * `onPhase` noch `onAngekommen` feuern, und OrbitControls sind gesperrt.
+   */
+  anfahrt?: boolean
+  /** Feuert genau einmal, wenn das Gespann steht. */
+  onAnfahrtEnde?: () => void
+  /** Markiert „deinen Sparren“ (Achse engine-intern abgeleitet). */
+  deinSparren?: boolean
 }
+// KEINE Wert-Exporte neben der Default-Komponente (Bundle-Regel, s. README —
+// Laufzeit-Konstanten der Buehnen leben in `kanon.ts`).
 
 export default function Dachstuhl3D({
   zielT,
@@ -69,6 +91,12 @@ export default function Dachstuhl3D({
   onDaneben,
   onPhase,
   onAngekommen,
+  darstellung = 'koerper',
+  stimmung = 'standard',
+  kulisse = false,
+  anfahrt = false,
+  onAnfahrtEnde,
+  deinSparren = false,
 }: Dachstuhl3DProps) {
   const sichtfeld = useSichtfeld()
   // Nach Stunden Standbetrieb fordert iOS Speicher zurück und nimmt der Seite
@@ -101,12 +129,61 @@ export default function Dachstuhl3D({
 
   // Rückmeldungen laufen über ein Ref: `useFrame` liest den Fortschritt jeden
   // Frame, React rendert dabei nicht neu.
-  const melder = useRef({ onPhase, onAngekommen })
+  const melder = useRef({ onPhase, onAngekommen, onAnfahrtEnde })
   useEffect(() => {
-    melder.current = { onPhase, onAngekommen }
+    melder.current = { onPhase, onAngekommen, onAnfahrtEnde }
   })
 
+  // ---- Anfahrt (M5) --------------------------------------------------------
+  // Solange die Fahrt läuft, ist der Aufbau-Treiber unten komplett angehalten:
+  // bei `zielT = M5_ENDE` und `fortschritt = startT` würde er sonst sofort
+  // losfahren — und bei `|rest| < 0.0005` bzw. `reduziert` schon im ersten
+  // Frame `onAngekommen` feuern.
+  const [fahrtLaeuft, setFahrtLaeuft] = useState(anfahrt)
+  const fahrtRef = useRef(anfahrt ? 0 : 1)
+  const anfahrtGemeldet = useRef(false)
+
   useEffect(() => {
+    if (!fahrtLaeuft) return
+
+    const fertig = () => {
+      setFahrtLaeuft(false)
+      if (!anfahrtGemeldet.current) {
+        anfahrtGemeldet.current = true
+        melder.current.onAnfahrtEnde?.()
+      }
+    }
+
+    // Reduzierte Bewegung: keine Fahrt, das Gespann steht sofort geparkt.
+    if (reduziert) {
+      fahrtRef.current = 1
+      fertig()
+      return
+    }
+
+    let id = 0
+    const start = performance.now()
+    const glatt = (u: number) => u * u * (3 - 2 * u)
+    const schritt = (jetzt: number) => {
+      const u = Math.min((jetzt - start) / 1000 / ANFAHRT_DAUER, 1)
+      // Der Skip-Tipp setzt den Ref direkt auf 1 — nie dahinter zurückfallen.
+      fahrtRef.current = Math.max(fahrtRef.current, glatt(u))
+      if (fahrtRef.current >= 1) {
+        fertig()
+        return
+      }
+      id = requestAnimationFrame(schritt)
+    }
+    id = requestAnimationFrame(schritt)
+    return () => cancelAnimationFrame(id)
+  }, [fahrtLaeuft, reduziert])
+
+  useEffect(() => {
+    // Während der Anfahrt steht die Zeitachse: kein rAF-Fortschritt, keine
+    // Meldungen. Der Effekt läuft nach `setFahrtLaeuft(false)` erneut und
+    // startet dann den unveränderten Treiber von `startT` aus.
+    if (fahrtLaeuft) return
+
     // Bei reduzierter Bewegung wird nicht gefahren, sondern gesetzt.
     if (reduziert) {
       fortschritt.current = zielT
@@ -148,7 +225,7 @@ export default function Dachstuhl3D({
 
     id = requestAnimationFrame(schritt)
     return () => cancelAnimationFrame(id)
-  }, [zielT, dauer, reduziert])
+  }, [zielT, dauer, reduziert, fahrtLaeuft])
 
   const tippen = useCallback(
     (teil: Bauteil) => {
@@ -170,10 +247,25 @@ export default function Dachstuhl3D({
     [],
   )
 
+  const kulisseProps = useMemo<KulisseProps | null>(
+    () => (kulisse ? { gespann: true, ladungAusFortschritt: true } : null),
+    [kulisse],
+  )
+
   return (
     <div
       className="relative size-full"
-      onPointerDown={(e) => tap.merken(e)}
+      // Skip der Fahrt: `pointerdown` im Capture, vor OrbitControls (die
+      // während der Fahrt ohnehin gesperrt sind). Der Tipp wird konsumiert.
+      onPointerDownCapture={(e) => {
+        if (fahrtLaeuft && fahrtRef.current < 1) {
+          fahrtRef.current = 1
+          e.stopPropagation()
+        }
+      }}
+      onPointerDown={(e) => {
+        if (!fahrtLaeuft) tap.merken(e)
+      }}
       data-wisch="aus"
     >
       <Szene
@@ -194,6 +286,12 @@ export default function Dachstuhl3D({
         // der Leinwand und braucht dafür keinen eigenen Zweig mehr.
         dunkel
         reduziert={reduziert}
+        darstellung={darstellung}
+        stimmung={stimmung}
+        kulisse={kulisseProps}
+        fahrtRef={anfahrt ? fahrtRef : null}
+        deinSparren={deinSparren}
+        steuerungGesperrt={fahrtLaeuft}
         tap={tap}
         onTap={tippen}
         onDaneben={daneben}

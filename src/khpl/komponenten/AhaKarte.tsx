@@ -1,28 +1,34 @@
 import { useId, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
-import { Plus } from 'lucide-react'
+import { HelpCircle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 /**
- * Der gelegentliche Einwurf aus khpl-flow.md 6.4 — kurze Karte, die *nach*
- * einer Interaktion einfährt. Kein Pflichtelement: sie sitzt dort, wo sie
- * etwas umdreht, nicht auf jedem Screen.
+ * Der gelegentliche Einwurf aus khpl-flow.md 6.4 — jetzt als **Einblendung
+ * über der Bühne**, nicht mehr als Kasten im Panel.
  *
- * **Sie klappt auf, statt einfach dazustehen.** Als Absatz standen auf Screens
- * mit zwei Karten bis zu neunzig Wörter Zusatztext da, die niemand angefordert
- * hatte — bei einem Publikum, das im Vorbeigehen dreißig Sekunden investiert,
- * ist das der Punkt, an dem weggeschaut wird. Als Zeile mit Pluszeichen kostet
- * derselbe Inhalt zwei Zeilen Platz, und wer ihn liest, hat sich dafür
- * entschieden.
+ * **Warum der Umbau.** Die Karte war zuletzt ein oranger Aufklapp-Streifen
+ * unten im Panel: Etikett links, Pluszeichen rechts. Am Stand hat sie
+ * praktisch niemand angetippt. Sie stand dort, wo der Screen ohnehin schon zu
+ * Ende gelesen war, sie sah aus wie eine Überschrift, und sie machte das Panel
+ * bei jedem gelösten Schritt eine Zeile höher — ausgerechnet in dem Moment, in
+ * dem der Screen fertig sein sollte.
  *
- * Der Preis ist ein Tap. Das ist hier kein Preis, sondern der Zweck: die
- * Lese-Steps (M3, B3.1, B5.1, M6) hätten sonst überhaupt nichts zu tun.
+ * Jetzt kommt sie **hereingeflogen**, sobald der Moment da ist: eine schmale
+ * Sprechblase mit einem Fragezeichen und genau einer Zeile — der Frage, nicht
+ * der Antwort. Wer sie antippt, klappt die Antwort auf; wer sie ignoriert,
+ * verliert nichts. Sie liegt oberhalb des Panels und wächst nach **oben** in
+ * die Bühne hinein, nicht in den Text hinunter.
  *
- * **Der geschlossene Streifen sieht seit dem Umbau aus wie ein Knopf**, nicht
- * wie ein Kasten mit einem Icon rechts. Er hat einen vollen orangen Rand, das
- * Pluszeichen sitzt in einem gefüllten Kreis, und beim Drücken sinkt er ein.
- * Vorher stand da ein hellgrauer Balken mit einer grauen Kleinzeile darauf —
- * das las sich wie eine Überschrift, und Überschriften tippt niemand an.
+ * Drei Regeln, die den Unterschied machen:
+ *
+ *  1. **Nur die Frage steht draußen.** Nicht der Inhalt, nicht ein Etikett.
+ *     Ein Streifen, auf dem „Übrigens“ steht, verspricht nichts.
+ *  2. **Das Fragezeichen ist die Einladung.** Ein rundes, gefülltes Zeichen
+ *     links vor der Zeile — dasselbe Signal wie bei den Begriffs-Popovern,
+ *     also schon gelernt, wenn die erste Karte kommt.
+ *  3. **Sie lässt sich wegtippen.** Was aufgeklappt war, darf zu; was zu war,
+ *     bleibt liegen. Nichts an ihr blockiert den Weg nach vorn.
  */
 export function AhaKarte({
   sichtbar,
@@ -33,10 +39,8 @@ export function AhaKarte({
 }: {
   sichtbar: boolean
   /**
-   * Die Zeile auf dem geschlossenen Streifen — sie muss neugierig machen,
-   * ohne die Pointe zu verraten. `null` fällt auf „Übrigens“ zurück: ein
-   * Streifen ganz ohne Beschriftung wäre nicht antippbar, weil nichts
-   * dransteht.
+   * Die eine Zeile, die draußen steht. Sie muss neugierig machen, ohne die
+   * Pointe zu verraten — sie ist der ganze Grund, warum jemand tippt.
    */
   eyebrow?: string | null
   /** Sekunden. Für Steps mit mehreren Karten, die nacheinander einfahren. */
@@ -45,40 +49,80 @@ export function AhaKarte({
   children: React.ReactNode
 }) {
   const [offen, setOffen] = useState(false)
+  const [weg, setWeg] = useState(false)
   const inhaltId = useId()
-  const beschriftung = eyebrow ?? 'Übrigens'
+  const frage = eyebrow ?? 'Übrigens'
 
   return (
     <AnimatePresence initial={false}>
-      {sichtbar && (
+      {sichtbar && !weg && (
         <motion.aside
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 8 }}
-          transition={{ duration: 0.45, delay: verzoegerung, ease: [0.22, 1, 0.36, 1] }}
+          // `layout` trägt den Übergang von der Blase zur Karte: Breite und
+          // Höhe ändern sich beide, und ohne Layout-Animation ist das ein
+          // Sprung mitten in der Bewegung, die gerade eingeladen hat.
+          layout
+          initial={{ opacity: 0, y: 14, scale: 0.96 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 8, scale: 0.98 }}
+          transition={{
+            duration: 0.42,
+            delay: verzoegerung,
+            ease: [0.22, 1, 0.36, 1],
+            layout: { duration: 0.3, ease: [0.22, 1, 0.36, 1] },
+          }}
+          data-testid="aha"
+          data-offen={offen}
           className={cn(
-            'shrink-0 overflow-hidden rounded-kh border-2 border-kh-orange/45 bg-kh-orange/10',
+            // Eigener, deutlich hellerer Grund als das Panel: sie schwebt über
+            // der Bühne und muss dort auch auf einem hellen Foto stehen.
+            'pointer-events-auto w-fit max-w-full origin-bottom-left overflow-hidden rounded-kh-lg border-2 border-kh-orange/60 bg-[#1B1509]/92 shadow-[0_18px_50px_rgba(0,0,0,0.55)] backdrop-blur-md',
             className,
           )}
         >
-          <button
-            type="button"
-            onClick={() => setOffen((o) => !o)}
-            aria-expanded={offen}
-            aria-controls={inhaltId}
-            data-testid="aha-schalter"
-            className="flex min-h-[60px] w-full items-center justify-between gap-3 px-4 py-3 text-left transition-transform active:scale-[0.985]"
-          >
-            <span className="kh-etikett">{beschriftung}</span>
-            <motion.span
-              aria-hidden
-              animate={{ rotate: offen ? 135 : 0 }}
-              transition={{ type: 'spring', stiffness: 380, damping: 22 }}
-              className="grid size-9 shrink-0 place-items-center rounded-full bg-kh-orange text-[#0E0D0B]"
+          {/* `layout="position"` an den Kindern: die Hülle darf ihre Größe
+              animieren, ihr Inhalt darf dabei nicht mitskaliert werden —
+              sonst zieht sich die Schrift während des Aufklappens in die
+              Breite. */}
+          <motion.div layout="position" className="flex items-start">
+            <button
+              type="button"
+              onClick={() => setOffen((o) => !o)}
+              aria-expanded={offen}
+              aria-controls={inhaltId}
+              data-testid="aha-schalter"
+              className="flex min-h-[56px] flex-1 items-center gap-3 py-2.5 pr-4 pl-3 text-left transition-transform active:scale-[0.985]"
             >
-              <Plus className="size-5" strokeWidth={3} />
-            </motion.span>
-          </button>
+              <motion.span
+                aria-hidden
+                animate={offen ? {} : { scale: [1, 1.14, 1] }}
+                transition={{
+                  duration: 1.6,
+                  repeat: offen ? 0 : Infinity,
+                  repeatDelay: 2.4,
+                }}
+                className="grid size-9 shrink-0 place-items-center rounded-full bg-kh-orange text-[#0E0D0B]"
+              >
+                <HelpCircle className="size-5" strokeWidth={2.75} />
+              </motion.span>
+              <span className="min-w-0 text-[1.0625rem] leading-snug font-semibold text-balance text-kh-paper">
+                {frage}
+              </span>
+            </button>
+
+            {/* Erst wenn sie offen ist, gibt es ein Schließen — vorher wäre ein
+                X neben einer Frage die Einladung, sie loszuwerden. */}
+            {offen && (
+              <button
+                type="button"
+                onClick={() => setWeg(true)}
+                aria-label="Einwurf schließen"
+                data-testid="aha-schliessen"
+                className="grid size-[52px] shrink-0 place-items-center text-kh-paper/45 transition-transform active:scale-90"
+              >
+                <X className="size-5" strokeWidth={2.5} />
+              </button>
+            )}
+          </motion.div>
 
           <AnimatePresence initial={false}>
             {offen && (
@@ -87,14 +131,15 @@ export function AhaKarte({
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                <div
+                <motion.div
+                  layout="position"
                   data-auswaehlbar
-                  className="px-4 pb-4 text-[1.0625rem] leading-[1.45] text-kh-paper/90 sm:text-[1.125rem]"
+                  className="max-w-[46ch] px-4 pt-0.5 pb-4 text-[1.0625rem] leading-[1.45] text-kh-paper/90 sm:text-[1.125rem]"
                 >
                   {children}
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
