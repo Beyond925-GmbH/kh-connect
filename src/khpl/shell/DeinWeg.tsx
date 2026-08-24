@@ -1,7 +1,7 @@
 import { Dialog as BaseDialog } from '@base-ui/react/dialog'
-import { ArrowRight, Check, CornerDownRight, X } from 'lucide-react'
-import { step, type StepGraph, type StepId } from '@/khpl/flow/steps'
-import { wegzustand } from '@/khpl/flow/uebergaenge'
+import { ArrowRight, Check, X } from 'lucide-react'
+import { railIndex, step, type StepGraph, type StepId } from '@/khpl/flow/steps'
+import { wegzustand, type Wegzustand } from '@/khpl/flow/uebergaenge'
 import { BERUFE } from '@/khpl/berufe/registry'
 import type { BerufId } from '@/khpl/berufe/typen'
 import type { Fortschritt } from '@/khpl/store/fortschritt'
@@ -15,8 +15,27 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  * die aktuelle Stelle, ○ ist sichtbar aber gesperrt — **nach vorne springt
  * niemand**, sonst bricht das Paar `Teach:` (M5) → `Abfrage:` (M7).
  *
- * Nicht genommene Abstecher bleiben sichtbar. Sie zeigen, was es noch zu holen
- * gäbe, ohne dass ein Schritt „unvollständig“ wirkt.
+ * **Warum es jetzt eine Zeitachse mit Nummern ist.** Die Vorfassung setzte
+ * siebzehn gleich aussehende Zeilen untereinander: gelaufene in Weiß,
+ * kommende in Grau, davor je ein Kringel. Neun graue Zeilen hintereinander
+ * lesen sich nicht als „das kommt noch“, sondern als „das ist kaputt“ — und
+ * die Leiste sagt „4 / 10“, während in der Liste nichts nummeriert ist.
+ * Niemand konnte ein Segment der Rail einer Zeile zuordnen.
+ *
+ * Deshalb:
+ *
+ *  - **Nummern.** Die Hauptschritte tragen 1…n, dieselbe Zählung wie die
+ *    Rail. Das Sheet und die Leiste sprechen damit dieselbe Sprache.
+ *  - **Eine durchgehende Achse.** Ein Strang läuft durch alle Zeilen; er ist
+ *    orange, so weit man gekommen ist, und danach eine leere Kerbe. Der
+ *    Zustand hängt an der Achse und am Knoten — die Beschriftung bleibt
+ *    lesbar, statt weggedimmt zu werden.
+ *  - **Abstecher zweigen ab.** Sie hängen an einem kurzen Ausleger neben der
+ *    Achse. Der `↳`-Pfeil und der zweite Einzugsstrich der Vorfassung sagten
+ *    dasselbe dreimal.
+ *  - **Ein nicht genommener Abstecher ist ein Angebot, kein Mangel.** Statt
+ *    fünfmal „nicht angeschaut“ in Grau steht dort einmal „noch offen“ in
+ *    Orange — dieselbe Information, andere Aussage.
  *
  * **Warum der Berufswechsel hier sitzt und nicht in der Leiste.** Das Sheet
  * ist der Ort, an dem die App „wo bin ich“ beantwortet; „wo könnte ich sonst
@@ -30,6 +49,22 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  * jedem Wechsel hieße, dass niemand wechselt — und dann wäre das Angebot von
  * vier Berufen eine Behauptung.
  */
+
+/**
+ * Eine Zeile der Achse. `nummer` trägt die Rail-Zählung; Abstecher bekommen
+ * keine, weil sie in der Rail kein Segment haben (ui-shell 4).
+ *
+ * `bahn` ist der Hauptschritt, unter dem die Zeile hängt — bei Hauptschritten
+ * sie selbst. Daran hängt die Farbe der Achse: ein nicht genommener Abstecher
+ * darf den Strang nicht unterbrechen, obwohl er selbst „offen“ ist.
+ */
+interface Achsenzeile {
+  id: StepId
+  nummer: number | null
+  abstecher: boolean
+  bahnErreicht: boolean
+}
+
 export function DeinWeg({
   offen,
   graph,
@@ -54,6 +89,17 @@ export function DeinWeg({
   const aktiv = BERUFE.find((b) => b.id === aktiverBeruf) ?? null
   const andere = BERUFE.filter((b) => b.id !== aktiverBeruf)
 
+  const zeilen: Achsenzeile[] = []
+  for (const [i, haupt] of graph.haupt.entries()) {
+    const bahnErreicht = wegzustand(graph, haupt.id, fortschritt) !== 'offen'
+    zeilen.push({ id: haupt.id, nummer: i + 1, abstecher: false, bahnErreicht })
+    for (const a of haupt.abstecher) {
+      zeilen.push({ id: a, nummer: null, abstecher: true, bahnErreicht })
+    }
+  }
+
+  const jetzt = railIndex(graph, fortschritt.currentStepId) + 1
+
   return (
     <BaseDialog.Root open={offen} onOpenChange={(auf) => !auf && onSchliessen()}>
       <BaseDialog.Portal>
@@ -64,79 +110,65 @@ export function DeinWeg({
         >
           {/* Das Warnband oben ist die einzige Stelle, an der das Sheet die
               Marke trägt — ein oranger Balken darüber wäre ein zweites
-              Orange neben dem, das im Sheet schon die Häkchen macht. */}
+              Orange neben dem, das im Sheet schon die Knoten setzt. */}
           <div aria-hidden className="kh-warnband h-1.5 shrink-0" />
-          <header className="flex shrink-0 items-start justify-between gap-3 border-b border-kh-line px-5 py-3">
-            <div className="min-w-0">
+          <header className="flex shrink-0 items-center gap-3 border-b border-kh-line px-5 py-3">
+            <div className="min-w-0 flex-1">
               <BaseDialog.Title className="kh-titel-klein">Dein Weg</BaseDialog.Title>
               {aktiv && (
                 <p className="mt-0.5 truncate text-[0.9375rem] text-kh-mute">
-                  als {aktiv.name}
+                  {/* `kurz`, nicht `name`: „als Dachdecker/Dachdeckerin“ ist
+                      die Berufsbezeichnung aus der Ausbildungsordnung und in
+                      einer Kopfzeile schlicht zu lang. */}
+                  {aktiv.kurz} · Schritt {jetzt} von {graph.haupt.length}
                 </p>
               )}
             </div>
             {/*
               Der Wechsel gehört in den Kopf, obwohl das Angebot unten steht.
 
-              Die Liste der Hauptschritte ist siebzehn Zeilen lang; alles unter
-              ihr ist auf einem Step am Anfang des Tages unsichtbar, und ein
-              Angebot, das man erst erscrollen muss, ist am Messestand keins.
-              Der Chip hier führt auf die Berufsliste — den Screen, auf dem
-              nebeneinander steht, was es gibt. Die Kurzwege unten bleiben für
-              den, der ohnehin schon dort unten ist.
+              Die Achse ist siebzehn Zeilen lang; alles unter ihr ist auf einem
+              Step am Anfang des Tages unsichtbar, und ein Angebot, das man
+              erst erscrollen muss, ist am Messestand keins. Er ist hier
+              allerdings **Text und kein Knopf** — zwei gleich große weiße
+              Pillen neben einer kleinen Überschrift ließen den Kopf so
+              aussehen, als sei das Wechseln die Hauptsache des Sheets.
             */}
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                data-testid="weg-wechseln"
-                onClick={onAlleBerufe}
-                className="flex h-12 items-center gap-1 rounded-kh-pill bg-white/6 px-4 text-[0.9375rem] font-semibold text-kh-paper transition-transform active:scale-95"
-              >
-                Wechseln
-                <ArrowRight className="size-4 text-kh-orange" strokeWidth={2.5} />
-              </button>
-              <BaseDialog.Close
-                aria-label="Schließen"
-                className="grid size-12 shrink-0 place-items-center rounded-kh-pill bg-white/6 text-kh-paper transition-transform active:scale-90"
-              >
-                <X className="size-5" strokeWidth={2.25} />
-              </BaseDialog.Close>
-            </div>
+            <button
+              type="button"
+              data-testid="weg-wechseln"
+              onClick={onAlleBerufe}
+              className="flex h-12 shrink-0 items-center gap-1 rounded-kh-pill px-3 text-[0.9375rem] font-semibold text-kh-paper/70 transition-transform active:scale-95 active:text-kh-paper"
+            >
+              Wechseln
+              <ArrowRight className="size-4 text-kh-orange" strokeWidth={2.5} />
+            </button>
+            <BaseDialog.Close
+              aria-label="Schließen"
+              className="grid size-12 shrink-0 place-items-center rounded-kh-pill bg-white/6 text-kh-paper transition-transform active:scale-90"
+            >
+              <X className="size-5" strokeWidth={2.25} />
+            </BaseDialog.Close>
           </header>
 
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
-            <ol className="px-4 py-2">
-              {graph.haupt.map((haupt) => (
-                <li key={haupt.id}>
-                  <Zeile
-                    id={haupt.id}
-                    graph={graph}
-                    fortschritt={fortschritt}
-                    onSpringe={onSpringe}
-                    onSchliessen={onSchliessen}
-                  />
-                  {haupt.abstecher.length > 0 && (
-                    <ol className="mb-0.5 ml-7 border-l-2 border-kh-line pl-3">
-                      {haupt.abstecher.map((id) => (
-                        <li key={id}>
-                          <Zeile
-                            id={id}
-                            graph={graph}
-                            eingerueckt
-                            fortschritt={fortschritt}
-                            onSpringe={onSpringe}
-                            onSchliessen={onSchliessen}
-                          />
-                        </li>
-                      ))}
-                    </ol>
-                  )}
-                </li>
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain" data-scroll>
+            <ol className="px-4 py-3">
+              {zeilen.map((zeile, i) => (
+                <Zeile
+                  key={zeile.id}
+                  zeile={zeile}
+                  graph={graph}
+                  fortschritt={fortschritt}
+                  achseOben={i > 0 && zeile.bahnErreicht}
+                  achseUnten={i < zeilen.length - 1 ? zeilen[i + 1].bahnErreicht : null}
+                  onSpringe={onSpringe}
+                  onSchliessen={onSchliessen}
+                />
               ))}
             </ol>
 
             {/*
-              Die anderen Berufe. Bewusst unter der Liste und nicht darüber:
+              Die anderen Berufe. Bewusst unter der Achse und nicht darüber:
               wer das Sheet öffnet, will zuerst wissen, wo er steht. Das
               Angebot ist die Antwort auf die zweite Frage, nicht auf die
               erste.
@@ -200,41 +232,84 @@ export function DeinWeg({
   )
 }
 
+/** Die Achse liegt hinter den Knoten; 25 px = Mitte eines 36-px-Knotens bei `px-2`. */
+const ACHSE_X = 'left-[25px]'
+
 function Zeile({
-  id,
+  zeile,
   graph,
-  eingerueckt = false,
   fortschritt,
+  achseOben,
+  achseUnten,
   onSpringe,
   onSchliessen,
 }: {
-  id: StepId
+  zeile: Achsenzeile
   graph: StepGraph
-  eingerueckt?: boolean
   fortschritt: Fortschritt
+  /** Ist das Stück Achse über dieser Zeile schon gelaufen? */
+  achseOben: boolean
+  /** …und das darunter? `null` = letzte Zeile, kein Stück mehr. */
+  achseUnten: boolean | null
   onSpringe: (ziel: StepId) => void
   onSchliessen: () => void
 }) {
-  const zustand = wegzustand(graph, id, fortschritt)
-  const def = step(graph, id)
+  const zustand = wegzustand(graph, zeile.id, fortschritt)
+  const def = step(graph, zeile.id)
   const antippbar = zustand === 'besucht'
-  const nichtGenommen = eingerueckt && zustand === 'offen'
+  const nichtGenommen = zeile.abstecher && zustand === 'offen'
 
   const inhalt = (
     <>
-      <span className="grid size-6 shrink-0 place-items-center" aria-hidden>
-        {eingerueckt && zustand === 'offen' ? (
-          <CornerDownRight className="size-4 text-kh-mute/50" strokeWidth={2} />
-        ) : zustand === 'besucht' ? (
-          <span className="grid size-6 place-items-center rounded-full bg-kh-orange text-[#0E0D0B]">
-            <Check className="size-4" strokeWidth={3.5} />
+      {/* Die Achse. Sie läuft hinter dem Knoten durch, deshalb zwei Hälften:
+          so kann das Stück über einer Zeile schon orange sein, während das
+          darunter noch leer ist. */}
+      {achseOben && (
+        <span
+          aria-hidden
+          className={`absolute ${ACHSE_X} top-0 h-1/2 w-[2px] bg-kh-orange/55`}
+        />
+      )}
+      {achseUnten !== null && (
+        <span
+          aria-hidden
+          className={`absolute ${ACHSE_X} top-1/2 h-1/2 w-[2px] ${
+            achseUnten ? 'bg-kh-orange/55' : 'bg-white/12'
+          }`}
+        />
+      )}
+      {zeile.abstecher ? (
+        <>
+          {/* Der Ausleger: von der Achse waagerecht zum Abstecher-Knoten. */}
+          <span
+            aria-hidden
+            className={`absolute ${ACHSE_X} top-1/2 h-[2px] w-7 ${
+              zustand === 'offen' ? 'bg-white/12' : 'bg-kh-orange/55'
+            }`}
+          />
+          <span className="ml-7 grid size-6 shrink-0 place-items-center" aria-hidden>
+            {zustand === 'besucht' ? (
+              <span className="grid size-6 place-items-center rounded-full bg-kh-orange text-[#0E0D0B]">
+                <Check className="size-3.5" strokeWidth={3.5} />
+              </span>
+            ) : zustand === 'aktuell' ? (
+              <span className="size-3.5 rounded-full bg-kh-signal ring-4 ring-kh-signal/25" />
+            ) : (
+              // Orange nur, wo der Abstecher auch erreichbar ist. Unter einem
+              // Hauptschritt, der noch kommt, wäre ein oranger Ring ein
+              // Angebot, das man nicht annehmen kann.
+              <span
+                className={`size-3 rounded-full border-2 bg-kh-surface ${
+                  zeile.bahnErreicht ? 'border-kh-orange/50' : 'border-white/20'
+                }`}
+              />
+            )}
           </span>
-        ) : zustand === 'aktuell' ? (
-          <span className="size-3.5 rounded-full bg-kh-signal ring-4 ring-kh-signal/25" />
-        ) : (
-          <span className="size-2.5 rounded-full border-2 border-white/25" />
-        )}
-      </span>
+        </>
+      ) : (
+        <Knoten nummer={zeile.nummer} zustand={zustand} />
+      )}
+
       {/*
         Zwei Beschriftungen, je nach Zustand — und das ist der Punkt, an dem sich
         die beiden Abnahmen widersprochen haben.
@@ -247,54 +322,84 @@ function Zeile({
 
         Also: besucht und aktuell zeigen `titel`, gesperrt zeigt `kurz`.
       */}
-      <span className="min-w-0 flex-1 truncate text-left">
+      <span
+        className={`min-w-0 flex-1 truncate text-left ${
+          zustand === 'offen' ? 'text-kh-paper/55' : 'text-kh-paper'
+        } ${zeile.abstecher ? 'text-[1rem]' : ''}`}
+      >
         {zustand === 'offen' ? def.kurz : def.titel}
       </span>
+
       {zustand === 'aktuell' && (
         <span className="shrink-0 rounded-kh-pill bg-kh-signal px-2.5 py-1 text-[0.8125rem] font-bold whitespace-nowrap text-[#0E0D0B] uppercase">
           du bist hier
         </span>
       )}
       {nichtGenommen && (
-        <span className="shrink-0 text-[0.875rem] whitespace-nowrap text-kh-mute/60">
-          nicht angeschaut
+        <span
+          className={`shrink-0 rounded-kh-pill border px-2 py-0.5 text-[0.8125rem] whitespace-nowrap ${
+            zeile.bahnErreicht
+              ? 'border-kh-orange/45 text-kh-orange/85'
+              : 'border-white/15 text-kh-mute/60'
+          }`}
+        >
+          noch offen
         </span>
       )}
     </>
   )
 
   const basis =
-    'flex w-full items-center gap-3 rounded-kh px-3 py-1.5 text-[1.0625rem] min-h-[52px] transition-colors'
-
-  if (!antippbar) {
-    return (
-      <div
-        data-testid={`weg-${id}`}
-        data-zustand={zustand}
-        className={`${basis} ${
-          zustand === 'aktuell'
-            ? 'bg-white/8 font-semibold text-kh-paper'
-            : 'text-kh-mute/50'
-        }`}
-        aria-current={zustand === 'aktuell' ? 'step' : undefined}
-      >
-        {inhalt}
-      </div>
-    )
-  }
+    'relative flex w-full items-center gap-3 rounded-kh px-2 py-1.5 text-[1.0625rem] min-h-[52px] transition-colors'
 
   return (
-    <button
-      type="button"
-      data-testid={`weg-${id}`}
-      data-zustand={zustand}
-      onClick={() => {
-        onSpringe(id)
-        onSchliessen()
-      }}
-      className={`${basis} cursor-pointer text-kh-paper/85 transition-transform active:scale-[0.98] active:bg-white/8`}
+    <li className="relative">
+      {antippbar ? (
+        <button
+          type="button"
+          data-testid={`weg-${zeile.id}`}
+          data-zustand={zustand}
+          onClick={() => {
+            onSpringe(zeile.id)
+            onSchliessen()
+          }}
+          className={`${basis} cursor-pointer active:scale-[0.98] active:bg-white/8`}
+        >
+          {inhalt}
+        </button>
+      ) : (
+        <div
+          data-testid={`weg-${zeile.id}`}
+          data-zustand={zustand}
+          className={`${basis} ${zustand === 'aktuell' ? 'font-semibold' : ''}`}
+          aria-current={zustand === 'aktuell' ? 'step' : undefined}
+        >
+          {inhalt}
+        </div>
+      )}
+    </li>
+  )
+}
+
+/**
+ * Der Knoten eines Hauptschritts — und der Grund, warum das Sheet und die Rail
+ * jetzt dieselbe Zählung zeigen. Die Nummer steht **im** Knoten: sie ist
+ * dadurch Teil der Achse und braucht keine eigene Spalte.
+ */
+function Knoten({ nummer, zustand }: { nummer: number | null; zustand: Wegzustand }) {
+  const stil =
+    zustand === 'besucht'
+      ? 'bg-kh-orange text-[#0E0D0B]'
+      : zustand === 'aktuell'
+        ? 'bg-kh-signal text-[#0E0D0B] ring-4 ring-kh-signal/20'
+        : 'border-2 border-white/18 bg-kh-surface text-kh-mute/70'
+
+  return (
+    <span
+      aria-hidden
+      className={`relative grid size-9 shrink-0 place-items-center rounded-full font-display text-[0.9375rem] tabular-nums ${stil}`}
     >
-      {inhalt}
-    </button>
+      {nummer}
+    </span>
   )
 }
