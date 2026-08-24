@@ -1,5 +1,4 @@
 import type { StepId } from '@/khpl/flow/steps'
-import { Auftragsannahme } from '@/khpl/shell/Auftragsannahme'
 import { KioskGuard } from '@/khpl/shell/KioskGuard'
 import { Splash } from '@/khpl/shell/Splash'
 import { Platzhalter } from '@/khpl/steps/Platzhalter'
@@ -56,7 +55,6 @@ export function KhplApp() {
   return (
     <KioskGuard>
       {bildschirm === 'splash' && <Splash />}
-      {bildschirm === 'intro' && <Auftragsannahme />}
       {bildschirm === 'step' && <Step id={currentStepId} />}
     </KioskGuard>
   )

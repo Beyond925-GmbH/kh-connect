@@ -1,40 +1,56 @@
 import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
-import { Hand } from 'lucide-react'
+import { ArrowRight, ChevronRight, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
 import { STEPS } from '@/khpl/flow/steps'
-import { machWeiter, starteNeu, useWiedereinstieg } from '@/khpl/store/fortschritt'
+import {
+  machWeiter,
+  nimmAuftragAn,
+  starteKarriereSkip,
+  useWiedereinstieg,
+} from '@/khpl/store/fortschritt'
 import { useStaffAusgang } from './staffAusgang'
 
 /**
- * S0 — Splash / Attract (khpl-ui-shell.md 2). Der Ruhezustand des Standes.
+ * S0 — Start (khpl-ui-shell.md 2). Der Ruhezustand des Standes **und** der
+ * Framing-Screen in einem.
  *
- * Der Screen hat genau eine Aufgabe: jemanden, der drei Meter entfernt
- * vorbeigeht, dazu bringen, den Kopf zu drehen. Deshalb ist er der einzige im
- * ganzen Ablauf, der **randlos** ist — kein Panel, keine Leiste, nur Bewegtbild
- * und drei Zeilen darauf.
+ * Vorher waren das zwei Screens: ein Attract-Splash auf `hero.mp4` und
+ * dahinter die Auftragsannahme auf `szenario.mp4`. Beide randlos, beide
+ * dunkles Bewegtbild mit Plakatzeile und einem Ziel unten — wer „Tippen zum
+ * Starten“ drückte, bekam als Antwort denselben Screen mit anderem Text. Ein
+ * Tap, der nichts sichtbar verändert, ist ein verlorener Tap: der erste
+ * Eindruck war, die App hänge.
  *
- * Marke, Titel, „Tippen zum Starten“ — und bei vorhandenem Fortschritt
- * **zusätzlich** Weitermachen / Neu starten. Zusätzlich, nicht anstelle: sonst
- * bekäme ein neuer Besucher als erstes eine Frage nach einem Schritt gestellt,
- * den er nie gesehen hat, und keinen offensichtlichen Weg hinein.
+ * Jetzt trägt ein Screen beide Aufgaben. Er muss aus drei Metern den Kopf
+ * drehen (Bild, Plakatzeile, ein orangenes Ziel) und aus einem halben Meter
+ * die Rolle setzen (Etikett, drei Sätze in-fiction, **[Auftrag annehmen]**).
+ * Das geht, weil beides derselbe Blick ist — von weit nach nah, nicht von
+ * Screen zu Screen.
  *
- * Erststart-Budget: bis „Tippen zum Starten“ ≤ 1,5 MB (flow 8.5). Deshalb trägt
- * der Screen zuerst nur das Poster; der Loop wird erst **nach** dem ersten Frame
- * nachgeladen und blendet sich darüber. Wer sofort tippt, hat schon gestartet,
- * bevor das Video da ist.
+ * Bewegtbild ist dabei `szenario.mp4`: 52 Sekunden Montage aus vier Clips
+ * statt der 10-Sekunden-Schleife von `hero.mp4`. Der Stand läuft stundenlang
+ * im Ruhezustand — eine Schleife, die sechsmal pro Minute an derselben Stelle
+ * neu ansetzt, liest sich aus der Halle als Standbild mit Ruckler.
+ *
+ * Erststart-Budget: bis zum sichtbaren Ziel ≤ 1,5 MB (flow 8.5). Deshalb trägt
+ * der Screen zuerst nur das Poster (32 K); das Video wird erst **nach** dem
+ * ersten Frame nachgeladen und blendet sich darüber. Wer sofort tippt, hat
+ * schon gestartet, bevor es da ist. In Summe lädt der Stand jetzt weniger:
+ * `hero.mp4` (1,4 MB) fällt ersatzlos weg.
+ *
+ * Er trägt den ersten der periodischen Karriere-Links (ui-shell 6). Wer ihn
+ * hier nimmt, hat den Auftrag damit angenommen: die Rückkehr aus dem Skip
+ * führt laut Zustandsmaschine auf S2, nicht hierher zurück.
+ *
+ * TEXT: `GEPRÜFT`. Die Spec gibt für das Framing nur die Haltung vor („Du bist
+ * Azubi. Gerade kam eine Anfrage rein — nimmst du den Auftrag an?“), keinen
+ * fertigen Wortlaut; der Wortlaut hier ist am 24.08.2026 abgenommen worden.
  */
 
-/**
- * Poster und Loop gehören zusammen — `hero-poster.webp` ist ausweislich
- * `INVENTAR.md` das Standbild genau zu `hero.mp4`. (Das naheliegendere
- * `shared/start-poster.webp` ist das Poster zum *Start-Loop* über alle drei
- * Gewerke und zeigt eine andere Szene; die Ueberblendung wäre ein harter
- * Schnitt zwischen zwei fremden Aufnahmen.)
- */
-const POSTER = '/medien/media/zimmerer/hero-poster.webp'
-const LOOP = '/medien/media/zimmerer/hero.mp4'
+const POSTER = '/medien/media/zimmerer/szenario-poster.webp'
+const FILM = '/medien/media/zimmerer/szenario.mp4'
 
 export function Splash() {
   const wiedereinstieg = useWiedereinstieg()
@@ -49,7 +65,7 @@ export function Splash() {
     return () => window.clearTimeout(id)
   }, [])
 
-  // Der Splash wird an einem Messetag dutzendfach auf- und abgebaut (jeder
+  // Der Startscreen wird an einem Messetag dutzendfach auf- und abgebaut (jeder
   // Idle-Reset, jeder Sitzungsstart). WebKit gibt Decoder eines nur entfernten,
   // noch laufenden <video> nicht sofort frei, und die Zahl gleichzeitiger
   // Decoder ist auf iOS begrenzt — deshalb hier ausdrücklich abräumen.
@@ -65,9 +81,11 @@ export function Splash() {
   )
 
   return (
+    // Der ganze Screen ist das Startziel. Aus drei Metern zielt niemand auf
+    // einen Knopf; der Knopf sagt nur, *was* passiert, wenn man hintippt.
     <div
       data-testid="splash"
-      onClick={starteNeu}
+      onClick={nimmAuftragAn}
       className="kh-screen flex flex-col overflow-hidden bg-kh-ink"
     >
       <motion.img
@@ -87,7 +105,7 @@ export function Splash() {
       {ladeVideo && (
         <video
           ref={video}
-          src={LOOP}
+          src={FILM}
           autoPlay
           muted
           loop
@@ -101,8 +119,8 @@ export function Splash() {
         />
       )}
       {/* Zwei Lagen: ein Verlauf, der die Schrift trägt, und ein warmer
-          Farbstich in Markenorange, der die neutrale Werkstattaufnahme an die
-          Palette bindet. */}
+          Farbstich in Markenorange, der die neutrale Aufnahme an die Palette
+          bindet. */}
       <div className="absolute inset-0 bg-gradient-to-t from-[#0E0D0B] via-[#0E0D0B]/55 to-[#0E0D0B]/25" />
       <div
         aria-hidden
@@ -115,84 +133,121 @@ export function Splash() {
           lesbar ist. */}
       <div aria-hidden className="kh-warnband absolute inset-x-0 bottom-0 h-1.5" />
 
-      <div className="relative flex min-h-0 flex-1 flex-col justify-between p-6 landscape:p-10">
-        {/* `self-start`, sonst zieht die Flex-Spalte das Bild auf volle Breite.
-            Auf dem Logo liegt der Staff-Ausgang — fünf schnelle Taps, wie in
-            ui-shell 8 beschrieben. `stopPropagation`, sonst startet der Tap
-            zugleich eine neue Sitzung. */}
+      <div className="relative flex items-center justify-between gap-4 p-4 landscape:p-6">
+        <div className="flex min-w-0 flex-wrap items-center gap-2.5">
+          {/* Auf dem Logo liegt der Staff-Ausgang — fünf schnelle Taps, wie in
+              ui-shell 8 beschrieben. `stopPropagation`, sonst startet der Tap
+              zugleich eine neue Sitzung. */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              staffTap()
+            }}
+            aria-label="Kreishandwerkerschaft Paderborn-Lippe"
+            className="w-fit shrink-0"
+          >
+            <Logo className="h-9 w-auto landscape:h-11" />
+          </button>
+
+          {/* Der Wiedereinstieg. Er stand vorher als zweiter Absatz mit eigenem
+              Knopf unter dem Titel und stellte damit jedem neuen Besucher als
+              erstes eine Frage nach einem Schritt, den er nie gesehen hat.
+              Hier oben ist er das, was er ist: eine Ausnahme für den, der
+              gerade weggeschaut hat. Grau, klein, neben der Marke — er darf
+              „Auftrag annehmen“ nicht ansatzweise Konkurrenz machen. */}
+          {wiedereinstieg && (
+            <button
+              type="button"
+              data-testid="weitermachen"
+              onClick={(e) => {
+                e.stopPropagation()
+                machWeiter()
+              }}
+              className="flex h-11 min-w-0 items-center gap-2 rounded-kh-pill bg-black/35 px-3.5 text-[0.9375rem] font-medium text-kh-paper/55 backdrop-blur-md transition-transform active:scale-95"
+            >
+              <RotateCcw className="size-4 shrink-0" strokeWidth={2} />
+              {/* Unterhalb von 640 px bliebe vom Steptitel neben Marke und
+                  Karriere-Link nichts als ein abgeschnittenes Wort übrig —
+                  dort steht nur „Weiter“, und die Pille rutscht unter das Logo
+                  (`flex-wrap` oben). Das Zielgerät ist ohnehin das iPad; das
+                  ist die Notlösung fürs Telefon. */}
+              <span className="shrink-0 sm:hidden">Weiter</span>
+              <span className="hidden truncate sm:inline">
+                Weiter bei „{STEPS[wiedereinstieg.currentStepId].titel}“
+              </span>
+            </button>
+          )}
+        </div>
+
+        {/* „klein, textuell, in Grau, nicht als Button“ (ui-shell 6). Auf einem
+            dunklen Video heißt Grau gedämpftes Weiß auf einer flachen Pille. */}
         <button
           type="button"
+          data-testid="karriere-skip"
           onClick={(e) => {
             e.stopPropagation()
-            staffTap()
+            nimmAuftragAn()
+            starteKarriereSkip()
           }}
-          aria-label="Kreishandwerkerschaft Paderborn-Lippe"
-          className="w-fit self-start"
+          className="flex h-11 shrink-0 items-center gap-1 rounded-kh-pill bg-black/35 px-4 text-[1rem] font-medium text-kh-paper/60 backdrop-blur-md transition-transform active:scale-95"
         >
-          <Logo className="h-9 w-auto landscape:h-11" />
+          Karriere-Wege
+          <ChevronRight className="size-4" strokeWidth={2} />
         </button>
+      </div>
 
-        <div className="flex flex-col items-start gap-6">
-          <motion.h1
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-            className="kh-plakat"
-          >
+      <motion.div
+        initial={{ opacity: 0, y: 22 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        className="relative flex min-h-0 flex-1 flex-col justify-end gap-6 p-6 landscape:p-10"
+      >
+        <div className="flex max-w-[44rem] flex-col gap-4">
+          {/* Das Etikett setzt die Rolle, bevor der erste Satz sie behauptet.
+              „Dein erster Auftrag“ ist dabei kein Fortschrittszähler, sondern
+              der Anfang einer Geschichte — und macht die Zeitangabe
+              überflüssig, die ui-shell 1 ausdrücklich verbietet. */}
+          <span className="kh-etikett flex items-center gap-2">
+            <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
+            Dein erster Auftrag
+          </span>
+          <h1 className="kh-plakat">
             Bau heute
             <br />
             {/* Die zweite Zeile in Markenorange: der Titel bekommt damit einen
                 Akzent, ohne dass irgendwo ein zweites Element nötig wäre. */}
             <span className="text-kh-orange">ein Dach.</span>
-          </motion.h1>
-
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-            data-testid="tippen-zum-starten"
-            className="flex items-center gap-3.5"
-          >
-            {/* Die pulsierende Hand ist die Einladung. Vorher pulsierte die
-                Textzeile selbst zwischen 55 % und 100 % Deckkraft — aus drei
-                Metern ist eine blinkende Zeile nicht von einer flackernden zu
-                unterscheiden. Ein Ziel, das atmet, liest sich als „hier
-                anfassen“. */}
-            <motion.span
-              aria-hidden
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="grid size-14 shrink-0 place-items-center rounded-full bg-kh-orange text-[#0E0D0B] animate-puls"
-            >
-              <Hand className="size-7" strokeWidth={2.25} />
-            </motion.span>
-            <span className="text-[clamp(1.25rem,1.05rem+0.8vw,1.75rem)] font-semibold text-kh-paper">
-              Tippen zum Starten
-            </span>
-          </motion.div>
-
-          {wiedereinstieg && (
-            <div
-              className="flex flex-col items-start gap-2.5"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <p className="text-[1rem] text-kh-paper/50">
-                Oder da weiter, wo jemand aufgehört hat:
-              </p>
-              <Button
-                variant="neben"
-                onClick={machWeiter}
-                data-testid="weitermachen"
-                className="max-w-[min(34rem,86vw)] justify-start"
-              >
-                <span className="truncate">
-                  Weitermachen bei „{STEPS[wiedereinstieg.currentStepId].titel}“
-                </span>
-              </Button>
-            </div>
-          )}
+          </h1>
+          <p className="text-[clamp(1.125rem,1.02rem+0.55vw,1.4rem)] leading-[1.45] text-kh-paper/85">
+            Du bist Azubi in einer Zimmerei. Der Chef legt das Telefon weg und dreht sich
+            zu dir um: altes Haus, das Dach muss neu. Er fragt, ob du mitkommst.
+          </p>
         </div>
-      </div>
+
+        {/* Der Knopf atmet. Vorher pulsierte auf dem Splash eine Hand neben
+            „Tippen zum Starten“; jetzt gibt es nur noch ein Ziel, und das darf
+            die Einladung selbst tragen. Kein Blinken — eine Fläche, die sich
+            hebt und senkt, liest sich aus drei Metern als „hier anfassen“, eine
+            blinkende als Defekt. Skaliert wird der Rahmen, nicht der Knopf:
+            sein `active:translate-y` bliebe sonst gegen die Animation wirkungslos. */}
+        <motion.div
+          animate={{ scale: [1, 1.035, 1] }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+          className="flex origin-left justify-start landscape:origin-right landscape:justify-end"
+        >
+          <Button
+            onClick={nimmAuftragAn}
+            variant="weiter"
+            size="lg"
+            data-testid="auftrag-annehmen"
+            className="px-10 text-[1.25rem]"
+          >
+            Auftrag annehmen
+            <ArrowRight className="size-5" strokeWidth={2.5} />
+          </Button>
+        </motion.div>
+      </motion.div>
     </div>
   )
 }

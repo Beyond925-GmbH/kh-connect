@@ -37,8 +37,7 @@ Aus dem Altbestand (`public/medien/media/`) wird weiterhin benutzt:
 
 | Datei | Wo |
 | --- | --- |
-| `zimmerer/hero.mp4` + `hero-poster.webp` | Splash (S0) — Attract-Loop |
-| `zimmerer/hero-poster.webp` | Auftragsannahme (S1) |
+| `zimmerer/szenario.mp4` + `szenario-poster.webp` | Start (S0) — Attract und Auftragsannahme in einem |
 
 ## Was bei der Auswahl galt
 
