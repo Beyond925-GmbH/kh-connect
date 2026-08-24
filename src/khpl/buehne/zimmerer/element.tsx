@@ -597,17 +597,24 @@ function Holzstueck({
 export function Holzstapel({
   gesuchteNummer = 47,
   hinweis = false,
+  schonGefunden = false,
   onHolz,
 }: {
   gesuchteNummer?: number
   /** „Zeig mir wie“ (khpl-tage.md 3): hebt das gesuchte Holz sichtbar an. */
   hinweis?: boolean
+  /**
+   * Der Step weiß beim Wiedereinstieg über „Dein Weg“, dass das Holz längst
+   * gefunden ist — die Bühne wüsste es nicht. Ohne diesen Startwert stünde im
+   * Panel „Dein Holz Nr. 47“, und auf dem Tisch läge nichts markiert.
+   */
+  schonGefunden?: boolean
   onHolz?: (nummer: number) => void
 }) {
   const stapel = useMemo(() => baueStapel(gesuchteNummer), [gesuchteNummer])
   const hebung = useRef(new Map<number, number>())
   const uhr = useRef(0)
-  const [gefunden, setGefunden] = useState(false)
+  const [gefunden, setGefunden] = useState(schonGefunden)
   useFrame(({ clock }) => {
     uhr.current = clock.elapsedTime
   })

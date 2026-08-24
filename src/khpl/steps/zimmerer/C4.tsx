@@ -44,7 +44,12 @@ import { Begriff } from './Begriff'
  *
  * Ab dem Treffer gehört das Element dem Besucher (`deinElement`).
  *
- * `answers.c4` `{ getroffen: boolean; versuche: number; abweichungMm?: number }`
+ * `answers.c4`
+ * `{ getroffen: boolean; versuche: number; abweichungMm?: number; ausschnitt?: Fensterausschnitt }`
+ *
+ * `ausschnitt` steht nicht in der Spec-Zeile, ist aber die Bedingung dafür,
+ * dass ihr Satz „der Ausschnitt ist deiner“ über C5 hinaus gilt: die späteren
+ * Zustände bekommen ihn von dort.
  */
 
 const Wandelement3D = lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))
@@ -172,6 +177,11 @@ export function C4() {
         getroffen: true,
         versuche: n,
         abweichungMm: ausschnitt.breiteMm - ZIEL_BREITE_MM,
+        // Ab hier ist der Ausschnitt **deiner** (khpl-tag-zimmerer.md 2): C5,
+        // C6 und C7 zeigen dasselbe Fenster wieder, und C6 fragt an ihm ab,
+        // wo oben ist. Deshalb der volle Ausschnitt und nicht nur die
+        // Abweichung — aus einer Zahl lässt er sich nicht rekonstruieren.
+        ausschnitt,
       })
       setGeloest(true)
       setPhase('aufrichten')
@@ -203,6 +213,12 @@ export function C4() {
                 ...a,
                 breiteMm: klemme(a.breiteMm, MIN_BREITE_MM, MAX_BREITE_MM),
                 yMm: klemme(a.yMm, MIN_Y_MM, MAX_Y_MM),
+                // Die Höhe der Öffnung ist **nicht Teil der Übung** — sie gibt
+                // das Wechselholz vor. Die Bühne meldet sie trotzdem mit,
+                // weil ein Ziehrechteck zwei Achsen hat; hier wird sie
+                // zurückgesetzt. Ohne das stünde am Ende ein Schlitz auf dem
+                // Anhänger, obwohl der Screen „Passt“ gesagt hat.
+                hoeheMm: FENSTER_HOEHE_MM,
               })
               setAntwort(null)
             }}

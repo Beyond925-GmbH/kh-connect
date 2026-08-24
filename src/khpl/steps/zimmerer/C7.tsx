@@ -110,7 +110,16 @@ export function C7() {
       interaktionOffen={false}
       buehne={
         <Suspense fallback={<Dachstuhl3DFallback text="Das Haus steht" />}>
-          <Wandelement3D zustand="haus" deinElement />
+          {/*
+            Der Ausschnitt aus C4: „In C7 ist die Wand mit dem Fenster
+            identifizierbar“ (khpl-tag-zimmerer.md 2) — mit einem fremden
+            Fenster wäre sie das nicht.
+          */}
+          <Wandelement3D
+            zustand="haus"
+            deinElement
+            ausschnitt={fortschritt.answers.c4?.ausschnitt}
+          />
         </Suspense>
       }
       fachtext={

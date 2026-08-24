@@ -162,6 +162,12 @@ export interface Wandelement3DProps {
    * ausgeführt.
    */
   hinweisZeigen?: boolean
+  /**
+   * Beim Wiedereinstieg über „Dein Weg“: das gesuchte Holz liegt von Anfang an
+   * markiert oben. Den Zustand kennt nur der Step — die Bühne hält ihn sonst
+   * als eigenen State und stünde nach der Rückkehr wieder auf Anfang.
+   */
+  holzGefunden?: boolean
   /** Ein Holz wurde angetippt. Der Step entscheidet, was das heißt. */
   onHolz?: (nummer: number) => void
 
@@ -292,11 +298,12 @@ export default function Wandelement3D(props: Wandelement3DProps) {
   const { zustand, blick, licht } = props
   const gezeigterBlick =
     blick ?? (zustand === 'haken' || zustand === 'haus' ? 'untersicht' : 'draufsicht')
+  // Der Bruch sitzt bei C5, aber *hinter* ihm: „Bis dahin: Halle, Kunstlicht …
+  // Ab C6: draußen, Nachmittagslicht“ (khpl-tag-zimmerer.md 3). `verladen`
+  // spielt um elf in der Halle und trägt deshalb noch Hallenlicht — sonst
+  // nimmt die warme Stimmung der Drehung bei C6 ihre Wirkung.
   const gezeigtesLicht =
-    licht ??
-    (zustand === 'haken' || zustand === 'haus' || zustand === 'verladen'
-      ? 'nachmittag'
-      : 'halle')
+    licht ?? (zustand === 'haken' || zustand === 'haus' ? 'nachmittag' : 'halle')
 
   const sichtfeld = useSichtfeld('roh')
   const reduziert = useMemo(
@@ -339,8 +346,11 @@ export default function Wandelement3D(props: Wandelement3DProps) {
   const stehend = zustand === 'fenster' && props.aufrichtenZeigen === true
   const fang = waehleBlickfang(zustand, gezeigterBlick, stehend)
   const hintergrund = SZENE_FARBEN.dunkel.hintergrund
-  // Ab C5 trägt das Element den Ausschnitt sichtbar weiter, auch wenn der
-  // Step keinen übergibt — und es ist dann per Default *deins*.
+  // Ab C5 trägt das Element den Ausschnitt sichtbar weiter. Die Steps geben
+  // ihn aus `answers.c4` mit — *dein* Fenster, nicht irgendeins. Der
+  // Standardausschnitt ist nur noch der Rückfall für ein übersprungenes C4:
+  // ohne ihn stünde dort eine Wand ohne Fenster, und C6 hätte nichts, woran es
+  // „wo ist oben“ fragen könnte.
   const spaeterAusschnitt = props.ausschnitt ?? STANDARD_AUSSCHNITT
   const spaeteMarke =
     props.deinElement ??
@@ -389,6 +399,7 @@ export default function Wandelement3D(props: Wandelement3DProps) {
             <Holzstapel
               gesuchteNummer={props.gesuchteNummer}
               hinweis={props.hinweisZeigen}
+              schonGefunden={props.holzGefunden}
               onHolz={props.onHolz}
             />
           </group>

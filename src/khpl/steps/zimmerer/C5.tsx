@@ -129,7 +129,14 @@ export function C5() {
             passiert nichts anderes, und `prefers-reduced-motion` heißt, das
             Gespann ist sofort fort.
           */}
-          <Wandelement3D zustand="verladen" abfahrt={!schonDagewesen} deinElement />
+          <Wandelement3D
+            zustand="verladen"
+            abfahrt={!schonDagewesen}
+            deinElement
+            // Der Ausschnitt aus C4 — auf dem Anhänger steht *dein* Element,
+            // nicht irgendeins (khpl-tag-zimmerer.md 2).
+            ausschnitt={answers.c4?.ausschnitt}
+          />
         </Suspense>
       }
       fachtext={

@@ -109,6 +109,11 @@ export function C1() {
           <Wandelement3D
             zustand="stapel"
             gesuchteNummer={GESUCHT}
+            // Wiedereinstieg über „Dein Weg“: `tippen` kehrt bei `gefunden`
+            // sofort zurück, also muss das Holz von Anfang an markiert
+            // obenauf liegen — sonst zeigt das Panel „Dein Holz Nr. 47“ und
+            // der Tisch nichts.
+            holzGefunden={gefunden}
             hinweisZeigen={hinweis && !gefunden}
             onHolz={tippen}
           />
@@ -153,7 +158,13 @@ export function C1() {
         </Wechsel>
       }
       aha={
-        <AhaKarte sichtbar={gefunden} eyebrow="Wer hat das alles geschnitten?">
+        /*
+          Nicht „Wer hat das alles geschnitten?“: der Abstecher-Knopf desselben
+          Screens fragt laut Spec „Wer hat das alles zugeschnitten?“, und zwei
+          fast gleiche Fragen nebeneinander verraten nichts Eigenes. Der
+          Einwurf dreht deshalb auf das *Wann* — den Inhalt der Karte.
+        */
+        <AhaKarte sichtbar={gefunden} eyebrow="Wann ist das hier geschnitten worden?">
           Die Maschine hat das heute Nacht geschnitten. Jemand hat ihr am Rechner gesagt,
           wie.
         </AhaKarte>

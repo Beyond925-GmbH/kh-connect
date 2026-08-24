@@ -104,7 +104,8 @@ const ACHSEN = [
 type Takt = 'lage' | 'einweisen' | 'fertig'
 
 export function C6() {
-  const gespeichert = useFortschritt().answers.c6
+  const answers = useFortschritt().answers
+  const gespeichert = answers.c6
 
   const [aussen, setAussen] = useState<Elementlage['aussenseite'] | null>(null)
   const [oben, setOben] = useState<Elementlage['oben'] | null>(null)
@@ -200,6 +201,11 @@ export function C6() {
           <Wandelement3D
             zustand="haken"
             deinElement
+            // **Der Ausschnitt aus C4, zwingend.** C4 kippt das Element hoch
+            // und sagt „Merk dir, wo das Fenster ist“; die Abfrage hier liest
+            // genau dieses Bild wieder ab. Ein anderes Fenster als in C4 wäre
+            // keine Erinnerungsleistung, sondern eine Falle.
+            ausschnitt={answers.c4?.ausschnitt}
             lage={lage}
             // Die Bühne darf die Lage selbst liefern, wenn man das Element dort
             // anhält — dann führt der Tap auf der Bühne und die Wahl im Panel

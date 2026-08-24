@@ -93,8 +93,25 @@ export interface Antworten {
    * C4 — Fensterausschnitt getroffen, mit Zahl der Versuche. `abweichungMm` ist
    * **optional**: alte localStorage-Stände und der Fehlversuch-Zweig kennen es
    * nicht, und die Anzeige hängt allein an `getroffen`.
+   *
+   * `ausschnitt` trägt den **vollen** Ausschnitt in Millimetern, weil er das
+   * Fadenobjekt ab C4 kennzeichnet: „Ab C4 gehört das Element dem Besucher —
+   * der Ausschnitt ist deiner“ (khpl-tag-zimmerer.md 2). C5, C6 und C7 zeigen
+   * dasselbe Fenster wieder, und C6 fragt an ihm ab, wo oben ist — mit einem
+   * anderen Fenster als in C4 wäre das keine Erinnerungsleistung, sondern eine
+   * Falle. Ebenfalls optional: alte Stände und ein übersprungenes C4 kennen ihn
+   * nicht, dann fällt die Bühne auf ihren Standardausschnitt zurück.
+   *
+   * Strukturell notiert und nicht als `Fensterausschnitt` importiert: der Typ
+   * wohnt neben der lazy geladenen Bühne, und diese Datei gehört allen vier
+   * Berufen.
    */
-  c4?: { getroffen: boolean; versuche: number; abweichungMm?: number }
+  c4?: {
+    getroffen: boolean
+    versuche: number
+    abweichungMm?: number
+    ausschnitt?: { xMm: number; yMm: number; breiteMm: number; hoeheMm: number }
+  }
   /** C5 — welche der drei Pausenfragen aufgedeckt wurden. */
   c5?: { gelesen: string[] }
   /** C6 — Lage am Haken richtig erkannt, Element versetzt, Zahl der Versuche. */
@@ -264,6 +281,25 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
     // Nur eine echte Zahl übernehmen — alles andere bleibt weg.
     if (typeof c4.abweichungMm === 'number' && Number.isFinite(c4.abweichungMm)) {
       a.c4.abweichungMm = c4.abweichungMm
+    }
+    // Alle vier Maße oder keines: ein halber Ausschnitt zeichnet ein halbes
+    // Fenster, und die Bühne hat für „keiner“ einen Rückfall.
+    const s = c4.ausschnitt
+    if (
+      s &&
+      Number.isFinite(s.xMm) &&
+      Number.isFinite(s.yMm) &&
+      Number.isFinite(s.breiteMm) &&
+      Number.isFinite(s.hoeheMm) &&
+      s.breiteMm > 0 &&
+      s.hoeheMm > 0
+    ) {
+      a.c4.ausschnitt = {
+        xMm: s.xMm,
+        yMm: s.yMm,
+        breiteMm: s.breiteMm,
+        hoeheMm: s.hoeheMm,
+      }
     }
   }
   const c5 = q.c5 as Antworten['c5']

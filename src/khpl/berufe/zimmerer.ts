@@ -242,12 +242,25 @@ export const ZIMMERER: BerufDef = {
    * Redaktionsentscheidung und passiert, wenn Dachdecker-Motive vorliegen —
    * dieser Tag nimmt sie ihm nicht weg.
    *
-   * Bis dahin stehen hier Pfade, die es nicht gibt, und `BerufBild` fängt sie
-   * mit seinem typografischen Ersatz ab. Das ist Absicht und kein Fehler.
+   * **`karte` zeigt deshalb auf einen Pfad, den es nicht gibt**, und
+   * `BerufBild` fängt ihn mit seinem typografischen Ersatz ab — genau der Weg,
+   * den khpl-tag-zimmerer.md 10 vorschreibt („arbeitet bis zur Klärung mit
+   * `BerufBild`-Ersatz und meldet den Bedarf“). Auf `card.webp` zu zeigen wäre
+   * hier keine Lösung, sondern ein zweiter Fehler: in der Berufsliste stünden
+   * dann zwei Karten mit demselben Foto nebeneinander.
+   *
+   * ⚠️ **`heroPoster` darf das nicht.** `shell/Auftragsannahme.tsx` liest
+   * `szenarioPoster ?? heroPoster` und rendert es als nacktes `<img>` ohne
+   * `onError` — ein toter Pfad wäre dort ein 404-Motiv auf dem **ersten**
+   * Screen des Durchlaufs (S5), vollflächig. Deshalb steht hier das
+   * vorhandene Werkstatt-Standbild. Es nimmt dem gebauten Tag nichts weg: der
+   * zeigt auf S5 `szenario-poster.webp`, und kein Screen zeigt beide Berufe
+   * nebeneinander. Der fehlende Rückfall in der Hülle ist gemeldet, nicht
+   * geändert (khpl-tage.md 6.2).
    */
   medien: {
     karte: '/medien/media/zimmerer-tag/card.webp',
-    heroPoster: '/medien/media/zimmerer-tag/hero-poster.webp',
+    heroPoster: '/medien/media/zimmerer/hero-poster.webp',
   },
   /**
    * Die Motivliste dieses Tages — am Stück, wie es eine Redaktionsentscheidung
