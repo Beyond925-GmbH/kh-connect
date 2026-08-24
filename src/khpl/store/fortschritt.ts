@@ -19,7 +19,7 @@ const SPEICHER_SCHLUESSEL = 'khpl-progress'
 export const VERFALL_MS = 30 * 60 * 1000
 
 /** Welcher der Screens aus khpl-ui-shell.md 2 gerade läuft. Nie persistiert. */
-export type Bildschirm = 'splash' | 'intro' | 'step'
+export type Bildschirm = 'splash' | 'step'
 
 /** M9 und alles darunter — der Karriere-Bereich S4/S5. */
 const KARRIERE: readonly StepId[] = ['M9', 'B9.1', 'B9.2', 'B9.3', 'M10']
@@ -273,20 +273,20 @@ function skipStand(alt: Fortschritt, ziel: StepId): StepId | null {
 // Aktionen
 // ---------------------------------------------------------------------------
 
-/** S0 → S1. Verwirft einen alten Stand vollständig. */
-export function starteNeu() {
-  vergiss()
-  sichere()
-  setzeBildschirm('intro')
-}
-
 /** S0 → S2 an der Stelle, an der der letzte Besucher aufgehört hat. */
 export function machWeiter() {
   if (pruefeVerfall()) return
   setzeBildschirm('step')
 }
 
-/** S1 → S2. „Auftrag annehmen“ ist der erste Besuch von M1. */
+/**
+ * S0 → S2. „Auftrag annehmen“ ist der erste Besuch von M1.
+ *
+ * Zugleich der Neustart: seit Attract und Auftragsannahme ein Screen sind
+ * (S1 ist entfallen), gibt es zwischen „Start“ und „Neu starten“ keinen
+ * Unterschied mehr — beides ist ein Tap auf S0, und beides beginnt mit einem
+ * leeren Stand.
+ */
 export function nimmAuftragAn() {
   // Vollständiger Reset, nicht nur der Zeiger: sonst erbte eine neue Sitzung
   // Abstecher und Antworten der vorigen, sobald S1 von woanders erreichbar wird.

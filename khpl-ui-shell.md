@@ -29,8 +29,8 @@ abgelenkt war, wählt *Weitermachen*.
 
 | ID | Screen | Rolle |
 | --- | --- | --- |
-| **S0** | Splash / Attract | Ruhezustand des Standes. Marke, Titel, „Tippen zum Start". Bei vorhandenem Fortschritt zusätzlich *Weitermachen* / *Neu starten*. |
-| **S1** | Auftragsannahme | Der Framing-Screen. In-fiction, keine Meta-Erklärung, keine Dauer. Endet auf **[Auftrag annehmen]**. Trägt den ersten diskreten Karriere-Link. |
+| **S0** | Start (Attract + Auftragsannahme) | Ruhezustand des Standes **und** Framing-Screen. Marke, Titel, drei Sätze in-fiction — keine Meta-Erklärung, keine Dauer. Endet auf **[Auftrag annehmen]**; der ganze Screen ist zugleich das Ziel. Trägt den ersten diskreten Karriere-Link. Bei vorhandenem Fortschritt oben links zusätzlich *Weitermachen*. |
+| ~~**S1**~~ | ~~Auftragsannahme~~ | Aufgegangen in S0. Zwei randlose Videoscreens mit Plakatzeile hintereinander waren aus Besuchersicht derselbe Screen zweimal — der erste Tap sah aus, als sei nichts passiert. |
 | **S2** | Step-Screen | Das Arbeitspferd. Rendert jeden gelben Step (Haupt **und** Abstecher) aus den Daten. Anatomie → §5. |
 | **S3** | „Dein Weg" (Sheet) | Overlay über S2. Die ganze Hauptlinie als vertikale Liste mit ✓ / ● / ○, Abstecher eingerückt unter ihrem Elternschritt. Antwort auf „Was habe ich bisher gemacht?". |
 | **S4** | Karriere-Bereich | M9 + B9.1–B9.3 als Info-Screens. Erreichbar regulär über den Flow **oder** über den Skip. Im Skip-Modus mit persistenter Rückkehr-Leiste. |
@@ -48,13 +48,12 @@ Recap (M8) ist **kein** eigener Screen-Typ, sondern eine Variante von S2, die
 ```mermaid
 stateDiagram-v2
   [*] --> S0
-  S0 --> S1: Start / Neu starten
+  S0 --> S2: Auftrag annehmen (= Start / Neu starten)
   S0 --> S2: Weitermachen
-  S1 --> S2: Auftrag annehmen
   S2 --> S2: Weiter / Zurück / Abstecher
   S2 --> S3: Rail antippen
   S3 --> S2: schließen · besuchten Schritt wählen
-  S1 --> S4: Karriere-Link (Skip)
+  S0 --> S4: Karriere-Link (Skip)
   S2 --> S4: Karriere-Link (Skip)
   S4 --> S2: „Zurück zu deinem Tag"
   S2 --> S4: regulär über M9
@@ -145,7 +144,7 @@ Jugendlicher, der an M4 hängen bleibt, darf nicht am Stand festsitzen.
 ## 6. Der Karriere-Skip
 
 **Wo er auftaucht.** Im Skip-Slot der Leiste, aber nicht dauernd — sonst konkurriert
-er mit *Weiter*. Regel: auf **S1** und danach auf **jedem zweiten Hauptschritt**
+er mit *Weiter*. Regel: auf **S0** und danach auf **jedem zweiten Hauptschritt**
 (M2, M4, M6, M8). Auf Abstecher-Screens nie. Während eine Interaktion noch offen ist
 nie. So begegnet er jedem Besucher mehrfach, ohne je zu drängen.
 
