@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Bild } from './Bild'
 import { STRICH } from './stil'
+import { RASTER_KURVE } from './kanon'
 import { Kiste } from './Kiste'
 import { Maschine } from './Maschine'
 import { Messschraube } from './Messschraube'
@@ -139,6 +140,14 @@ const EIGENER_ZOOM: Record<WerkstueckZustand, Zoomstufe> = {
 
 const MASSSTAB: Record<Zoomstufe, number> = { fern: 1, nah: 1.6, makro: 2.8 }
 
+/**
+ * Die Zoomfahrt der Bühne. Kurve und Dauer stehen **nicht** als Literal hier,
+ * sondern kommen aus `kanon.ts` — dort liegen die Laufzeitwerte dieses Tages an
+ * einer Stelle, und der Zoom ist die eine Bewegung, die alle sechs Zustände
+ * teilen (khpl-tage.md §3, „Laufzeitkonstanten einer Bühne liegen three-frei").
+ */
+const ZOOMFAHRT = `transform 0.7s cubic-bezier(${RASTER_KURVE.join(', ')})`
+
 export function Werkstueck(props: WerkstueckProps) {
   const zoom = props.zoom ?? EIGENER_ZOOM[props.zustand]
   const massstab = MASSSTAB[zoom] / MASSSTAB[EIGENER_ZOOM[props.zustand]]
@@ -161,7 +170,7 @@ export function Werkstueck(props: WerkstueckProps) {
         className="size-full"
         style={{
           transform: `scale(${massstab})`,
-          transition: 'transform 0.7s cubic-bezier(0.2, 0, 0, 1)',
+          transition: ZOOMFAHRT,
         }}
       >
         {props.zustand === 'zeichnung' && (
