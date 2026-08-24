@@ -1,5 +1,11 @@
-import { PROFIL, RASTER_KURVE, ROHLING_DURCHMESSER } from './kanon'
-import { motion } from 'motion/react'
+import { useEffect, useRef } from 'react'
+import { Bild } from './Bild'
+import { STRICH } from './stil'
+import { Kiste } from './Kiste'
+import { Maschine } from './Maschine'
+import { Messschraube } from './Messschraube'
+import { Werkzeugweg } from './Werkzeugweg'
+import { Zeichnung } from './Zeichnung'
 
 /**
  * Die Bühne des Zerspanungs-Tages — **ein Werkstück, sechs Zustände.**
@@ -23,6 +29,13 @@ import { motion } from 'motion/react'
  * Richtung — Zeichnung, Maschine, Messraum, Messschraube. Deshalb ist `zoom`
  * eine Eigenschaft der Bühne und keine des einzelnen Screens.
  *
+ * Jeder Zustand bringt seine Stufe schon in seinem Bildausschnitt mit; `zoom`
+ * sagt nur, wie weit die Kamera **von dort aus** noch vor- oder zurückgeht.
+ * Ohne Angabe steht sie da, wo der Zustand sie hinstellt — und ein Step, der
+ * nichts anderes will, muss nichts angeben. Ein zurückgenommener Zoom
+ * (`zoom="fern"` auf `messung`) zeigt Rand: die Kamera dieses Tages ist dafür
+ * gebaut, nach vorn zu gehen.
+ *
  * **Diese Datei ist three-frei und bleibt es.** Der Tag baut keine 3D-Welt; die
  * Werkzeuge dieses Berufs sind die Zeichnung, der Werkzeugweg und die Zahl,
  * und alle drei sind flach. Falls Z2 doch einen Drehkörper bekommt
@@ -30,11 +43,11 @@ import { motion } from 'motion/react'
  * Datei daneben und wird **ausschließlich** über `lazy()` geladen —
  * Laufzeitwerte kommen weiterhin aus `kanon.ts` (§7, khpl-tage.md §3).
  *
- * ---
- *
- * ⚠️ **Stand: Gerüst.** Die Props sind die Schnittstelle, gegen die Steps und
- * Bühne gebaut werden — sie sind vollständig und gelten. Gezeichnet ist bisher
- * die Kontur; die einzelnen Zustände füllt der Bühnen-Agent.
+ * Gebaut ist er nicht, und das ist eine Entscheidung: Die Spec erlaubt den
+ * Rückfall ausdrücklich („die Beweislast liegt bei 3D, nicht bei 2D", §7).
+ * Ein gerenderter Drehkörper wäre der einzige Screen des Tages mit einer
+ * anderen Handschrift — ausgerechnet der, auf dem man lesen soll, was wo
+ * sitzt. Solange die 2D-Maschine das trägt, kostet 3D nur Startzeit.
  */
 
 export type WerkstueckZustand =
@@ -128,59 +141,112 @@ const MASSSTAB: Record<Zoomstufe, number> = { fern: 1, nah: 1.6, makro: 2.8 }
 
 export function Werkstueck(props: WerkstueckProps) {
   const zoom = props.zoom ?? EIGENER_ZOOM[props.zustand]
+  const massstab = MASSSTAB[zoom] / MASSSTAB[EIGENER_ZOOM[props.zustand]]
+
+  // Die Bühne ist mit dem ersten Bild da — sie lädt nichts nach. Die Meldung
+  // gibt es trotzdem, weil die Steps gegen dieselbe Schnittstelle gebaut sind
+  // wie beim Dachstuhl, und ein Step, der auf `onBereit` wartet, hier sonst
+  // ewig wartet.
+  const gemeldet = useRef(false)
+  const onBereit = props.onBereit
+  useEffect(() => {
+    if (gemeldet.current) return
+    gemeldet.current = true
+    onBereit?.()
+  }, [onBereit])
 
   return (
-    <div className="relative size-full overflow-hidden bg-kh-surface" data-wisch="aus">
-      <motion.svg
-        viewBox="-42 -18 50 36"
+    <div className="relative size-full overflow-hidden bg-kh-surface">
+      <div
         className="size-full"
-        aria-hidden
-        initial={false}
-        animate={{ scale: MASSSTAB[zoom] }}
-        transition={{ duration: 0.7, ease: RASTER_KURVE }}
+        style={{
+          transform: `scale(${massstab})`,
+          transition: 'transform 0.7s cubic-bezier(0.2, 0, 0, 1)',
+        }}
       >
-        {/* Die Mittelachse — in einer technischen Zeichnung strichpunktiert. */}
-        <line
-          x1={-40}
-          y1={0}
-          x2={4}
-          y2={0}
-          stroke="currentColor"
-          strokeWidth={0.18}
-          strokeDasharray="3 1 0.6 1"
-          className="text-kh-line-strong"
-        />
-
-        {props.zustand === 'rohling' && (
-          <rect
-            x={-38}
-            y={-ROHLING_DURCHMESSER / 2}
-            width={38}
-            height={ROHLING_DURCHMESSER}
-            className="fill-kh-raised"
+        {props.zustand === 'zeichnung' && (
+          <Zeichnung
+            massHervorgehoben={props.massHervorgehoben}
+            toleranzfeld={props.toleranzfeld}
           />
         )}
-
-        <path
-          d={kontur()}
-          className="fill-none text-kh-paper"
-          stroke="currentColor"
-          strokeWidth={0.4}
-          strokeLinejoin="round"
-        />
-      </motion.svg>
+        {props.zustand === 'rohling' && (
+          <Maschine ruestschritte={props.ruestschritte} nullpunkt={props.nullpunkt} />
+        )}
+        {props.zustand === 'werkzeugweg' && (
+          <Werkzeugweg
+            zeile={props.zeile}
+            markierteZeile={props.markierteZeile}
+            kollision={props.kollision}
+          />
+        )}
+        {props.zustand === 'messraum' && <Messraum />}
+        {props.zustand === 'messung' && (
+          <Messschraube
+            messwert={props.messwert}
+            toleranzUeberlagerung={props.toleranzUeberlagerung}
+            korrigiert={props.korrigiert}
+          />
+        )}
+        {props.zustand === 'kiste' && <Kiste fuellstand={props.fuellstand} />}
+      </div>
     </div>
   )
 }
 
 /**
- * Die Kontur als geschlossener Pfad: das Halbprofil aus `kanon.ts`, an der
- * Achse gespiegelt. `z` läuft ins Material und damit nach links, `r` nach oben
- * und unten.
+ * Z4 — der Messraum. **Der einzige helle Screen eines Tages, der sonst in
+ * dunkler Halle spielt** (khpl-tag-zerspanung.md §6 Z4), und damit der
+ * sichtbarste Bruch, den dieser Tag hergibt, ohne die Tokens anzufassen.
+ *
+ * ⚠️ Z4 trägt im Bestand ein Foto (`berufe/zerspanung.ts`, `quiz-praezision`),
+ * und solange das so bleibt, kommt dieser Zustand nicht auf den Screen. Er
+ * steht trotzdem hier: Er ist Teil der Schnittstelle, und wenn das Motiv
+ * fällt, soll die Zäsur nicht in einer leeren Fläche stattfinden.
+ *
+ * Hell, leer, ein Messgerät, sonst nichts. Kein Werkzeug, kein Span, kein
+ * Mensch — ein Raum, in dem nichts steht außer dem, womit gemessen wird.
  */
-function kontur(): string {
-  const start = PROFIL[0]
-  const oben = PROFIL.slice(1).map((p) => `L ${p.z} ${-p.r}`)
-  const unten = [...PROFIL].reverse().map((p) => `L ${p.z} ${p.r}`)
-  return `M ${start.z} ${-start.r} ${oben.join(' ')} ${unten.join(' ')} Z`
+function Messraum() {
+  const strich = { stroke: 'currentColor', vectorEffect: 'non-scaling-stroke' } as const
+
+  return (
+    <Bild viewBox="0 -4 124 84" hell>
+      <g className="text-kh-ink" fill="none" strokeWidth={STRICH.voll} {...strich}>
+        {/* Wo Wand und Boden sich treffen. Mehr Raum braucht es nicht. */}
+        <line x1={0} y1={62} x2={124} y2={62} {...strich} />
+
+        {/* Der Messtisch: eine Granitplatte auf zwei Böcken. Sie ist der
+            eigentliche Grund, warum dieser Raum ein eigener Raum ist —
+            schwer, eben, und immer gleich warm. */}
+        <path
+          d="M 18 52 L 106 52 L 106 60 L 18 60 Z"
+          className="fill-kh-ink/10"
+          {...strich}
+        />
+        <path d="M 28 60 L 28 76 M 96 60 L 96 76" {...strich} />
+
+        {/* Das Messgerät: Ständer, Arm, Messuhr. Die Spitze steht auf dem
+            Teil, das auf zwei Auflagen liegt. */}
+        <path d="M 46 52 L 46 12 L 62 12" className="fill-none" {...strich} />
+        <circle cx={72} cy={12} r={10} className="fill-kh-ink/8" {...strich} />
+        <path d="M 72 12 L 72 5" strokeWidth={STRICH.fein} {...strich} />
+        <path d="M 62 12 L 62 30 L 66 30" {...strich} />
+        <path
+          d="M 66 27 L 74 30 L 66 33 Z"
+          className="fill-kh-ink"
+          strokeWidth={STRICH.fein}
+          {...strich}
+        />
+
+        {/* Das Teil auf den Auflagen — dasselbe Drehteil, nur hier oben. */}
+        <path
+          d="M 60 34 L 96 34 L 96 42 L 60 42 Z"
+          className="fill-kh-ink/10"
+          {...strich}
+        />
+        <path d="M 62 42 L 62 52 M 92 42 L 92 52" strokeWidth={STRICH.fein} {...strich} />
+      </g>
+    </Bild>
+  )
 }
