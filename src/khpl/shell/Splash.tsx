@@ -44,9 +44,9 @@ import { useStaffAusgang } from './staffAusgang'
  * hier nimmt, hat den Auftrag damit angenommen: die Rückkehr aus dem Skip
  * führt laut Zustandsmaschine auf S2, nicht hierher zurück.
  *
- * TEXT: `ENTWURF – UNGEPRÜFT`. Die Spec gibt für das Framing nur die Haltung
- * vor („Du bist Azubi. Gerade kam eine Anfrage rein — nimmst du den Auftrag
- * an?“), keinen fertigen Wortlaut.
+ * TEXT: `GEPRÜFT`. Die Spec gibt für das Framing nur die Haltung vor („Du bist
+ * Azubi. Gerade kam eine Anfrage rein — nimmst du den Auftrag an?“), keinen
+ * fertigen Wortlaut; der Wortlaut hier ist am 24.08.2026 abgenommen worden.
  */
 
 const POSTER = '/medien/media/zimmerer/szenario-poster.webp'
