@@ -14,7 +14,12 @@ import { useEffect, useState } from 'react'
  * `[INEFFECTIVE_DYNAMIC_IMPORT] … dynamic import will not move module into
  * another chunk.`
  */
-export function Dachstuhl3DFallback() {
+export function Dachstuhl3DFallback({
+  text = 'Der Dachstuhl wird aufgestellt',
+}: {
+  /** Ladehinweis je Buehne — M4 richtet die Werkstatt ein, B4.1 faehrt vor. */
+  text?: string
+}) {
   const [punkte, setPunkte] = useState('')
 
   useEffect(() => {
@@ -27,7 +32,9 @@ export function Dachstuhl3DFallback() {
 
   return (
     <div className="grid size-full place-items-center bg-kh-surface">
-      <p className="text-[15px] text-kh-mute">Der Dachstuhl wird aufgestellt {punkte}</p>
+      <p className="text-[15px] text-kh-mute">
+        {text} {punkte}
+      </p>
     </div>
   )
 }

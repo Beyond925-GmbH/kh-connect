@@ -69,7 +69,9 @@ komponenten/         Begriff (Glossar-Popover), AhaKarte, Verzweigung,
                      Helm (SVG), BerufBild (Motiv mit Ersatz).
 glossar/begriffe.ts  Alle 20 Begriffe aus flow 12, plus `Stundensatz`.
 buehne/              Foto + SCHRITT_BILDER (welcher Step welches Motiv trägt),
-                     Dachstuhl3D (die Lazy-Grenze um `three`),
+                     drei Lazy-Grenzen um `three` — Dachstuhl3D (M3, M5–M8,
+                     B3.2), Zuschnitt3D (M4), Beladen3D (B4.1) —,
+                     Dachstuhl3DFallback + kanon.ts (beide three-frei),
                      aufbauabschnitte.ts.
 steps/               Ein Modul je Step. Der Text steht gebündelt oben in der
                      Datei (flow 8.4).
@@ -80,7 +82,11 @@ steps/               Ein Modul je Step. Der Text steht gebündelt oben in der
 1. `three` darf **nie** statisch importiert werden — auch nicht ein Hilfsexport
    aus demselben Modul. Ein Modul, das irgendwo statisch importiert wird, zieht
    Rollup ganz ins Hauptbündel, und dann liegt `three` im Erststart (flow 8.5).
-   Deshalb steht der Ladezustand in `buehne/Dachstuhl3DFallback.tsx` allein.
+   Deshalb steht der Ladezustand in `buehne/Dachstuhl3DFallback.tsx` allein,
+   und deshalb liegen die Laufzeit-Konstanten der Bühnen (z. B. `ANFAHRT_DAUER`)
+   in `buehne/kanon.ts` statt neben den Bühnen-Komponenten. Aus `Dachstuhl3D`,
+   `Zuschnitt3D` und `Beladen3D` holt ein Step nur die Komponente per `lazy()`
+   und sonst ausschließlich `import type`.
    Kontrolle: `pnpm build` — `Szene-*.js` muss ein eigener Chunk sein, und der
    Build darf **kein** `INEFFECTIVE_DYNAMIC_IMPORT` melden.
 2. Wo M5 aufhört und M7 anfängt, steht in `buehne/aufbauabschnitte.ts` und wird
@@ -108,10 +114,15 @@ das Foto wieder zum Screen statt hinter ihn.
 
 Zwei Schalter bleiben an `StepShell`:
 
-- `buehneInteraktiv` — die Bühne **ist** die Interaktion (B3.2, M5, M7, M8). Das
+- `buehneInteraktiv` — die Bühne **ist** die Interaktion. Seit dem 3D-Umbau der
+  Handwerksstrecke tragen ihn M3–M8 sowie B3.2 und B4.1; nur M3 und M6 sind
+  dabei reine Lese-Steps mit fester Kamera (`interaktionOffen={false}`). Das
   Panel bleibt schmal, und `SichtfeldMesser` sagt der Kamera, wie viel Fläche
-  dem Modell wirklich bleibt.
-- `karteBreit` — für M4, den dichtesten Screen der Anwendung.
+  dem Modell wirklich bleibt — in zwei Fassungen: `mitLuft` (Default, mit dem
+  Sicherheitsstreifen für die zu knappe Dachstuhl-Hülle) und `roh` für Bühnen
+  mit exakter Hülle wie `Zuschnitt3D`.
+- `karteBreit` — für die dichtesten Textscreens der Anwendung, heute M1 und M2.
+  M4 trug ihn bis zum 3D-Umbau; seine Übung liegt jetzt auf der Bühne.
 
 **Im Panel scrollt nur der Inhalt, nie der Fuß.** M1 trägt zehn
 Checklistenpunkte, hochkant auf dem Handy passt das nicht auf einen Screen.
@@ -131,6 +142,10 @@ welches Motiv bekommt, steht gebündelt in `SCHRITT_BILDER`
 (`buehne/Foto.tsx`) — zusammen mit dem Bildmittelpunkt, denn `object-fit: cover`
 schneidet quer und hoch verschieden zu. Herkunft und Urheber:innen aller Dateien
 stehen in [`MEDIEN.md`](./MEDIEN.md).
+
+Nach dem 3D-Umbau der Handwerksstrecke ziehen nur noch M1, M2, M9, M10, B3.1,
+B5.1 und B9 ein Foto. Die Einträge `M3`, `M4`, `M6` und `B4.1` bleiben in
+`SCHRITT_BILDER` stehen, werden aber von keinem Step mehr referenziert.
 
 Für eigene Fotos aus den Betrieben ist der Tausch eine Zeile je Motiv; die
 Dateinamen können bleiben.
@@ -268,8 +283,8 @@ M10 endet nicht mehr auf dem Splash, sondern auf **„Noch einen Beruf“**.
 | Paket | Wofür (flow spec 8.2) |
 | --- | --- |
 | `motion` | Ein-/Ausgänge, animierter Dachaufbau (M5), Aha-Karten |
-| `@dnd-kit/core` | Zieh-Interaktionen: M4 Schnitt, M7 Bauteile, B4.1 Auswahl |
-| `three`, `@react-three/fiber`, `@react-three/drei` | 3D-Modell in B3.2, M5, M7, M8 |
+| `@dnd-kit/core` | Zieh-Interaktionen: M7 Bauteile, B4.1 Auswahl. M4 zieht seit dem 3D-Umbau direkt auf der Bühne, ohne dnd-kit |
+| `three`, `@react-three/fiber`, `@react-three/drei` | 3D-Bühnen: Dachstuhl in M3 (Planriss), M5–M8 und B3.2, Zuschnitt in M4, Beladen in B4.1 |
 
 Gemessen nach `pnpm build`, gegen die Budgets aus flow 8.5:
 
@@ -287,6 +302,16 @@ deshalb nicht zum Weg bis „Tippen zum Starten“.
 > eine zweite Schriftfamilie dazubekommen (ein Schnitt, rund 30 KB woff2), und
 > `szenario.mp4` liegt jetzt auf S1. Beides gehört einmal durch `pnpm build`
 > nachgerechnet.
+>
+> **Der 3D-Umbau der Handwerksstrecke ist danach ebenfalls nicht gemessen
+> worden.** Der Lazy-Chunk hat zwei weitere Bühnen (`Zuschnitt3D`, `Beladen3D`),
+> die Fahrzeug- und Riss-Geometrie sowie zwei bis dahin ungenutzte Module
+> dazubekommen: `mergeGeometries` aus `three/addons/utils/BufferGeometryUtils.js`
+> und `Html` aus drei (vorher wurde von drei nur `OrbitControls` gebraucht).
+> Alles davon ist Code, kein Asset, und alles liegt weiterhin **nur** im lazy
+> Chunk — der Erststart sollte unberührt sein, die 243 KB von `three` sind es
+> sicher nicht mehr. Die Zeile bleibt bis zum nächsten `pnpm build` ungeprüft;
+> ein Zahlenwert wird hier bewusst nicht geraten.
 
 ## Offline / PWA
 
@@ -391,7 +416,9 @@ ausgeleuchtete 3D-Fläche zwischen fünfzehn dunklen Screens war der einzige Ort
 an dem die App ihre eigene Farbe verließ.
 
 Das Abendlicht von M8 liegt als zwei Farbschichten *über* der Leinwand und
-braucht dafür keinen eigenen Zweig mehr.
+braucht dafür keinen eigenen Zweig mehr. Das Mittagslicht von M6 folgt demselben
+Muster: `stimmung="mittag"` stellt die Sonne im Canvas steiler und wärmer, die
+wahrnehmbare Zäsur machen aber zwei hellere Farbschichten über der Leinwand.
 
 ### Marke auf dunklem Grund
 

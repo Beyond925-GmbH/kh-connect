@@ -207,6 +207,41 @@ export function farbeFuer(typ: BauteilTyp, animIndex: number): string {
 /** Farbe der Rohdecke je Theme — das einzige Holz-freie Bauteil. */
 export const ROHDECKE_FARBE = { hell: '#B9B4AC', dunkel: '#3A3733' } as const
 
+/**
+ * „Dein Sparren“: das umlaufende Signal-Band am markierten Stueck. Derselbe
+ * Ton wie das Token `--color-kh-signal` — als three-Konstante hier, weil es
+ * innerhalb des <Canvas> kein Tailwind gibt (dieselbe dokumentierte Ausnahme
+ * wie alle SZENE_FARBEN).
+ */
+export const SIGNAL_MARKE = '#D8F63C'
+
+/**
+ * Fahrzeug-Kanon: Transporter + Langholz-Anhaenger als Flachfarben. Warme,
+ * gedeckte Toene, damit das Gespann Kulisse bleibt und nicht mit dem Holz
+ * oder den Auswahlfarben konkurriert.
+ */
+export const FAHRZEUG_FARBEN = {
+  aufbau: '#B8452E',
+  kabine: '#A93F2A',
+  fenster: '#1E2226',
+  fahrgestell: '#4A4E54',
+  rungen: '#5A5E64',
+  reifen: '#23262A',
+  felge: '#8B9096',
+  plane: '#867F74',
+  kiste: '#6B4F2E',
+  leiter: '#C9C2B4',
+} as const
+
+/**
+ * Planansicht (M3): kreidefarbene Kanten auf dunklem Grund, deckende
+ * Fuellkoerper fuer die Verdeckung (Hidden-Line ueber Tiefe, nicht Shader).
+ */
+export const RISS_FARBEN = {
+  kante: '#EFE7DC',
+  fuellung: '#221B14',
+} as const
+
 /** Hervorhebung und Abdunklung nicht gewaehlter Teile. */
 export const AUSWAHL_EMISSIV = '#FF9F2A'
 export const AUSWAHL_INTENSITAET = 0.45

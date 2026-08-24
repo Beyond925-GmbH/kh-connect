@@ -132,7 +132,11 @@ export function M8() {
       buehne={
         <div className="relative size-full">
           <Suspense fallback={<Dachstuhl3DFallback />}>
-            <Dachstuhl3D zielT={1} attraktor />
+            {/* Der leere Anhänger gehört zum Feierabend: alles, was heute
+                Morgen auf ihm lag, ist verbaut. Und dein Sparren trägt sein
+                Band weiterhin — an der äußersten Achse, im lattenfreien
+                Traufstreifen, also auch am fertig gelatteten Dach sichtbar. */}
+            <Dachstuhl3D zielT={1} attraktor kulisse deinSparren />
           </Suspense>
           {/* Abendlicht als Lage darüber statt als zweite Lichtstimmung in der
               Szene: die Szene kennt nur hell und dunkel, und „dunkel“ ist ein

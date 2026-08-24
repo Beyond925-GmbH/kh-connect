@@ -22,11 +22,27 @@ import type { Sichtfeld } from '@/dachstuhl/kamera'
  * gesetzter Wert je Step wäre schon beim ersten Textlauf falsch — und quer
  * gegen hoch sowieso.
  */
-const SichtfeldKontext = createContext<Sichtfeld | null>(null)
+interface SichtfeldWerte {
+  /** Panelkante plus `LUFT` an den freien Kanten — für den Dachstuhl. */
+  mitLuft: Sichtfeld
+  /** Nur die gemessene Panelkante, ohne Sicherheitsstreifen — s. `LUFT`. */
+  roh: Sichtfeld
+}
 
-/** Die Bühne fragt hier, wie viel Fläche ihr bleibt. */
-export function useSichtfeld(): Sichtfeld | undefined {
-  return useContext(SichtfeldKontext) ?? undefined
+const SichtfeldKontext = createContext<SichtfeldWerte | null>(null)
+
+/**
+ * Die Bühne fragt hier, wie viel Fläche ihr bleibt.
+ *
+ * `'mitLuft'` (Default) enthält den `LUFT`-Sicherheitsstreifen, der die zu
+ * knappe Dachstuhl-Hülle ausgleicht. Bühnen mit **exakter** Hülle (Zuschnitt)
+ * nehmen `'roh'`: für sie ist der Streifen reine Verschwendung — quer schrumpfte
+ * das Schnittfenster damit auf gut die Hälfte und klebte links am Panel.
+ */
+export function useSichtfeld(
+  variante: keyof SichtfeldWerte = 'mitLuft',
+): Sichtfeld | undefined {
+  return useContext(SichtfeldKontext)?.[variante]
 }
 
 /** Runden auf 1 %: sonst löst jeder Subpixel ein neues Einpassen aus. */
@@ -92,7 +108,10 @@ export function SichtfeldMesser({
   karte: RefObject<HTMLElement | null>
   children: ReactNode
 }) {
-  const [sichtfeld, setSichtfeld] = useState<Sichtfeld>({})
+  const [sichtfeld, setSichtfeld] = useState<SichtfeldWerte>({
+    mitLuft: {},
+    roh: {},
+  })
   const letztes = useRef<Sichtfeld>({})
 
   const messen = useCallback(() => {
@@ -100,28 +119,32 @@ export function SichtfeldMesser({
     if (!f || f.width <= 0 || f.height <= 0) return
     const k = karte.current?.getBoundingClientRect()
 
-    const neu: Sichtfeld = { oben: 0, unten: 0, links: 0, rechts: 0 }
+    // Gemessen wird nur die Panelkante; `LUFT` kommt danach auf die freien
+    // Kanten. Beide Fassungen wandern in den Kontext — welche Bühne welche
+    // braucht, entscheidet ihre Hüllengenauigkeit (s. `useSichtfeld`).
+    const roh: Sichtfeld = { oben: 0, unten: 0, links: 0, rechts: 0 }
 
     if (k) {
       const quer = f.width > f.height
       const karteBreit = k.width / f.width > 0.9
       if (quer && !karteBreit) {
-        neu.links = grob((k.right - f.left) / f.width)
-        // Rechts steht keine Karte, aber der Bildrand — dort dieselbe Luft.
-        neu.rechts = LUFT
-        neu.oben = LUFT
-        neu.unten = LUFT
+        roh.links = grob((k.right - f.left) / f.width)
       } else {
-        neu.unten = grob((f.bottom - k.top) / f.height)
-        neu.oben = LUFT
-        neu.links = LUFT
-        neu.rechts = LUFT
+        roh.unten = grob((f.bottom - k.top) / f.height)
       }
     }
 
-    if (!gleich(neu, letztes.current)) {
-      letztes.current = neu
-      setSichtfeld(neu)
+    if (!gleich(roh, letztes.current)) {
+      letztes.current = roh
+      const mitLuft: Sichtfeld = k
+        ? {
+            links: roh.links || LUFT,
+            rechts: roh.rechts || LUFT,
+            oben: roh.oben || LUFT,
+            unten: roh.unten || LUFT,
+          }
+        : { ...roh }
+      setSichtfeld({ mitLuft, roh })
     }
   }, [flaeche, karte])
 
