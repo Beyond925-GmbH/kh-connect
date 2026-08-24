@@ -31,7 +31,14 @@ export function Begriff({ id, children }: { id: BegriffId; children?: React.Reac
   return (
     <Popover>
       <PopoverTrigger
-        className="inline cursor-pointer rounded-[3px] bg-kh-orange/25 px-[0.14em] font-semibold text-kh-paper underline decoration-kh-orange decoration-[3px] underline-offset-[0.2em] transition-colors active:bg-kh-orange active:text-[#0E0D0B]"
+        // **Die Fläche ist zurückgenommen, die Unterstreichung nicht.**
+        // `bg-kh-orange/25` machte aus jedem Begriff einen Textmarkerbalken;
+        // in M3 stehen vier davon in einem Absatz, und der Absatz zerfiel in
+        // fünf Bruchstücke — genau das, was der Kommentar unten schon für die
+        // Abstände beschreibt. Antippbar bleibt er an der 3-px-Kante in
+        // Markenfarbe und am Halbfett; die getippte Rückmeldung füllt nach
+        // wie vor voll orange.
+        className="inline cursor-pointer rounded-[3px] bg-kh-orange/10 px-[0.14em] font-semibold text-kh-paper underline decoration-kh-orange decoration-[3px] underline-offset-[0.2em] transition-colors active:bg-kh-orange active:text-[#0E0D0B]"
         aria-label={`${eintrag.label} — was ist das?`}
       >
         {children ?? eintrag.label}

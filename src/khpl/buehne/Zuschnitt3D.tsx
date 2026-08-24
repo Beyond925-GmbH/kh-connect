@@ -16,6 +16,7 @@ import { Gespann, SparrenBand } from '@/dachstuhl/fahrzeug'
 import { FOV, passeEin } from '@/dachstuhl/kamera'
 import type { Huelle } from '@/dachstuhl/mass'
 import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
+import { Hallenlicht } from '@/khpl/buehne/Hallenlicht'
 
 /**
  * Die M4-Werkstatt: ein Balken auf zwei Böcken auf dem Hof, feste
@@ -571,6 +572,8 @@ export default function Zuschnitt3D(props: Zuschnitt3DProps) {
     [],
   )
 
+  const sichtfeldRoh = useSichtfeld('roh')
+
   // Ein-Achsen-Drag auf der ganzen Bühne: Pointer-Capture auf dem Wrapper,
   // Aktivierung ab 8 px, fester Gain, 10-mm-Raster.
   const zug = useRef<{ id: number; x: number; mm: number; aktiv: boolean } | null>(null)
@@ -627,6 +630,11 @@ export default function Zuschnitt3D(props: Zuschnitt3DProps) {
       >
         <Werkstatt {...props} griffEl={griffEl} reduziert={reduziert} />
       </Canvas>
+
+      {/* Derselbe Grund wie unter dem Dachstuhl (s. `Hallenlicht`): ohne ihn
+          liegt der Balken auf einer schwarzen Fläche statt in einer Werkstatt.
+          `roh`, weil auch die Kamera hier ohne Sicherheitsstreifen rechnet. */}
+      <Hallenlicht sichtfeld={sichtfeldRoh} />
 
       {/* Der Griff-Punkt an der unteren Schnittecke — DOM, damit er 48 px
           groß und tokenfarben ist; die Lage schreibt die Projektion per ref. */}

@@ -4,13 +4,14 @@ import { berechneMasse } from '@/dachstuhl/mass'
 import { bildeEinheiten, erzeugeTeile, schritteJePhase } from '@/dachstuhl/teileliste'
 import type { Bauteil } from '@/dachstuhl/teileliste'
 import type { Auswahl } from '@/dachstuhl/debug'
-import type { Ansicht, Sichtfeld } from '@/dachstuhl/kamera'
+import type { Ansicht } from '@/dachstuhl/kamera'
 import type { KulisseProps } from '@/dachstuhl/Dachstuhl'
 import type { Lichtstimmung } from '@/dachstuhl/Beleuchtung'
 import { phaseAt } from '@/dachstuhl/zeitachse'
 import { useTapErkennung } from '@/dachstuhl/useTapErkennung'
 import { Szene } from '@/dachstuhl/Szene'
 import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
+import { Hallenlicht } from '@/khpl/buehne/Hallenlicht'
 import { ANFAHRT_DAUER } from '@/khpl/buehne/kanon'
 
 /**
@@ -313,48 +314,5 @@ export default function Dachstuhl3D({
         </div>
       )}
     </div>
-  )
-}
-
-/**
- * Der Schein, in dem das Modell steht.
- *
- * **Warum die 3D-Steps ihn brauchen.** Zwölf Screens tragen ein Foto, das bis
- * an alle vier Kanten läuft. Vier tragen ein 3D-Modell auf `#141210` — und weil
- * die Leinwand undurchsichtig ist, ist das ein einfarbiges Rechteck mit einem
- * Dachstuhl darin. Quer, wo das Panel nur die linke Hälfte belegt, blieb
- * daneben eine große schwarze Fläche, in der das Modell zu schweben schien.
- * Nicht weil es zu klein ist, sondern weil um es herum nichts ist: kein Boden,
- * kein Raum, keine Lichtquelle, die man sehen kann.
- *
- * Der Schein liegt deshalb **über** der Leinwand (`alpha: false`, dahinter geht
- * nichts) und sitzt genau dort, wo das Modell steht: Mitte und Ausdehnung
- * kommen aus demselben `sichtfeld`, mit dem die Kamera einpasst. Zwei Lagen —
- * ein warmer Kegel in `screen`, der Hallenlicht andeutet, und eine Vignette in
- * `multiply`, die die Ecken schließt. Beide bewusst schwach: sie sollen einen
- * Raum behaupten, nicht das Holz einnebeln.
- */
-function Hallenlicht({ sichtfeld }: { sichtfeld: Sichtfeld | undefined }) {
-  const f = { links: 0, rechts: 0, oben: 0, unten: 0, ...sichtfeld }
-  const x = ((f.links + (1 - f.rechts)) / 2) * 100
-  const y = ((f.oben + (1 - f.unten)) / 2) * 100
-
-  return (
-    <>
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-10 mix-blend-screen"
-        style={{
-          background: `radial-gradient(60% 55% at ${x}% ${y}%, rgba(255,159,42,0.16), rgba(255,159,42,0.05) 45%, transparent 72%)`,
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-10 mix-blend-multiply"
-        style={{
-          background: `radial-gradient(85% 80% at ${x}% ${y}%, transparent 40%, rgba(8,7,6,0.55) 100%)`,
-        }}
-      />
-    </>
   )
 }
