@@ -39,3 +39,4 @@ dev-dist
 
 # Screenshots aus Abnahmelaeufen, wo Playwright sie ablegt
 /*.png
+tmp/
