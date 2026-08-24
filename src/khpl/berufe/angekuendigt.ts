@@ -22,30 +22,31 @@ import type { BerufDef } from './typen'
  * muss belegt werden, bevor sie einem Vierzehnjährigen gezeigt wird.
  */
 
-export const DACHDECKER: BerufDef = {
-  id: 'dachdecker',
-  name: 'Dachdecker/Dachdeckerin',
-  kurz: 'Dachdecker',
-  zeile: 'Die Hülle, die dicht hält. Ziegel, Abdichtung, Solar.',
-  // Die Nachbarschaft zum Zimmerer ist inhaltlich richtig und im Matching das
-  // eigentliche Problem: beide draußen, beide oben, beide auf demselben Dach.
-  // Getrennt werden sie über Frage 3 (Tragwerk gegen Hülle) und über `sinn` —
-  // PV und Dachbegrünung liegen beim Dachdecker.
+export const ZIMMERER: BerufDef = {
+  id: 'zimmerer',
+  name: 'Zimmerer/Zimmerin',
+  kurz: 'Zimmerer',
+  zeile: 'Das Tragwerk, das alles hält. Balken, Abbund, Aufrichten.',
+  // Die Nachbarschaft zum Dachdecker ist inhaltlich richtig und im Matching
+  // das eigentliche Problem: beide draußen, beide oben, beide auf demselben
+  // Dach. Getrennt werden sie über Frage 3 (Tragwerk gegen Hülle) und über
+  // `technik` — der Abbund läuft über CAD und CNC.
   merkmale: {
-    anpacken: 0.9,
-    praezision: 0.5,
-    technik: 0.35,
-    draussen: 1,
-    hoehe: 1,
-    team: 0.7,
-    sinn: 0.7,
+    anpacken: 1,
+    praezision: 0.65,
+    technik: 0.5,
+    draussen: 0.9,
+    hoehe: 0.95,
+    team: 0.8,
+    sinn: 0.6,
   },
-  // ⚠️ Für diesen Beruf gibt es im Repo **kein einziges Motiv**. Die Pfade
-  // stehen so, wie sie heißen werden; bis die Dateien da sind, greift der
-  // Fallback in `BerufKarte` und `BerufBald`.
+  // Die Motive unter `media/zimmerer/` zeigen Zimmerleute an Balken und
+  // gehören der Sache nach hierher — sie sind aber an den gebauten Tag
+  // vergeben (`dachdecker.ts`), solange der keine eigenen hat. Deshalb hier
+  // Pfade, die es noch nicht gibt, und der Fallback in `BerufBild`.
   medien: {
-    karte: '/medien/media/dachdecker/card.webp',
-    heroPoster: '/medien/media/dachdecker/hero-poster.webp',
+    karte: '/medien/media/zimmerer-tag/card.webp',
+    heroPoster: '/medien/media/zimmerer-tag/hero-poster.webp',
   },
   graph: null,
 }

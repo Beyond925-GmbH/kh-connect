@@ -39,15 +39,15 @@ export function M3() {
           <Begriff id="abbundplan">Abbundplan</Begriff>: jedes Holz mit Länge, Winkel und
           eigener Nummer. Gezeichnet wird er im <Begriff id="cad">CAD</Begriff>,
           zugeschnitten wird danach beim <Begriff id="abbund">Abbund</Begriff>. Parallel
-          stimmst du Termine ab — Bauherr, Kranfirma, Dachdecker. Alle müssen am selben
+          stimmst du Termine ab — Bauherr, Kranfirma, Gerüstbauer. Alle müssen am selben
           Tag können.
         </p>
       }
       aha={
         <AhaKarte sichtbar={aha} eyebrow="Übrigens">
-          Terminplanung ist ein Puzzle. Kran, Wetter, Materiallieferung und Dachdecker
-          müssen zusammenpassen — ein verregneter Tag verschiebt die ganze Kette. Im Büro
-          nennt man das Projektmanagement.
+          Terminplanung ist ein Puzzle. Kran, Wetter, Materiallieferung und Gerüst müssen
+          zusammenpassen — ein verregneter Tag verschiebt die ganze Kette. Im Büro nennt
+          man das Projektmanagement.
         </AhaKarte>
       }
       fuss={<StepFuss id="M3" />}

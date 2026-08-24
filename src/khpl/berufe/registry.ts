@@ -1,18 +1,18 @@
-import { ZIMMERER } from './zimmerer'
-import { ANLAGENMECHANIKER, DACHDECKER, ZERSPANUNGSMECHANIKER } from './angekuendigt'
+import { DACHDECKER } from './dachdecker'
+import { ANLAGENMECHANIKER, ZERSPANUNGSMECHANIKER, ZIMMERER } from './angekuendigt'
 import type { BerufDef, BerufId } from './typen'
 
 /**
  * Das Angebot. Die Reihenfolge hier **ist** die Reihenfolge in der
  * Berufsliste — sortiert wird sie dort nur, wenn ein Vorschlag vorliegt.
  *
- * Der Zimmerer steht vorn, weil er als einziger einen Tag hat. Sobald ein
+ * Der Dachdecker steht vorn, weil er als einziger einen Tag hat. Sobald ein
  * zweiter fertig ist, gehört die Reihenfolge auf den Prüfstand: an einem Stand
  * ist die erste Karte die, die am häufigsten getippt wird.
  */
 export const BERUFE: readonly BerufDef[] = [
-  ZIMMERER,
   DACHDECKER,
+  ZIMMERER,
   ZERSPANUNGSMECHANIKER,
   ANLAGENMECHANIKER,
 ]

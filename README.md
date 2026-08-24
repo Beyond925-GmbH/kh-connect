@@ -13,9 +13,16 @@ on the design system below. See [Der Flow](#der-flow-srckhpl).
 
 **Seit dem Umbau auf vier Berufe** liegt davor ein Trichter (Helm → Fragen →
 Vorschlag → Berufsliste), und der Tagesablauf ist Daten statt Konstanten. Genau
-**ein** Beruf hat bisher einen Tag: Zimmerer/Zimmerin. Die anderen drei sind
-angekündigt und begehbar, aber leer — siehe
-[Vier Berufe](#vier-berufe-srckhplberufe).
+**ein** Beruf hat bisher einen Tag: **Dachdecker/Dachdeckerin**. Die anderen
+drei — Zimmerer, Zerspanung, Anlagenmechanik — sind angekündigt und begehbar,
+aber leer. Siehe [Vier Berufe](#vier-berufe-srckhplberufe).
+
+> ⚠️ **Die Spec darunter ist auf Zimmerer/Zimmerin geschrieben.**
+> `khpl-flow.md` führt in §1 den Ausbildungsberuf Zimmerer/Zimmerin, und die
+> belegten Zahlen in §10 hängen daran. Der gebaute Tag heißt inzwischen
+> Dachdecker; **die Fachrecherche ist noch nicht nachgezogen.** Was das
+> konkret heißt, steht unter [Was noch Zimmerer
+> ist](#was-noch-zimmerer-ist).
 
 ## Specs
 
@@ -167,7 +174,9 @@ sagt der Screen „Sprich jetzt mit uns am Stand“, nie `[Name]`.
 
 ## Vier Berufe (`src/khpl/berufe/`)
 
-Zimmerer · Dachdecker · Zerspanungsmechaniker:in · Anlagenmechaniker:in SHK.
+Dachdecker · Zimmerer · Zerspanungsmechaniker:in · Anlagenmechaniker:in SHK.
+
+Gebaut ist **Dachdecker**. Die anderen drei sind angekündigt.
 
 **Ein Beruf ist eine Datei.** `BerufDef` trägt Name, Kurzform, die Zeile für die
 Karte, den Merkmalsvektor fürs Matching, die Medienpfade, die Copy des
@@ -176,14 +185,35 @@ angekündigt und noch nicht gebaut; das ist absichtlich im Typ und nicht in eine
 Flag, damit jede Stelle, die einen Graphen braucht, den Fall behandeln **muss**.
 
 Einen der drei fertigstellen heißt: `graph` mit `baueGraph` füllen (Vorbild
-`zimmerer.ts`), `auftrag` schreiben, Medien nach `public/medien/media/<id>/`
+`dachdecker.ts`), `auftrag` schreiben, Medien nach `public/medien/media/<id>/`
 legen. Hat der Beruf eigene React-Module, kommen sie in
 `berufe/komponenten.tsx`; was dort fehlt, rendert der `Platzhalter`. **Die Hülle
 ändert sich nicht.**
 
 > ⚠️ Merkmale und Texte der drei angekündigten Berufe sind **gesetzt, nicht
 > recherchiert**. Sie reichen, um den Trichter zu bauen und zu bedienen; sie
-> sind nicht die Sorgfalt, die `khpl-flow.md` §10 für den Zimmerer aufbringt.
+> sind nicht die Sorgfalt, die `khpl-flow.md` §10 aufbringt.
+
+### Was noch Zimmerer ist
+
+Der gebaute Tag ist von Zimmerer auf Dachdecker umbenannt worden. Der **Ablauf**
+trägt das (ein Dach entsteht, von der Anfrage bis zum Feierabend), die
+**Fachrecherche darunter nicht**. Offen, nach Dringlichkeit:
+
+| Wo | Was | Warum es zählt |
+| --- | --- | --- |
+| `steps/karrierewege.ts` | „rund 45.000 Euro" für den Meister ist der **Zimmerer**-Wert | Eine Zahl vor einem Vierzehnjährigen. Belegen oder streichen. |
+| `glossar/begriffe.ts` | Stundensatz 50–90 € stammt aus dem **Zimmerer**handwerk | dito, steht im Glossar-Popover |
+| `khpl-flow.md` §1, §10 | die ganze Quellenlage (AusbauBAusbV, Holzbau Deutschland, Zimmererzentrum) | jede Aussage der App hängt daran |
+| `berufe/dachdecker.ts` | `auftrag`-Copy war für eine Zimmerei abgenommen, Betrieb ist getauscht | Abnahme ist damit offen |
+| `public/medien/media/zimmerer/` | Motive zeigen Zimmerleute an Balken | Ordnername und Inhalt gehören zum Zimmerer, dienen aber dem Dachdecker-Tag |
+| M5 · M7 · B3.2 | das 3D-Modell ist ein **Dachstuhl** | Tragwerk ist Zimmererarbeit; als Dachdecker-Inhalt fachlich strittig |
+
+Zwei Stellen waren nach dem Umbenennen **selbstbezüglich** und sind schon
+korrigiert: M3 stimmte Termine „mit dem Dachdecker" ab, und in B4.1 waren die
+Dachziegel falsch, „weil die der Dachdecker mitbringt" — bei einer gewerteten
+Aufgabe die schlimmste Sorte Fehler. Beide nennen jetzt kein fremdes Gewerk
+mehr.
 
 ### Der Trichter
 

@@ -92,7 +92,7 @@ export const BEGRIFFE = {
   statik: {
     label: 'Statik',
     erklaerung:
-      'Die Berechnung, ob ein Bauteil die Lasten trägt, die auf es wirken: Eigengewicht, Schnee, Wind. Sie kommt vom Statiker oder Ingenieurbüro — der Zimmerer baut nach ihr.',
+      'Die Berechnung, ob ein Bauteil die Lasten trägt, die auf es wirken: Eigengewicht, Schnee, Wind. Sie kommt vom Statiker oder Ingenieurbüro — auf dem Bau wird nach ihr gebaut.',
   },
   kvh: {
     label: 'KVH',
@@ -137,7 +137,9 @@ export const BEGRIFFE = {
   stundensatz: {
     label: 'Stundensatz',
     erklaerung:
-      'Was eine Arbeitsstunde im Angebot kostet. Darin steckt nicht nur der Lohn, sondern auch Werkzeug, Fahrzeug, Werkstatt und Verwaltung. Im Zimmererhandwerk liegt er grob zwischen 50 und 90 Euro.',
+      // ⚠️ SPANNE GEHÖRT ZUM ZIMMERERHANDWERK (khpl-flow.md §10) und ist für
+      // das Dachdeckerhandwerk nicht nachgeschlagen. Vor der Messe belegen.
+      'Was eine Arbeitsstunde im Angebot kostet. Darin steckt nicht nur der Lohn, sondern auch Werkzeug, Fahrzeug, Werkstatt und Verwaltung. Im Bauhandwerk liegt er grob zwischen 50 und 90 Euro.',
     nachgetragen: true,
   },
 } as const satisfies Record<string, Begriffseintrag>

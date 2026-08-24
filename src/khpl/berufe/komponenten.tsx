@@ -32,7 +32,7 @@ import { M10 } from '@/khpl/steps/M10'
 export const BERUF_KOMPONENTEN: Partial<
   Record<BerufId, Readonly<Record<StepId, () => React.ReactNode>>>
 > = {
-  zimmerer: {
+  dachdecker: {
     M1: () => <M1 />,
     M2: () => <M2 />,
     M3: () => <M3 />,

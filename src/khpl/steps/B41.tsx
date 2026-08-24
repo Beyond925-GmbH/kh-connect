@@ -50,7 +50,12 @@ const TEILE: Teil[] = [
     id: 'ziegel',
     text: 'Dachziegel',
     mit: false,
-    grund: 'Die bringt der Dachdecker mit. Ihr baut das, was darunter liegt.',
+    // Vorher: „Die bringt der Dachdecker mit." Das ging, solange der Tag dem
+    // Zimmerer gehörte. Jetzt ist der Besucher selbst der Dachdecker, und die
+    // Begründung schickte ihn zu sich selbst — bei einer *gewerteten* Aufgabe
+    // die schlimmste Sorte Fehler. Der neue Grund gilt für jedes Gewerk:
+    // heute steht das Tragwerk, gedeckt wird später.
+    grund: 'Heute wird aufgerichtet, nicht gedeckt. Die kommen, wenn das Tragwerk steht.',
   },
   {
     id: 'anker',

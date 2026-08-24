@@ -66,10 +66,10 @@ export default defineConfig({
       },
 
       manifest: {
-        name: 'KHPL Connect — Zimmerer/Zimmerin',
+        name: 'KHPL Connect — Handwerksberufe',
         short_name: 'KHPL Connect',
         description:
-          'Interaktive Messe-Anwendung der Kreishandwerkerschaft Paderborn-Lippe zum Ausbildungsberuf Zimmerer/Zimmerin.',
+          'Interaktive Messe-Anwendung der Kreishandwerkerschaft Paderborn-Lippe zu vier Ausbildungsberufen im Handwerk.',
         lang: 'de',
         start_url: '/',
         // Kiosk: no browser chrome. iOS honours the equivalent meta tags in

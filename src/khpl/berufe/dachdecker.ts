@@ -2,18 +2,28 @@ import { baueGraph, type Angebot, type StepDef } from '@/khpl/flow/steps'
 import type { BerufDef } from './typen'
 
 /**
- * Zimmerer/Zimmerin — der Beruf, für den `khpl-flow.md` geschrieben ist.
+ * Dachdecker/Dachdeckerin — der gebaute Tag. Siebzehn Steps, M1 bis M10 plus
+ * sieben Abstecher.
  *
  * Die Steps standen bis zur Einführung der vier Berufe als `STEPS` in
- * `flow/steps.ts`. Inhaltlich ist hier **nichts** verändert worden: dieselben
- * siebzehn Steps, dieselben Titel, dieselbe Reihenfolge, dieselben Abstecher.
- * Nur ihr Ort ist neu, und mit ihm die Zuständigkeit — was der Zimmerer-Tag
- * ist, steht jetzt beim Zimmerer und nicht mehr in der Hülle.
+ * `flow/steps.ts`. Inhaltlich ist am Ablauf **nichts** verändert worden:
+ * dieselben siebzehn Steps, dieselben Titel, dieselbe Reihenfolge, dieselben
+ * Abstecher. Nur ihr Ort ist neu, und mit ihm die Zuständigkeit.
  *
  * Dazugekommen sind die drei Angaben, die vorher als Konstanten in `StepShell`
  * und im Store lagen und in Wahrheit Aussagen über *diesen* Tagesablauf sind:
  * wo der Karriere-Link auftaucht, was zum Karriere-Bereich gehört, wo der Skip
  * landet.
+ *
+ * ⚠️ **Die Recherche darunter ist auf Zimmerer/Zimmerin geschrieben.**
+ * `khpl-flow.md` führt in §1 den Ausbildungsberuf Zimmerer/Zimmerin, und die
+ * belegten Zahlen in §10 hängen daran: Ausbildungsvergütung nach Holzbau
+ * Deutschland, die AusbauBAusbV von 2026, „Zimmerermeister:in" als
+ * Aufstiegstitel, der Stundensatz „im Zimmererhandwerk". Was davon für
+ * Dachdecker:innen anders ist, ist **noch nicht nachgezogen** — die Stellen
+ * stehen in `steps/karrierewege.ts` und `glossar/begriffe.ts` und sind dort
+ * markiert. Bis dahin trägt dieser Beruf einen Dachdecker-Namen über
+ * Zimmerer-Zahlen.
  */
 
 /**
@@ -217,21 +227,21 @@ const STEPS = [
   },
 ] as const satisfies readonly ZimmererStep[]
 
-export const ZIMMERER: BerufDef = {
-  id: 'zimmerer',
-  name: 'Zimmerer/Zimmerin',
-  kurz: 'Zimmerer',
-  zeile: 'Aus Balken wird ein Dachstuhl. Zehn Meter über dem Boden.',
-  // Draußen, hoch, im Team, mit den Händen — und mehr Technik, als der Beruf
-  // von außen hergibt: der Abbund läuft über CAD und CNC (B3.1, M3).
+export const DACHDECKER: BerufDef = {
+  id: 'dachdecker',
+  name: 'Dachdecker/Dachdeckerin',
+  kurz: 'Dachdecker',
+  zeile: 'Ein Dach, von der ersten Messung bis zum Richtfest. Zehn Meter über dem Boden.',
+  // Draußen bei jedem Wetter, hoch oben, im Team — und mehr Technik, als der
+  // Beruf von außen hergibt: geplant wird am Rechner (M3, B3.1).
   merkmale: {
-    anpacken: 1,
-    praezision: 0.65,
-    technik: 0.5,
-    draussen: 0.9,
-    hoehe: 0.95,
-    team: 0.8,
-    sinn: 0.6,
+    anpacken: 0.9,
+    praezision: 0.5,
+    technik: 0.35,
+    draussen: 1,
+    hoehe: 1,
+    team: 0.7,
+    sinn: 0.7,
   },
   medien: {
     karte: '/medien/media/zimmerer/card.webp',
@@ -240,13 +250,13 @@ export const ZIMMERER: BerufDef = {
     szenario: '/medien/media/zimmerer/szenario.mp4',
     szenarioPoster: '/medien/media/zimmerer/szenario-poster.webp',
   },
-  // TEXT: `GEPRÜFT` (24.08.2026). Wortlaut unverändert von dem Startscreen
-  // übernommen, auf dem er abgenommen wurde — er ist jetzt nur wieder ein
-  // eigener Screen, weil das Framing je Beruf ein anderes ist.
+  // TEXT: `ENTWURF`. Der Wortlaut war am 24.08.2026 abgenommen — aber für eine
+  // Zimmerei („Du bist Azubi in einer Zimmerei"). Der Betrieb ist hier
+  // ausgetauscht, der Rest steht unverändert; damit ist die Abnahme offen.
   auftrag: {
     etikett: 'Dein erster Auftrag',
     titel: ['Bau heute', 'ein Dach.'],
-    text: 'Du bist Azubi in einer Zimmerei. Der Chef legt das Telefon weg und dreht sich zu dir um: altes Haus, das Dach muss neu. Er fragt, ob du mitkommst.',
+    text: 'Du bist Azubi in einem Dachdeckerbetrieb. Der Chef legt das Telefon weg und dreht sich zu dir um: altes Haus, das Dach muss neu. Er fragt, ob du mitkommst.',
     knopf: 'Auftrag annehmen',
   },
   graph: baueGraph(STEPS, {

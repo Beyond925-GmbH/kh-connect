@@ -50,8 +50,12 @@ export const KARRIEREWEGE: Karriereweg[] = [
       },
       {
         frage: 'Was du verdienst',
+        // ⚠️ ZAHL GEHÖRT ZUM ZIMMERERHANDWERK (khpl-flow.md §10). Der gebaute
+        // Tag heißt seit dem Umbenennen Dachdecker; für das Dachdeckerhandwerk
+        // ist der Wert **nicht** nachgeschlagen. Vor der Messe belegen oder
+        // ersetzen — hier steht eine Zahl vor einem Vierzehnjährigen.
         antwort:
-          'Als Zimmerermeister:in im Schnitt rund 45.000 Euro im Jahr, mit Erfahrung deutlich mehr.',
+          'Als Meister:in im Schnitt rund 45.000 Euro im Jahr, mit Erfahrung deutlich mehr.',
       },
     ],
     aufhaenger:
@@ -106,7 +110,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
       },
     ],
     aufhaenger:
-      'Vielleicht wusstest du nicht, dass du als Zimmerer studieren kannst — ohne Abitur, 30 Kilometer von hier.',
+      'Vielleicht wusstest du nicht, dass du als Handwerker:in studieren kannst — ohne Abitur, 30 Kilometer von hier.',
   },
 ]
 

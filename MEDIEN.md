@@ -38,8 +38,8 @@ Aus dem Altbestand (`public/medien/media/`) wird weiterhin benutzt:
 | Datei | Wo |
 | --- | --- |
 | `shared/start-loop.mp4` + `start-poster.webp` | Splash (S0) — Attract über alle Berufe. **Deckt nur drei Gewerke ab; Dachdecker fehlt.** |
-| `zimmerer/szenario.mp4` + `szenario-poster.webp` | Auftragsannahme (S1) des Zimmerers |
-| `zimmerer/hero.mp4` + `hero-poster.webp` | Karte und Vorschlag des Zimmerers |
+| `zimmerer/szenario.mp4` + `szenario-poster.webp` | Auftragsannahme (S1) des **Dachdeckers** — der gebaute Tag. Ordnername und Motive stammen vom Zimmerer und sind noch nicht ersetzt. |
+| `zimmerer/hero.mp4` + `hero-poster.webp` | Karte und Vorschlag des Dachdeckers, dito |
 
 ## Was bei der Auswahl galt
 
