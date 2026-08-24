@@ -45,9 +45,18 @@ export const ABFAHRT_DAUER = 4.5
 /**
  * Sekunden für den Blick nach oben in C4 — „So sieht das aus, wenn es steht.“
  * Die Spec setzt „eine Sekunde, nicht interaktiv“; das hier ist die Dauer des
- * Aufrichtens, nicht die Standzeit.
+ * Aufrichtens. Dieselbe Dauer legt das Element danach animiert wieder ab.
  */
 export const AUFRICHTEN_DAUER = 1
+
+/**
+ * Sekunden, die das aufgerichtete Element **steht**, bevor es sich zurücklegt.
+ * Ohne Standzeit wäre der Blick nach oben nur der Drehweg: die träge Kamera
+ * kommt in einer Sekunde kaum an, und C6 fragt genau dieses Bild ab — die
+ * „halbe Miete“ der Spec braucht einen Moment, in dem das Element wirklich
+ * steht.
+ */
+export const AUFRICHTEN_STANDZEIT = 1.8
 
 /**
  * Dämpfung der pendelnden Last in C6, 0…1 je Sekunde.

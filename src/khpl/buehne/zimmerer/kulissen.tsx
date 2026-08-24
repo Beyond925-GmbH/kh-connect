@@ -384,8 +384,12 @@ export function AmHaken({
   const dreher = useRef<THREE.Group>(null)
   const seil = useRef<THREE.Mesh>(null)
 
+  // Die beiden Achsen koppeln: Rx(π) (Rollen) spiegelt neben oben/unten auch
+  // vorn/hinten. Sichtbar ist die Holzfaserseite genau dann, wenn Gieren und
+  // Rollen **dieselbe** Parität haben — Melde- und Ziel-Mapping unten rechnen
+  // deshalb mit dem Paritätsvergleich, nie mit psi allein.
   const z = useRef({
-    psi: 0.6, // Gieren; 0 = Holzfaser nach außen
+    psi: 0.6, // Gieren; Parität(psi) == Parität(phi) = Holzfaser nach außen
     phi: Math.PI, // Rollen; 0 = Rähm oben — es hängt zunächst falsch herum
     flipVon: Math.PI,
     flipStart: -10,
@@ -416,7 +420,8 @@ export function AmHaken({
         const gieren = ((Math.round(psi / Math.PI) % 2) + 2) % 2
         const rollen = ((Math.round(phi / Math.PI) % 2) + 2) % 2
         melder.current.onLage?.({
-          aussenseite: gieren === 0 ? 'holzfaser' : 'beplankung',
+          // Gleiche Parität = Holzfaser sichtbar (siehe Kopplung oben).
+          aussenseite: gieren === rollen ? 'holzfaser' : 'beplankung',
           oben: rollen === 0 ? 'raehm' : 'schwelle',
         })
       },
@@ -455,8 +460,13 @@ export function AmHaken({
     let zielPhi: number | null = null
     if (lage != null || einweisen) {
       const l = lage ?? { aussenseite: 'holzfaser' as const, oben: 'raehm' as const }
-      zielPsi = naechsteHalbe(s.psi, l.aussenseite === 'holzfaser')
+      // Rollen bestimmt oben; Gieren muss die Spiegelung des Rollens
+      // mitrechnen: Holzfaser außen braucht gleiche Parität beider Achsen.
       zielPhi = naechsteHalbe(s.phi, l.oben === 'raehm')
+      zielPsi = naechsteHalbe(
+        s.psi,
+        (l.aussenseite === 'holzfaser') === (l.oben === 'raehm'),
+      )
     } else if (s.schnapp) {
       zielPsi = s.schnapp.psi
       zielPhi = s.schnapp.phi

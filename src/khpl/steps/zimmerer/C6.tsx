@@ -162,6 +162,10 @@ export function C6() {
     const neu = versuche + 1
     setVersuche(neu)
     setMeldung({ text: falsch.map((a) => a.warum).join(' '), ok: false })
+    // Der Bühnen-Beat der Spec: das Element setzt nicht ab, es dreht sich
+    // zurück in die Luft — die Wahl verfällt mit (`lage` wird wieder `null`).
+    setAussen(null)
+    setOben(null)
     merkeAntwort('c6', { seiteRichtig: false, versetzt: false, versuche: neu })
   }
 

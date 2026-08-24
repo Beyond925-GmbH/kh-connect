@@ -156,6 +156,12 @@ export interface Wandelement3DProps {
    * Länge, sondern in der Ausklinkung.
    */
   gesuchteNummer?: number
+  /**
+   * „Zeig mir wie“ (khpl-tage.md 3): das gesuchte Holz hebt sich an und bleibt
+   * markiert oben, bis es angetippt ist — die Lösung wird gezeigt, nicht
+   * ausgeführt.
+   */
+  hinweisZeigen?: boolean
   /** Ein Holz wurde angetippt. Der Step entscheidet, was das heißt. */
   onHolz?: (nummer: number) => void
 
@@ -185,11 +191,12 @@ export interface Wandelement3DProps {
   onAusschnitt?: (a: Fensterausschnitt) => void
   /**
    * Der Blick nach oben, sobald der Rahmen sitzt: das Element kippt für
-   * `AUFRICHTEN_DAUER` in die Senkrechte und zeigt, wo das Fenster ist. Nicht
-   * interaktiv. Das ist die halbe Miete für die Abfrage in C6.
+   * `AUFRICHTEN_DAUER` in die Senkrechte, **steht** dort `AUFRICHTEN_STANDZEIT`
+   * und zeigt, wo das Fenster ist. Nicht interaktiv. Das ist die halbe Miete
+   * für die Abfrage in C6. Zurück legt es sich animiert, kein Snap.
    */
   aufrichtenZeigen?: boolean
-  /** Feuert, wenn das Aufrichten durch ist. */
+  /** Feuert nach der Standzeit — wenn der Blick nach oben angekommen ist. */
   onAufrichtenEnde?: () => void
 
   // -- C5 — die Zäsur -------------------------------------------------------
@@ -379,7 +386,11 @@ export default function Wandelement3D(props: Wandelement3DProps) {
         {zustand === 'stapel' && (
           <group>
             <Halle />
-            <Holzstapel gesuchteNummer={props.gesuchteNummer} onHolz={props.onHolz} />
+            <Holzstapel
+              gesuchteNummer={props.gesuchteNummer}
+              hinweis={props.hinweisZeigen}
+              onHolz={props.onHolz}
+            />
           </group>
         )}
 

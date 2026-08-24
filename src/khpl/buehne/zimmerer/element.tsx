@@ -11,6 +11,7 @@ import {
   ACHSMASS_MAX_CM,
   ACHSMASS_MIN_CM,
   AUFRICHTEN_DAUER,
+  AUFRICHTEN_STANDZEIT,
   ELEMENT_BREITE_M,
   ELEMENT_HOEHE_M,
   PLATTENBREITE_CM,
@@ -492,11 +493,14 @@ function baueStapel(gesucht: number): Holz[] {
 function Holzstueck({
   holz,
   gefunden,
+  hinweis,
   onTap,
   hebung,
 }: {
   holz: Holz
   gefunden: boolean
+  /** „Zeig mir wie“: das gesuchte Holz hebt sich und bleibt markiert oben. */
+  hinweis: boolean
   onTap: (nummer: number) => void
   hebung: React.RefObject<Map<number, number>>
 }) {
@@ -509,7 +513,7 @@ function Holzstueck({
   useFrame(({ clock }) => {
     const g = gruppe.current
     if (!g) return
-    if (gefunden) {
+    if (gefunden || hinweis) {
       g.position.y = TISCH_OBEN + h / 2 + 0.16
       return
     }
@@ -564,12 +568,18 @@ function Holzstueck({
           <meshStandardMaterial color={farbe} roughness={0.85} flatShading />
         </mesh>
       )}
-      {gefunden && (
+      {gefunden ? (
         <mesh position={[-holz.laenge * 0.32, 0, 0]}>
           <boxGeometry args={[0.12, h + 0.04, b + 0.04]} />
           <meshBasicMaterial color={SIGNAL_MARKE} />
         </mesh>
-      )}
+      ) : hinweis ? (
+        // Hinweisfarbe, nicht Signalgrün: gezeigt bekommen ist nicht geschafft.
+        <mesh position={[-holz.laenge * 0.32, 0, 0]}>
+          <boxGeometry args={[0.12, h + 0.04, b + 0.04]} />
+          <meshBasicMaterial color={AUSWAHL_EMISSIV} />
+        </mesh>
+      ) : null}
       <Html
         center
         distanceFactor={9}
@@ -586,9 +596,12 @@ function Holzstueck({
 
 export function Holzstapel({
   gesuchteNummer = 47,
+  hinweis = false,
   onHolz,
 }: {
   gesuchteNummer?: number
+  /** „Zeig mir wie“ (khpl-tage.md 3): hebt das gesuchte Holz sichtbar an. */
+  hinweis?: boolean
   onHolz?: (nummer: number) => void
 }) {
   const stapel = useMemo(() => baueStapel(gesuchteNummer), [gesuchteNummer])
@@ -612,6 +625,7 @@ export function Holzstapel({
           key={holz.nummer}
           holz={holz}
           gefunden={gefunden && holz.nummer === gesuchteNummer}
+          hinweis={hinweis && !gefunden && holz.nummer === gesuchteNummer}
           onTap={tippen}
           hebung={hebung}
         />
@@ -773,10 +787,20 @@ export function Staenderwerk({
 const FAECHER = [0.9, 0.6, 0.3, 0, -0.3]
 
 /**
- * Die geführte Hälfte des Lernpaars: je gelegter Schicht schiebt sich eine
- * Lage von der Seite in ihren Slot. Das Tragwerk steht schon (aus C2); seine
- * Karte bringt die Gefachdämmung mit. Der Treppenversatz hält alle Kanten
- * sichtbar — eine Wand von genau oben wäre ein Rechteck.
+ * Die fünf Karten des Steps (Innenbeplankung · Dampfbremse · Ständerwerk mit
+ * Dämmung · Holzfaserplatte · Fassade) auf die Geometrie-Schichten (gips ·
+ * installation · dampfbremse · tragwerk · holzfaser) übersetzt: die erste
+ * Karte nennt die Installationsebene in ihrem Satz mit und deckt deshalb zwei
+ * Lagen auf; die Fassade hat keine eigene Geometrie — sie ist Sache des
+ * Bauherrn, sagt die Karte selbst.
+ */
+const KARTE_ZU_LAGEN = [0, 2, 3, 4, 5, 5] as const
+
+/**
+ * Die geführte Hälfte des Lernpaars: je gelegter Karte schiebt sich die
+ * zugehörige Lage von der Seite in ihren Slot. Das Tragwerk steht schon (aus
+ * C2); seine Karte bringt die Gefachdämmung mit. Der Treppenversatz hält alle
+ * Kanten sichtbar — eine Wand von genau oben wäre ein Rechteck.
  */
 export function Sandwichaufbau({
   schichten = 0,
@@ -787,12 +811,12 @@ export function Sandwichaufbau({
 }) {
   const zeiten = useRef<(number | null)[]>(Array(SCHICHTEN.length).fill(null))
   const gruppen = useRef<(THREE.Group | null)[]>([])
+  const lagen = KARTE_ZU_LAGEN[klemm(Math.round(schichten), 0, KARTE_ZU_LAGEN.length - 1)]
 
   useFrame(({ clock }) => {
     for (let i = 0; i < SCHICHTEN.length; i++) {
-      if (i < schichten && zeiten.current[i] === null)
-        zeiten.current[i] = clock.elapsedTime
-      if (i >= schichten) zeiten.current[i] = null
+      if (i < lagen && zeiten.current[i] === null) zeiten.current[i] = clock.elapsedTime
+      if (i >= lagen) zeiten.current[i] = null
       const g = gruppen.current[i]
       if (!g) continue
       const start = zeiten.current[i]
@@ -856,7 +880,9 @@ export function Sandwichaufbau({
  * der Bühne auf (Vorbild `Zuschnitt3D`: Bühne liefert Geometrie, der Step
  * entscheidet über Treffer und Toleranz). `aufrichtenZeigen` kippt das Element
  * um die Schwellenkante in die Senkrechte — der erste Blick nach oben, die
- * halbe Miete für C6.
+ * halbe Miete für C6. Oben angekommen **steht** es `AUFRICHTEN_STANDZEIT`
+ * lang (erst dann feuert `onAufrichtenEnde`), und zurück legt es sich mit
+ * derselben Kippfahrt statt zu schnappen.
  */
 export function FensterElement({
   ausschnitt = null,
@@ -875,6 +901,8 @@ export function FensterElement({
 }) {
   const kipp = useRef<THREE.Group>(null)
   const start = useRef<number | null>(null)
+  const von = useRef(-Math.PI / 2)
+  const obenSeit = useRef<number | null>(null)
   const gemeldet = useRef(false)
   const zieht = useRef<{ xMm: number; yMm: number } | null>(null)
   const [umriss, setUmriss] = useState(false)
@@ -884,31 +912,36 @@ export function FensterElement({
   })
 
   useEffect(() => {
-    if (!aufrichtenZeigen) {
-      start.current = null
-      gemeldet.current = false
-    }
+    // Jeder Wechsel startet eine neue Kippfahrt vom aktuellen Winkel aus —
+    // auch das Zurücklegen ist animiert, kein Snap.
+    start.current = null
+    obenSeit.current = null
+    if (aufrichtenZeigen) gemeldet.current = false
   }, [aufrichtenZeigen])
 
   useFrame(({ clock }) => {
     const g = kipp.current
     if (!g) return
-    if (!aufrichtenZeigen) {
-      g.rotation.x = -Math.PI / 2
-      return
-    }
+    const t = clock.elapsedTime
+    const ziel = aufrichtenZeigen ? 0 : -Math.PI / 2
     if (reduziert) {
-      g.rotation.x = 0
+      g.rotation.x = ziel
     } else {
-      if (start.current === null) start.current = clock.elapsedTime
-      const u = Math.min((clock.elapsedTime - start.current) / AUFRICHTEN_DAUER, 1)
-      g.rotation.x = (-Math.PI / 2) * (1 - glatt(u))
-      if (u < 1) return
+      if (start.current === null) {
+        start.current = t
+        von.current = g.rotation.x
+      }
+      const u = Math.min((t - start.current) / AUFRICHTEN_DAUER, 1)
+      g.rotation.x = von.current + (ziel - von.current) * glatt(u)
+      if (aufrichtenZeigen && u < 1) return
     }
-    if (!gemeldet.current) {
-      gemeldet.current = true
-      melder.current?.()
-    }
+    if (!aufrichtenZeigen || gemeldet.current) return
+    // Standzeit: gemeldet wird erst, wenn das Element wirklich gestanden hat —
+    // die träge Kamera braucht den Moment, und C6 fragt genau dieses Bild ab.
+    if (obenSeit.current === null) obenSeit.current = t
+    if (t - obenSeit.current < AUFRICHTEN_STANDZEIT) return
+    gemeldet.current = true
+    melder.current?.()
   })
 
   const punktZuMm = (p: THREE.Vector3): { xMm: number; yMm: number } => ({

@@ -1,4 +1,5 @@
 import { Suspense, lazy, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
@@ -28,6 +29,11 @@ import { Begriff } from './Begriff'
  * **Kein Fehlerzähler auf dem Screen.** `versuche` läuft mit, weil der Store
  * ihn führt und weil nach zwei Fehlgriffen die Hilfe dazukommt (flow 6.6) —
  * gezeigt wird die Zahl nie.
+ *
+ * **Nach zwei Fehlgriffen bietet die App die Lösung an** (khpl-tage.md 3):
+ * neben der Hinweiszeile kommt „Zeig mir wie“ in den Fuß, und die Bühne hebt
+ * das gesuchte Holz an und markiert es — angetippt wird es trotzdem selbst,
+ * die Bühne bleibt die Übung.
  *
  * `answers.c1` `{ gefunden: boolean; versuche: number }`
  */
@@ -74,6 +80,7 @@ export function C1() {
   const gespeichert = useFortschritt().answers.c1
   const [gefunden, setGefunden] = useState(() => !!gespeichert?.gefunden)
   const [versuche, setVersuche] = useState(() => gespeichert?.versuche ?? 0)
+  const [hinweis, setHinweis] = useState(false)
   const [antwort, setAntwort] = useState<{ ok: boolean; text: string } | null>(() =>
     gespeichert?.gefunden ? { ok: true, text: TREFFER_TEXT } : null,
   )
@@ -99,7 +106,12 @@ export function C1() {
       interaktionOffen={!gefunden}
       buehne={
         <Suspense fallback={<Dachstuhl3DFallback text="Die Halle wird hell" />}>
-          <Wandelement3D zustand="stapel" gesuchteNummer={GESUCHT} onHolz={tippen} />
+          <Wandelement3D
+            zustand="stapel"
+            gesuchteNummer={GESUCHT}
+            hinweisZeigen={hinweis && !gefunden}
+            onHolz={tippen}
+          />
         </Suspense>
       }
       fachtext={
@@ -130,7 +142,7 @@ export function C1() {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <Stueckliste hilfe={versuche >= HILFE_AB} />
+              <Stueckliste hilfe={versuche >= HILFE_AB} hinweis={hinweis} />
               <Rueckmeldung
                 ok={antwort?.ok ?? null}
                 text={antwort?.text ?? null}
@@ -150,6 +162,19 @@ export function C1() {
         <StepFuss
           id="C1"
           uebungOffen={!gefunden}
+          // Die Übung selbst hat keine Aktion (die Bühne ist die Übung) — nur
+          // das Lösungsangebot nach zwei Fehlgriffen sitzt hier, wie in C4/C6.
+          aktion={
+            !gefunden && !hinweis && versuche >= HILFE_AB ? (
+              <Button
+                variant="leise"
+                onClick={() => setHinweis(true)}
+                data-testid="c1-zeig-mir-wie"
+              >
+                Zeig mir wie
+              </Button>
+            ) : null
+          }
           geschafft={gefunden ? 'Gefunden' : null}
         />
       }
@@ -162,11 +187,11 @@ export function C1() {
  * Werkzeichnung in M4: wer die Nummer sucht, darf nicht am Bildrand danach
  * schauen müssen, während er auf dem Tisch tippt.
  *
- * Die Hilfe wächst nach zwei Fehlgriffen unten an, statt als Knopf zu
- * erscheinen: das Angebot ist die Zeile selbst, und ein zweites Bedienelement
- * für „lies das hier“ wäre eines zu viel.
+ * Die Hilfe wächst nach zwei Fehlgriffen unten an; die Lösung selbst bietet
+ * parallel „Zeig mir wie“ im Fuß an — ist sie angenommen (`hinweis`), sagt die
+ * Zeile, worauf die Bühne gerade zeigt.
  */
-function Stueckliste({ hilfe }: { hilfe: boolean }) {
+function Stueckliste({ hilfe, hinweis }: { hilfe: boolean; hinweis: boolean }) {
   return (
     <div className="kh-feld flex flex-col gap-1.5 px-3.5 py-2.5">
       <p className="kh-etikett">Aus der Stückliste</p>
@@ -189,7 +214,9 @@ function Stueckliste({ hilfe }: { hilfe: boolean }) {
           data-testid="c1-hilfe"
           className="border-t border-kh-line pt-2 text-[1rem] leading-snug text-kh-paper/70"
         >
-          Zwei Hölzer sind gleich lang. Deins hat die Kerbe am Ende.
+          {hinweis
+            ? 'Das angehobene Holz ist deins — tipp es an.'
+            : 'Zwei Hölzer sind gleich lang. Deins hat die Kerbe am Ende.'}
         </p>
       )}
     </div>

@@ -164,9 +164,10 @@ export function C4() {
     const n = versuche + 1
     setVersuche(n)
     if (r.treffer) {
-      // Sofort speichern und sofort lösen: das Aufrichten ist eine Sekunde
-      // Ansicht, kein Zustand, auf den jemand warten muss. Wer währenddessen
-      // weitergeht, hat den Ausschnitt trotzdem im Store.
+      // Sofort speichern und sofort lösen: das Aufrichten (samt Standzeit,
+      // `AUFRICHTEN_STANDZEIT`) ist eine Ansicht, kein Zustand, auf den jemand
+      // warten muss. Wer währenddessen weitergeht, hat den Ausschnitt trotzdem
+      // im Store.
       merkeAntwort('c4', {
         getroffen: true,
         versuche: n,
@@ -339,8 +340,8 @@ function bewerte(a: Fensterausschnitt): Antwort {
       treffer: false,
       text:
         f <= 0
-          ? 'Zu schmal. Der Rahmen geht so gar nicht rein. Nachschneiden geht — das kostet dich zehn Minuten.'
-          : `Zu knapp. ${f} Millimeter Fuge, und der Dichtstoff braucht zehn. Nachschneiden geht — das kostet dich zehn Minuten.`,
+          ? 'Zu schmal. Der Rahmen geht so gar nicht rein. Nachschneiden geht — das dauert, und um elf steht der Lkw.'
+          : `Zu knapp. ${f} Millimeter Fuge, und der Dichtstoff braucht zehn. Nachschneiden geht — das dauert, und um elf steht der Lkw.`,
     }
   }
   if (f > FUGE_MAX_MM) {
