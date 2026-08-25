@@ -7,6 +7,7 @@ import {
   betreteBeruf,
   useAktiverBeruf,
   useBesuchteBerufe,
+  useFertigeBerufe,
   useSitzung,
   zeigeVorschlag,
 } from '@/khpl/store/fortschritt'
@@ -29,6 +30,7 @@ export function Berufsliste() {
   const { rangfolge, kaltstart, bester } = useMatch()
   const aktiv = useAktiverBeruf()
   const besuchte = useBesuchteBerufe()
+  const fertige = useFertigeBerufe()
   const sitzung = useSitzung()
   const staffTap = useStaffAusgang()
 
@@ -96,6 +98,7 @@ export function Berufsliste() {
             index={i}
             empfohlen={b.id === empfohlen}
             angefangen={besuchte.includes(b.id)}
+            fertig={fertige.includes(b.id)}
             aktiv={b.id === aktiv}
           />
         ))}
@@ -116,12 +119,14 @@ function Karte({
   index,
   empfohlen,
   angefangen,
+  fertig,
   aktiv,
 }: {
   beruf: BerufDef
   index: number
   empfohlen: boolean
   angefangen: boolean
+  fertig: boolean
   aktiv: boolean
 }) {
   const bald = beruf.graph === null
@@ -182,7 +187,21 @@ function Karte({
             was das Sheet sagt — und Gelbgrün bleibt dem einen Beruf, in dem
             der Besucher gerade steckt.
           */}
-          {angefangen && !aktiv && (
+          {/*
+            Ein zu Ende gespielter Tag heißt nicht mehr „da weitermachen“ —
+            er ist geschafft, und genau dafür ist Gelbgrün reserviert
+            (index.css). Das ist neben „du bist hier“ das zweite legitime
+            Gelbgrün dieses Screens; beide markieren ein Ist, keine Wahl.
+          */}
+          {fertig && !aktiv && (
+            <span
+              className={`${CHIP} flex items-center gap-1 bg-kh-signal text-[#0E0D0B]`}
+            >
+              <Check className="size-3.5" strokeWidth={3.5} aria-hidden />
+              geschafft
+            </span>
+          )}
+          {angefangen && !fertig && !aktiv && (
             <span
               className={`${CHIP} flex items-center gap-1.5 border border-kh-line-strong bg-white/12 text-kh-paper`}
             >

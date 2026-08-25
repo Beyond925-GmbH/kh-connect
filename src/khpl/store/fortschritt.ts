@@ -1049,3 +1049,20 @@ export function useBesuchteBerufe(): BerufId[] {
     (id) => (s.berufe[id]?.visited.length ?? 0) > 0,
   )
 }
+
+/**
+ * Welche Berufe der Besucher in dieser Sitzung **zu Ende** gespielt hat: der
+ * Schlussstep eines Tages ist der mit `weiter: null` — wer dort war, hat den
+ * CTA gesehen. Ohne diese Auskunft trug ein komplett durchgespielter Tag auf
+ * der Berufsliste dieselbe Marke „Angefangen — da weitermachen“ wie ein
+ * halbfertiger (Nachprüfung 25.08.).
+ */
+export function useFertigeBerufe(): BerufId[] {
+  const s = useSitzung()
+  return (Object.keys(s.berufe) as BerufId[]).filter((id) => {
+    const graph = beruf(id).graph
+    const visited = s.berufe[id]?.visited
+    if (!graph || !visited?.length) return false
+    return visited.some((v) => istStepId(graph, v) && step(graph, v).weiter === null)
+  })
+}

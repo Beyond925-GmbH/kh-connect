@@ -295,11 +295,14 @@ export const ANLAGENMECHANIKER: BerufDef = {
       und A4.1. Es zeigt einen Menschen bei der Arbeit an einer Anlage; genau
       darum geht es auf diesem Screen.
 
-      `pos` sitzt links, weil hochkant nur rund ein Drittel der Bildbreite
-      stehen bleibt: dort ist der Kopf, nicht der Handschuh. Quer deckt das Bild
-      die Fläche ohnehin ganz ab.
+      `pos` sitzt bei 65 %, weil hochkant nur rund ein Drittel der Bildbreite
+      stehen bleibt: dort liegen die behandschuhten Hände am grünen Messblock —
+      die Arbeit. Links davon ist nur der Hinterkopf (das Foto ist eine
+      Rückenansicht, ein Gesicht gibt es nirgends im Bild; die Nachprüfung vom
+      25.08. hatte den 28-%-Ausschnitt genau deshalb moniert). Quer deckt das
+      Bild die Fläche ohnehin ganz ab.
     */
-    A9: { src: '/medien/media/anlagenmechaniker/card.webp', pos: '28% 45%' },
+    A9: { src: '/medien/media/anlagenmechaniker/card.webp', pos: '65% 45%' },
   } satisfies Partial<Record<Id, StepBild>>,
   /**
    * S5 — die Auftragsannahme, in-fiction, ohne Meta-Erklärung. Wortlaut aus

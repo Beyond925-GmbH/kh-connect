@@ -296,9 +296,13 @@ export function C6() {
                   <p className="kh-etikett text-kh-paper/55">{achse.frage}</p>
                   <div className="grid grid-cols-2 gap-2">
                     {achse.optionen.map((o) => (
+                      // `ton="orange"` wie M1/M4: das Antippen ist vorläufig —
+                      // die Prüfung „So absetzen“ färbt danach, und Gelbgrün
+                      // bliebe sonst auf einer falschen Wahl stehen.
                       <Wahlflaeche
                         key={o.wert}
                         form="karte"
+                        ton="orange"
                         gewaehlt={gewaehlt[achse.id] === o.wert}
                         onClick={() => waehle(achse.id, o.wert)}
                         data-testid={`c6-${achse.id}-${o.wert}`}
