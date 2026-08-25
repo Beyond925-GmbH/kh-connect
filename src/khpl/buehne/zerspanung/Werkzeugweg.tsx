@@ -40,8 +40,22 @@ import {
  * teure Weg zum selben Bild.
  */
 
-/** x ∈ [-50, 20], y ∈ [-30, 22]. Dieselbe Millimeterwelt wie Zeichnung und Maschine. */
-const SICHT = '-50 -30 70 52'
+/**
+ * Der Ausschnitt, quer und hochkant. Dieselbe Millimeterwelt wie Zeichnung und
+ * Maschine.
+ *
+ * **Quer: x ∈ [-52, 22], y ∈ [-30, 30].** Die erste Fassung endete bei y = 22
+ * und schnitt damit das Futter (es reicht bis 26) waagerecht an der unteren
+ * Bühnenkante ab — ein Bauteil, das an zwei Kanten gleichzeitig endet, liest
+ * sich als Fehler, eins, das seitlich aus dem Bild läuft, als Maschine, die
+ * weitergeht. Jetzt endet es nur noch links.
+ *
+ * **Hochkant: x ∈ [-46, 22].** Sechs Millimeter enger — vom Futter bleiben die
+ * Backen, und die kosten nichts an Aussage: Der Screen handelt vom Weg, nicht
+ * von der Spannung. Dafür steht die Kontur im stehenden Feld eine Stufe größer.
+ */
+const SICHT = '-52 -30 74 60'
+const SICHT_HOCH = '-46 -30 68 60'
 
 /** Wie lange der ganze Schnittweg braucht, wenn er von null an durchläuft. */
 const GESAMT_DAUER = ZEILEN_DAUER * Math.max(1, SCHNITT.length - 1)
@@ -136,93 +150,102 @@ export function Werkzeugweg({
     RUECKZUG.length === 2 && zeile > RUECKZUG[1].zeile && !luftschnitt
 
   return (
-    <Bild viewBox={SICHT}>
-      <g
-        style={{
-          opacity: luftschnitt ? 0.75 : 1,
-          transition: 'opacity 0.25s cubic-bezier(0.2, 0, 0, 1)',
-        }}
-      >
-        <Futter />
+    <Bild viewBox={SICHT} viewBoxHoch={SICHT_HOCH}>
+      {(hoch) => (
+        <g
+          style={{
+            opacity: luftschnitt ? 0.75 : 1,
+            transition: 'opacity 0.25s cubic-bezier(0.2, 0, 0, 1)',
+          }}
+        >
+          <Futter />
 
-        {/* Der Rohling als Schatten: was abgetragen wird, bleibt sichtbar. */}
-        <g opacity={0.34}>
-          <Rohteil von={-46} bis={2} />
-        </g>
+          {/* Der Rohling als Schatten: was abgetragen wird, bleibt sichtbar. */}
+          <g opacity={0.34}>
+            <Rohteil von={-46} bis={2} />
+          </g>
 
-        <Achse von={-48} bis={16} />
+          <Achse von={hoch ? -44 : -50} bis={18} />
 
-        {/* Das Teil, das unter dem Weg entsteht.
+          {/* Das Teil, das unter dem Weg entsteht.
 
             `d` steht schon beim Rendern und nicht erst im ersten Takt: Der
             Effekt läuft nach dem Anstrich, und ein Screen, auf den man
             zurückspringt, hätte sonst ein Bild lang gar keine Kontur. Rendert
             React später neu, schreibt es genau den Stand hin, der ohnehin
             schon im Attribut steht — der Takt läuft ungestört weiter. */}
-        <path
-          ref={koerperRef}
-          d={koerperPfad(stand.current)}
-          className="fill-kh-paper/16 stroke-kh-paper"
-          strokeWidth={STRICH.voll}
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
-
-        {zurueckgezogen && (
           <path
-            d={alsPfad(RUECKZUG)}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={STRICH.fein}
-            strokeDasharray="7 4"
+            ref={koerperRef}
+            d={koerperPfad(stand.current)}
+            className="fill-kh-paper/22 stroke-kh-paper"
+            strokeWidth={STRICH.voll}
+            strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
-            className="text-kh-mute"
           />
-        )}
 
-        {/* Der gefahrene Schnittweg — dieselbe Strichstärke wie die Kontur in
+          {/* Der Rückzug fährt `G0 X100. Z50.` an und liegt damit weit außerhalb
+            jeder Ansicht dieses Tages — er läuft also aus dem Bild. Das ist
+            richtig so und war trotzdem der Grund, warum die Zeichnung quer
+            „rechts rausläuft“: ohne Rahmen zeichnete sich die Strecke bis an
+            die Kante des SVG-Elements weiter, also mitten in den leeren
+            Streifen neben dem Ausschnitt. `Bild` klammert jetzt auf den
+            `viewBox`; die gestrichelte Linie endet sauber am Rand. */}
+          {zurueckgezogen && (
+            <path
+              d={alsPfad(RUECKZUG)}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={STRICH.fein}
+              strokeDasharray="7 4"
+              vectorEffect="non-scaling-stroke"
+              className="text-kh-mute"
+            />
+          )}
+
+          {/* Der gefahrene Schnittweg — dieselbe Strichstärke wie die Kontur in
             Z1, weil es dieselbe Kontur ist (§6 Z3). */}
-        <path
-          ref={wegRef}
-          d={alsPfad(schnittBis(stand.current))}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={STRICH.voll}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-          className="text-kh-orange"
-        />
-
-        {markiert && (
           <path
-            d={markiert}
+            ref={wegRef}
+            d={alsPfad(schnittBis(stand.current))}
             fill="none"
             stroke="currentColor"
-            strokeWidth={STRICH.voll * 3}
+            strokeWidth={STRICH.voll}
             strokeLinecap="round"
+            strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
-            className="text-kh-orange/35"
+            className="text-kh-orange"
           />
-        )}
 
-        {/* Der Weg, den die falsche Zeile wirklich fährt — aus `FEHLER_CODE`
+          {markiert && (
+            <path
+              d={markiert}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={STRICH.voll * 3}
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+              className="text-kh-orange/35"
+            />
+          )}
+
+          {/* Der Weg, den die falsche Zeile wirklich fährt — aus `FEHLER_CODE`
             gerechnet wie jeder andere Weg auch. Er läuft am Teil vorbei und
             aus dem Bild hinaus, und unter ihm bleibt der Rohling stehen. */}
-        {luftschnitt && FEHLWEG.length === 2 && <Luftschnitt />}
+          {luftschnitt && FEHLWEG.length === 2 && <Luftschnitt />}
 
-        <g
-          ref={werkzeugRef}
-          transform={
-            luftschnitt
-              ? `translate(${HALT[0]} ${HALT[1]})`
-              : spitzenVersatz(stand.current)
-          }
-          style={{ opacity: angefahren ? 1 : 0, transition: 'opacity 0.3s' }}
-        >
-          <Schneide />
+          <g
+            ref={werkzeugRef}
+            transform={
+              luftschnitt
+                ? `translate(${HALT[0]} ${HALT[1]})`
+                : spitzenVersatz(stand.current)
+            }
+            style={{ opacity: angefahren ? 1 : 0, transition: 'opacity 0.3s' }}
+          >
+            <Schneide />
+          </g>
         </g>
-      </g>
+      )}
     </Bild>
   )
 }
@@ -256,7 +279,7 @@ function Schneide() {
         stroke="currentColor"
         strokeWidth={STRICH.fein}
         vectorEffect="non-scaling-stroke"
-        className="text-kh-line-strong"
+        className="text-kh-mute"
       />
     </g>
   )

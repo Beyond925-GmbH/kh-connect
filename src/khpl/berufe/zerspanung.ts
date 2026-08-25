@@ -275,19 +275,23 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       den Stand gehen. „Team am Maschinenbildschirm“ ist das einzige Motiv im
       Bestand, auf dem in diesem Beruf jemand mit jemandem redet.
 
-      **Der Ausschnitt bleibt mittig, und der zweite Wert wirkt nicht.** Das
-      Motiv ist 16 : 9; auf der stehenden Stele deckt `cover` damit die volle
-      Höhe ab und beschneidet ausschließlich seitlich — quer (16 : 9) fällt gar
-      kein Schnitt an. Was hochkant vom Bild bleibt, ist ein Streifen von einem
-      knappen Drittel der Breite, und mittig steht darin das Profil des
-      Kollegen mit Bart, davor der jüngere. Weiter nach rechts geschoben stehen
-      zwar zwei weitere Gesichter im Streifen, beide aber so hoch im Bild, dass
-      die Screenkante sie in der Mitte durchschneidet — ein halbes Kinn ist
-      kein Gesprächsangebot. Dass die Fläche nicht orange wirkte, lag nicht am
-      Ausschnitt, sondern am Multiplizieren über einem dunklen Motiv; das ist
-      in `Z8.tsx` behoben.
+      **Nur der erste Wert entscheidet.** Das Motiv ist 16 : 9; auf der
+      stehenden Stele deckt `cover` die volle Höhe ab und beschneidet
+      ausschließlich seitlich, quer (16 : 9) fällt gar kein Schnitt an. Der
+      zweite Wert steht deshalb nur der Vollständigkeit halber da — die
+      senkrechte Lage ist auf diesem Bild in keiner Ausrichtung verschiebbar.
+
+      ⚠️ **Die Schädeldecken fehlen schon in der Vorlage.** Alle drei Köpfe
+      berühren im Original die obere Kante; kein Ausschnitt der Welt holt sie
+      zurück, und ein tiefer gesetztes Bild ergäbe eine waagerechte Naht mitten
+      durch die Stirnen. Was der Ausschnitt entscheiden kann, ist, ob im
+      stehenden Streifen **Gesichter** stehen oder Rümpfe. Bei 50 % stand darin
+      der junge Kollege und hinter ihm eine Schulter — zwei angeschnittene
+      Kinne, keine Szene. Bei 70 % liegen zwei vollständige Profile im
+      Streifen, beide im Gespräch nach rechts gewandt, dazwischen die Hand mit
+      dem Tablet: der Moment, den dieser Screen als Aufforderung braucht.
     */
-    Z8: { src: '/medien/media/zerspanungsmechaniker/card.webp', pos: '50% 45%' },
+    Z8: { src: '/medien/media/zerspanungsmechaniker/card.webp', pos: '70% 45%' },
   } satisfies Partial<Record<Id, StepBild>>,
   /**
    * S5 — die Auftragsannahme, `VALIDIERT` (khpl-tag-zerspanung.md §6).

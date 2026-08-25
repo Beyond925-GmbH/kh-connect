@@ -52,7 +52,7 @@ export function Kiste({ fuellstand = 0 }: { fuellstand?: number }) {
           das ist der ganze Grund, warum es eine Sichtkiste ist. */}
       <path
         d="M 8 6 L 92 6 L 84 68 L 16 68 Z"
-        className="fill-kh-paper/5 stroke-kh-paper/55"
+        className="fill-kh-paper/8 stroke-kh-paper/80"
         strokeWidth={STRICH.voll}
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"
@@ -138,7 +138,7 @@ export function Kiste({ fuellstand = 0 }: { fuellstand?: number }) {
         stroke="currentColor"
         strokeWidth={STRICH.voll}
         vectorEffect="non-scaling-stroke"
-        className="text-kh-line"
+        className="text-kh-mute/70"
       />
     </Bild>
   )

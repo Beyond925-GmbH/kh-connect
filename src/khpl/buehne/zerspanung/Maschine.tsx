@@ -32,14 +32,54 @@ import { LAENGE, NENNMASS, ROHLING_DURCHMESSER } from './kanon'
  * Richtungsangabe, mit der das Programm in Z3 dann `Z-35.` schreibt.
  */
 
-/** x ∈ [-68, 37], y ∈ [-49, 29]. Dieselbe Millimeterwelt wie die Zeichnung. */
-const SICHT = '-68 -49 105 78'
-const [SICHT_X, SICHT_Y] = [68, 49]
+/**
+ * Wie die Maschine im Feld steht — **je Lage einmal.**
+ *
+ * Eine Drehmaschine ist breit: Futter links, Werkstück in der Mitte, Revolver
+ * rechts oben. Im stehenden Feld bleibt davon eine Zeichnung auf halber Höhe
+ * und darüber wie darunter ein leeres Drittel. Was dagegen hilft, ist keine
+ * andere Skalierung, sondern eine andere **Aufstellung**: hochkant schwenkt der
+ * Revolver über die Schneide statt neben sie. Er sitzt damit fachlich richtiger
+ * (er steht ohnehin über dem Werkzeug) und der Ausschnitt wird zwölf Millimeter
+ * schmaler und zwölf höher — die Maschine wird größer, nicht kleiner.
+ */
+interface Aufstellung {
+  /** `min-x min-y breite hoehe` in Millimetern. */
+  sicht: string
+  /** Mitte der Revolverscheibe. */
+  revolver: readonly [number, number]
+  /** Wo der Werkzeughalter aus der Scheibe tritt. */
+  halter: readonly [number, number]
+}
+
+/**
+ * x ∈ [-68, 40], y ∈ [-49, 29]. Dieselbe Millimeterwelt wie die Zeichnung.
+ * Drei Millimeter mehr Luft rechts als in der ersten Fassung: die Scheibe endet
+ * bei 34 und stand vorher auf der Kante, was sich wie ein Anschnitt las.
+ */
+const QUER: Aufstellung = {
+  sicht: '-68 -49 108 78',
+  revolver: [20, -30],
+  halter: [12, -20],
+}
+
+/** x ∈ [-68, 28], y ∈ [-58, 32] — der Revolver steht über der Schneide. */
+const HOCH: Aufstellung = {
+  sicht: '-68 -58 96 90',
+  revolver: [12, -40],
+  halter: [8, -30],
+}
 
 /** Stirnfläche der Spannbacken. Ab hier nach links ist Futter, kein Werkstück. */
 const BACKEN_STIRN = -37
 
 const ROHLING_R = ROHLING_DURCHMESSER / 2
+
+/** Die linke obere Ecke einer Ansicht — Bezug für `transform-origin`. */
+function ursprung(sicht: string): readonly [number, number] {
+  const [x, y] = sicht.split(/\s+/).map(Number)
+  return [x, y]
+}
 
 export function Maschine({
   ruestschritte = 0,
@@ -54,21 +94,29 @@ export function Maschine({
   const genullt = ruestschritte >= 4 || nullpunkt
 
   return (
-    <Bild viewBox={SICHT}>
-      <Futter offen={!gespannt} />
+    <Bild viewBox={QUER.sicht} viewBoxHoch={HOCH.sicht}>
+      {(hoch) => {
+        const lage = hoch ? HOCH : QUER
 
-      <g
-        style={{
-          opacity: gespannt ? 1 : 0,
-          transition: 'opacity 0.4s cubic-bezier(0.2, 0, 0, 1)',
-        }}
-      >
-        <Rohteil von={-46} bis={2} />
-      </g>
+        return (
+          <>
+            <Futter offen={!gespannt} />
 
-      <Revolver bestueckt={bestueckt} />
-      <Werkzeuglaenge sichtbar={vermessen} />
-      <Nullpunkt sichtbar={genullt} leuchtet={nullpunkt} />
+            <g
+              style={{
+                opacity: gespannt ? 1 : 0,
+                transition: 'opacity 0.4s cubic-bezier(0.2, 0, 0, 1)',
+              }}
+            >
+              <Rohteil von={-46} bis={2} />
+            </g>
+
+            <Revolver bestueckt={bestueckt} lage={lage} />
+            <Werkzeuglaenge sichtbar={vermessen} lage={lage} />
+            <Nullpunkt sichtbar={genullt} leuchtet={nullpunkt} />
+          </>
+        )
+      }}
     </Bild>
   )
 }
@@ -107,7 +155,7 @@ export function Futter({ offen = false }: { offen?: boolean }) {
         stroke="currentColor"
         strokeWidth={STRICH.fein}
         vectorEffect="non-scaling-stroke"
-        className="text-kh-paper/30"
+        className="text-kh-paper/55"
       />
 
       {[-1, 1].map((seite) => (
@@ -150,7 +198,6 @@ export function Rohteil({ von, bis }: { von: number; bis: number }) {
 
 /** Wo die Schneide sitzt, wenn sie in Position steht. */
 const SCHNEIDE = [1.5, -ROHLING_R - 0.6] as const
-const REVOLVER_MITTE = [20, -30] as const
 const REVOLVER_R = 14
 
 /**
@@ -159,10 +206,11 @@ const REVOLVER_R = 14
  * Werkzeug in Position steht. Eine harte Rastung, keine Feder — der Revolver
  * einer Drehmaschine schwingt nicht aus.
  */
-export function Revolver({ bestueckt }: { bestueckt: boolean }) {
+export function Revolver({ bestueckt, lage }: { bestueckt: boolean; lage: Aufstellung }) {
+  const [cx, cy] = lage.revolver
+  const [ux, uy] = ursprung(lage.sicht)
   const ecken = Array.from({ length: 12 }, (_, i) => {
     const w = (i / 12) * Math.PI * 2
-    const [cx, cy] = REVOLVER_MITTE
     return `${cx + Math.cos(w) * REVOLVER_R},${cy + Math.sin(w) * REVOLVER_R}`
   }).join(' ')
 
@@ -172,7 +220,7 @@ export function Revolver({ bestueckt }: { bestueckt: boolean }) {
         style={{
           transform: `rotate(${bestueckt ? 0 : -22}deg)`,
           transformBox: 'view-box',
-          transformOrigin: `${REVOLVER_MITTE[0] + SICHT_X}px ${REVOLVER_MITTE[1] + SICHT_Y}px`,
+          transformOrigin: `${cx - ux}px ${cy - uy}px`,
           transition: 'transform 0.5s cubic-bezier(0.2, 0, 0, 1)',
         }}
       >
@@ -186,7 +234,6 @@ export function Revolver({ bestueckt }: { bestueckt: boolean }) {
         {/* Die leeren Stationen — dort sitzen die anderen elf Werkzeuge. */}
         {Array.from({ length: 12 }, (_, i) => {
           const w = (i / 12) * Math.PI * 2 + Math.PI / 12
-          const [cx, cy] = REVOLVER_MITTE
           return (
             <line
               key={i}
@@ -197,19 +244,19 @@ export function Revolver({ bestueckt }: { bestueckt: boolean }) {
               stroke="currentColor"
               strokeWidth={STRICH.fein}
               vectorEffect="non-scaling-stroke"
-              className="text-kh-paper/30"
+              className="text-kh-paper/55"
             />
           )
         })}
         <circle
-          cx={REVOLVER_MITTE[0]}
-          cy={REVOLVER_MITTE[1]}
+          cx={cx}
+          cy={cy}
           r={3.6}
           fill="none"
           stroke="currentColor"
           strokeWidth={STRICH.fein}
           vectorEffect="non-scaling-stroke"
-          className="text-kh-paper/45"
+          className="text-kh-paper/70"
         />
       </g>
 
@@ -221,19 +268,19 @@ export function Revolver({ bestueckt }: { bestueckt: boolean }) {
         }}
       >
         <path
-          d={`M 12 -20 L ${SCHNEIDE[0] + 1.4} ${SCHNEIDE[1] - 1.8}`}
+          d={`M ${lage.halter[0]} ${lage.halter[1]} L ${SCHNEIDE[0] + 1.4} ${SCHNEIDE[1] - 1.8}`}
           stroke="currentColor"
           strokeWidth={5}
           strokeLinecap="round"
           className="text-kh-raised"
         />
         <path
-          d={`M 12 -20 L ${SCHNEIDE[0] + 1.4} ${SCHNEIDE[1] - 1.8}`}
+          d={`M ${lage.halter[0]} ${lage.halter[1]} L ${SCHNEIDE[0] + 1.4} ${SCHNEIDE[1] - 1.8}`}
           fill="none"
           stroke="currentColor"
           strokeWidth={STRICH.fein}
           vectorEffect="non-scaling-stroke"
-          className="text-kh-paper/45"
+          className="text-kh-paper/70"
         />
         <polygon
           points={`${SCHNEIDE[0]},${SCHNEIDE[1]} ${SCHNEIDE[0] + 5},${SCHNEIDE[1] - 2.5} ${SCHNEIDE[0] + 3},${SCHNEIDE[1] - 6}`}
@@ -249,7 +296,9 @@ export function Revolver({ bestueckt }: { bestueckt: boolean }) {
  * Z und in X. Ohne Zahlen — welche dort stünden, hängt an Maschine und
  * Halter, und der Screen behauptet nichts, was er nicht belegen kann.
  */
-function Werkzeuglaenge({ sichtbar }: { sichtbar: boolean }) {
+function Werkzeuglaenge({ sichtbar, lage }: { sichtbar: boolean; lage: Aufstellung }) {
+  const ecke = [lage.revolver[0], SCHNEIDE[1]] as const
+
   return (
     <g
       style={{
@@ -259,8 +308,8 @@ function Werkzeuglaenge({ sichtbar }: { sichtbar: boolean }) {
     >
       {/* Die beiden Maße treffen sich in der Ecke unter dem Revolver: X, wie
           weit die Schneide heraussteht, und Z, wie weit sie vorsteht. */}
-      <Mass von={REVOLVER_MITTE} bis={[REVOLVER_MITTE[0], SCHNEIDE[1]]} hervor />
-      <Mass von={SCHNEIDE} bis={[REVOLVER_MITTE[0], SCHNEIDE[1]]} hervor />
+      <Mass von={lage.revolver} bis={ecke} hervor />
+      <Mass von={SCHNEIDE} bis={ecke} hervor />
     </g>
   )
 }

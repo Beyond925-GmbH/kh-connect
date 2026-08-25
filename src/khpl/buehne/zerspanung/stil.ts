@@ -16,13 +16,32 @@
  * Rechner: Der Zoom zeigt mehr Details, er macht die Linien nicht fett.
  * Bauteile dagegen (Futter, Rohling, Bügel) sind Flächen mit echter
  * Ausdehnung und werden mitskaliert.
+ *
+ * **Die Stärken sind eine Stufe höher als in der ersten Fassung.** Am
+ * Schreibtisch trug 1,25 px; auf einer stehenden Stele, aus zwei Metern und bei
+ * Tageslicht durch die Hallentür, war eine halbtransparente Haarlinie auf
+ * Fast-Schwarz nicht mehr da. Der Zoom macht die Linien nicht fett — die
+ * Grundstärke muss deshalb von sich aus tragen.
  */
 export const STRICH = {
   /** Hilfs-, Maß- und Mittellinien. */
-  fein: 1.25,
+  fein: 1.6,
   /** Sichtbare Kanten, Werkzeugweg. Dieselbe Stärke in Z1 und Z3 — §6 Z3. */
-  voll: 2.5,
+  voll: 3.4,
 } as const
+
+/**
+ * Die Farbe der Bemaßung: Maßlinien, Pfeilspitzen, Mittelachse, Hinweislinien.
+ *
+ * **Nicht `kh-line-strong`.** Das Token ist 26 % Weiß auf `kh-surface` und
+ * damit ein Rahmenton für Flächen, kein Zeichenton — auf der Stele blieb davon
+ * bei Tageslicht nichts übrig. `kh-mute` ist ein deckender Grauton aus
+ * demselben Satz und liest sich wie der weiche Bleistift, mit dem eine
+ * Zeichnung bemaßt wird: sichtbar, aber leiser als die Kontur.
+ */
+export const BEMASSUNG = 'text-kh-mute'
+/** Maßhilfslinien — dieselbe Familie, eine Spur zurückgenommen. */
+export const HILFE = 'text-kh-mute/70'
 
 /**
  * Wie ein Bauteil aussieht: Futter, Rohling, Bügel, Trommel, Kiste.
@@ -34,12 +53,12 @@ export const STRICH = {
  * Handschrift, die zum Tag gehört — die Werkzeuge dieses Berufs sind die
  * Zeichnung, der Werkzeugweg und die Zahl, und alle drei sind Linie.
  *
- * Die Deckkraft der Kante ist eine Stufe höher als in der ersten Fassung:
- * auf der stehenden Stele, aus zwei Metern Abstand und unter Hallenlicht,
- * verschwand ein Grauton auf Fast-Schwarz. Am Schreibtisch war er zu sehen —
- * am Schreibtisch steht das Gerät aber nicht.
+ * Die Kante steht inzwischen **voll** in `kh-paper`. Zwei Stufen Deckkraft
+ * hintereinander (erst /70, dann /80) waren jedes Mal am Schreibtisch genug und
+ * auf der Stele nicht — Tageslicht frisst den Rest eines Grautons auf
+ * Fast-Schwarz. Am Schreibtisch steht das Gerät aber nicht.
  */
-export const BAUTEIL = 'fill-kh-raised stroke-kh-paper/80'
+export const BAUTEIL = 'fill-kh-raised stroke-kh-paper'
 
 /**
  * Millimeter mit drei Stellen hinter dem Komma — der Satz, in dem `20,000` und

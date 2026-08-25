@@ -33,6 +33,20 @@ import { FASE, GROESSTMASS, KLEINSTMASS, NENNMASS, TOLERANZ } from './kanon'
  */
 const SICHT = '0 -28 116 72'
 
+/**
+ * Hochkant: x ∈ [0, 106], y ∈ [-44, 44].
+ *
+ * Eine Mikrometerschraube ist ein liegendes Gerät; im stehenden Feld blieb sie
+ * auf halber Breite stehen und ließ oben wie unten ein Drittel leer. Zwei
+ * Handgriffe holen das zurück, und beide sind Bühne, keine Aussage: Der Weg,
+ * den die Trommel beim Aufdrehen nach rechts zurücklegt, bleibt frei statt
+ * vorgehalten — sie fährt dann beim Zudrehen von der Kante her ins Bild, was
+ * genau die Handlung des Takts ist —, und die **Toleranzzone rückt nach oben**,
+ * in die Höhe, die sonst niemand benutzt. Sie ist ohnehin stark überhöht; wie
+ * hoch sie über der Fläche schwebt, ist keine Zahl, sondern Platz.
+ */
+const SICHT_HOCH = '0 -44 106 88'
+
 const TEIL = [24, 0] as const
 const TEIL_R = NENNMASS / 2
 
@@ -51,8 +65,25 @@ const STEIGUNG = 0.5
  * kreuzte ausgerechnet die Kontur, um die es geht. Zwischen Teilkante
  * (`-TEIL_R`) und Zonenunterkante bleibt jetzt ein Streifen frei, den die
  * gestrichelte Hinweislinie überbrückt.
+ *
+ * **`von` steht bei 14 und nicht mehr bei 9.** Die Marke des Messwerts läuft
+ * vier Millimeter über die Zone hinaus nach links; bei 9 begann sie damit bei
+ * 5, also am Rand des Ausschnitts, und sah aus wie angeschnitten. Jetzt liegt
+ * zwischen Band und Bühnenkante eine Handbreit, und die Zone beginnt genau über
+ * der linken Teilkante (`TEIL[0] − TEIL_R` = 14), auf die sie sich bezieht.
  */
-const ZONE = { oben: -24, hoch: 6, von: 9, bis: 39 }
+interface Zone {
+  oben: number
+  hoch: number
+  von: number
+  bis: number
+  /** Schriftgrad von Größt- und Kleinstmaß neben dem Band. */
+  grad: number
+}
+
+const ZONE_QUER: Zone = { oben: -23, hoch: 6, von: 14, bis: 44, grad: 3.4 }
+/** Hochkant sitzt dieselbe Zone höher und trägt größere Zahlen. */
+const ZONE_HOCH: Zone = { oben: -37, hoch: 8, von: 14, bis: 44, grad: 4.2 }
 
 /**
  * Wie weit die Marke außerhalb der Zone laufen darf, in Zeichnungseinheiten.
@@ -90,134 +121,149 @@ export function Messschraube({
   const offen = Math.max(0, (messwert - NENNMASS) * SPINDEL_UEBERHOEHT)
 
   return (
-    <Bild viewBox={SICHT}>
-      {/* Der Bügel. Ein Bauteil mit Ausdehnung, deshalb Fläche und nicht Linie. */}
-      <path
-        d="M 12 4 L 12 38 L 68 38 L 68 4 L 60 4 L 60 30 L 20 30 L 20 4 Z"
-        className={BAUTEIL}
-        strokeWidth={STRICH.voll}
-        strokeLinejoin="round"
-        vectorEffect="non-scaling-stroke"
-      />
+    <Bild viewBox={SICHT} viewBoxHoch={SICHT_HOCH}>
+      {(hoch) => (
+        <>
+          {/* Der Bügel. Ein Bauteil mit Ausdehnung, deshalb Fläche und nicht Linie. */}
+          <path
+            d="M 12 4 L 12 38 L 68 38 L 68 4 L 60 4 L 60 30 L 20 30 L 20 4 Z"
+            className={BAUTEIL}
+            strokeWidth={STRICH.voll}
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
 
-      {/* Amboss links, Messspindel rechts — dazwischen liegt das Teil an. */}
-      <rect
-        x={5}
-        y={-7}
-        width={9}
-        height={14}
-        rx={1}
-        className={BAUTEIL}
-        strokeWidth={STRICH.voll}
-        vectorEffect="non-scaling-stroke"
-      />
-      {/*
-        Die Messspindel. Sie ist das eine Bauteil, das beim Zudrehen wandert —
-        zusammen mit Trommel und Ratsche weiter unten, und **ohne** die
-        Skalenhülse, die zum Bügel gehört. Der Weg ist überhöht
-        (`SPINDEL_UEBERHOEHT`): sechs Zehntel wären auf dieser Bühne fünf
-        Bildschirmpunkte, und ein Zudrehen, das man nicht sieht, ist keins.
-      */}
-      <g transform={`translate(${offen} 0)`}>
-        <rect
-          x={34}
-          y={-5.5}
-          width={24}
-          height={11}
-          rx={1}
-          className={BAUTEIL}
-          strokeWidth={STRICH.voll}
-          vectorEffect="non-scaling-stroke"
-        />
-      </g>
+          {/* Amboss links, Messspindel rechts — dazwischen liegt das Teil an. */}
+          <rect
+            x={5}
+            y={-7}
+            width={9}
+            height={14}
+            rx={1}
+            className={BAUTEIL}
+            strokeWidth={STRICH.voll}
+            vectorEffect="non-scaling-stroke"
+          />
+          {/*
+            Die Messspindel. Sie ist das eine Bauteil, das beim Zudrehen wandert —
+            zusammen mit Trommel und Ratsche weiter unten, und **ohne** die
+            Skalenhülse, die zum Bügel gehört. Der Weg ist überhöht
+            (`SPINDEL_UEBERHOEHT`): sechs Zehntel wären auf dieser Bühne fünf
+            Bildschirmpunkte, und ein Zudrehen, das man nicht sieht, ist keins.
+          */}
+          <g transform={`translate(${offen} 0)`}>
+            <rect
+              x={34}
+              y={-5.5}
+              width={24}
+              height={11}
+              rx={1}
+              className={BAUTEIL}
+              strokeWidth={STRICH.voll}
+              vectorEffect="non-scaling-stroke"
+            />
+          </g>
 
-      {/* Das Teil, von der Stirnseite: der Durchmesser, um den es geht. */}
-      <circle
-        cx={TEIL[0]}
-        cy={TEIL[1]}
-        r={TEIL_R}
-        className="fill-kh-raised stroke-kh-paper"
-        strokeWidth={STRICH.voll}
-        vectorEffect="non-scaling-stroke"
-      />
-      {/* Die Fasenkante: dieselbe Fase, die Z1 mit „2 × 45°“ bemaßt. */}
-      <circle
-        cx={TEIL[0]}
-        cy={TEIL[1]}
-        r={TEIL_R - FASE}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={STRICH.fein}
-        vectorEffect="non-scaling-stroke"
-        className="text-kh-paper/50"
-      />
+          {/*
+            Das Teil, von der Stirnseite: der Durchmesser, um den es geht.
 
-      {/* Skalenhülse mit ihrer Längsstrichmarke. */}
-      <rect
-        x={56}
-        y={-8.5}
-        width={24}
-        height={17}
-        rx={1.5}
-        className={BAUTEIL}
-        strokeWidth={STRICH.voll}
-        vectorEffect="non-scaling-stroke"
-      />
-      <line
-        x1={58}
-        y1={0}
-        x2={79}
-        y2={0}
-        stroke="currentColor"
-        strokeWidth={STRICH.fein}
-        vectorEffect="non-scaling-stroke"
-        className="text-kh-paper/60"
-      />
-      {Array.from({ length: 9 }, (_, i) => (
-        <line
-          key={i}
-          x1={59 + i * 2.2}
-          y1={0}
-          x2={59 + i * 2.2}
-          y2={i % 2 === 0 ? -4.4 : -2.6}
-          stroke="currentColor"
-          strokeWidth={STRICH.fein}
-          vectorEffect="non-scaling-stroke"
-          className="text-kh-paper/60"
-        />
-      ))}
+            **Es darf nicht aussehen wie das Gerät.** In der ersten Fassung war es
+            derselbe `kh-raised`-Grund mit derselben hellen Kante wie Amboss,
+            Spindel und Bügel — zwischen zwei Klötzen lag ein dritter Klotz, und
+            „dreh sie zu, bis sie anliegt“ hatte optisch kein Gegenüber. Jetzt trägt
+            es eine deutlich hellere Fläche und die kräftigste Kante der Bühne: das
+            Gerät ist Werkzeug, das Teil ist die Sache. Dieselbe Rangfolge, mit der
+            Z1 die Kontur von der Bemaßung trennt.
+          */}
+          <circle
+            cx={TEIL[0]}
+            cy={TEIL[1]}
+            r={TEIL_R}
+            className="fill-kh-paper/20 stroke-kh-paper"
+            strokeWidth={STRICH.voll * 1.35}
+            vectorEffect="non-scaling-stroke"
+          />
+          {/* Die Fasenkante: dieselbe Fase, die Z1 mit „2 × 45°“ bemaßt. */}
+          <circle
+            cx={TEIL[0]}
+            cy={TEIL[1]}
+            r={TEIL_R - FASE}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={STRICH.fein}
+            vectorEffect="non-scaling-stroke"
+            className="text-kh-paper/75"
+          />
 
-      {/* Skalentrommel und Ratsche — sie wandern über die feste Hülse, und
-          genau das ist die Anzeige. */}
-      <g transform={`translate(${offen} 0)`}>
-        <rect
-          x={TROMMEL.x1}
-          y={-TROMMEL.r}
-          width={TROMMEL.x2 - TROMMEL.x1}
-          height={TROMMEL.r * 2}
-          rx={2.5}
-          className={BAUTEIL}
-          strokeWidth={STRICH.voll}
-          vectorEffect="non-scaling-stroke"
-        />
-        <Trommelstriche wert={messwert} />
-        <rect
-          x={96}
-          y={-4.5}
-          width={8}
-          height={9}
-          rx={2}
-          className={BAUTEIL}
-          strokeWidth={STRICH.voll}
-          vectorEffect="non-scaling-stroke"
-        />
-      </g>
+          {/* Skalenhülse mit ihrer Längsstrichmarke. */}
+          <rect
+            x={56}
+            y={-8.5}
+            width={24}
+            height={17}
+            rx={1.5}
+            className={BAUTEIL}
+            strokeWidth={STRICH.voll}
+            vectorEffect="non-scaling-stroke"
+          />
+          <line
+            x1={58}
+            y1={0}
+            x2={79}
+            y2={0}
+            stroke="currentColor"
+            strokeWidth={STRICH.fein}
+            vectorEffect="non-scaling-stroke"
+            className="text-kh-paper/80"
+          />
+          {Array.from({ length: 9 }, (_, i) => (
+            <line
+              key={i}
+              x1={59 + i * 2.2}
+              y1={0}
+              x2={59 + i * 2.2}
+              y2={i % 2 === 0 ? -4.4 : -2.6}
+              stroke="currentColor"
+              strokeWidth={STRICH.fein}
+              vectorEffect="non-scaling-stroke"
+              className="text-kh-paper/80"
+            />
+          ))}
 
-      <Toleranzzone
-        wert={messwert}
-        sichtbar={toleranzUeberlagerung || korrigiert}
-        gut={korrigiert}
-      />
+          {/* Skalentrommel und Ratsche — sie wandern über die feste Hülse, und
+            genau das ist die Anzeige. */}
+          <g transform={`translate(${offen} 0)`}>
+            <rect
+              x={TROMMEL.x1}
+              y={-TROMMEL.r}
+              width={TROMMEL.x2 - TROMMEL.x1}
+              height={TROMMEL.r * 2}
+              rx={2.5}
+              className={BAUTEIL}
+              strokeWidth={STRICH.voll}
+              vectorEffect="non-scaling-stroke"
+            />
+            <Trommelstriche wert={messwert} />
+            <rect
+              x={96}
+              y={-4.5}
+              width={8}
+              height={9}
+              rx={2}
+              className={BAUTEIL}
+              strokeWidth={STRICH.voll}
+              vectorEffect="non-scaling-stroke"
+            />
+          </g>
+
+          <Toleranzzone
+            wert={messwert}
+            zone={hoch ? ZONE_HOCH : ZONE_QUER}
+            sichtbar={toleranzUeberlagerung || korrigiert}
+            gut={korrigiert}
+          />
+        </>
+      )}
     </Bild>
   )
 }
@@ -265,22 +311,24 @@ function Trommelstriche({ wert }: { wert: number }) {
  */
 function Toleranzzone({
   wert,
+  zone,
   sichtbar,
   gut,
 }: {
   wert: number
+  zone: Zone
   sichtbar: boolean
   gut: boolean
 }) {
-  const unten = ZONE.oben + ZONE.hoch
-  // Überhöhung: die ganze Zone ist `ZONE.hoch` hoch, also liegt ein Wert um
+  const unten = zone.oben + zone.hoch
+  // Überhöhung: die ganze Zone ist `zone.hoch` hoch, also liegt ein Wert um
   // `hoch / TOLERANZ` je Millimeter daneben. Gekappt, damit ein weit
   // danebenliegender Wert nicht aus dem Bild fährt.
   const lage = Math.max(
-    ZONE.oben - MARKE_UEBERSTAND,
+    zone.oben - MARKE_UEBERSTAND,
     Math.min(
       unten + MARKE_UEBERSTAND,
-      ZONE.oben + ((GROESSTMASS - wert) / TOLERANZ) * ZONE.hoch,
+      zone.oben + ((GROESSTMASS - wert) / TOLERANZ) * zone.hoch,
     ),
   )
   const ton = gut ? 'text-kh-signal' : 'text-kh-orange'
@@ -296,18 +344,18 @@ function Toleranzzone({
       }}
     >
       <rect
-        x={ZONE.von}
-        y={ZONE.oben}
-        width={ZONE.bis - ZONE.von}
-        height={ZONE.hoch}
+        x={zone.von}
+        y={zone.oben}
+        width={zone.bis - zone.von}
+        height={zone.hoch}
         className="fill-kh-signal/14"
       />
-      {[ZONE.oben, unten].map((y, i) => (
+      {[zone.oben, unten].map((y, i) => (
         <line
           key={y}
-          x1={ZONE.von}
+          x1={zone.von}
           y1={y}
-          x2={ZONE.bis}
+          x2={zone.bis}
           y2={y}
           stroke="currentColor"
           strokeWidth={STRICH.fein}
@@ -320,9 +368,9 @@ function Toleranzzone({
       {/* Wo die gemessene Fläche wirklich liegt. */}
       <g className={ton}>
         <line
-          x1={ZONE.von - 3}
+          x1={zone.von - 4}
           y1={lage}
-          x2={ZONE.bis}
+          x2={zone.bis}
           y2={lage}
           stroke="currentColor"
           strokeWidth={STRICH.voll}
@@ -330,7 +378,7 @@ function Toleranzzone({
           style={{ transition: 'none' }}
         />
         <polygon
-          points={`${ZONE.bis},${lage} ${ZONE.bis - 3.4},${lage - 1.9} ${ZONE.bis - 3.4},${lage + 1.9}`}
+          points={`${zone.bis},${lage} ${zone.bis - 3.4},${lage - 1.9} ${zone.bis - 3.4},${lage + 1.9}`}
           fill="currentColor"
         />
       </g>
@@ -345,23 +393,23 @@ function Toleranzzone({
         strokeWidth={STRICH.fein}
         strokeDasharray="3 3"
         vectorEffect="non-scaling-stroke"
-        className="text-kh-line-strong"
+        className="text-kh-mute"
       />
 
       <text
-        x={ZONE.bis + 4}
-        y={ZONE.oben + 1.2}
-        fontSize={3.4}
-        className="fill-kh-paper/75 font-display"
+        x={zone.bis + 4}
+        y={zone.oben + 1.2}
+        fontSize={zone.grad}
+        className="fill-kh-paper/90 font-display"
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
         {KOMMA.format(GROESSTMASS)}
       </text>
       <text
-        x={ZONE.bis + 4}
+        x={zone.bis + 4}
         y={unten + 1.2}
-        fontSize={3.4}
-        className="fill-kh-paper/75 font-display"
+        fontSize={zone.grad}
+        className="fill-kh-paper/90 font-display"
         style={{ fontVariantNumeric: 'tabular-nums' }}
       >
         {KOMMA.format(KLEINSTMASS)}

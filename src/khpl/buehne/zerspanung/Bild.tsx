@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import type { ReactNode, RefObject } from 'react'
-import { STRICH } from './stil'
+import { BEMASSUNG, HILFE, STRICH } from './stil'
 
 /**
  * Der Rahmen, in dem jede Ansicht dieses Tages steht.
@@ -18,10 +18,51 @@ import { STRICH } from './stil'
  * Rest gestellt, der wirklich frei bleibt; quer sind das die rechten Fünftel,
  * und für Z3 fällt das mit der Spec zusammen: **Code links, Werkzeugweg
  * rechts.**
+ *
+ * **Zwei Ausschnitte, nicht einer** (`viewBoxHoch`). Die Fläche ist quer breit
+ * und hochkant hoch, und ein einziger querformatiger `viewBox` bekommt in einem
+ * stehenden Feld mit `meet` beides gleichzeitig: eine kleine Zeichnung und über
+ * ihr wie unter ihr ein leeres Drittel. Das ist keine Einstellungssache — eine
+ * liegende Drehmaschine füllt kein stehendes Feld, solange sie liegt. Was sie
+ * füllen kann, ist ein **anderer Ausschnitt**: enger an der Sache, mit der
+ * Bemaßung nach oben und unten verteilt statt nach links und rechts. Jede
+ * Ansicht bringt den deshalb selbst mit; die Bühne misst nur, welcher gilt.
+ *
+ * **Und geklammert wird hart.** Ein `viewBox` mit `meet` ist kein Rahmen: was
+ * außerhalb liegt, wird in den Letterbox-Streifen weitergezeichnet, bis die
+ * Kante des SVG-Elements kommt. Genau daher kam der abgeschnittene Riesen-
+ * buchstabe am linken Rand von Z1 (die Bemaßung, vierfach vergrößert) und der
+ * Rückzug in Z3, der `X100. Z50.` anfährt und dabei quer aus dem Bild lief. Ein
+ * `clipPath` auf dem `viewBox` macht aus dem Ausschnitt wieder das, was auf
+ * einem Zeichnungsblatt der Rahmen ist: die Grenze.
+ *
+ * ⚠️ **Was bleibt, und warum es bleiben darf.** Gemessen an einem stehenden
+ * Bühnenfeld von rund 1040 × 1385 px steht jetzt oben und unten:
+ *
+ * | Ansicht | vorher | jetzt |
+ * | --- | --- | --- |
+ * | Z1 Zeichnung | 288 px | 105 px |
+ * | Z2 Maschine | 306 px | 205 px |
+ * | Z3 Werkzeugweg | 306 px | 234 px |
+ * | Z5 Messschraube | 370 px | 261 px |
+ *
+ * Und die Zeichnungen sind dabei **größer** geworden, nicht kleiner. Null wird
+ * es nicht: Eine Drehmaschine und eine Mikrometerschraube sind quer gebaute
+ * Gegenstände, und der einzige Weg auf null wäre, sie seitlich anzuschneiden —
+ * dann fehlte auf Z5 die Trommel, also die Anzeige, um die der Screen geht.
+ * Ein Fünftel Rand oben und unten ist der Rand eines Blattes; die Hälfte war
+ * ein Loch.
  */
+
+/** Bühneninhalt, der wissen darf, ob er im stehenden Feld steht. */
+type Inhalt = ReactNode | ((hoch: boolean) => ReactNode)
+
+const zeige = (inhalt: Inhalt, hoch: boolean): ReactNode =>
+  typeof inhalt === 'function' ? inhalt(hoch) : inhalt
 
 export function Bild({
   viewBox,
+  viewBoxHoch,
   massstab = 1,
   mitte,
   hell = false,
@@ -30,6 +71,11 @@ export function Bild({
 }: {
   /** `min-x min-y breite hoehe`, in Millimetern der jeweiligen Ansicht. */
   viewBox: string
+  /**
+   * Derselbe Gegenstand, fürs stehende Feld anders gefasst. Ohne Angabe gilt
+   * `viewBox` in beiden Lagen — richtig für alles, was ohnehin hoch ist.
+   */
+  viewBoxHoch?: string
   /** Zoomfaktor auf `mitte`. 1 heißt: die Ansicht steht, wie sie gedacht ist. */
   massstab?: number
   /** Der Punkt, auf den gezoomt wird. Ohne Angabe die Mitte der Ansicht. */
@@ -37,15 +83,21 @@ export function Bild({
   /** Der Messraum ist der einzige helle Screen des Tages (§6 Z4). */
   hell?: boolean
   /** Liegt **über** dem Zoom und fährt nicht mit — Detailansichten, Hinweise. */
-  ueber?: ReactNode
-  children: ReactNode
+  ueber?: Inhalt
+  children: Inhalt
 }) {
-  const [minX, minY, breite, hoehe] = viewBox.split(/\s+/).map(Number)
+  const rahmen = useRef<HTMLDivElement>(null)
+  const frei = useFreieFlaeche(rahmen)
+
+  const sicht = frei.hoch ? (viewBoxHoch ?? viewBox) : viewBox
+  const [minX, minY, breite, hoehe] = sicht.split(/\s+/).map(Number)
   const [cx, cy] = [minX + breite / 2, minY + hoehe / 2]
   const [mx, my] = mitte ?? [cx, cy]
 
-  const rahmen = useRef<HTMLDivElement>(null)
-  const frei = useFreieFlaeche(rahmen)
+  // `useId` liefert Doppelpunkte; in einer `url(#…)`-Referenz haben sie nichts
+  // zu suchen. Ein Rahmen je Bühne, weil zwei Bühnen nebeneinander sonst
+  // denselben Ausschnitt benutzten.
+  const rahmenId = `zerspanung-rahmen-${useId().replace(/:/g, '')}`
 
   return (
     // `data-wisch="aus"` ist die Hausmarke für Flächen, auf denen gezogen
@@ -83,27 +135,38 @@ export function Bild({
         }}
       >
         <svg
-          viewBox={viewBox}
+          viewBox={sicht}
           preserveAspectRatio="xMidYMid meet"
           className="size-full"
           aria-hidden
         >
-          <g
-            style={{
-              // `view-box` legt den Ursprung für `transform-origin` auf die
-              // linke obere Ecke der Ansicht — deshalb der Versatz um min-x
-              // und min-y. Ohne das zoomt jede Ansicht auf einen anderen Punkt.
-              transformBox: 'view-box',
-              transformOrigin: `${mx - minX}px ${my - minY}px`,
-              transform: `translate(${cx - mx}px, ${cy - my}px) scale(${massstab})`,
-              // Raster, keine Springs (§7). `prefers-reduced-motion` schaltet
-              // die Dauer global in `index.css` auf null.
-              transition: 'transform 0.7s cubic-bezier(0.2, 0, 0, 1)',
-            }}
-          >
-            {children}
+          <defs>
+            <clipPath id={rahmenId}>
+              <rect x={minX} y={minY} width={breite} height={hoehe} />
+            </clipPath>
+          </defs>
+
+          {/* Der Rahmen liegt auf einer eigenen Gruppe **ohne** Transformation:
+              geklammert wird der Ausschnitt, nicht das, was gerade in ihn
+              hineinfährt. Läge er auf der zoomenden Gruppe, zoomte er mit. */}
+          <g clipPath={`url(#${rahmenId})`}>
+            <g
+              style={{
+                // `view-box` legt den Ursprung für `transform-origin` auf die
+                // linke obere Ecke der Ansicht — deshalb der Versatz um min-x
+                // und min-y. Ohne das zoomt jede Ansicht auf einen anderen Punkt.
+                transformBox: 'view-box',
+                transformOrigin: `${mx - minX}px ${my - minY}px`,
+                transform: `translate(${cx - mx}px, ${cy - my}px) scale(${massstab})`,
+                // Raster, keine Springs (§7). `prefers-reduced-motion` schaltet
+                // die Dauer global in `index.css` auf null.
+                transition: 'transform 0.7s cubic-bezier(0.2, 0, 0, 1)',
+              }}
+            >
+              {zeige(children, frei.hoch)}
+            </g>
+            {zeige(ueber, frei.hoch)}
           </g>
-          {ueber}
         </svg>
       </div>
     </div>
@@ -119,6 +182,13 @@ interface Rand {
   rechts: number
   unten: number
   links: number
+  /**
+   * Ist das, was übrig bleibt, höher als breit? **Nicht dasselbe wie ein
+   * hochkanter Screen**: quer mit breitem Panel bleibt der Bühne ein Streifen,
+   * der ebenfalls steht, und hochkant mit sehr hohem Panel einer, der liegt.
+   * Entschieden wird nach der Fläche, die die Zeichnung wirklich bekommt.
+   */
+  hoch: boolean
 }
 
 /** Luft zwischen Zeichnung und Screenkante, in px. */
@@ -166,12 +236,16 @@ function grob(px: number, bezug: number): number {
  * Layout-Position kennt keine Transformationen.
  */
 function useFreieFlaeche(rahmen: RefObject<HTMLDivElement | null>): Rand {
-  const [rand, setRand] = useState<Rand>({
+  const [rand, setRand] = useState<Rand>(() => ({
     oben: LEISTE,
     rechts: LUFT,
     unten: LUFT,
     links: LUFT,
-  })
+    // Der erste Anstrich steht, bevor gemessen werden konnte. Die Lage des
+    // Fensters ist der beste Rateschritt und liegt in der Praxis richtig; der
+    // Layout-Effekt korrigiert ihn noch vor dem Bild.
+    hoch: window.innerHeight >= window.innerWidth,
+  }))
   const letzter = useRef(rand)
 
   const messen = useCallback(() => {
@@ -181,7 +255,13 @@ function useFreieFlaeche(rahmen: RefObject<HTMLDivElement | null>): Rand {
     const h = flaeche.clientHeight
     if (b <= 0 || h <= 0) return
 
-    const neu: Rand = { oben: LEISTE, rechts: LUFT, unten: LUFT, links: LUFT }
+    const neu: Rand = {
+      oben: LEISTE,
+      rechts: LUFT,
+      unten: LUFT,
+      links: LUFT,
+      hoch: true,
+    }
     const panel = flaeche.querySelector<HTMLElement>('[data-testid="karte"]')
 
     if (panel) {
@@ -202,13 +282,15 @@ function useFreieFlaeche(rahmen: RefObject<HTMLDivElement | null>): Rand {
 
     neu.links = Math.min(neu.links, b * (1 - MINDEST_BREIT))
     neu.unten = Math.min(neu.unten, h - LEISTE - h * MINDEST_HOCH)
+    neu.hoch = h - neu.oben - neu.unten > b - neu.links - neu.rechts
 
     const alt = letzter.current
     if (
       alt.oben === neu.oben &&
       alt.rechts === neu.rechts &&
       alt.unten === neu.unten &&
-      alt.links === neu.links
+      alt.links === neu.links &&
+      alt.hoch === neu.hoch
     ) {
       return
     }
@@ -258,7 +340,7 @@ export function Achse({ von, bis, y = 0 }: { von: number; bis: number; y?: numbe
       strokeWidth={STRICH.fein}
       strokeDasharray="14 5 3 5"
       vectorEffect="non-scaling-stroke"
-      className="text-kh-line-strong"
+      className={BEMASSUNG}
     />
   )
 }
@@ -287,7 +369,7 @@ export function Mass({
   const [x2, y2] = bis
   const laenge = Math.hypot(x2 - x1, y2 - y1) || 1
   const [ex, ey] = [(x2 - x1) / laenge, (y2 - y1) / laenge]
-  const farbe = hervor ? 'text-kh-orange' : 'text-kh-line-strong'
+  const farbe = hervor ? 'text-kh-orange' : BEMASSUNG
   const winkel = (Math.atan2(ey, ex) * 180) / Math.PI
 
   return (
@@ -339,7 +421,7 @@ export function Hilfslinie({
       stroke="currentColor"
       strokeWidth={STRICH.fein}
       vectorEffect="non-scaling-stroke"
-      className="text-kh-line"
+      className={HILFE}
     />
   )
 }
