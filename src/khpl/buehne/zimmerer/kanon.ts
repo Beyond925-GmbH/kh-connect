@@ -71,3 +71,16 @@ export const PENDEL_DAEMPFUNG = 0.75
 
 /** Wie weit die Last höchstens ausschwingt, in Metern. */
 export const PENDEL_AUSSCHLAG_M = 0.6
+
+/**
+ * Halbe Breite des Einrast-Fensters beim Absetzen in C6, seitlich in Metern.
+ *
+ * Der Ziehweg umfasst ±3 m. Mit ±0,2 m war das Trefferfenster rund 36 von
+ * 545 Bildpunkten breit und auf der Bühne nicht markiert — am Messe-Kiosk
+ * stand das Element optisch längst, während der Screen weiter „lass es ab“
+ * sagte (Abnahme-Befund). Jetzt gilt das Muster von C4/M7: großzügige
+ * Toleranz, denn der Lerninhalt ist das Prinzip — die Last ruhig über die
+ * Schwelle führen —, nicht Pixelpräzision. Die Zielzone markiert `Zielgeist`
+ * sichtbar.
+ */
+export const ABSETZ_FENSTER_M = 0.75

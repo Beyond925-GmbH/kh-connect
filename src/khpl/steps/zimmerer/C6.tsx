@@ -111,6 +111,15 @@ export function C6() {
   const [oben, setOben] = useState<Elementlage['oben'] | null>(null)
   const [versuche, setVersuche] = useState(() => gespeichert?.versuche ?? 0)
   const [meldung, setMeldung] = useState<{ text: string; ok: boolean } | null>(null)
+  /**
+   * Nach einem falschen „So absetzen“ **bleibt die Wahl stehen** — der
+   * Fehlertext erklärt genau diese beiden Entscheidungen, und wer sie nicht
+   * mehr sieht, kann ihn nicht auf sie beziehen (Abnahme-Befund). Nur die
+   * Bühne lässt los: `verworfen` schaltet `lage` auf `null`, das Element
+   * dreht sich zurück in die Luft. Der nächste Tap auf eine Option (oder auf
+   * die Bühne) hebt es wieder auf.
+   */
+  const [verworfen, setVerworfen] = useState(false)
 
   // Wer schon einmal hier war, steigt dort ein, wo er aufgehört hat: die
   // Abfrage zweimal zu beantworten wäre keine Erinnerungsleistung mehr.
@@ -124,12 +133,13 @@ export function C6() {
   /** Die Lage, die die Bühne zeigen soll. `null` = sie dreht sich weiter. */
   const lage: Elementlage | null =
     takt === 'lage'
-      ? aussen && oben
+      ? aussen && oben && !verworfen
         ? { aussenseite: aussen, oben }
         : null
       : { ...RICHTIG }
 
   const uebernimm = (l: Elementlage) => {
+    setVerworfen(false)
     setAussen(l.aussenseite)
     setOben(l.oben)
   }
@@ -142,6 +152,7 @@ export function C6() {
    * soll.
    */
   const waehle = (achse: string, wert: string) => {
+    setVerworfen(false)
     if (achse === 'aussenseite') {
       setAussen(wert === 'holzfaser' ? 'holzfaser' : 'beplankung')
     } else {
@@ -164,9 +175,9 @@ export function C6() {
     setVersuche(neu)
     setMeldung({ text: falsch.map((a) => a.warum).join(' '), ok: false })
     // Der Bühnen-Beat der Spec: das Element setzt nicht ab, es dreht sich
-    // zurück in die Luft — die Wahl verfällt mit (`lage` wird wieder `null`).
-    setAussen(null)
-    setOben(null)
+    // zurück in die Luft. Die Wahl im Panel bleibt dabei stehen — siehe
+    // `verworfen` oben.
+    setVerworfen(true)
     merkeAntwort('c6', { seiteRichtig: false, versetzt: false, versuche: neu })
   }
 

@@ -55,6 +55,14 @@ interface Schicht {
    * nicht wie dick genau.
    */
   dicke: number
+  /**
+   * Farbe im Querschnitt-Schema — dieselbe, die die Schicht auf der 3D-Bühne
+   * trägt (`buehne/zimmerer/element.tsx` bzw. `kulissen.tsx`; von dort nicht
+   * importierbar, das ist der three-Chunk). Bühnen-lokal, kein neuer
+   * Tokensatz: fünf gleich helle Blöcke lasen sich als Platzhalter
+   * (Abnahme-Befund), fünf Bühnenfarben lesen sich als dieselbe Wand.
+   */
+  farbe: string
 }
 
 /**
@@ -68,30 +76,35 @@ const SCHICHTEN: Schicht[] = [
     name: 'Innenbeplankung',
     was: 'Die Platte, die im fertigen Zimmer die Wand ist. Davor liegt meist noch eine Installationsebene für Kabel und Dosen — damit später niemand durch die Dichtung bohrt.',
     dicke: 2,
+    farbe: '#DDD8CF', // Gipsplatte auf der Bühne
   },
   {
     id: 'dampfbremse',
     name: 'Dampfbremse',
     was: 'Auf die warme Innenseite, direkt vor die Dämmung. Sie hält die Luftfeuchte aus dem Zimmer aus der Wand heraus.',
     dicke: 1,
+    farbe: '#7FA9B5', // die blaugraue Bahn auf der Bühne
   },
   {
     id: 'daemmung',
     name: 'Ständerwerk mit Dämmung',
     was: 'Das tragende Skelett — und zwischen den Ständern, im Gefach, die Dämmung. Hier steckt die Wärme des Hauses drin.',
     dicke: 7,
+    farbe: '#D8C48F', // die Gefachdämmung auf der Bühne
   },
   {
     id: 'holzfaser',
     name: 'Holzfaserplatte',
     was: 'Außen, und diffusionsoffen. Was doch an Feuchte in die Wand gerät, muss hier wieder heraus können.',
     dicke: 3,
+    farbe: '#B58C4C', // die Holzfaserplatte auf der Bühne
   },
   {
     id: 'fassade',
     name: 'Fassade',
     was: 'Was man von der Straße sieht: Putz, Lattung, Schalung. Das entscheidet der Bauherr — die vier Schichten davor entscheidet die Bauphysik.',
     dicke: 2,
+    farbe: '#A8814A', // die Hauswand in C7 (kulissen.tsx)
   },
 ]
 
@@ -218,11 +231,13 @@ function Schichtkarte({
 
 /**
  * Der Querschnitt als Schema: innen links, außen rechts. Was schon liegt, ist
- * gefüllt; was gerade drankommt, leuchtet; was noch fehlt, ist ein Umriss.
+ * in seiner Bühnenfarbe gefüllt; was gerade drankommt, leuchtet orange; was
+ * noch fehlt, ist ein Umriss.
  *
  * Die Breiten sind schematisch (`Schicht.dicke`) und tragen bewusst keine
- * Beschriftung — die Zeichnung beantwortet *wo sitzt das*, die Zahlen dazu
- * hat niemand belegt.
+ * Maßbeschriftung — die Zeichnung beantwortet *wo sitzt das*, die Zahlen dazu
+ * hat niemand belegt. Namen stehen auf den Karten; im Schlusstakt rahmen
+ * „innen“/„außen“ das Schema, denn genau diese Achse ist die Pointe.
  */
 function Wandschnitt({ bis, hervor }: { bis: number; hervor: number }) {
   const LUFT = 0.7
@@ -250,16 +265,10 @@ function Wandschnitt({ bis, hervor }: { bis: number; hervor: number }) {
             width={s.dicke}
             height={12}
             rx={0.4}
-            fill={
-              aktiv
-                ? 'var(--color-kh-orange)'
-                : liegt
-                  ? 'var(--color-kh-paper)'
-                  : 'transparent'
-            }
-            fillOpacity={aktiv ? 1 : liegt ? 0.6 : 0}
+            fill={aktiv ? 'var(--color-kh-orange)' : liegt ? s.farbe : 'transparent'}
+            fillOpacity={aktiv ? 1 : liegt ? 0.95 : 0}
             stroke={aktiv ? 'var(--color-kh-orange)' : 'var(--color-kh-paper)'}
-            strokeOpacity={aktiv || liegt ? 1 : 0.25}
+            strokeOpacity={aktiv ? 1 : liegt ? 0.4 : 0.25}
             strokeWidth={0.25}
           />
         )
@@ -279,8 +288,15 @@ function Wandschnitt({ bis, hervor }: { bis: number; hervor: number }) {
 function Prinzip() {
   return (
     <div className="flex flex-col gap-2.5">
-      <span className="grid h-[54px] w-full max-w-[22rem] place-items-center rounded-kh bg-black/35 p-2">
-        <Wandschnitt bis={SCHICHTEN.length} hervor={-1} />
+      {/* „innen“/„außen“ sind funktionale Achsen-Etiketten, keine Fachwerte —
+          sie beschriften die Leserichtung des Schemas, um die es im Satz
+          darunter geht. */}
+      <span className="flex h-[54px] w-full max-w-[22rem] items-center gap-2.5 rounded-kh bg-black/35 px-3 py-2">
+        <span className="kh-etikett shrink-0 text-kh-paper/50">innen</span>
+        <span className="h-full min-w-0 flex-1">
+          <Wandschnitt bis={SCHICHTEN.length} hervor={-1} />
+        </span>
+        <span className="kh-etikett shrink-0 text-kh-paper/50">außen</span>
       </span>
 
       <p className="kh-titel-klein text-kh-signal">Innen dichter als außen.</p>

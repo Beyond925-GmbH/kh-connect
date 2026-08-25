@@ -276,9 +276,9 @@ export const ZIMMERER: BerufDef = {
    * C7 tragen das Wandelement in seinen sieben Zuständen. Fotos braucht dieser
    * Tag nur an wenigen Stellen (khpl-tag-zimmerer.md 10).
    *
-   * ⚠️ **Drei davon tragen einen Platzhalter, keinen Eigenbedarf.** Für C3.1,
-   * C5.1 und C8 führt die Spec kein eigenes Motiv; die erste Fassung ließ die
-   * Bühne dort deshalb leer. Auf der hochkanten Stele ist das ein schwarzes
+   * ⚠️ **Vier davon tragen einen Platzhalter, keinen Eigenbedarf.** Für C3.1,
+   * C5.1, C8 und C9 führt die Spec kein eigenes Motiv; die erste Fassung ließ
+   * die Bühne dort deshalb leer. Auf der hochkanten Stele ist das ein schwarzes
    * Feld über zwei Dritteln der Höhe — es sieht nicht nach Absicht aus,
    * sondern nach einem Bild, das nicht geladen hat, und es trifft
    * ausgerechnet den Sicherheits-Abstecher mit dem stärksten Zitat des Tages
@@ -310,6 +310,18 @@ export const ZIMMERER: BerufDef = {
     'C8.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
     'C8.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
     'C8.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
+    // PLATZHALTER. Der CTA: ohne Motiv blieb auf der hochkanten Stele
+    // zwischen Paderborn-Silhouette und Panel rund ein Drittel Bildhöhe
+    // reines Orange (Abnahme-Befund) — und eine leere Farbfläche fordert
+    // niemanden auf, mit einem Menschen zu sprechen. `gallery-2` (Blick von
+    // unten in den Holzrahmenbau, junger Mann im Sparrenwerk) trägt zwar
+    // schon die Berufskarte, liegt hier aber unter der orangen Markenzone
+    // (`mix-blend-multiply`) und liest sich als Zeichnung mit Mensch darin,
+    // nicht als zweite Karte — kein Screen zeigt beide nebeneinander.
+    // Bewusst nicht `intro-aufrichten.webp`: das ist der CTA des
+    // Dachdecker-Tages, und zwei Tage mit demselben Schlussbild wären der
+    // Fehler, den die Karten-Entscheidung oben gerade vermeidet.
+    C9: { src: '/medien/media/zimmerer/gallery-2.webp', pos: '50% 40%' },
   } satisfies Partial<Record<Id | 'intro', StepBild>>,
   /** Wortlaut `VALIDIERT` (khpl-tag-zimmerer.md 6, S5). */
   auftrag: {

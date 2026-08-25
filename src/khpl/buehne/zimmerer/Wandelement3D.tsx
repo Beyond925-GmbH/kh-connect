@@ -437,7 +437,10 @@ export default function Wandelement3D(props: Wandelement3DProps) {
 
         {zustand === 'fenster' && (
           <group>
-            <Halle mitAuflage />
+            {/* Ohne die kamerazugewandte Stützenreihe: der Blick nach oben
+                (aufgerichtet) ist schräg, und die Reihe schnitte das Element
+                mittig durch (Abnahme-Befund C4). */}
+            <Halle mitAuflage ohneVordereStuetzen />
             <FensterElement
               ausschnitt={props.ausschnitt}
               onAusschnitt={props.onAusschnitt}
@@ -451,8 +454,16 @@ export default function Wandelement3D(props: Wandelement3DProps) {
 
         {zustand === 'verladen' && (
           <group>
-            <Halle />
-            <group position={[0, 0, 3.0]}>
+            {/* Ohne die kamerazugewandte Stützenreihe: unter dem schrägen
+                Blick der Zäsur stand sie als Vordergrund vor dem Gespann und
+                las sich ohne Bodenkontakt als Renderfehler (Abnahme-Befund
+                C5). */}
+            <Halle ohneVordereStuetzen />
+            {/* x = −2,8 zentriert das Gespann in der Kamerahülle (±7,6 m):
+                der Anhänger trägt die Ladung um x = 0, der Transporter ragt
+                bis fast +10 — unverschoben lief der Innenlader rechts aus
+                dem Bild (Abnahme-Befund C5). */}
+            <group position={[-2.8, 0, 3.0]}>
               <Verladung
                 ausschnitt={spaeterAusschnitt}
                 marke={spaeteMarke}

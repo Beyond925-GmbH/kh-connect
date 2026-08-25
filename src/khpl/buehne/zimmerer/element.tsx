@@ -588,13 +588,13 @@ function Holzstueck({
           {holzStoff}
         </mesh>
       )}
-      <Html
-        center
-        distanceFactor={9}
-        position={[0, h / 2 + 0.05, 0]}
-        style={{ pointerEvents: 'none' }}
-      >
-        <span className="rounded-full bg-kh-ink/85 px-2 py-0.5 text-[13px] font-semibold whitespace-nowrap text-kh-paper">
+      {/* Konstante Bildschirmgröße, bewusst ohne `distanceFactor`: wächst die
+          Inhaltskarte, schrumpft das Sichtfeld und die Kamera fährt heraus —
+          mitskalierte Etiketten waren dann kaum noch lesbar (Abnahme-Befund
+          C1). Die Nummer ist der Arbeitsauftrag dieser Übung; sie muss in
+          jeder Kartenhöhe lesbar bleiben. */}
+      <Html center position={[0, h / 2 + 0.05, 0]} style={{ pointerEvents: 'none' }}>
+        <span className="rounded-full bg-kh-ink/85 px-2 py-0.5 text-[15px] font-semibold whitespace-nowrap text-kh-paper">
           {holz.nummer}
         </span>
       </Html>

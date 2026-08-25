@@ -1,12 +1,22 @@
 import { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { RISS_FARBEN, SIGNAL_MARKE, SZENE_FARBEN } from '@/dachstuhl/bauteil-texte'
+import {
+  AUSWAHL_EMISSIV,
+  RISS_FARBEN,
+  SIGNAL_MARKE,
+  SZENE_FARBEN,
+} from '@/dachstuhl/bauteil-texte'
 import type { Huelle } from '@/dachstuhl/mass'
 import { passeEin } from '@/drei/kamera'
 import type { Sichtfeld } from '@/drei/kamera'
 import { Gespann } from '@/drei/fahrzeug'
-import { ABFAHRT_DAUER, PENDEL_AUSSCHLAG_M, PENDEL_DAEMPFUNG } from './kanon'
+import {
+  ABFAHRT_DAUER,
+  ABSETZ_FENSTER_M,
+  PENDEL_AUSSCHLAG_M,
+  PENDEL_DAEMPFUNG,
+} from './kanon'
 import { B, H, T, Tafel, TISCH_OBEN, ELEMENT_FLACH_Y, glatt } from './element'
 import type { Elementlage, Elementlicht, Fensterausschnitt } from './Wandelement3D'
 
@@ -174,8 +184,22 @@ function Kontaktschatten({
  * breiter Streifen Platte leer. Perspektivisch erklärbar, gelesen wird es als
  * „das Element rutscht vom Tisch“. Die Auflagen liegen ohnehin schon auf der
  * Elementmitte — der Tisch zieht jetzt nach.
+ *
+ * **`ohneVordereStuetzen` lässt die kamerazugewandte Stützenreihe (z = +7)
+ * weg.** Unter der Draufsicht (C1–C3) liegt sie außerhalb des Bildes; unter
+ * den schrägen Blicken von C4 (aufgerichtet) und C5 stünde sie dagegen als
+ * Vordergrund direkt vor dem Motiv und schnitte Element bzw. Gespann
+ * (Abnahme-Befund). Die Kontaktschatten geben den verbleibenden Stützen ihren
+ * Bodenkontakt — auf dem dunklen Boden lasen sie sich sonst als frei
+ * schwebende schwarze Balken.
  */
-export function Halle({ mitAuflage = false }: { mitAuflage?: boolean }) {
+export function Halle({
+  mitAuflage = false,
+  ohneVordereStuetzen = false,
+}: {
+  mitAuflage?: boolean
+  ohneVordereStuetzen?: boolean
+}) {
   const tischZ = mitAuflage ? -H / 2 : 0
   const beine: [number, number][] = [
     [-4.2, tischZ - 1.5],
@@ -211,12 +235,15 @@ export function Halle({ mitAuflage = false }: { mitAuflage?: boolean }) {
           </mesh>
         ))}
       {/* Hallenstützen — Tiefe, die im Dunst versinkt */}
-      {[-7, 7].map((z) =>
+      {(ohneVordereStuetzen ? [-7] : [-7, 7]).map((z) =>
         [-9, -3, 3, 9].map((x) => (
-          <mesh key={`${x}:${z}`} position={[x, 3, z]}>
-            <boxGeometry args={[0.35, 6, 0.35]} />
-            <meshStandardMaterial color="#3A342C" roughness={0.9} flatShading />
-          </mesh>
+          <group key={`${x}:${z}`}>
+            <mesh position={[x, 3, z]}>
+              <boxGeometry args={[0.35, 6, 0.35]} />
+              <meshStandardMaterial color="#3A342C" roughness={0.9} flatShading />
+            </mesh>
+            <Kontaktschatten position={[x, 0.012, z]} groesse={[1.1, 1.1]} />
+          </group>
         )),
       )}
     </group>
@@ -352,6 +379,14 @@ const SEIL_L = 2.6
 const PX_JE_M = 0.011
 /** Höhe der Elementunterkante, wenn es auf der Bodenplatte steht. */
 const ABGESETZT_Y = 0.02
+/**
+ * Untergrenze der Zieh-Höhe in Beat 2 — deutlich über der Platte. Bei 0,15 m
+ * sah das Element aus, als stünde es längst, während der Screen weiter
+ * „lass es ab“ sagte (Abnahme-Befund): der Besucher hielt die App für hängen
+ * geblieben. Jetzt schwebt die Last sichtbar, bis das Einrasten die
+ * Absetz-Blende fährt — gesessen wird erst, wenn es wirklich sitzt.
+ */
+const SCHWEBE_MIN_Y = 0.35
 /** Schwebehöhe in Beat 1 — das Element hängt und wartet auf seine Lage. */
 const SCHWEBE_Y = 2.3
 /**
@@ -496,7 +531,7 @@ export function AmHaken({
     if (einweisen) {
       const e = eingabe.current
       s.hx = Math.max(-3, Math.min(3, s.hx + e.dx * PX_JE_M))
-      s.hy = Math.max(0.15, Math.min(2.6, s.hy - e.dy * PX_JE_M))
+      s.hy = Math.max(SCHWEBE_MIN_Y, Math.min(2.6, s.hy - e.dy * PX_JE_M))
       e.dx = 0
       e.dy = 0
     }
@@ -578,8 +613,16 @@ export function AmHaken({
     const unterkanteX = hookX - Math.sin(s.theta) * H
     let y = bodenY
     if (einweisen && s.setztSeit === null) {
-      const ruhig = Math.abs(s.thetaV) < 0.25 || reduziert
-      if (Math.abs(unterkanteX) < 0.2 && bodenY < 0.45 && ruhig) s.setztSeit = t
+      // Großzügig nach dem Muster von C4/M7 (siehe `ABSETZ_FENSTER_M`): tief
+      // genug herangeführt und halbwegs ruhig reicht — die Übung fragt das
+      // Führen der Last ab, nicht das Treffen einer Pixelspalte.
+      const ruhig = Math.abs(s.thetaV) < 0.4 || reduziert
+      if (
+        Math.abs(unterkanteX) < ABSETZ_FENSTER_M &&
+        bodenY < SCHWEBE_MIN_Y + 0.3 &&
+        ruhig
+      )
+        s.setztSeit = t
     }
     if (s.setztSeit !== null) {
       const u = reduziert ? 1 : glatt((t - s.setztSeit) / 0.8)
@@ -672,19 +715,46 @@ export function AmHaken({
   )
 }
 
-/** Der schwache Geist des Ziels: wo die Wand hin soll. */
+/**
+ * Die Zielzone des Absetzens: der Geist der Wand plus ein Markierungsrahmen
+ * an ihren Kanten. Vorher stand hier nur eine Fläche mit 7 % Deckkraft — auf
+ * der Stele unsichtbar, und das Einrast-Fenster blieb damit unmarkiert
+ * (Abnahme-Befund C6). Der Rahmen trägt die Hinweisfarbe, nicht das Gelbgrün:
+ * Gelbgrün heißt „geschafft“, und geschafft ist hier noch nichts.
+ */
 export function Zielgeist() {
   return (
-    <mesh position={[0, H / 2, WANDACHSE_Z - T / 2]}>
-      <planeGeometry args={[B, H]} />
-      <meshBasicMaterial
-        color={RISS_FARBEN.kante}
-        transparent
-        opacity={0.07}
-        depthWrite={false}
-        side={THREE.DoubleSide}
-      />
-    </mesh>
+    <group position={[0, 0, WANDACHSE_Z - T / 2]}>
+      <mesh position={[0, H / 2, 0]}>
+        <planeGeometry args={[B, H]} />
+        <meshBasicMaterial
+          color={RISS_FARBEN.kante}
+          transparent
+          opacity={0.12}
+          depthWrite={false}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+      {/* Linke und rechte Kante, dazu die Oberkante: die Lücke, in die die
+          Wand gehört, liest sich als Rahmen — nicht als Rechenfenster. */}
+      {(
+        [
+          [-B / 2, H / 2, 0.07, H],
+          [B / 2, H / 2, 0.07, H],
+          [0, H, B + 0.07, 0.07],
+        ] as const
+      ).map(([x, y, dx, dy], i) => (
+        <mesh key={i} position={[x, y, 0]}>
+          <boxGeometry args={[dx, dy, 0.05]} />
+          <meshBasicMaterial
+            color={AUSWAHL_EMISSIV}
+            transparent
+            opacity={0.55}
+            depthWrite={false}
+          />
+        </mesh>
+      ))}
+    </group>
   )
 }
 

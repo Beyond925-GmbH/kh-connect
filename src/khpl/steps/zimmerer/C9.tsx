@@ -131,19 +131,15 @@ export function C9() {
 }
 
 /**
- * Das Abschlussfeld: die Markenzone, und darin ein Motiv, sobald es eines gibt.
+ * Das Abschlussfeld: die Markenzone, und darin das Motiv aus
+ * `berufe/zimmerer.ts` (`C9`).
  *
- * ⚠️ **Für C9 liegt heute keines im Repo.** Die Motive unter `media/zimmerer/`
- * gehören der Sache nach hierher und sind an den gebauten Dachdecker-Tag
- * vergeben, weil es kein einziges Dachdecker-Motiv gibt (khpl-tage.md 7). Der
- * Zimmerer-Agent nimmt sie ihm nicht weg; die Fläche trägt bis zur
- * Redaktionsentscheidung Orange und die Paderborner Silhouette, und
- * `useStepBild` blendet ein Foto ein, sobald `berufe/zimmerer.ts` eines für
- * `C9` führt. Gemeldeter Medienbedarf.
- *
- * Das Argument des gebauten Tages gilt unverändert: eine leere Farbfläche
- * fordert niemanden auf, mit einem Menschen zu sprechen. Deshalb ist das hier
- * eine Lücke und keine Gestaltung.
+ * ⚠️ **Das Motiv ist ein Platzhalter aus dem eigenen Ordner** (`gallery-2`,
+ * Begründung dort): hochkant blieb sonst zwischen Silhouette und Panel rund
+ * ein Drittel Bildhöhe reines Orange (Abnahme-Befund), und das Argument des
+ * gebauten Tages gilt unverändert — eine leere Farbfläche fordert niemanden
+ * auf, mit einem Menschen zu sprechen. Der Medienbedarf für ein eigenes
+ * C9-Motiv bleibt gemeldet (khpl-tag-zimmerer.md 10).
  */
 function Abschlussfeld() {
   const bild = useStepBild('C9')
