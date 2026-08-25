@@ -48,7 +48,7 @@ export function Berufsliste() {
         className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_0%,rgba(255,122,26,0.16),transparent_60%)]"
       />
 
-      <header className="relative flex shrink-0 items-center gap-3 px-4 pt-4 landscape:px-8 landscape:pt-6">
+      <header className="relative flex shrink-0 items-center gap-3 px-5 pt-6 pb-1 landscape:px-8 landscape:pt-6 landscape:pb-0">
         {zurueck && (
           <button
             type="button"
@@ -62,7 +62,7 @@ export function Berufsliste() {
         )}
         <div className="min-w-0">
           <h1 className="kh-titel">Vier Berufe</h1>
-          <p className="text-[1rem] text-kh-mute">
+          <p className="text-[1.125rem] text-kh-mute landscape:text-[1rem]">
             {sitzung.aktiverBeruf
               ? 'Wechsle, wann du willst — dein Fortschritt bleibt.'
               : 'Such dir einen aus. Umentscheiden geht jederzeit.'}
@@ -79,11 +79,15 @@ export function Berufsliste() {
 
       <div
         data-scroll
-        // Quer füllen die vier Karten den Screen (`auto-rows-fr`), statt oben zu
-        // kleben und die untere Hälfte leer zu lassen. Hochkant bleibt es bei
-        // `auto-rows-min` mit Scrollen — dort passen vier Karten in voller Höhe
-        // ohnehin nicht nebeneinander.
-        className="relative mt-4 grid min-h-0 flex-1 auto-rows-min grid-cols-1 gap-3 overflow-y-auto overscroll-contain px-4 pb-5 landscape:auto-rows-fr landscape:grid-cols-2 landscape:px-8 landscape:pb-8"
+        // Die vier Karten füllen den Screen — quer über zwei Spalten, hochkant
+        // über vier volle Zeilen.
+        //
+        // Hochkant stand hier `auto-rows-min`: vier Karten à 9,5 rem klebten
+        // oben, darunter blieben auf der Stele rund 1.200 px Schwarz. Das ist
+        // der Hauptauswahl-Screen des Standes — die Fläche gehört den Karten.
+        // `minmax(9.5rem, 1fr)` statt `fr` allein: die alte Mindesthöhe bleibt
+        // der Boden, damit ein kleines Telefon scrollt statt zu quetschen.
+        className="relative mt-4 grid min-h-0 flex-1 auto-rows-[minmax(9.5rem,1fr)] grid-cols-1 gap-4 overflow-y-auto overscroll-contain px-5 pb-6 landscape:mt-4 landscape:auto-rows-fr landscape:grid-cols-2 landscape:gap-3 landscape:px-8 landscape:pb-8"
       >
         {berufe.map((b, i) => (
           <Karte
@@ -99,6 +103,13 @@ export function Berufsliste() {
     </div>
   )
 }
+
+/**
+ * Das Etikett auf einer Karte. Vier Zustände (empfohlen, hier, angefangen,
+ * bald) teilen sich Form und Größe; unterschieden wird über die Fläche.
+ */
+const CHIP =
+  'rounded-kh-pill px-3 py-1.5 text-[0.8125rem] font-bold tracking-[0.1em] uppercase landscape:px-2.5 landscape:py-1 landscape:text-[0.75rem]'
 
 function Karte({
   beruf,
@@ -142,23 +153,49 @@ function Karte({
           className={bald ? 'opacity-55 grayscale-[0.85]' : 'opacity-75'}
         />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0E0D0B] via-[#0E0D0B]/80 to-[#0E0D0B]/35" />
+        {/* Hochkant ist die Karte dreimal so hoch wie vorher; der Text steht
+            dann nicht mehr in der abgedunkelten linken Hälfte, sondern über
+            dem unteren Bildrand. Der Fuß-Verlauf trägt ihn dort — quer wird
+            er nicht gebraucht. */}
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0E0D0B] via-[#0E0D0B]/45 to-transparent landscape:hidden" />
       </div>
 
-      <div className="relative flex min-w-0 flex-1 flex-col justify-end gap-1.5 p-4">
+      <div className="relative flex min-w-0 flex-1 flex-col justify-end gap-2 p-6 landscape:gap-1.5 landscape:p-4">
         <div className="flex flex-wrap items-center gap-1.5">
           {empfohlen && (
-            <span className="rounded-kh-pill bg-kh-orange px-2.5 py-1 text-[0.75rem] font-bold tracking-[0.1em] text-[#0E0D0B] uppercase">
-              Passt zu dir
+            <span className={`${CHIP} bg-kh-orange text-[#0E0D0B]`}>Passt zu dir</span>
+          )}
+          {aktiv && (
+            <span
+              className={`${CHIP} flex items-center gap-1 bg-kh-signal text-[#0E0D0B]`}
+            >
+              <Check className="size-3.5" strokeWidth={3.5} aria-hidden />
+              du bist hier
             </span>
           )}
-          {angefangen && (
-            <span className="flex items-center gap-1 rounded-kh-pill bg-kh-signal px-2.5 py-1 text-[0.75rem] font-bold tracking-[0.1em] text-[#0E0D0B] uppercase">
-              <Check className="size-3.5" strokeWidth={3.5} aria-hidden />
-              {aktiv ? 'du bist hier' : 'angefangen'}
+          {/*
+            Der angefangene Beruf — dieselbe Auskunft wie im Sheet „Dein Weg“,
+            und wörtlich dieselbe Formulierung.
+
+            Vorher trug er dasselbe gelbgrüne Etikett wie „du bist hier“, nur
+            mit anderem Wort: zwei Zustände, ein Bild. Jetzt sagt die Karte,
+            was das Sheet sagt — und Gelbgrün bleibt dem einen Beruf, in dem
+            der Besucher gerade steckt.
+          */}
+          {angefangen && !aktiv && (
+            <span
+              className={`${CHIP} flex items-center gap-1.5 border border-kh-line-strong bg-white/12 text-kh-paper`}
+            >
+              {/* Orange wie das Häkchen desselben Zustands im Sheet. Gelbgrün
+                  hieße „geschafft“ — angefangen ist es gerade nicht. */}
+              <Check className="size-3.5 text-kh-orange" strokeWidth={3.5} aria-hidden />
+              Angefangen — da weitermachen
             </span>
           )}
           {bald && (
-            <span className="flex items-center gap-1 rounded-kh-pill bg-white/12 px-2.5 py-1 text-[0.75rem] font-bold tracking-[0.1em] text-kh-paper/70 uppercase">
+            <span
+              className={`${CHIP} flex items-center gap-1 bg-white/12 text-kh-paper/70`}
+            >
               <Clock className="size-3.5" strokeWidth={2.5} aria-hidden />
               bald
             </span>
@@ -172,17 +209,23 @@ function Karte({
           einlösen kann. Jetzt steht er in der Titelzeile, und wo es noch
           nichts zu betreten gibt, steht dort gar nichts.
         */}
-        <h2 className="flex items-center gap-2">
-          <span className="kh-titel-klein">{beruf.kurz}</span>
+        <h2 className="flex items-center gap-2.5">
+          {/* Hochkant `kh-titel`, quer die kleine Stufe: dort steht dieselbe
+              Karte in halber Breite neben einer zweiten. */}
+          <span className="kh-titel landscape:text-[1.85rem] landscape:leading-none">
+            {beruf.kurz}
+          </span>
           {!bald && (
             <ArrowRight
               aria-hidden
-              className={`size-6 shrink-0 ${empfohlen ? 'text-kh-orange' : 'text-kh-paper/50'}`}
+              className={`size-8 shrink-0 landscape:size-6 ${empfohlen ? 'text-kh-orange' : 'text-kh-paper/50'}`}
               strokeWidth={2.5}
             />
           )}
         </h2>
-        <p className="text-[0.9375rem] leading-snug text-kh-paper/70">{beruf.zeile}</p>
+        <p className="max-w-[42ch] text-[1.125rem] leading-snug text-kh-paper/75 landscape:text-[0.9375rem] landscape:text-kh-paper/70">
+          {beruf.zeile}
+        </p>
       </div>
     </motion.button>
   )

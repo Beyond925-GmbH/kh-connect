@@ -23,14 +23,14 @@ import { cn } from '@/lib/utils'
  * einem Formular mit acht Schaltern gemacht; die Stellen behalten ihren
  * Inhalt und teilen sich den Grund.
  *
- * **Der gewählte Zustand ist Signalfarbe — außer in M1.** `index.css` hält
- * fest, dass das Warnwesten-Gelbgrün genau eine Sache markiert: „das hast du
- * geschafft“. Eine getroffene Wahl ist davon nur einen Schritt entfernt, und
- * Fragen, Helmwahl und M4 setzen es längst so. M1 ist die Ausnahme, und zwar
- * aus dem Grund, der die Regel bestätigt: dort ist das Antippen **vorläufig**
- * — die Auswertung danach färbt die richtigen Treffer, und wenn schon das
- * Auswählen Signalfarbe wäre, hätte die Auswertung keine Farbe mehr übrig.
- * Deshalb `ton="orange"` genau dort.
+ * **Der gewählte Zustand ist Signalfarbe — außer wo das Antippen vorläufig
+ * ist.** `index.css` hält fest, dass das Warnwesten-Gelbgrün genau eine Sache
+ * markiert: „das hast du geschafft“. Eine getroffene Wahl ist davon nur einen
+ * Schritt entfernt, und Fragen und Helmwahl setzen es längst so. M1 und M4
+ * sind die Ausnahmen, und zwar aus dem Grund, der die Regel bestätigt: dort
+ * ist das Antippen **vorläufig** — die Prüfung danach färbt die richtigen
+ * Treffer, und wenn schon das Auswählen Signalfarbe wäre, hätte die
+ * Auswertung keine Farbe mehr übrig. Deshalb `ton="orange"` genau dort.
  */
 export const wahlflaeche = cva(
   [

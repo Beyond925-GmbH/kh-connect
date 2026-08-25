@@ -72,23 +72,35 @@ export function Helmwahl() {
 
             Er war in der ersten Fassung auf 15 rem gedeckelt und stand damit
             als Daumennagel in einer 34-%-Spalte: das Ergebnis der Wahl war das
-            kleinste Element des Screens. Jetzt füllt er seine Spalte. */}
-        <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 landscape:w-[36%] landscape:flex-none">
+            kleinste Element des Screens. Jetzt füllt er seine Spalte.
+
+            **Hochkant bekommt er ein Band statt einer Hälfte.** `flex-1` gab
+            ihm auf der Stele die obere Hälfte von 1920 px, in der ein 272 px
+            breiter Helm mittig schwebte — darunter, bis zur ebenfalls mittig
+            zentrierten Wahl, standen rund 600 px totes Schwarz. Ein Band von
+            38 % Höhe, in dem der Helm auf **Höhe** skaliert (`h-full`),
+            schließt beides zusammen: der Helm wird so groß wie sein Platz, und
+            der Platz ist nur noch so groß wie der Helm. */}
+        <div className="flex h-[38%] min-h-0 shrink-0 flex-col items-center justify-center gap-3 landscape:h-auto landscape:w-[36%] landscape:flex-none">
           <motion.div
             key={farbe}
             initial={{ scale: 0.9, opacity: 0, rotate: -4 }}
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 420, damping: 22 }}
-            className="w-[min(58%,17rem)] landscape:w-full landscape:max-w-[23rem]"
+            className="flex h-full w-full items-center justify-center landscape:h-auto landscape:max-w-[23rem]"
           >
             <Helm
               farbe={farbe}
-              className="h-auto w-full drop-shadow-[0_14px_34px_rgba(0,0,0,0.6)]"
+              className="h-full max-w-full drop-shadow-[0_14px_34px_rgba(0,0,0,0.6)] landscape:h-auto landscape:w-full"
             />
           </motion.div>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col gap-4 landscape:max-w-[40rem]">
+        {/* Die Kante trennt hochkant Helmband und Wahl. Ohne sie stehen beide
+            als zwei zentrierte Inseln in derselben schwarzen Fläche und der
+            Abstand dazwischen liest sich als Lücke; mit ihr ist er der Rand
+            eines Feldes. Quer übernimmt das die Spaltenkante. */}
+        <div className="flex min-h-0 flex-1 flex-col gap-4 border-t border-kh-line pt-4 landscape:border-t-0 landscape:pt-0 landscape:max-w-[40rem]">
           {/*
             Überschrift und Wahl sind **ein** Block, und der steht mittig im
             Platz, der ihm bleibt.
@@ -107,7 +119,7 @@ export function Helmwahl() {
             data-scroll
             className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pr-0.5"
           >
-            <div className="m-auto flex w-full flex-col gap-6 py-1">
+            <div className="m-auto flex w-full flex-col gap-8 py-1 landscape:gap-6">
               <header className="flex shrink-0 flex-col gap-1.5">
                 <span className="kh-etikett flex items-center gap-2">
                   <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
@@ -123,7 +135,7 @@ export function Helmwahl() {
                 Systems. Als Etikett tragen sie so weit wie der Rest.
               */}
                 <h2 className="kh-etikett">Welche Farbe?</h2>
-                <div className="mt-3 flex flex-wrap gap-3">
+                <div className="mt-4 flex flex-wrap gap-4 landscape:mt-3 landscape:gap-3">
                   {HELM_FARBEN.map((f) => (
                     <button
                       key={f.id}
@@ -135,7 +147,7 @@ export function Helmwahl() {
                       // weiße Kante im Kreis war auf dem weißen Helm unsichtbar,
                       // und genau der ist die Voreinstellung. Ein abgesetzter
                       // Ring in Signalfarbe trägt auf allen vier Farben.
-                      className={`size-[64px] rounded-kh-pill transition-transform active:scale-90 ${
+                      className={`size-[88px] rounded-kh-pill transition-transform active:scale-90 landscape:size-[64px] ${
                         farbe === f.id
                           ? 'scale-105 ring-3 ring-kh-signal ring-offset-3 ring-offset-kh-ink'
                           : 'opacity-65'
@@ -150,7 +162,10 @@ export function Helmwahl() {
 
               <section>
                 <h2 className="kh-etikett">Wonach greifst du zuerst?</h2>
-                <div className="mt-3 grid grid-cols-3 gap-2.5">
+                {/* Hochkant tragen die Kacheln 9 rem statt 104 px: dieselbe
+                    Zahl von Kacheln, mehr Fläche je Finger — und die Höhe, die
+                    dem Screen unten sonst fehlt. */}
+                <div className="mt-4 grid grid-cols-3 gap-3 landscape:mt-3 landscape:gap-2.5">
                   {WERKZEUGE.map((w) => {
                     const Icon = ICONS[w.icon]
                     const gewaehlt = werkzeug === w.id
@@ -161,13 +176,14 @@ export function Helmwahl() {
                         gewaehlt={gewaehlt}
                         data-testid={`werkzeug-${w.id}`}
                         onClick={() => setWerkzeug(gewaehlt ? '' : w.id)}
+                        className="min-h-[9rem] landscape:min-h-[104px]"
                       >
                         <Icon
-                          className={gewaehlt ? 'size-9' : 'size-9 text-kh-paper/70'}
+                          className={`size-11 landscape:size-9 ${gewaehlt ? '' : 'text-kh-paper/70'}`}
                           strokeWidth={1.75}
                           aria-hidden
                         />
-                        <span className="text-[0.9375rem] leading-tight font-semibold">
+                        <span className="text-[1.0625rem] leading-tight font-semibold landscape:text-[0.9375rem]">
                           {w.name}
                         </span>
                       </Wahlflaeche>

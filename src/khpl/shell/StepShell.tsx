@@ -280,11 +280,16 @@ export function StepShell({
             genau an der Kante (kein Überlauf, oder zu Ende gescrollt), fraß
             der Verlauf die letzte Zeile an, obwohl gar nichts zu scrollen
             war. Jetzt wird gemessen: Verlauf nur bei echtem Rest nach unten.
+
+            Höhe h-14, nicht h-8: der Verlauf muss eine ganze Fachtext-Zeile
+            schlucken können. Bei 32 px ragte die obere Hälfte einer an der
+            Scrollkante zerschnittenen Zeile scharf über den Schleier — die
+            Kante las sich als Fehler statt als „da kommt noch was".
           */}
           {ueberlauf && (
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#0E0D0B] to-transparent"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#0E0D0B] to-transparent"
             />
           )}
         </div>
