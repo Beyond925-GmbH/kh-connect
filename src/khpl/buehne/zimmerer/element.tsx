@@ -350,12 +350,10 @@ function DeineMarke() {
 export function Tafel({
   schichten = SCHICHTEN.length,
   ausschnitt = null,
-  umriss = false,
   marke = false,
 }: {
   schichten?: number
   ausschnitt?: Fensterausschnitt | null
-  umriss?: boolean
   marke?: boolean
 }) {
   const loch = ausschnitt ? lochLokal(ausschnitt) : null
@@ -412,23 +410,6 @@ export function Tafel({
             dz={T}
             farbe={FARBE_KVH}
           />
-        </group>
-      )}
-      {loch && umriss && (
-        <group>
-          {(
-            [
-              [(loch.x1 + loch.x2) / 2, loch.y1, loch.x2 - loch.x1 + 0.04, 0.04],
-              [(loch.x1 + loch.x2) / 2, loch.y2, loch.x2 - loch.x1 + 0.04, 0.04],
-              [loch.x1, (loch.y1 + loch.y2) / 2, 0.04, loch.y2 - loch.y1],
-              [loch.x2, (loch.y1 + loch.y2) / 2, 0.04, loch.y2 - loch.y1],
-            ] as const
-          ).map(([x, y, dx, dy], i) => (
-            <mesh key={i} position={[x, y, 0.02]}>
-              <boxGeometry args={[dx, dy, 0.015]} />
-              <meshBasicMaterial color={AUSWAHL_EMISSIV} />
-            </mesh>
-          ))}
         </group>
       )}
       {marke && <DeineMarke />}
@@ -592,11 +573,29 @@ function Holzstueck({
           Inhaltskarte, schrumpft das Sichtfeld und die Kamera fährt heraus —
           mitskalierte Etiketten waren dann kaum noch lesbar (Abnahme-Befund
           C1). Die Nummer ist der Arbeitsauftrag dieser Übung; sie muss in
-          jeder Kartenhöhe lesbar bleiben. */}
-      <Html center position={[0, h / 2 + 0.05, 0]} style={{ pointerEvents: 'none' }}>
-        <span className="rounded-full bg-kh-ink/85 px-2 py-0.5 text-[15px] font-semibold whitespace-nowrap text-kh-paper">
+          jeder Kartenhöhe lesbar bleiben.
+
+          Die Plakette ist zugleich das Tippziel: auf dem Handy ist das Holz
+          darunter nur ~8 px hoch, und wer „Tipp das Holz an“ liest, tippt
+          ohnehin auf die Nummer (Sichtbefund C1).
+
+          **Die Trefferfläche ist die Pille und keinen Pixel mehr.** Ein
+          unsichtbarer 44-px-Rand darum hielt zwar die Trefferflächen-Regel
+          ein, reichte hochkant aber über die Nachbarplakette: die Reihen des
+          Stapels liegen dort nur 21 bis 30 Bildpunkte auseinander, und der
+          Rand der später gezeichneten Nummer lag über der sichtbaren Pille der
+          früheren. Ein Tipp mitten auf die „45“ meldete „Nr. 48 steht nicht
+          auf deiner Liste“ — und zählte als Fehlversuch. Ein etwas kleineres
+          Ziel ist besser als ein falsches; wer daneben tippt, trifft das Holz
+          darunter, und das reagiert genauso. */}
+      <Html center position={[0, h / 2 + 0.05, 0]}>
+        <button
+          type="button"
+          className="cursor-pointer rounded-full bg-kh-ink/85 px-2 py-0.5 text-[15px] font-semibold whitespace-nowrap text-kh-paper"
+          onClick={() => onTap(holz.nummer)}
+        >
           {holz.nummer}
-        </span>
+        </button>
       </Html>
     </group>
   )
@@ -887,64 +886,332 @@ export function Sandwichaufbau({
 }
 
 // ---------------------------------------------------------------------------
-// C4 — der Fensterausschnitt und der Blick nach oben
+// C4 — der Rahmen und der Blick nach oben
 // ---------------------------------------------------------------------------
 
 /**
- * **Die Untersetzung des Ziehwegs** — und der Grund, warum es sie gibt.
+ * **Warum hier nichts mehr gezogen wird.**
  *
- * Die Draufsicht bildet das acht Meter breite Element auf gut achthundert
- * Bildpunkte ab: ein Punkt ist damit rund ein Zentimeter am Bauteil. Eins zu
- * eins übertragen wäre das Trefferfenster dieser Übung — vier Zentimeter
- * Breite (Fuge 10 bis 30 mm) und vier Zentimeter Höhe — **vier Pixel breit**.
- * Mit einer pixelgenauen Maus zu treffen, mit dem Finger nicht.
+ * Die erste Fassung ließ den Besucher den Ausschnitt frei auf dem Element
+ * aufziehen: zwei Maße, zwei Achsen, eine unsichtbare Ziehfläche über der
+ * halben Bühne und ein zehnfach untersetzter Fingerweg. Das war in der
+ * Abnahme der schwächste Screen der vier Tage — nicht schwer, sondern
+ * unbedienbar. Es gab keinen sichtbaren Griff; jeder Zug verstellte Breite
+ * *und* Unterkante zugleich, weil ein Finger nun einmal beide Komponenten
+ * hat; und die größte Zahl auf dem Schirm („Fuge“) war die einzige, die im
+ * Plan nicht vorkam.
  *
- * Die Spec verlangt das Gegenteil: „eng genug, dass Ziehen mit dem Finger es
- * nicht zufällig trifft, und weit genug, dass es niemanden frustriert“
- * (khpl-tag-zimmerer.md 6, C4). Aufgeweicht wird deshalb **nicht die Toleranz,
- * sondern die Übersetzung**: ein Zentimeter Fingerweg verstellt das Maß um
- * einen Millimeter. Aus vier Pixeln werden vierzig, das Fugenfenster bleibt
- * exakt das, was der Beleg hergibt.
+ * **Und sachlich war es ohnehin falsch.** Kein Zimmerer schätzt einen
+ * Fensterausschnitt mit der Hand. Der Ausschnitt steht im Plan, die Maschine
+ * schneidet ihn, das Wechselholz sitzt. Die Entscheidung, die in der Werkstatt
+ * wirklich getroffen wird und wirklich Geld kostet, ist eine andere:
+ * **wie viel Luft bekommt der Rahmen?**
  *
- * Das macht aus dem Aufziehen ein Zurechtziehen: der Ausschnitt liegt von
- * Anfang an da (zu weit, mit Absicht), und der Zug verstellt ihn, statt ihn
- * neu aufzuspannen. Der Druckpunkt ist damit **kein Maß mehr** — vorher legte
- * er die Unterkante pixelgenau fest, und keine Untersetzung der Welt hätte
- * daran etwas geändert.
+ * Deshalb ist der Ausschnitt jetzt gesetzt, und die Übung ist eine Wahl aus
+ * drei bereitliegenden Rahmen. Der verlockend falsche ist der passgenaue —
+ * dieselbe Bauart von Fehler wie in C6, wo die glatte Innenseite nach außen
+ * will. Wer ihn nimmt, sieht auf der Bühne, was passiert: der Rahmen setzt
+ * auf und bleibt oben liegen.
  */
-const ZIEH_UNTERSETZUNG = 0.1
 
-/** Das Maß rastet in Zentimetern. Feiner ist am Finger nicht mehr zu lesen. */
-const ZIEH_RASTER_MM = 10
+/** Ein bereitliegender Rahmen. Die Breite ist zugleich sein Etikett. */
+export interface Rahmenangebot {
+  id: string
+  breiteMm: number
+}
+
+/** Was der Step über einen probierten Rahmen entschieden hat. */
+export type Rahmenurteil = 'passt' | 'zu-gross' | 'zu-klein'
+
+/** Sekunden für Anheben, Überführen und Absenken eines Rahmens. */
+const PROBE_HEBEN = 0.5
+const PROBE_FAHRT = 0.75
+const PROBE_SENKEN = 0.7
+const PROBE_DAUER = PROBE_HEBEN + PROBE_FAHRT + PROBE_SENKEN
+/** Und so lange braucht ein abgelehnter Rahmen zurück auf seinen Platz. */
+const PROBE_HEIMWEG = 0.7
+
+/** Flughöhe über der Elementoberfläche, während ein Rahmen überführt wird. */
+const PROBE_HOEHE = 1.05
+
+/** Profilmaße des Rahmens: Ansichtsbreite und Bautiefe in Metern. */
+const RAHMEN_PROFIL = 0.09
+const RAHMEN_TIEFE = 0.15
+
+/** Holzton des Fensterrahmens — heller als das KVH, damit er sich abhebt. */
+const FARBE_RAHMENHOLZ = '#EBD9B4'
+/** Die Scheibe. Erst sie macht aus vier Hölzern von oben ein Fenster. */
+const FARBE_GLAS = '#7FA2B0'
 
 /**
- * Die unsichtbare Ziehfläche ist deutlich größer als das Element. Sie muss
- * es sein: untersetzt braucht der Finger ein Vielfaches des Weges, und ein
- * Zug, der an der Elementkante aufhört, hört mitten in der Bewegung auf.
+ * Ein Fensterrahmen als Bauteil: vier Hölzer und eine Scheibe, in der xy-Ebene
+ * gebaut, Bautiefe entlang z. Liegt flach auf dem Tisch, wenn die Gruppe
+ * darüber ihn um −π/2 kippt — dieselbe Konvention wie beim Element.
  */
-const ZIEHFLAECHE = 2.6
+function Rahmenkoerper({
+  breite,
+  hoehe,
+  leuchtet = false,
+}: {
+  breite: number
+  hoehe: number
+  leuchtet?: boolean
+}) {
+  const p = RAHMEN_PROFIL
+  const farbe = leuchtet ? AUSWAHL_EMISSIV : FARBE_RAHMENHOLZ
+  return (
+    <group>
+      {/* Scheibe zuerst, damit die Hölzer davor stehen */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[breite - 2 * p, hoehe - 2 * p, RAHMEN_TIEFE * 0.35]} />
+        <meshStandardMaterial
+          color={FARBE_GLAS}
+          roughness={0.15}
+          metalness={0.1}
+          transparent
+          opacity={0.55}
+        />
+      </mesh>
+      {(
+        [
+          [0, hoehe / 2 - p / 2, breite, p],
+          [0, -hoehe / 2 + p / 2, breite, p],
+          [-breite / 2 + p / 2, 0, p, hoehe - 2 * p],
+          [breite / 2 - p / 2, 0, p, hoehe - 2 * p],
+        ] as const
+      ).map(([x, y, dx, dy], i) => (
+        <mesh key={i} position={[x, y, 0]}>
+          <boxGeometry args={[dx, dy, RAHMEN_TIEFE]} />
+          <meshStandardMaterial
+            color={farbe}
+            emissive={leuchtet ? AUSWAHL_EMISSIV : '#000000'}
+            emissiveIntensity={leuchtet ? 0.4 : 0}
+            roughness={0.8}
+            flatShading
+          />
+        </mesh>
+      ))}
+    </group>
+  )
+}
 
 /**
- * Das fertige Sandwich, flach; der Besucher zieht den Ausschnitt direkt auf
- * der Bühne zurecht (Vorbild `Zuschnitt3D`: Bühne liefert Geometrie, der Step
- * entscheidet über Treffer und Toleranz). Der Zug ist **untersetzt** und geht
- * vom bestehenden Ausschnitt aus, nicht vom Druckpunkt — warum, steht bei
- * `ZIEH_UNTERSETZUNG`. `aufrichtenZeigen` kippt das Element
- * um die Schwellenkante in die Senkrechte — der erste Blick nach oben, die
- * halbe Miete für C6. Oben angekommen **steht** es `AUFRICHTEN_STANDZEIT`
- * lang (erst dann feuert `onAufrichtenEnde`), und zurück legt es sich mit
- * derselben Kippfahrt statt zu schnappen.
+ * Ein Rahmen auf dem Tisch, mit Etikett und Tippziel.
+ *
+ * Das Etikett ist eine `Html`-Pille wie die Holznummern in C1 und aus
+ * demselben Grund: die Breite ist der Arbeitsauftrag dieser Übung, und aus
+ * zwölf Metern Kameradistanz sind zwei Zentimeter Unterschied zwischen zwei
+ * Rahmen **nicht zu sehen**. Genau das ist die Pointe — man muss die Zahl
+ * lesen und denken, nicht hinschauen und raten.
+ */
+function Rahmenablage({
+  angebot,
+  ruheX,
+  ruheZ,
+  aktiv,
+  urteil,
+  zielX,
+  zielZ,
+  etikett,
+  onTap,
+  onGesetzt,
+  reduziert,
+}: {
+  angebot: Rahmenangebot
+  ruheX: number
+  ruheZ: number
+  aktiv: boolean
+  urteil: Rahmenurteil | null
+  zielX: number
+  zielZ: number
+  etikett: string
+  onTap: (id: string) => void
+  onGesetzt: () => void
+  reduziert: boolean
+}) {
+  const gruppe = useRef<THREE.Group>(null)
+  const tap = useTapErkennung()
+  const seit = useRef<number | null>(null)
+  const gemeldet = useRef(false)
+  /** Die Pose beim letzten Wechsel — der Heimweg beginnt, wo der Rahmen steht. */
+  const abflug = useRef<[number, number, number]>([ruheX, TISCH_OBEN + 0.05, ruheZ])
+  const melder = useRef(onGesetzt)
+  useEffect(() => {
+    melder.current = onGesetzt
+  })
+
+  const breite = angebot.breiteMm / 1000
+  const ruheY = TISCH_OBEN + 0.05
+
+  useEffect(() => {
+    seit.current = null
+    gemeldet.current = false
+    const g = gruppe.current
+    if (g) abflug.current = [g.position.x, g.position.y, g.position.z]
+  }, [aktiv])
+
+  /** Endhöhe der Probe — hier steckt die ganze Aussage des Screens. */
+  const endY =
+    urteil === 'passt'
+      ? // Sitzt in der Laibung, bündig unter der Außenhaut.
+        ELEMENT_FLACH_Y - RAHMEN_TIEFE / 2 - 0.01
+      : urteil === 'zu-klein'
+        ? // Rutscht durch bis auf die Innenbeplankung und schwimmt dort.
+          ELEMENT_FLACH_Y - T + RAHMEN_TIEFE / 2 + 0.01
+        : // Zu groß: setzt auf der Oberfläche auf und bleibt liegen.
+          ELEMENT_FLACH_Y + RAHMEN_TIEFE / 2 + 0.005
+
+  useFrame(({ clock }) => {
+    const g = gruppe.current
+    if (!g) return
+    const t = clock.elapsedTime
+    if (seit.current === null) seit.current = t
+    const dt = t - seit.current
+    const [ax, ay, az] = abflug.current
+
+    if (!aktiv) {
+      // Heimweg: von da, wo der Rahmen gerade stand, zurück auf den Tisch.
+      const u = reduziert ? 1 : glatt(Math.min(dt / PROBE_HEIMWEG, 1))
+      g.position.set(ax + (ruheX - ax) * u, ay + (ruheY - ay) * u, az + (ruheZ - az) * u)
+      g.rotation.z = 0
+      return
+    }
+
+    if (reduziert) {
+      g.position.set(zielX, endY, zielZ)
+      if (!gemeldet.current) {
+        gemeldet.current = true
+        melder.current()
+      }
+      return
+    }
+
+    // Anheben — überführen — absenken. Drei Takte, keine Kurve durch alles:
+    // ein Rahmen, der diagonal durch die Luft zum Loch segelt, sieht aus wie
+    // ein Fehler, nicht wie eine Montage.
+    if (dt < PROBE_HEBEN) {
+      const u = glatt(dt / PROBE_HEBEN)
+      g.position.set(ax, ay + (ELEMENT_FLACH_Y + PROBE_HOEHE - ay) * u, az)
+      return
+    }
+    if (dt < PROBE_HEBEN + PROBE_FAHRT) {
+      const u = glatt((dt - PROBE_HEBEN) / PROBE_FAHRT)
+      g.position.set(
+        ax + (zielX - ax) * u,
+        ELEMENT_FLACH_Y + PROBE_HOEHE,
+        az + (zielZ - az) * u,
+      )
+      return
+    }
+    const u = Math.min((dt - PROBE_HEBEN - PROBE_FAHRT) / PROBE_SENKEN, 1)
+    const von = ELEMENT_FLACH_Y + PROBE_HOEHE
+    g.position.set(zielX, von + (endY - von) * glatt(u), zielZ)
+
+    // Der zu große Rahmen bekommt beim Aufsetzen zwei kurze Stöße mit: er
+    // *will* rein und geht nicht. Das ist der Moment, um den es hier geht.
+    if (u >= 1 && urteil === 'zu-gross') {
+      const nach = dt - PROBE_DAUER
+      g.position.y = endY + Math.max(0, Math.sin(nach * 16)) * 0.05 * Math.exp(-nach * 2)
+    }
+    // Der zu kleine liegt schief in der Öffnung — er hat ja nichts, was ihn hält.
+    if (u >= 1 && urteil === 'zu-klein') g.rotation.z = 0.035
+
+    if (u >= 1 && !gemeldet.current) {
+      gemeldet.current = true
+      melder.current()
+    }
+  })
+
+  const zeigerAb = (e: ThreeEvent<PointerEvent>) => {
+    e.stopPropagation()
+    tap.merken(e)
+  }
+  const zeigerAuf = (e: ThreeEvent<PointerEvent>) => {
+    e.stopPropagation()
+    if (tap.istTap(e)) onTap(angebot.id)
+  }
+
+  return (
+    <group
+      ref={gruppe}
+      position={[ruheX, ruheY, ruheZ]}
+      onPointerDown={zeigerAb}
+      onPointerUp={zeigerAuf}
+    >
+      <group rotation={[-Math.PI / 2, 0, 0]}>
+        <Rahmenkoerper breite={breite} hoehe={breite} leuchtet={aktiv} />
+      </group>
+      {/* Konstante Bildschirmgröße wie die Holznummern in C1: die Zahl ist der
+          Arbeitsauftrag und muss in jeder Kartenhöhe lesbar bleiben. */}
+      <Html center position={[0, 0.3, 0]}>
+        <button
+          type="button"
+          className="cursor-pointer rounded-full bg-kh-ink/85 px-2.5 py-1 text-[15px] font-semibold whitespace-nowrap text-kh-paper tabular-nums"
+          onClick={() => onTap(angebot.id)}
+        >
+          {etikett}
+        </button>
+      </Html>
+    </group>
+  )
+}
+
+/**
+ * Der sitzende Rahmen, gebaut in Elementkoordinaten — er kippt mit
+ * auf, wenn das Element sich aufrichtet. Der fliegende Rahmen der Ablage wird
+ * dafür ausgeblendet: er steht in Weltkoordinaten und bliebe sonst waagerecht
+ * in der Luft stehen, während das Element hochgeht.
+ */
+function SitzenderRahmen({ loch, breiteMm }: { loch: Loch; breiteMm: number }) {
+  const mx = (loch.x1 + loch.x2) / 2
+  const my = (loch.y1 + loch.y2) / 2
+  const b = breiteMm / 1000
+  const h = Math.min(b, loch.y2 - loch.y1 - 0.02)
+  return (
+    <group position={[mx, my, -RAHMEN_TIEFE / 2 - 0.01]}>
+      <Rahmenkoerper breite={b} hoehe={h} />
+    </group>
+  )
+}
+
+/**
+ * Das fertige Sandwich, flach, mit gesetztem Ausschnitt — und drei Rahmen auf
+ * dem Tisch davor. Die Bühne liefert Geometrie und Bewegung; **welcher Rahmen
+ * richtig ist, entscheidet der Step** (Vorbild `Zuschnitt3D`, und dasselbe
+ * Muster wie C1: die Bühne meldet den Tap, das Urteil kommt zurück).
+ *
+ * `aufrichtenZeigen` kippt das Element um die Schwellenkante in die Senkrechte
+ * — der erste Blick nach oben, die halbe Miete für C6. Oben angekommen
+ * **steht** es `AUFRICHTEN_STANDZEIT` lang (erst dann feuert
+ * `onAufrichtenEnde`), und zurück legt es sich mit derselben Kippfahrt statt
+ * zu schnappen.
  */
 export function FensterElement({
   ausschnitt = null,
-  onAusschnitt,
+  angebote = [],
+  gewaehlt = null,
+  urteil = null,
+  gesetzt = false,
+  onRahmen,
+  onProbeEnde,
+  etikett = (mm: number) => `${(mm / 1000).toFixed(2).replace('.', ',')} m`,
   aufrichtenZeigen = false,
   onAufrichtenEnde,
   marke = false,
   reduziert,
 }: {
   ausschnitt?: Fensterausschnitt | null
-  onAusschnitt?: (a: Fensterausschnitt) => void
+  angebote?: readonly Rahmenangebot[]
+  /** Welcher Rahmen gerade probiert wird. `null` = alle liegen auf dem Tisch. */
+  gewaehlt?: string | null
+  /** Das Urteil des Steps über den probierten Rahmen. */
+  urteil?: Rahmenurteil | null
+  /** Der richtige Rahmen sitzt — ab hier gehört er zum Element. */
+  gesetzt?: boolean
+  onRahmen?: (id: string) => void
+  /** Feuert, wenn der probierte Rahmen unten angekommen ist. */
+  onProbeEnde?: () => void
+  etikett?: (breiteMm: number) => string
   aufrichtenZeigen?: boolean
   onAufrichtenEnde?: () => void
   marke?: boolean
@@ -955,9 +1222,6 @@ export function FensterElement({
   const von = useRef(-Math.PI / 2)
   const obenSeit = useRef<number | null>(null)
   const gemeldet = useRef(false)
-  /** Der Griff: Weltpunkt beim Aufsetzen plus der Ausschnitt, wie er da lag. */
-  const zieht = useRef<{ x: number; z: number; von: Fensterausschnitt } | null>(null)
-  const [umriss, setUmriss] = useState(false)
   const melder = useRef(onAufrichtenEnde)
   useEffect(() => {
     melder.current = onAufrichtenEnde
@@ -996,73 +1260,54 @@ export function FensterElement({
     melder.current?.()
   })
 
-  /** Weltweg in Metern → Maßänderung in Millimetern, untersetzt und gerastet. */
-  const wegMm = (meter: number) =>
-    Math.round((meter * 1000 * ZIEH_UNTERSETZUNG) / ZIEH_RASTER_MM) * ZIEH_RASTER_MM
-
-  const melden = (p: THREE.Vector3) => {
-    const griff = zieht.current
-    if (!griff || !onAusschnitt) return
-    const { von } = griff
-    onAusschnitt({
-      // Die linke Kante bleibt liegen, die rechte folgt dem Finger: der
-      // Ausschnitt wird breiter und schmaler, nicht verschoben. Auf dem
-      // Planmaß steht er damit genau mittig auf dem Element — `xMm` ist für
-      // die Planbreite berechnet.
-      xMm: von.xMm,
-      // Draufsicht: das Element liegt nach hinten geklappt, die Höhe über
-      // Rohboden läuft also gegen die z-Achse. Nach oben ziehen heißt: höher.
-      yMm: Math.max(von.yMm + wegMm(griff.z - p.z), 0),
-      breiteMm: Math.max(von.breiteMm + wegMm(p.x - griff.x), 120),
-      hoeheMm: von.hoeheMm,
-    })
-  }
-
-  useEffect(() => {
-    const loslassen = () => {
-      zieht.current = null
-      setUmriss(false)
-    }
-    window.addEventListener('pointerup', loslassen)
-    window.addEventListener('pointercancel', loslassen)
-    return () => {
-      window.removeEventListener('pointerup', loslassen)
-      window.removeEventListener('pointercancel', loslassen)
-    }
-  }, [])
+  const loch = ausschnitt ? lochLokal(ausschnitt) : null
+  /** Weltmitte der Öffnung: dorthin fährt jeder probierte Rahmen. */
+  const zielX = loch ? (loch.x1 + loch.x2) / 2 : 0
+  const zielZ = loch ? -(loch.y1 + loch.y2) / 2 : 0
+  const gesetzteBreite = angebote.find((a) => a.id === gewaehlt)?.breiteMm
 
   return (
     <group position={[0, ELEMENT_FLACH_Y, 0]}>
       <group ref={kipp} rotation={[-Math.PI / 2, 0, 0]}>
-        <Tafel ausschnitt={ausschnitt} umriss={umriss} marke={marke} />
+        <Tafel ausschnitt={ausschnitt} marke={marke} />
+        {gesetzt && loch && gesetzteBreite !== undefined && (
+          <SitzenderRahmen loch={loch} breiteMm={gesetzteBreite} />
+        )}
       </group>
-      {!aufrichtenZeigen && onAusschnitt && ausschnitt && (
-        <mesh
-          position={[0, 0.04, -H / 2]}
-          rotation={[-Math.PI / 2, 0, 0]}
-          onPointerDown={(e: ThreeEvent<PointerEvent>) => {
-            if (!e.isPrimary) return
-            e.stopPropagation()
-            zieht.current = { x: e.point.x, z: e.point.z, von: ausschnitt }
-            setUmriss(true)
-          }}
-          onPointerMove={(e: ThreeEvent<PointerEvent>) => {
-            if (!zieht.current || !e.isPrimary) return
-            e.stopPropagation()
-            melden(e.point)
-          }}
-          onPointerUp={(e: ThreeEvent<PointerEvent>) => {
-            if (!zieht.current) return
-            e.stopPropagation()
-            melden(e.point)
-            zieht.current = null
-            setUmriss(false)
-          }}
-        >
-          <planeGeometry args={[B * ZIEHFLAECHE, H * ZIEHFLAECHE]} />
-          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-        </mesh>
-      )}
+      {/* Die Ablage liegt in Weltkoordinaten neben dem Element und kippt
+          deshalb nicht mit. Sobald der Rahmen sitzt, übernimmt
+          `SitzenderRahmen` — sonst bliebe hier ein zweites Fenster in der Luft
+          stehen, während das Element hochgeht. */}
+      {!gesetzt &&
+        !aufrichtenZeigen &&
+        onRahmen &&
+        angebote.map((a, i) => (
+          <group key={a.id} position={[0, -ELEMENT_FLACH_Y, 0]}>
+            <Rahmenablage
+              angebot={a}
+              ruheX={ABLAGE_X[i] ?? 0}
+              ruheZ={ABLAGE_Z}
+              aktiv={gewaehlt === a.id}
+              urteil={gewaehlt === a.id ? urteil : null}
+              zielX={zielX}
+              zielZ={zielZ}
+              etikett={etikett(a.breiteMm)}
+              onTap={onRahmen}
+              onGesetzt={() => onProbeEnde?.()}
+              reduziert={reduziert}
+            />
+          </group>
+        ))}
     </group>
   )
 }
+
+/**
+ * Wo die drei Rahmen liegen: vor dem Element auf dem Abbundtisch, in einer
+ * Reihe. `ABLAGE_Z` ist so gewählt, dass die Rahmen die Schwellenkante des
+ * Elements (z = 0) gerade nicht unterlaufen — dort schauen sie sonst unter der
+ * Platte hervor. Der Tisch reicht in diesem Zustand bis z = 1,3 (`tischTiefe`
+ * in `Halle`).
+ */
+const ABLAGE_X = [-2.6, 0, 2.6] as const
+const ABLAGE_Z = 0.66

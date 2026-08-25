@@ -7,6 +7,7 @@ import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
+import { useSchmal } from '@/khpl/shell/schmal'
 
 /**
  * Z2 — Alles muss sitzen, bevor irgendwas läuft.
@@ -77,6 +78,7 @@ const HANDGRIFFE: readonly Handgriff[] = [
 ]
 
 export function Z2() {
+  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.z2
   const [gesetzt, setGesetzt] = useState(() =>
     gespeichert?.fertig ? HANDGRIFFE.length : (gespeichert?.geruestet.length ?? 0),
@@ -99,6 +101,10 @@ export function Z2() {
     <StepShell
       id="Z2"
       interaktionOffen={!fertig}
+      // Die Rückmeldung auf jeden Handgriff — Backen fahren zu, der Nullpunkt
+      // leuchtet — passiert auf der Bühne. Hochkant blieb ihr sonst ein
+      // Streifen, in dem vom Höhepunkt des Screens nichts zu sehen war.
+      buehnePlatz
       buehne={
         <Werkstueck
           zustand="rohling"
@@ -107,20 +113,32 @@ export function Z2() {
         />
       }
       fachtext={
-        <>
+        // Auf dem Handy hochkant fällt der Warmlauf-Absatz weg: mit beiden
+        // Absätzen lag der Handgriff — die Übung — unter der Scrollkante
+        // (s. `schmal.ts`). Der Satz, der den Beruf trägt, bleibt.
+        schmal ? (
           <p>
-            Zuerst läuft die Maschine warm — dafür gibt es ein eigenes Programm, und das
-            macht man jeden Morgen. Eine Maschine ist kein Schalter; sie ist eher wie ein
-            Auto im Winter.
-          </p>
-          <p className="mt-3">
             <Begriff id="ruesten">Rüsten</Begriff>:{' '}
-            <Begriff id="rohling">Rohling</Begriff> spannen, Werkzeuge bestücken,
-            Werkzeuglängen vermessen, den{' '}
-            <Begriff id="werkstuecknullpunkt">Werkstücknullpunkt</Begriff> setzen. Das ist
-            der eigentliche Beruf. Die Maschine zerspant; der Mensch richtet ein.
+            <Begriff id="rohling">Rohling</Begriff> spannen, Werkzeuge bestücken, den{' '}
+            <Begriff id="werkstuecknullpunkt">Werkstücknullpunkt</Begriff> setzen. Die
+            Maschine zerspant; der Mensch richtet ein.
           </p>
-        </>
+        ) : (
+          <>
+            <p>
+              Zuerst läuft die Maschine warm — dafür gibt es ein eigenes Programm, und das
+              macht man jeden Morgen. Eine Maschine ist kein Schalter; sie ist eher wie
+              ein Auto im Winter.
+            </p>
+            <p className="mt-3">
+              <Begriff id="ruesten">Rüsten</Begriff>:{' '}
+              <Begriff id="rohling">Rohling</Begriff> spannen, Werkzeuge bestücken,
+              Werkzeuglängen vermessen, den{' '}
+              <Begriff id="werkstuecknullpunkt">Werkstücknullpunkt</Begriff> setzen. Das
+              ist der eigentliche Beruf. Die Maschine zerspant; der Mensch richtet ein.
+            </p>
+          </>
+        )
       }
       interaktion={
         <Wechsel takt={fertig ? 'fertig' : dran.id}>

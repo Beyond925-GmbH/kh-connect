@@ -134,8 +134,17 @@ export const RAHMEN = {
   keller: { x: 52, y: 106, b: 216, h: 176 },
   /** A3 — das ganze Haus. */
   haus: { x: 30, y: 12, b: 260, h: 238 },
-  /** A4 — der Keller als Raster, enger als A2: hier wird gezogen. */
-  raster: { x: 54, y: 112, b: 212, h: 172 },
+  /**
+   * A4 — der Keller als Raster, und zwar so eng, wie es die Aufgabe zulässt:
+   * hier wird gezogen, und jede Einheit Rahmen kostet Zellgröße auf dem
+   * Schirm. Die Vorfassung (`x 54 · y 112 · b 212 · h 172`) nahm einen
+   * Streifen Erdgeschoss und viel Erdreich mit in die Garantie; auf einem
+   * Handy hochkant blieben dadurch 26 px je Rasterzelle. Der Rahmen umfasst
+   * jetzt genau Kellerwände, Rasterknoten samt Start- und Zielring und die
+   * Wärmepumpe — was drumherum Platz hat, zeichnet die Umgebung ohnehin
+   * (`kamera`: Mindestausschnitt, kein Fenster).
+   */
+  raster: { x: 61, y: 144, b: 198, h: 104 },
   /** A6 — Keller und Haus zusammen. Die Wärme läuft durch beides. */
   inbetriebnahme: { x: 30, y: 12, b: 260, h: 238 },
   /**
@@ -151,6 +160,20 @@ export const RAHMEN = {
    */
   uebergabe: { x: 42, y: 50, b: 236, h: 190 },
 } as const satisfies Record<string, Rahmen>
+
+/**
+ * A6, wenn die Bühne nur ein **flacher Streifen** ist (Handy hochkant,
+ * Panel aufgeklappt): der Keller mit dem Manometer statt des ganzen Hauses.
+ *
+ * In einem Band von 366 × 103 px schrumpft das ganze Haus auf ~96 px und das
+ * Manometer auf 18 px — der Zeiger, den der Screen ablesen lässt, ist dann
+ * keiner mehr (Sichtprüfung, A6 handy-hoch). Auf diesen Ausschnitt gerechnet
+ * füllt der Keller das Band, und das Manometer kommt auf ~47 px. Sobald die
+ * Anlage läuft, zieht sich das Panel zusammen, die Fläche wird hoch statt
+ * flach, und `Haus` wechselt auf den vollen Rahmen — die Wärme steigt dann
+ * sichtbar durchs ganze Haus, genau in dem Moment, in dem es darauf ankommt.
+ */
+export const RAHMEN_INBETRIEBNAHME_BAND: Rahmen = { x: 54, y: 150, b: 212, h: 92 }
 
 /**
  * **Das Sichtfeld — die `viewBox`, und sie richtet sich nach dem Screen.**

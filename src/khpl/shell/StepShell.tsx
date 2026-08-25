@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+} from 'lucide-react'
 import { motion } from 'motion/react'
 import { step, type StepId } from '@/khpl/flow/steps'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
@@ -75,6 +81,8 @@ export function StepShell({
   fuss,
   buehneInteraktiv = false,
   karteBreit = false,
+  buehnePlatz,
+  einklappbar,
   interaktionOffen,
   titelZusatz,
 }: {
@@ -93,6 +101,28 @@ export function StepShell({
   /** Für die dichten Übungs-Steps: das Panel darf quer breiter werden. */
   karteBreit?: boolean
   /**
+   * Die Bühne braucht Fläche — sie trägt die Übung oder eine Zeichnung, die
+   * gelesen werden muss. Zwei Folgen: das Panel bekommt den Klappgriff, und
+   * hochkant ist es auf 62 % statt 84 % gedeckelt.
+   *
+   * Ohne Angabe gilt `buehneInteraktiv`. Steps mit 2D-Bühne (Z1, Z3) setzen
+   * es von Hand.
+   */
+  buehnePlatz?: boolean
+  /**
+   * Nur der Griff, ohne die kleinere Obergrenze.
+   *
+   * **Warum das eine eigene Angabe ist.** Auf A1 stehen sechs Prüfungen zur
+   * Wahl, und die Zeichnung daneben erklärt sie nur — das Panel ist der Kern
+   * des Screens. `buehnePlatz` hätte dort mit dem Griff auch den 62-%-Deckel
+   * gebracht und damit ausgerechnet den Scroll-Befund verschärft, der zu
+   * beheben war. Wer die Zeichnung trotzdem einmal ganz sehen können soll,
+   * ohne dass das Panel dauerhaft schrumpft, nimmt diese Angabe.
+   *
+   * Ohne Angabe gilt `buehnePlatz`.
+   */
+  einklappbar?: boolean
+  /**
    * Solange `true`: kein Karriere-Link. Ohne Angabe gilt jeder Step mit
    * Interaktion als offen — der sichere Zustand muss der Standard sein.
    */
@@ -106,6 +136,28 @@ export function StepShell({
   const fortschritt = useFortschritt()
   const staffTap = useStaffAusgang()
   const [wegOffen, setWegOffen] = useState(false)
+  /**
+   * Panel eingeklappt — nur Griff und Fuß bleiben stehen, die Bühne bekommt
+   * den Rest des Screens.
+   *
+   * **Warum das überhaupt sein muss.** Das Panel ist auf `max-h-[84%]`
+   * gedeckelt; auf einem Handy hochkant sind das 635 von 844 px, und der
+   * Bühne bleibt ein Streifen von 193 px. Auf den Screens, auf denen die
+   * Bühne die Übung *ist* — die Leitung ziehen (A4), den Ausschnitt zurechen
+   * (C4), ein Bauteil antippen (B3.2) —, ist das keine Bühne mehr, sondern
+   * ein Vorschaubild. Panel und Bühne gleichzeitig groß gibt der Screen
+   * nicht her; also bekommt der Besucher die Wahl.
+   *
+   * Der Zustand lebt im Step: `KhplApp` mountet jeden Step frisch
+   * (`key={beruf}:{id}`), damit fängt jeder Screen wieder aufgeklappt an.
+   * Das ist Absicht — eingeklappt ankommen hieße, die Aufgabe zu verstecken,
+   * bevor sie einmal gelesen wurde.
+   *
+   * **`hidden` statt Ausbauen:** die Interaktion im Panel behält ihren
+   * Zustand. Wer C6 halb gelöst hat, klappt ein, zieht, klappt auf — und
+   * findet seine Wahl wieder.
+   */
+  const [eingeklappt, setEingeklappt] = useState(false)
   const flaeche = useRef<HTMLElement>(null)
   // Das Panel. Der Messer rechnet daraus aus, wie viel Fläche dem 3D-Modell
   // bleibt.
@@ -146,7 +198,10 @@ export function StepShell({
     }
     const kante = el.getBoundingClientRect()
     const unten = letztes.getBoundingClientRect().bottom
-    setUeberlauf(unten - kante.bottom > 6)
+    // Der Verlauf ist 56 px hoch. Ihn für 8 px Rest einzublenden kostet mehr
+    // Text, als darunter liegt — auf B9.1 quer fraß er eine ganze Zeile, um
+    // acht Pixel Schriftüberhang anzuzeigen. Erst ab einer halben Zeile.
+    setUeberlauf(unten - kante.bottom > 14)
     setScrollbar(unten - kante.top + el.scrollTop > el.clientHeight + 6)
   }, [])
   useEffect(() => {
@@ -197,6 +252,58 @@ export function StepShell({
       ? 'landscape:max-w-[52rem]'
       : 'landscape:max-w-[44rem]'
 
+  /**
+   * Eingeklappt wird das Panel quer auch **schmaler**, nicht nur flacher.
+   *
+   * Hochkant genügt die Höhe: die Bühne bekommt den Streifen über dem Panel,
+   * und der wächst, sobald das Panel schrumpft. Quer stimmt das nicht. Dort
+   * steht das Panel links, und die 2D-Bühnen setzen an seiner **rechten
+   * Kante** an (`Bild.useFreieFlaeche`, `Schnitt.useRahmen`) — die bewegt
+   * sich beim Einklappen keinen Pixel. Auf Z1, Z2 und Z3 quer war die Bühne
+   * auf- und eingeklappt exakt gleich groß (755 × 726 px), das Panel schrumpfte
+   * von 587 auf 137 px, und daneben stand eine leere Fläche. Ein Griff, der
+   * „Mehr Platz zum Arbeiten" verspricht und quer keinen liefert, ist ein
+   * kaputtes Versprechen.
+   *
+   * 26 rem trägt den Fuß — Überspringen plus Primärhandlung — ohne Umbruch.
+   */
+  const eingeklapptBreite = 'landscape:max-w-[26rem]'
+
+  /**
+   * Wo die Bühne die Aussage trägt, gibt es den Griff. Ohne Bühne wäre er
+   * ein Knopf, der Text versteckt und nichts dafür hergibt.
+   */
+  const brauchtPlatz = buehnePlatz ?? buehneInteraktiv
+  const griff = (einklappbar ?? brauchtPlatz) && buehne != null
+
+  /**
+   * Wie hoch das Panel werden darf.
+   *
+   * `84 %` ist richtig für einen Screen, auf dem die Bühne Kulisse ist — dort
+   * zählt, dass der Text ohne Scrollen dasteht. Auf einem Screen, auf dem die
+   * Bühne die Übung *ist*, ist derselbe Wert der Fehler: hochkant bleiben von
+   * 844 px genau 193 px, und in denen soll jemand ein Wandelement zurechtziehen
+   * (C4: 326 × 116 px) oder eine Stirnseite ablesen (C6: 147 × 59 px).
+   *
+   * **Der Griff allein reicht dafür nicht.** Er löst das Problem für den, der
+   * ihn findet — der Screen *kommt* aber aufgeklappt an, und der erste
+   * Eindruck ist ein 116-px-Streifen mit der Aufforderung, darauf zu ziehen.
+   * Hochkant deshalb 62 %: das Panel trägt weiterhin Fachtext und Fuß, der
+   * Rest wird gescrollt (der Auslauf-Verlauf zeigt es an), und die Bühne
+   * kommt mit rund 250 statt 120 px an. Wer mehr braucht, klappt ein.
+   *
+   * Quer bleibt es bei 84 %: dort nimmt das Panel Breite, nicht Höhe.
+   *
+   * **Und nur, solange die Übung offen ist.** Der Deckel ist ein Zugeständnis
+   * an die Bühne für die Zeit, in der man auf ihr arbeitet. Ist die Übung
+   * gelöst, kippt das Verhältnis: dann steht die Auflösung im Panel, und die
+   * Bühne hat ihre Rolle gespielt. Auf Z1 kostete der Deckel nach dem Lösen
+   * 167 px und schob Maßtabelle, Haarvergleich und den Papier-Dialog unter
+   * die Kante — ausgerechnet die Pointe des Screens.
+   */
+  const panelHoehe =
+    brauchtPlatz && offen ? 'max-h-[62%] landscape:max-h-[84%]' : 'max-h-[84%]'
+
   const ueberlagerung = (
     // `pt-[72px]` hält die Leiste frei. Ohne das schiebt ein inhaltsschwerer
     // Step (M1 trägt zehn Checklistenpunkte) sein Panel so hoch, dass der
@@ -219,7 +326,16 @@ export function StepShell({
         className={`flex w-full shrink-0 flex-col gap-1.5 ${spaltenbreite}`}
       >
         {titelZusatz && (
-          <span className="kh-etikett flex items-center gap-2">
+          // „ABSTECHER“ bzw. „KARRIERE-WEG“ stand als orange Schrift ohne
+          // Grund auf dem Foto — auf den hellen Motiven von C5.1 (Himmel) und
+          // C8.2 (weiße Leuchte) blieb davon die Hälfte lesbar.
+          //
+          // **Enger und dunkler als beim Titel.** Der Titel trägt
+          // `0_2px_18px/0.65`; ein weicher 18-px-Schleier legt sich unter eine
+          // 60-px-Versalie und trägt sie. Unter 13 px gesperrten Versalien
+          // verteilt sich derselbe Schleier ins Nichts — dort hält nur ein
+          // harter Rand die Buchstabenkante gegen den hellen Grund.
+          <span className="kh-etikett flex items-center gap-2 drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]">
             <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
             {titelZusatz}
           </span>
@@ -245,7 +361,7 @@ export function StepShell({
         // `min-h-0` ist die Bedingung dafür, dass das Scrollen unten
         // überhaupt greift: ein Flex-Kind hat von Haus aus `min-height: auto`
         // und wächst über den Container hinaus, statt zu scrollen.
-        className={`kh-panel pointer-events-auto flex max-h-[84%] min-h-0 w-full flex-col p-4 sm:p-5 landscape:p-6 ${spaltenbreite}`}
+        className={`kh-panel pointer-events-auto flex min-h-0 w-full flex-col p-4 sm:p-5 landscape:p-6 ${panelHoehe} ${eingeklappt ? eingeklapptBreite : spaltenbreite}`}
       >
         {/*
           Nur der Inhalt scrollt, der Fuß nicht.
@@ -256,7 +372,15 @@ export function StepShell({
           Screen an derselben Stelle liegen soll, wäre ausgerechnet die
           unsichtbare.
         */}
-        <div className="relative flex min-h-0 flex-1 flex-col">
+        {griff && (
+          <Klappgriff
+            eingeklappt={eingeklappt}
+            onKlick={() => setEingeklappt((v) => !v)}
+          />
+        )}
+        <div
+          className={`relative flex min-h-0 flex-1 flex-col ${eingeklappt ? 'hidden' : ''}`}
+        >
           {/* `overflow-hidden`, solange es nichts zu scrollen gibt: sonst
               steht auf jedem Panel mit einer Anton-Zeile am Ende ein
               Scrollbalken für zehn Pixel Schriftüberhang — und das Panel
@@ -294,7 +418,15 @@ export function StepShell({
           )}
         </div>
         {fuss && (
-          <div className="mt-2.5 shrink-0 border-t border-kh-line pt-2.5 landscape:mt-3 landscape:pt-3">
+          // Eingeklappt trennt der Strich nichts mehr — über ihm steht nur der
+          // Griff, und zwei Linien übereinander lesen sich als Fehler.
+          <div
+            className={`shrink-0 ${
+              eingeklappt
+                ? ''
+                : 'mt-2.5 border-t border-kh-line pt-2.5 landscape:mt-3 landscape:pt-3'
+            }`}
+          >
             {fuss}
           </div>
         )}
@@ -317,8 +449,24 @@ export function StepShell({
     </div>
   )
 
+  /*
+    `isolate` — die Bühne ist eine **abgeschlossene** Ebene.
+
+    Ohne den eigenen Stapelkontext war sie nur ein `absolute` ohne
+    `z-index`, und alles, was in ihr einen `z-index` trägt, wanderte in den
+    Stapel des Screens: `Hallenlicht` legt seine Vignette als `z-10
+    mix-blend-multiply` über die Leinwand — und lag damit über dem Panel und
+    multiplizierte sich in dessen Grund. Sichtbar als Schattenschleier, der
+    das Panel von oben nach unten um ein Drittel abdunkelte und der leisesten
+    Zeile darin (`kh-mute`) genau unten den Kontrast nahm.
+
+    Der Fehler saß nicht im Hallenlicht: eine Vignette *soll* multiplizieren.
+    Er saß darin, dass die Bühne nicht sagte, wo sie aufhört. `isolate` sagt
+    es — und jede künftige Mischebene auf einer Bühne ist damit vorab
+    eingefangen, ohne dass sie es selbst wissen muss.
+  */
   const buehnenFlaeche = (
-    <div className="absolute inset-0 overflow-hidden bg-kh-ink">
+    <div className="absolute inset-0 isolate overflow-hidden bg-kh-ink">
       {buehne}
       {/* Der Verlauf liegt hier und nicht in `Foto`: er gehört zur Bühne als
           Ebene, egal ob darunter ein Bild, ein 3D-Modell oder nichts liegt.
@@ -338,17 +486,28 @@ export function StepShell({
             liegt per `absolute` optisch oben, Screenreader und Tastatur
             beginnen aber nicht mit „zurück“. */}
         <main ref={flaeche} className="relative min-h-0 flex-1">
-          {buehneInteraktiv ? (
-            <SichtfeldMesser flaeche={flaeche} karte={panel}>
-              {buehnenFlaeche}
-              {ueberlagerung}
-            </SichtfeldMesser>
-          ) : (
-            <>
-              {buehnenFlaeche}
-              {ueberlagerung}
-            </>
-          )}
+          {/*
+            Der Messer steht auf **jedem** Step, nicht nur auf den 3D-Screens.
+
+            Vorher hing er an `buehneInteraktiv`, und das Flag zieht quer die
+            Textspalte auf 38 rem zusammen — ein Step, der nur wissen wollte,
+            wo das Panel steht, musste dafür sein Layout ändern. Zerspanung
+            und Anlagenmechanik haben deshalb je einen eigenen Messer gebaut
+            (`Bild.useFreieFlaeche`, `Schnitt.useRahmen`), und beide raten an
+            der Stelle, an der die Hülle misst: quer steht in `Schnitt` ein
+            fester `inset: … 30%`, während das Panel 51 % breit ist, und
+            `Bild` deckelt den linken Rand auf 58 % und zeichnet den Rest
+            bewusst unter das Panel.
+
+            Der Messer kostet einen `ResizeObserver` je Step und liefert
+            nichts aus, solange niemand `useSichtfeld` aufruft. Ihn allen
+            bereitzustellen ist billiger als drei Messungen, die sich
+            widersprechen.
+          */}
+          <SichtfeldMesser flaeche={flaeche} karte={panel}>
+            {buehnenFlaeche}
+            {ueberlagerung}
+          </SichtfeldMesser>
 
           {einwuerfe}
 
@@ -425,6 +584,51 @@ export function StepShell({
         />
       </div>
     </>
+  )
+}
+
+/**
+ * Der Griff, mit dem das Panel aus dem Weg geht.
+ *
+ * **Er sitzt oben im Panel und nicht als Symbol in der Ecke.** Eine 44-px-Ecke
+ * über dem Fachtext verdeckt die erste Zeile, und ein Symbol allein sagt am
+ * Messestand niemandem, was passiert. Eine volle Zeile mit Griffstrich und
+ * Wort kostet 40 px und ist die einzige Fläche im Panel, die aussieht, als
+ * ließe sie sich anfassen.
+ *
+ * **Der Text sagt die Folge, nicht den Mechanismus.** Nicht „Panel
+ * einklappen“, sondern „Mehr Platz zum Arbeiten“ — auf diesen Screens ist
+ * genau das der Grund, aus dem jemand tippt.
+ */
+function Klappgriff({
+  eingeklappt,
+  onKlick,
+}: {
+  eingeklappt: boolean
+  onKlick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onKlick}
+      data-testid="panel-klappe"
+      aria-expanded={!eingeklappt}
+      className="-mt-1 mb-1 flex h-10 shrink-0 items-center justify-center gap-2.5 rounded-kh-pill text-[0.9375rem] font-medium text-kh-paper/55 transition-colors active:text-kh-paper landscape:-mt-2"
+    >
+      <span aria-hidden className="h-[3px] w-8 rounded-full bg-kh-paper/25" />
+      {eingeklappt ? (
+        <>
+          <ChevronUp className="size-[18px]" strokeWidth={2.25} />
+          Aufgabe zeigen
+        </>
+      ) : (
+        <>
+          <ChevronDown className="size-[18px]" strokeWidth={2.25} />
+          Mehr Platz zum Arbeiten
+        </>
+      )}
+      <span aria-hidden className="h-[3px] w-8 rounded-full bg-kh-paper/25" />
+    </button>
   )
 }
 

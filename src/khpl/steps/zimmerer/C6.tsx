@@ -9,6 +9,7 @@ import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { useSchmal } from '@/khpl/shell/schmal'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
@@ -77,33 +78,75 @@ const RICHTIG: Elementlage = { aussenseite: 'holzfaser', oben: 'raehm' }
  * `warum` ist der Satz für den Fehlversuch: **was in fünf Jahren in dieser Wand
  * passiert wäre**, nicht „falsch“. Der Aufbau-Grund steht in C3 (`BELEGT`,
  * belege/zimmerer.md 2), der Lastweg über die Schwelle im Glossar.
+ *
+ * `warumKurz` ist derselbe Satz fürs Handy, auf die Hälfte gekürzt: dort steht
+ * die Rückmeldung über den Kacheln, und jede Zeile schiebt die Wahl weiter
+ * unter die Scrollkante.
+ *
+ * `labelKurz` und `kurz` sind dieselben Beschriftungen für das Handy hochkant,
+ * jede auf eine Zeile gekürzt. Jede zweite Zeile in einer Kachel kostet dort
+ * gut zwanzig Pixel; über vier Kacheln war das genug, um die zweite Frage
+ * samt beider Kacheln unter die Scrollkante zu schieben — und beide Antworten
+ * sind Pflicht, bevor „So absetzen“ etwas tut.
  */
 const ACHSEN = [
   {
     id: 'aussenseite',
     frage: 'Welche Seite kommt nach außen?',
     optionen: [
-      { wert: 'beplankung', label: 'Die glatte Seite', zusatz: 'sieht schon fertig aus' },
-      { wert: 'holzfaser', label: 'Die raue Platte', zusatz: 'Holzfaser, dunkel' },
+      {
+        wert: 'beplankung',
+        label: 'Die glatte Seite',
+        labelKurz: 'Die glatte Seite',
+        zusatz: 'sieht schon fertig aus',
+        kurz: 'sieht fertig aus',
+      },
+      {
+        wert: 'holzfaser',
+        label: 'Die raue Platte',
+        labelKurz: 'Die raue Platte',
+        zusatz: 'Holzfaser, dunkel',
+        kurz: 'Holzfaser, dunkel',
+      },
     ],
     warum:
       'Nach außen käme dann die Dampfbremse. Raumfeuchte wandert in die Wand, kondensiert an der kalten dichten Schicht — und die Wand trocknet nie wieder. In fünf Jahren ist die Dämmung nass und das Holz faul.',
+    warumKurz:
+      'Nach außen käme die Dampfbremse. In fünf Jahren ist die Dämmung nass und das Holz faul.',
   },
   {
     id: 'oben',
     frage: 'Und wo ist oben?',
     optionen: [
-      { wert: 'raehm', label: 'Rähm nach oben', zusatz: 'das obere Holz' },
-      { wert: 'schwelle', label: 'Schwelle nach oben', zusatz: 'das untere Holz' },
+      {
+        wert: 'raehm',
+        label: 'Rähm nach oben',
+        labelKurz: 'Rähm oben',
+        zusatz: 'das obere Holz',
+        kurz: 'das obere Holz',
+      },
+      {
+        wert: 'schwelle',
+        label: 'Schwelle nach oben',
+        labelKurz: 'Schwelle oben',
+        zusatz: 'das untere Holz',
+        kurz: 'das untere Holz',
+      },
     ],
     warum:
       'Dann hinge das Element auf dem Kopf. Über die Schwelle geht die Last der ganzen Wand in die Bodenplatte — sie gehört nach unten. Und dein Fenster säße an der falschen Stelle.',
+    warumKurz:
+      'Verkehrt herum — die Schwelle trägt die Last nach unten, und dein Fenster säße falsch.',
   },
 ] as const
 
 type Takt = 'lage' | 'einweisen' | 'fertig'
 
 export function C6() {
+  // Handy hochkant: Panel und Element teilen sich 844 px, und der Klappgriff
+  // deckelt das Panel auf 62 %. Dort trägt der Screen weniger Text — die
+  // vier Antwortkacheln sind die Übung und bleiben ganz (s. `shell/schmal.ts`).
+  const schmal = useSchmal()
   const answers = useFortschritt().answers
   const gespeichert = answers.c6
 
@@ -173,7 +216,10 @@ export function C6() {
 
     const neu = versuche + 1
     setVersuche(neu)
-    setMeldung({ text: falsch.map((a) => a.warum).join(' '), ok: false })
+    setMeldung({
+      text: falsch.map((a) => (schmal ? a.warumKurz : a.warum)).join(' '),
+      ok: false,
+    })
     // Der Bühnen-Beat der Spec: das Element setzt nicht ab, es dreht sich
     // zurück in die Luft. Die Wahl im Panel bleibt dabei stehen — siehe
     // `verworfen` oben.
@@ -243,6 +289,18 @@ export function C6() {
             Seite stimmt, oben stimmt. Jetzt über die Schwelle — langsam. Die Last hat
             Masse: zu schnell gezogen, und sie schwingt über das Ziel hinaus.
           </p>
+        ) : // Sobald der Fehlertext steht, weicht die Einleitung: sie hat ihre
+        // Arbeit dann getan, und ihre Zeilen sind genau die, die der Meldung
+        // und den Kacheln zusammen fehlen. Quer geht damit beides ganz ins
+        // Bild, hochkant Meldung und erste Frage.
+        meldung ? undefined : schmal ? (
+          // Der Kern des Satzes samt beider Begriffe. Die volle Fassung war
+          // hochkant sieben Zeilen und schob die zweite Frage aus dem Bild.
+          <p>
+            Es dreht sich am Haken. Wie herum setzt es ab —{' '}
+            <Begriff id="raehm">Rähm</Begriff> oben oder{' '}
+            <Begriff id="schwelle">Schwelle</Begriff>?
+          </p>
         ) : (
           <p>
             Das Element hängt am Haken und dreht sich langsam. Den ganzen Vormittag lag es
@@ -282,6 +340,19 @@ export function C6() {
             </div>
           ) : (
             <div className="flex flex-col gap-3" data-wisch="aus">
+              {/* Der Fehlertext steht **über** den Kacheln, nicht darunter.
+                  Unter vier Kacheln beginnt er hochkant erst 400 Pixel unter
+                  der Scrollkante, und `Rueckmeldung` holt sich zwar selbst ins
+                  Bild, misst dabei aber die Scrollhöhe von *vor* dem Einfügen
+                  und scrollt deshalb gar nicht: gemessen 0 von 336 Pixeln
+                  sichtbar. Oben steht er ohne Scrollen im Bild, und die Wahl,
+                  auf die er sich bezieht, bleibt direkt darunter stehen. */}
+              <Rueckmeldung
+                ok={meldung ? meldung.ok : null}
+                text={meldung ? meldung.text : null}
+                testid="c6-meldung"
+              />
+
               {ACHSEN.map((achse) => (
                 // `role="group"` statt `fieldset`/`legend`: die Optionen sind
                 // Knöpfe mit `aria-pressed`, keine Formularfelder — und ein
@@ -309,22 +380,16 @@ export function C6() {
                         className="min-h-[84px]"
                       >
                         <span className="text-[1.0625rem] leading-tight font-semibold">
-                          {o.label}
+                          {schmal ? o.labelKurz : o.label}
                         </span>
                         <span className="text-[0.9375rem] leading-snug opacity-70">
-                          {o.zusatz}
+                          {schmal ? o.kurz : o.zusatz}
                         </span>
                       </Wahlflaeche>
                     ))}
                   </div>
                 </div>
               ))}
-
-              <Rueckmeldung
-                ok={meldung ? meldung.ok : null}
-                text={meldung ? meldung.text : null}
-                testid="c6-meldung"
-              />
             </div>
           )}
         </Wechsel>

@@ -157,7 +157,17 @@ export function Bild({
                 // und min-y. Ohne das zoomt jede Ansicht auf einen anderen Punkt.
                 transformBox: 'view-box',
                 transformOrigin: `${mx - minX}px ${my - minY}px`,
-                transform: `translate(${cx - mx}px, ${cy - my}px) scale(${massstab})`,
+                // Bei Maßstab 1 keine Verschiebung: `translate` rückt `mitte`
+                // in die Bildmitte, und das ist die halbe Zoomformel — im
+                // Ruhestand schob sie die ganze Zeichnung um den Abstand
+                // zwischen Ansichtsmitte und Zoomziel (Z1: 7,5 mm nach unten),
+                // und die Längenbemaßung lag hinter der unteren Rahmenkante.
+                // Die Fahrt bleibt eine Fahrt: `transition` interpoliert von
+                // der Identität genauso weich wie von einem Versatz.
+                transform:
+                  massstab === 1
+                    ? undefined
+                    : `translate(${cx - mx}px, ${cy - my}px) scale(${massstab})`,
                 // Raster, keine Springs (§7). `prefers-reduced-motion` schaltet
                 // die Dauer global in `index.css` auf null.
                 transition: 'transform 0.7s cubic-bezier(0.2, 0, 0, 1)',
@@ -197,18 +207,23 @@ const LUFT = 20
 const LEISTE = 74
 /**
  * Weniger als das darf der Bühne nicht bleiben — hochkant in der Höhe, quer in
- * der Breite.
+ * der Breite. **Notbremsen, keine Sollwerte.**
  *
- * Ein Step mit sehr hohem Panel (Z3 hochkant trägt vierzehn Programmzeilen)
- * drückte die Zeichnung sonst auf einen Streifen zusammen, und ein Werkstück
- * von zwei Zentimetern Höhe ist keine Bühne mehr. Quer ist der Fall noch
- * schärfer: `karteBreit` deckelt das Panel auf 52 rem, und auf einem 4 : 3-Tablet
- * quer ist das fast die ganze Breite — die Bühne bekäme eine Handbreit. Ab
- * dieser Marke wird lieber wieder überlappt; dass der Titel auf dem Bild
- * steht, ist ohnehin Absicht der Hülle.
+ * Die erste Fassung deckelte bei 0,42 / 0,34 und zeichnete jenseits davon
+ * bewusst unter das Panel. Das Panel ist aber deckend: Was dahinter liegt, ist
+ * nicht „mit Titel überlagert“, sondern weg — auf Z6 quer verschwand so die
+ * Fahne „Nr. 1“, auf Z3 quer das halbe Futter. Deshalb gilt jetzt: Die Bühne
+ * bekommt den Rest, der wirklich frei ist, auch wenn er klein wird; ein Step,
+ * dessen Panel der Zeichnung zu viel nimmt, setzt `buehnePlatz` und gibt dem
+ * Besucher den Klappgriff, statt hinter sich selbst zu zeichnen.
+ *
+ * Die Bremsen bleiben nur für den Fall, dass ein sehr kleines Fenster mit
+ * einem sehr großen Panel zusammentrifft — dann ist ein angeschnittenes Bild
+ * das kleinere Übel als gar keins. Auf den drei Messe-Viewports greifen sie
+ * bei keinem Step dieses Tages mehr.
  */
-const MINDEST_HOCH = 0.34
-const MINDEST_BREIT = 0.42
+const MINDEST_HOCH = 0.2
+const MINDEST_BREIT = 0.3
 
 /**
  * Auf 2 % der Kantenlänge runden — sonst löst jede Textzeile ein neues
@@ -222,12 +237,14 @@ function grob(px: number, bezug: number): number {
 /**
  * Misst, was von der Bühnenfläche neben Leiste, Titel und Panel übrig bleibt.
  *
- * **Warum nicht `useSichtfeld`.** Der `SichtfeldMesser` der Hülle täte genau
- * das — er hängt aber an `buehneInteraktiv`, und das Flag zieht quer die
- * Textspalte auf 38 rem zusammen. Z3 braucht dort die breite Spalte für den
- * Code (`karteBreit`). Den Messer selbst aufzuspannen ginge nur mit den Refs
- * der Hülle, und die Hülle ist eingefroren (khpl-tage.md §6.2). Also misst
- * diese Bühne ihre eigene Fläche — dieselbe Rechnung, von der anderen Seite.
+ * **Warum nicht `useSichtfeld`.** Den Messer der Hülle gibt es inzwischen auf
+ * jedem Step, und `'roh'` wäre die passende Fassung. Zwei Dinge kann er für
+ * diese Bühne trotzdem nicht: Er misst nur das Panel, nicht den **Titel** —
+ * der steht hochkant unmittelbar über dem Panel in derselben Spalte, und eine
+ * Kontur, die erst an der Panelkante endet, endet mitten in der Überschrift.
+ * Und er misst Rechtecke aus dem Renderbaum, während hier unten mit
+ * `offsetTop` gerechnet wird (s. nächster Absatz). Also misst diese Bühne
+ * ihre eigene Fläche — dieselbe Rechnung, eine Kante genauer.
  *
  * **Gerechnet wird mit `offsetTop`, nicht mit `getBoundingClientRect`.** Titel
  * und Panel fahren beim Betreten des Steps mit `translateY` ein; ein Rechteck

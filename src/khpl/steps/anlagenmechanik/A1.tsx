@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Check, Clock } from 'lucide-react'
+import { Check, ChevronDown, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
@@ -9,6 +9,7 @@ import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { useSchmal } from '@/khpl/shell/schmal'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Fachwort } from './Fachwort'
 
@@ -177,6 +178,7 @@ const uhr = (stunde: number, minute: number) =>
   `${stunde}:${minute.toString().padStart(2, '0')} Uhr`
 
 export function A1() {
+  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.a1
   const [geprueft, setGeprueft] = useState<string[]>(() => gespeichert?.geprueft ?? [])
   const [entscheiden, setEntscheiden] = useState(() => !!gespeichert?.ursache)
@@ -222,6 +224,14 @@ export function A1() {
     <StepShell
       id="A1"
       karteBreit
+      /*
+        Nur der Griff, nicht `buehnePlatz`: die sechs Prüfungen im Panel sind
+        der Kern des Screens, die Anlage daneben erklärt sie. Der 62-%-Deckel,
+        den `buehnePlatz` mitbringt, hätte hier ausgerechnet den Scroll-Befund
+        verschärft, um den es ging. Wer die Anlage einmal ganz sehen will,
+        klappt kurz ein.
+      */
+      einklappbar
       interaktionOffen={!geloest}
       buehne={
         <Schnitt
@@ -240,7 +250,38 @@ export function A1() {
         />
       }
       fachtext={
-        geloest ? undefined : (
+        /*
+          **Im Takt *entscheiden* steht kein Fachtext mehr — auf keiner
+          Breite.** Schmal war das schon so; quer trug ihn das Fenster, solange
+          nur die fünf Ursachen darunter standen. Nach einem Fehlgriff kommen
+          Folge und Schlüsselprüfung dazu, und dann trägt es ihn nicht mehr:
+          gemessen auf 1180 × 820 lagen 114 px unter der Kante, das
+          Schlüsselfeld war angeschnitten (`tmp/sicht/a3-a1.mjs`). Der Absatz
+          ist an dieser Stelle auch das Entbehrlichste, was im Panel steht — er
+          beschreibt die Ausgangslage, und die steht in jeder der fünf Folgen
+          noch einmal, aus ihrem Blickwinkel. Die beiden Fachwörter sind im
+          Takt *suchen* antippbar, also vorher.
+        */
+        geloest || entscheiden ? undefined : schmal ? (
+          /*
+            Handy hochkant: zwei Zeilen statt fünf.
+
+            Die Vorfassung blendete den Absatz hier ganz aus (`max-sm:hidden`),
+            weil von den sechs Prüfungen nur drei über der Scrollkante standen.
+            Das kostete aber zwei Dinge, die der Screen nirgends sonst hat:
+            die **Ausgangslage** („Heizung warm, Wasser kalt") — auf dem Handy
+            musste man sie sich mit einer der drei freien Prüfungen kaufen —
+            und das Fachwort **Zirkulation**, das in diesem ganzen Tag kein
+            zweites Mal vorkommt, obwohl „Läuft die Zirkulation?" eine der
+            sechs Prüfungen ist. Kürzen ja, ein Fachwort streichen nein.
+
+            „Umwälzpumpe" fällt schmal weg — die steht in A2 noch einmal.
+          */
+          <p>
+            Heizung warm, Wasser kalt — dazwischen Speicher, Regelung,{' '}
+            <Fachwort id="zirkulation">Zirkulation</Fachwort>.
+          </p>
+        ) : (
           <p>
             Ein Symptom, viele mögliche Ursachen. Man tauscht nicht, man grenzt ein. Die
             Heizung wird warm, das warme Wasser nicht — zwischen Kessel und Zapfhahn
@@ -254,9 +295,19 @@ export function A1() {
           {geloest ? (
             <Geloest />
           ) : entscheiden ? (
-            <Entscheiden geprueft={geprueft} daneben={daneben} onWaehle={entscheide} />
+            <Entscheiden
+              geprueft={geprueft}
+              daneben={daneben}
+              onWaehle={entscheide}
+              schmal={schmal}
+            />
           ) : (
-            <Suchen geprueft={geprueft} offen={offeneP} onPruefe={pruefe} />
+            <Suchen
+              geprueft={geprueft}
+              offen={offeneP}
+              onPruefe={pruefe}
+              schmal={schmal}
+            />
           )}
         </Wechsel>
       }
@@ -299,24 +350,73 @@ function Suchen({
   geprueft,
   offen,
   onPruefe,
+  schmal = false,
 }: {
   geprueft: string[]
   offen: number
   onPruefe: (id: string) => void
+  /** Handy hochkant: kürzere Zeilen, damit das Ergebnis ins Fenster passt. */
+  schmal?: boolean
 }) {
   const zuletzt = geprueft.at(-1)
   const letzte = PRUEFUNGEN.find((p) => p.id === zuletzt)
 
+  /*
+    Eine Ergebnisfläche, kein Stapel: die zweite Prüfung schreibt ihr Ergebnis
+    dorthin, wo die erste stand. Was man schon geprüft hat, steht als markierte
+    Fläche daneben — man verliert nichts, aber das Panel wächst auch nicht mit
+    jedem Tap.
+
+    **Schmal steht sie über der Liste, sonst darunter.** Auf 390 × 844 passen
+    Kopf, sechs Kacheln und Ergebnis zusammen nicht ins Fenster; irgendetwas
+    liegt unter der Kante. Stand das Ergebnis unten, war es das Ergebnis —
+    „Kalt. Nicht lauwarm — kalt. Hier ist seit …" brach mitten im Satz ab,
+    und das ist der ganze Ertrag eines Taps. Über der Liste rutscht dafür die
+    unterste Kachelreihe unter den Verlauf: sichtbar angeschnitten, erreichbar
+    durch Scrollen, und nach der dritten Prüfung ohnehin gesperrt. Dieselbe
+    Abwägung wie in A6 mit der `Rueckmeldung`.
+  */
+  const ergebnisfeld = (
+    <Wechsel takt={zuletzt ?? 'nichts'}>
+      {letzte ? (
+        <div className="kh-feld px-4 py-3" data-testid="a1-ergebnis">
+          <p className="kh-etikett">{letzte.frage}</p>
+          <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+            {letzte.ergebnis}
+          </p>
+        </div>
+      ) : (
+        <p className="px-1 text-[1rem] text-kh-paper/55">
+          {schmal
+            ? 'Jede Prüfung schließt etwas aus — und kostet Zeit.'
+            : 'Jede Prüfung schließt etwas aus oder bestätigt etwas. Und jede kostet Zeit — danach wartet die nächste Adresse.'}
+        </p>
+      )}
+    </Wechsel>
+  )
+
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        {/*
+          Schmal die kurze Fassung: die lange lief über zwei Zeilen und schob
+          die Uhr auf eine dritte — 122 px Kopfzeile über einer Liste, die
+          selbst nur 229 px braucht. Was sie sagt, sagen die Kacheln darunter
+          ohnehin: sechs Fragen, von denen drei gehen.
+        */}
         <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
           {offen > 0
-            ? 'Drei Prüfungen hast du. Such dir aus, welche.'
-            : 'Das waren deine drei Prüfungen. Jetzt entscheidest du.'}
+            ? schmal
+              ? 'Drei Prüfungen hast du.'
+              : 'Drei Prüfungen hast du. Such dir aus, welche.'
+            : schmal
+              ? 'Jetzt entscheidest du.'
+              : 'Das waren deine drei Prüfungen. Jetzt entscheidest du.'}
         </p>
         <Uhr geprueft={geprueft.length} />
       </div>
+
+      {schmal && ergebnisfeld}
 
       {/*
         **Gelbgrün markiert höchstens eine Fläche, und nur die offene.**
@@ -329,10 +429,17 @@ function Suchen({
         etwas anderes.
 
         Jetzt dieselbe Geste wie in A2 und A4.1 an diesem Tag: markiert ist die
-        Prüfung, deren Ergebnis gerade unten steht, alle anderen erledigten
+        Prüfung, deren Ergebnis gerade im Feld steht, alle anderen erledigten
         tragen einen Haken. Erledigtes bleibt sichtbar, ohne zu leuchten.
       */}
-      <div className="grid gap-2 landscape:grid-cols-2">
+      {/*
+        Zwei Spalten auch auf dem Handy (`max-sm`): sechs einzeilige Flächen
+        untereinander schoben drei davon unter die Scrollkante — und wer nicht
+        scrollt, wählt aus der halben Auswahl (Sichtprüfung, A1 handy-hoch).
+        Die Fragen sind kurz genug für die halbe Breite; nur
+        „Speicherladepumpe" braucht die Trennhilfe (`hyphens-auto`).
+      */}
+      <div className="grid gap-2 max-sm:grid-cols-2 landscape:grid-cols-2">
         {PRUEFUNGEN.map((p) => {
           const fertig = geprueft.includes(p.id)
           return (
@@ -343,6 +450,8 @@ function Suchen({
               // lesbar — gesperrt sind nur die, für die keine Zeit mehr ist.
               disabled={!fertig && offen <= 0}
               gewaehlt={fertig && p.id === zuletzt}
+              className="max-sm:px-3 max-sm:py-2.5 max-sm:leading-snug max-sm:break-words max-sm:hyphens-auto"
+              lang="de"
               data-testid={`a1-pruefung-${p.id}`}
             >
               {fertig && p.id !== zuletzt && (
@@ -358,25 +467,7 @@ function Suchen({
         })}
       </div>
 
-      {/* Eine Ergebnisfläche, kein Stapel: die zweite Prüfung schreibt ihr
-          Ergebnis dorthin, wo die erste stand. Was man schon geprüft hat,
-          steht als markierte Fläche oben — man verliert nichts, aber das
-          Panel wächst auch nicht mit jedem Tap. */}
-      <Wechsel takt={zuletzt ?? 'nichts'}>
-        {letzte ? (
-          <div className="kh-feld px-4 py-3" data-testid="a1-ergebnis">
-            <p className="kh-etikett">{letzte.frage}</p>
-            <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-              {letzte.ergebnis}
-            </p>
-          </div>
-        ) : (
-          <p className="px-1 text-[1rem] text-kh-paper/55">
-            Jede Prüfung schließt etwas aus oder bestätigt etwas. Und jede kostet Zeit —
-            danach wartet die nächste Adresse.
-          </p>
-        )}
-      </Wechsel>
+      {!schmal && ergebnisfeld}
     </div>
   )
 }
@@ -404,42 +495,101 @@ function Uhr({ geprueft }: { geprueft: number }) {
 // Takt 2 — entscheiden
 // ---------------------------------------------------------------------------
 
+/**
+ * **Nach einem Fehlgriff schrumpft schmal die Liste, nicht die Lektion.**
+ *
+ * Gemessen auf 390 × 844 (`tmp/sicht/a3-a1.mjs`): fünf Ursachen (380 px), Folge
+ * (172 px) und Schlüsselfeld (221 px) ergeben 271 px unter der Kante — die
+ * Folge war zu einem Drittel zu sehen, „Entscheidend gewesen wäre …" gar
+ * nicht. Damit lag ausgerechnet das unter der Kante, was der Fehlgriff auf
+ * diesem Tag *ist*: nicht ein Tadel, sondern eine zweite Anfahrt und die
+ * Prüfung, an der der Fall gekippt wäre.
+ *
+ * Die Liste über die Lektion zu schieben hätte nur getauscht, wer unten liegt.
+ * Stattdessen klappt sie schmal zusammen: an ihrer Stelle steht eine Zeile
+ * *Noch einmal wählen*, die sie auf Tipp zurückholt. Das darf sie, weil sie an
+ * dieser Stelle **schon gelesen ist** — vor dem Fehlgriff stand sie
+ * vollständig im Fenster (Rest 0, 5 von 5 Flächen ganz sichtbar), und der
+ * Fehlgriff war der Tap auf eine davon. Beim zweiten Versuch stehen wieder
+ * alle fünf da, diesmal mit der Folge im Rücken. Dieselbe Antwort wie in Z7
+ * der Zerspanung: nichts streichen, nur nicht alles gleichzeitig zeigen.
+ *
+ * Quer bleibt die Liste offen — dort trägt das Fenster beides, seit der
+ * Fachtext im Takt *entscheiden* nicht mehr mitläuft.
+ */
 function Entscheiden({
   geprueft,
   daneben,
   onWaehle,
+  schmal = false,
 }: {
   geprueft: string[]
   daneben: string | null
   onWaehle: (id: string) => void
+  /** Handy hochkant: die Liste klappt nach einem Fehlgriff zusammen. */
+  schmal?: boolean
 }) {
   const fehlgriff = daneben ? URSACHEN.find((u) => u.id === daneben) : undefined
   const schluessel = PRUEFUNGEN.find((p) => p.id === ENTSCHEIDEND)
   const hatSchluessel = geprueft.includes(ENTSCHEIDEND)
 
+  const [wiederAuf, setWiederAuf] = useState(false)
+  const listeAuf = !schmal || !fehlgriff || wiederAuf
+  // Jeder neue Griff klappt wieder zu: sonst stünde nach dem zweiten
+  // Fehlversuch dieselbe Liste über einer Folge, die niemand sieht.
+  const waehle = (id: string) => {
+    setWiederAuf(false)
+    onWaehle(id)
+  }
+
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-        Woran liegt es?
-      </p>
+      {listeAuf ? (
+        <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
+          Woran liegt es?
+        </p>
+      ) : (
+        /*
+          Die Zeile ersetzt Überschrift **und** Liste — „Woran liegt es?" über
+          einem zugeklappten Griff wäre zweimal dieselbe Frage in 90 px.
+        */
+        <button
+          type="button"
+          onClick={() => setWiederAuf(true)}
+          aria-expanded={false}
+          data-testid="a1-nochmal"
+          className="kh-feld flex min-h-[48px] w-full items-center justify-between gap-3 px-4 py-2.5 text-left"
+        >
+          <span className="text-[1.125rem] font-semibold text-kh-paper">
+            Noch einmal wählen
+          </span>
+          <ChevronDown
+            aria-hidden
+            className="size-5 shrink-0 text-kh-paper/50"
+            strokeWidth={2.25}
+          />
+        </button>
+      )}
 
-      <div className="grid gap-2 landscape:grid-cols-2">
-        {/*
+      {listeAuf && (
+        <div className="grid gap-2 landscape:grid-cols-2">
+          {/*
           Keine der Flächen bleibt markiert. Gelbgrün heißt im ganzen System
           „das hast du geschafft" — und eine falsche Ursache in Signalfarbe
           stehen zu lassen wäre das Gegenteil davon. Trifft der Tap, wechselt
           der Takt ohnehin; trifft er nicht, steht die Folge darunter.
         */}
-        {URSACHEN.map((u) => (
-          <Wahlflaeche
-            key={u.id}
-            onClick={() => onWaehle(u.id)}
-            data-testid={`a1-ursache-${u.id}`}
-          >
-            {u.label}
-          </Wahlflaeche>
-        ))}
-      </div>
+          {URSACHEN.map((u) => (
+            <Wahlflaeche
+              key={u.id}
+              onClick={() => waehle(u.id)}
+              data-testid={`a1-ursache-${u.id}`}
+            >
+              {u.label}
+            </Wahlflaeche>
+          ))}
+        </div>
+      )}
 
       <Rueckmeldung
         ok={fehlgriff ? false : null}

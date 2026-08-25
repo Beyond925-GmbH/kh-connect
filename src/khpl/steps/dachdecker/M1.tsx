@@ -187,7 +187,7 @@ export function M1() {
       // Scrollen auf den Screen passen muss. M2 macht es genauso.
       fachtext={
         ausgewertet ? undefined : (
-          <p>
+          <p className="max-sm:text-[1rem] max-sm:leading-[1.4]">
             Ein Anruf, eine Adresse, ein altes Dach. Du fährst hin, misst auf —{' '}
             <Begriff id="aufmass">vom Zollstock bis zum Laser</Begriff> —, machst Fotos
             und hörst zu. Was du hier übersiehst, fehlt dir später im Angebot.
@@ -248,20 +248,24 @@ function Liste({
 }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-[1.125rem] leading-snug font-semibold text-kh-paper sm:text-[1.25rem]">
+      <p className="text-[1.125rem] leading-snug font-semibold text-kh-paper max-sm:text-[1.0625rem] sm:text-[1.25rem]">
         {FRAGE}{' '}
         <span className="font-normal text-kh-mute">Tipp alles an, was dazugehört.</span>
       </p>
 
-      {/* Zwei Spalten in **beiden** Ausrichtungen. Zehn Punkte untereinander
-          passen im Hochformat nicht auf einen Screen.
+      {/* Zwei Spalten in **allen drei** Formaten — auch auf dem Handy. Zehn
+          Punkte untereinander sind dort ~950 px Liste in einem 635-px-Panel:
+          372 px lagen unter der Scrollkante, und eine Mehrfachauswahl, deren
+          Optionen man nicht nebeneinander sieht, ist kein Vergleich mehr.
+          Damit die halbe Panelbreite reicht, werden die Chips unterhalb `sm`
+          eine Stufe kompakter (Text, Kreis, Polster).
 
           Die Punkte sind keine Checkbox-Zeilen mehr, sondern Chips: angetippt
           füllt sich der ganze Chip orange und zieht sich einmal zusammen. Eine
           6-px-Checkbox links neben grauem Text ist auf einem Touchscreen die
           leiseste Rückmeldung, die man bauen kann — und diese Übung besteht
           aus nichts anderem als zehnmal antippen. */}
-      <ul className="grid auto-rows-min grid-cols-1 content-start gap-1.5 sm:grid-cols-2">
+      <ul className="grid auto-rows-min grid-cols-2 content-start gap-1.5 max-sm:gap-1">
         {ANGEZEIGT.map((p) => {
           const an = gewaehlt.includes(p.id)
           return (
@@ -277,11 +281,11 @@ function Liste({
                 // Auswertung danach färbt die Treffer in Signalfarbe, und die
                 // wäre verbraucht, wenn schon das Auswählen sie benutzte
                 // (siehe `Wahlflaeche`).
-                className={wahlflaeche({ ton: 'orange', gewaehlt: an })}
+                className={`${wahlflaeche({ ton: 'orange', gewaehlt: an })} max-sm:min-h-[44px] max-sm:gap-2 max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.9375rem] max-sm:leading-tight`}
               >
                 <span
                   aria-hidden
-                  className={`grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors ${
+                  className={`grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors max-sm:size-5 ${
                     an ? 'border-[#0E0D0B] bg-[#0E0D0B]' : 'border-white/35'
                   }`}
                 >

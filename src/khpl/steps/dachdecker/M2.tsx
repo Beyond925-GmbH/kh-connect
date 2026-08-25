@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import {
@@ -52,6 +52,15 @@ const POSTEN = [
 const euro = (n: number) => n.toLocaleString('de-DE') + ' €'
 
 export function M2() {
+  // Der naechste Step (M3) ist der erste mit dem `three`-Buendel. Wer hier
+  // schaetzt, laedt es nebenbei schon — sonst steht er auf M3 sekundenlang
+  // vor dem Suspense-Fallback statt vor dem Abbundplan. Das Ergebnis wird
+  // verworfen; an der Lazy-Grenze (flow 8.5) aendert ein dynamic import
+  // nichts, der Chunk bleibt derselbe.
+  useEffect(() => {
+    void import('@/khpl/buehne/Dachstuhl3D')
+  }, [])
+
   const gespeichert = useFortschritt().answers.m2
   const [wert, setWert] = useState(() => gespeichert?.schaetzung ?? START)
   const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)

@@ -30,6 +30,14 @@ import {
   ELEMENT_FLACH_Y,
   H,
 } from './element'
+import type { Rahmenangebot, Rahmenurteil } from './element'
+
+/**
+ * Weitergereicht, damit die Steps die C4-Typen wie alle anderen Bühnentypen
+ * von hier holen — aus `element` importiert kein Step (`kanon.ts`-Regel:
+ * Laufzeitwerte nur aus `kanon`, Typen nur aus dieser Datei).
+ */
+export type { Rahmenangebot, Rahmenurteil }
 
 /**
  * Das Wandelement als Bühne — **ein Objekt, sieben Zustände**
@@ -191,10 +199,23 @@ export interface Wandelement3DProps {
   schichten?: number
 
   // -- C4 — der Fehler mit Preis -------------------------------------------
-  /** Der aufgezogene Ausschnitt. `null` = noch nichts gezogen. */
+  /**
+   * Der Ausschnitt. In C4 steht er fest (er kommt aus dem Plan, die Maschine
+   * schneidet ihn); ab C5 ist es der aus `answers.c4`. `null` = kein Fenster.
+   */
   ausschnitt?: Fensterausschnitt | null
-  /** Während des Ziehens, jeden Frame. */
-  onAusschnitt?: (a: Fensterausschnitt) => void
+  /** Die drei Rahmen, die in C4 auf dem Tisch liegen. */
+  rahmenangebote?: readonly Rahmenangebot[]
+  /** Welcher davon gerade probiert wird. */
+  gewaehlterRahmen?: string | null
+  /** Was der Step über den probierten Rahmen entschieden hat. */
+  rahmenurteil?: Rahmenurteil | null
+  /** Der richtige Rahmen sitzt und gehört ab jetzt zum Element. */
+  rahmenSitzt?: boolean
+  /** Ein Rahmen wurde angetippt. */
+  onRahmen?: (id: string) => void
+  /** Der probierte Rahmen ist unten angekommen — jetzt spricht der Step. */
+  onProbeEnde?: () => void
   /**
    * Der Blick nach oben, sobald der Rahmen sitzt: das Element kippt für
    * `AUFRICHTEN_DAUER` in die Senkrechte, **steht** dort `AUFRICHTEN_STANDZEIT`
@@ -281,8 +302,18 @@ function waehleBlickfang(
             huelle: huelle([-4.4, 0, -1.0], [4.4, ELEMENT_FLACH_Y + H + 0.3, 0.8]),
           }
         : {
-            richtung: blick === 'untersicht' ? [6.5, -2.6, 9.5] : [0.01, 13, 1.7],
-            huelle: huelle([-4.4, 0, -3.3], [4.4, 1.9, 0.6]),
+            // **Kein senkrechter Blick mehr.** Die Übung entscheidet sich in
+            // der Höhe: der passende Rahmen sitzt in der Laibung, der zu große
+            // bleibt fünfzehn Zentimeter darüber liegen, der zu kleine fällt
+            // durch. Von genau oben ist das alles derselbe Umriss. Der Blick
+            // steht deshalb schräg — flach genug, dass es eine Draufsicht
+            // bleibt (Spec: „Draufsicht C1–C4“), steil genug, dass man sieht,
+            // ob etwas aufliegt oder drinsteckt.
+            richtung: blick === 'untersicht' ? [6.5, -2.6, 9.5] : [0.01, 8.5, 5.6],
+            // Eng an der Tafel (x ±4, liegend z −3…0) plus der Reihe Rahmen
+            // davor bis z ≈ 1,3: mehr Hüllenreserve kostet auf dem Handy
+            // direkt Lesbarkeit der Etiketten. Der Tisch darf anschneiden.
+            huelle: huelle([-4.15, 0, -3.15], [4.15, 1.9, 1.35]),
           }
     case 'verladen':
       return {
@@ -292,7 +323,13 @@ function waehleBlickfang(
     case 'haken':
       return {
         richtung: blick === 'draufsicht' ? [0.4, 13, 2.0] : [6.5, -2.6, 9.5],
-        huelle: huelle([-4.8, 0, -2.5], [4.8, 8.6, WANDACHSE_Z + 2.4]),
+        // Nur Element und Bodenplatte, nicht das Gehänge: die Wand hängt mit
+        // Oberkante bei ~5,3 m, alles darüber ist Seil. Eine 8,6-m-Hülle
+        // steckte davon Dreiviertel in die bindende Achse, und die Abfrage
+        // „welche Seite, wo ist oben“ war auf dem Handy nicht mehr ablesbar
+        // (Sichtbefund C6). Das oben angeschnittene Seil ist gewollt — der
+        // Kran bleibt ohnehin aus dem Bild.
+        huelle: huelle([-4.3, 0, -2.5], [4.3, 5.2, WANDACHSE_Z + 2.4]),
       }
     case 'haus':
       return {
@@ -440,10 +477,15 @@ export default function Wandelement3D(props: Wandelement3DProps) {
             {/* Ohne die kamerazugewandte Stützenreihe: der Blick nach oben
                 (aufgerichtet) ist schräg, und die Reihe schnitte das Element
                 mittig durch (Abnahme-Befund C4). */}
-            <Halle mitAuflage ohneVordereStuetzen />
+            <Halle mitAuflage ohneVordereStuetzen tischTiefe={5.6} />
             <FensterElement
               ausschnitt={props.ausschnitt}
-              onAusschnitt={props.onAusschnitt}
+              angebote={props.rahmenangebote}
+              gewaehlt={props.gewaehlterRahmen}
+              urteil={props.rahmenurteil}
+              gesetzt={props.rahmenSitzt}
+              onRahmen={props.onRahmen}
+              onProbeEnde={props.onProbeEnde}
               aufrichtenZeigen={props.aufrichtenZeigen}
               onAufrichtenEnde={props.onAufrichtenEnde}
               marke={props.deinElement ?? false}

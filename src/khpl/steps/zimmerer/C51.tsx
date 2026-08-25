@@ -3,6 +3,7 @@ import { StepFoto } from '@/khpl/buehne/Foto'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { Begriff } from './Begriff'
+import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
 
 /**
  * C5.1 — Warum niemand unter der Last steht. Abstecher von C5, mündet in C6
@@ -46,11 +47,36 @@ import { Begriff } from './Begriff'
  * mit Helm und Handschuh. Die PSA ist das, wovon der Screen handelt; der Kran
  * bleibt C6. Der Medienbedarf ist gemeldet, nicht erledigt.
  */
+
+/**
+ * Der Absatz über die Aufstellung am Kran — hochkant eine Klappzeile.
+ *
+ * **Warum.** Ausgeschrieben lagen 146 px unter der Scrollkante: der Absatz
+ * brach nach drei Zeilen ab, und was fehlte, war ausgerechnet der Schlusssatz
+ * — dass keiner unter der Last steht, also der Titel des Screens. Kürzen wäre
+ * hier falsch gewesen: die vier Zimmerleute sind als Praxis *eines* Betriebs
+ * benannt, und genau diese Einschränkung steht in dem Teil, der wegfiel. Als
+ * Zeile steht die Überschrift über der Kante, der Absatz kommt ganz auf Tipp.
+ *
+ * Das Zitat bleibt unangetastet. Es ist der Inhalt dieses Screens; hätte es
+ * geklappt werden müssen, wäre der Screen der falsche Ort dafür gewesen.
+ */
+const AM_KRAN: Abschnitt[] = [
+  {
+    frage: 'Wer am Kran wo steht',
+    antwort:
+      'Am Kran hat jeder seinen Platz: einer hängt die Last an und hat den Kranführer im Blick, die anderen nehmen das Element oben in Empfang. In dem Betrieb, den wir gefragt haben, sind es beim Aufstellen vier — vorgeschrieben ist diese Zahl nicht. Vorgeschrieben ist, dass keiner von ihnen darunter steht.',
+  },
+]
 export function C51() {
   return (
     <StepShell
       id="C5.1"
       titelZusatz="Abstecher"
+      // Quer 52 statt 44 rem: die Zeile „Wer am Kran wo steht“ trägt quer ihre
+      // Überschrift mit, und die 22 px, die das kostet, holt die breitere
+      // Spalte im Zitat wieder herein.
+      karteBreit
       interaktionOffen={false}
       buehne={<StepFoto id="C5.1" />}
       fachtext={
@@ -76,6 +102,11 @@ export function C51() {
             data-testid="c51-zitat"
             className="kh-feld px-4 py-4"
           >
+            {/* `kh-titel-klein` setzt line-height 1 — Anton überragt bei
+                Versalien mit Umlaut seine Zeilenbox, und auf dem Handy bricht
+                das Zitat zweizeilig: „ und SICHERHEIT liefen ineinander
+                (Sichtbefund C5.1). Der Wert gehört eigentlich in die Utility
+                selbst (src/index.css), die ist aber nicht meine Datei. */}
             <p className="kh-titel-klein text-kh-orange">
               „Routine ist der größte Feind der Sicherheit.“
             </p>
@@ -89,17 +120,9 @@ export function C51() {
             </footer>
           </motion.blockquote>
 
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="kh-feld px-4 py-3 text-[1.0625rem] leading-[1.45] text-kh-paper/90"
-          >
-            Am Kran hat jeder seinen Platz: einer hängt die Last an und hat den Kranführer
-            im Blick, die anderen nehmen das Element oben in Empfang. In dem Betrieb, den
-            wir gefragt haben, sind es beim Aufstellen vier — vorgeschrieben ist diese
-            Zahl nicht. Vorgeschrieben ist, dass keiner von ihnen darunter steht.
-          </motion.p>
+          {/* Zugeklappt ankommen: über der Zeile steht das Zitat, der Screen
+              fängt also nicht mit einer zugeklappten Zeile an. */}
+          <Klappliste kennung="c51" abschnitte={AM_KRAN} ersterOffen={false} />
         </div>
       }
       fuss={<StepFuss id="C5.1" />}

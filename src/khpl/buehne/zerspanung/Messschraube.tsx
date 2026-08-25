@@ -34,18 +34,23 @@ import { FASE, GROESSTMASS, KLEINSTMASS, NENNMASS, TOLERANZ } from './kanon'
 const SICHT = '0 -28 116 72'
 
 /**
- * Hochkant: x ∈ [0, 106], y ∈ [-44, 44].
+ * Hochkant: x ∈ [0, 113], y ∈ [-44, 44].
  *
  * Eine Mikrometerschraube ist ein liegendes Gerät; im stehenden Feld blieb sie
- * auf halber Breite stehen und ließ oben wie unten ein Drittel leer. Zwei
- * Handgriffe holen das zurück, und beide sind Bühne, keine Aussage: Der Weg,
- * den die Trommel beim Aufdrehen nach rechts zurücklegt, bleibt frei statt
- * vorgehalten — sie fährt dann beim Zudrehen von der Kante her ins Bild, was
- * genau die Handlung des Takts ist —, und die **Toleranzzone rückt nach oben**,
- * in die Höhe, die sonst niemand benutzt. Sie ist ohnehin stark überhöht; wie
- * hoch sie über der Fläche schwebt, ist keine Zahl, sondern Platz.
+ * auf halber Breite stehen und ließ oben wie unten ein Drittel leer. Was
+ * dagegen hilft, ist Bühne, keine Aussage: die **Toleranzzone rückt nach
+ * oben**, in die Höhe, die sonst niemand benutzt — sie ist ohnehin stark
+ * überhöht; wie hoch sie über der Fläche schwebt, ist keine Zahl, sondern
+ * Platz.
+ *
+ * **Rechts endet der Ausschnitt hinter der offenen Ratsche** (sie steht bei
+ * maximal geöffneter Spindel bei x ≈ 112). Die Vorfassung schnitt bei 106 und
+ * ließ die Trommel „von der Kante her ins Bild fahren“ — auf dem Schirm las
+ * sich das aber nicht als Fahrt, sondern als angeschnittenes Gerät: Der erste
+ * Blick trifft immer den offenen Zustand, und da fehlte die halbe Ratsche.
+ * Beim Zudrehen fährt sie jetzt nach links und lässt rechts Luft zurück.
  */
-const SICHT_HOCH = '0 -44 106 88'
+const SICHT_HOCH = '0 -44 113 88'
 
 const TEIL = [24, 0] as const
 const TEIL_R = NENNMASS / 2

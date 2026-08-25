@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import {
@@ -16,6 +16,7 @@ import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
+import { useSchmal } from '@/khpl/shell/schmal'
 
 /**
  * Z3 — Zeile für Zeile. **Der Fehler mit Preis.**
@@ -81,6 +82,7 @@ function codeVon(zeile: Programmzeile, index: number, korrigiert: boolean): stri
 }
 
 export function Z3() {
+  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.z3
   const vorbei = !!(gespeichert?.gefunden || gespeichert?.kollision)
 
@@ -157,8 +159,20 @@ export function Z3() {
     <StepShell
       id="Z3"
       interaktionOffen={!erledigt}
-      // Code und Klammer nebeneinander brauchen quer die breite Spalte.
-      karteBreit
+      // Kein `karteBreit`: der Code ist rund zwanzig Zeichen breit, und jedes
+      // Rem mehr Panel ging quer direkt von der Bühne ab — bei 52 rem begann
+      // das SVG hinter der Panelkante und der halbe Werkzeugweg war verdeckt.
+      // Dafür der Klappgriff: Die Kontur, die sich Zeile für Zeile zeichnet,
+      // ist der Reiz dieses Screens, und wer sie groß sehen will, klappt das
+      // Panel zusammen.
+      /*
+        `einklappbar` statt `buehnePlatz`: die Übung dieses Steps steht im
+        Panel (eine von vierzehn Zeilen antippen), die Bühne zeigt dazu den
+        Weg. Der 62-%-Deckel, den `buehnePlatz` mitbringt, nähme dem Panel
+        hochkant genau den Platz, den die Liste braucht. Den Weg ganz sehen
+        kann man trotzdem — einmal einklappen.
+      */
+      einklappbar
       buehne={
         <Werkstueck
           zustand="werkzeugweg"
@@ -173,25 +187,34 @@ export function Z3() {
         />
       }
       fachtext={
-        <p>
-          Das Programm sagt der Maschine, wohin das Werkzeug fährt. Der Zerspaner schreibt
-          es nicht immer selbst — aber er muss es <em>lesen</em> können, bevor er Start
-          drückt. Jede Zeile ist ein Weg: ein Maß, ein{' '}
-          <Begriff id="vorschub">Vorschub</Begriff>, eine{' '}
-          <Begriff id="drehzahl">Drehzahl</Begriff>.
-        </p>
+        // Handy hochkant: nur der Kern — jede Zeile darüber kostet eine
+        // sichtbare Programmzeile in der Liste (s. `schmal.ts`).
+        schmal ? (
+          <p>
+            Das Programm sagt der Maschine, wohin das Werkzeug fährt. Jede Zeile ist ein
+            Weg: ein Maß, ein <Begriff id="vorschub">Vorschub</Begriff>, eine{' '}
+            <Begriff id="drehzahl">Drehzahl</Begriff>.
+          </p>
+        ) : (
+          <p>
+            Das Programm sagt der Maschine, wohin das Werkzeug fährt. Der Zerspaner
+            schreibt es nicht immer selbst — aber er muss es <em>lesen</em> können, bevor
+            er Start drückt. Jede Zeile ist ein Weg: ein Maß, ein{' '}
+            <Begriff id="vorschub">Vorschub</Begriff>, eine{' '}
+            <Begriff id="drehzahl">Drehzahl</Begriff>.
+          </p>
+        )
       }
       interaktion={
-        <div className="flex flex-col gap-3" data-wisch="aus">
-          <Programmliste
-            gelesen={gelesen}
-            takt={takt}
-            markiert={markiert}
-            vorschlag={vorschlag}
-            korrigiert={erledigt}
-            onZeile={tippeZeile}
-          />
-
+        <div className="flex min-h-0 flex-1 flex-col gap-3" data-wisch="aus">
+          {/*
+            Klammer, Anweisung und Rückmeldung stehen **über** der Liste:
+            vierzehn Zeilen laufen auf iPad quer wie auf dem Handy unter die
+            Scrollkante, und was dort unten stand, war ausgerechnet der Zustand
+            des Steps — „Zeile x von 14“, die Aufgabe, das Urteil. Der Zustand
+            darf nie unter der Kante liegen; die Liste darf es, sie holt ihre
+            aktive Zeile selbst in den Sichtbereich (s. `Programmliste`).
+          */}
           <Wechsel takt={takt}>
             {takt === 'lesen' ? (
               <Klammer zeile={PROGRAMM[gelesen]} nummer={gelesen + 1} />
@@ -221,6 +244,15 @@ export function Z3() {
               </div>
             )}
           </Wechsel>
+
+          <Programmliste
+            gelesen={gelesen}
+            takt={takt}
+            markiert={markiert}
+            vorschlag={vorschlag}
+            korrigiert={erledigt}
+            onZeile={tippeZeile}
+          />
         </div>
       }
       aha={
@@ -331,8 +363,37 @@ function Programmliste({
 }) {
   const suchen = takt === 'suchen'
 
+  /**
+   * Die Zeile, um die es gerade geht — beim Lesen die nächste, beim Suchen die
+   * angetippte. Sie holt sich selbst in den Sichtbereich: Die Liste steht
+   * unter Klammer und Anweisung, und ab Zeile elf liegt sie unter der
+   * Scrollkante des Panels. `nearest` rückt nur nach, wenn die Zeile wirklich
+   * draußen ist — wer selbst hochgescrollt hat, wird nicht zurückgezerrt,
+   * solange die Zeile im Bild bleibt.
+   */
+  const aktiv = takt === 'lesen' ? gelesen : markiert
+  const aktivRef = useRef<HTMLLIElement | null>(null)
+  useEffect(() => {
+    aktivRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }, [aktiv])
+
   return (
-    <ol className="kh-feld flex flex-col gap-1.5 px-2 py-2" data-testid="z3-programm">
+    // `flex-1 min-h-0 overflow-y-auto`: die Liste nimmt den Rest des Panels
+    // und scrollt **selbst**, statt das ganze Panel mitzuziehen. So bleiben
+    // Klammer und Anweisung darüber stehen, egal bei welcher Zeile man ist.
+    //
+    // **`min-h-[11rem]` ist die Untergrenze dazu.** Ohne sie gibt `flex-1`
+    // allen Platz an Fachtext, Klammer und Rückmeldung ab und die Liste
+    // bekommt, was übrig bleibt: auf dem Handy hochkant waren das im Takt
+    // `suchen` 0 vollständige Zeilen, nach einem Fehlversuch 23,7 px. Die
+    // Aufgabe des Screens ist, eine von sechs Fahrzeilen anzutippen — in
+    // einem 24-px-Schlitz geht das nicht. Drei Zeilen sind das Minimum, in
+    // dem man überhaupt vergleichen kann; reicht der Platz dafür nicht,
+    // scrollt lieber das Panel.
+    <ol
+      className="kh-feld flex min-h-[11rem] flex-1 flex-col gap-1.5 overflow-y-auto overscroll-contain px-2 py-2"
+      data-testid="z3-programm"
+    >
       {PROGRAMM.map((zeile, i) => {
         const dran = i === gelesen && takt === 'lesen'
         // Abgeblendet ist, was **hinter** der aktuellen Zeile liegt. Die eine
@@ -371,7 +432,7 @@ function Programmliste({
         }`
 
         return (
-          <li key={zeile.code + i}>
+          <li key={zeile.code + i} ref={i === aktiv ? aktivRef : undefined}>
             {waehlbar ? (
               <motion.button
                 type="button"
@@ -404,9 +465,10 @@ function Programmliste({
  * Die Klammer hinter der Zeile, die als Nächstes drankommt — im echten
  * Programm ein Kommentar.
  *
- * Sie steht **unter** der Liste und nicht in ihr: vierzehn Zeilen mit
+ * Sie steht **über** der Liste und nicht in ihr: vierzehn Zeilen mit
  * Erklärung daneben passen auf kein Hochkant-Panel, und die Erklärung, die
- * zählt, ist immer nur die eine.
+ * zählt, ist immer nur die eine. Und nicht darunter — dort liegt ab Zeile elf
+ * die Scrollkante, und die Klammer ist der Zustand des Steps.
  */
 function Klammer({
   zeile,

@@ -57,8 +57,18 @@ import { Transporter } from './Transporter'
  * ein toter schwarzer Streifen von 300 bis 550 px — am deutlichsten auf A1
  * nach dem Lösen. Jetzt läuft die Bühne hochkant bis kurz über die
  * Panelkante, und die Zeichnung füllt den Raum, den sie tatsächlich hat.
- * Quer bleibt es beim festen Rahmen: dort steht das Panel links und nimmt
- * keine Höhe weg.
+ *
+ * **Quer wird sie inzwischen ebenfalls gemessen.** Auch dort stand vorher ein
+ * fester Wert — `inset: '7% 3% 7% 30%'`, die Zeichnung begann also bei 30 %
+ * der Breite. Das Panel ist quer aber 44 rem breit (59,7 % auf 1180 px) und
+ * mit `buehneInteraktiv` 38 rem (51,5 %); auf A4 lagen dadurch die linken
+ * zwei bis drei Spalten des 9 × 5-Rasters hinter dem Panel — samt der
+ * **Wärmepumpe, an der die Ziehgeste anfängt**. Man sollte „von der
+ * Wärmepumpe zum Verteiler" ziehen und kam an die Wärmepumpe nicht heran.
+ * Dieselbe Wurzel auf A1, A3, A6, A7 und A8, dort nur mit Kulisse statt
+ * Bedienelement dahinter.
+ *
+ * Gemessen wird jetzt auf beiden Achsen dasselbe: die Kante des Panels.
  *
  * **Und sie füllt ihn wirklich.** Das Messen allein reichte nicht: die
  * Zeichnungen trugen weiterhin eine feste `viewBox` von 320 × 260 mit
@@ -104,11 +114,16 @@ export function Schnitt({
   onAbgewiesen,
   onWaermeAngekommen,
 }: SchnittProps) {
-  const { flaeche, rahmen, seiten } = useRahmen()
+  /*
+    **Der Transporter ist Kulisse, kein Schaubild** — deshalb darf er quer
+    hinter das Panel laufen. Siehe `useRahmen`.
+  */
+  const { flaeche, rahmen, seiten, anfassen } = useRahmen(zustand.szene === 'transporter')
 
   return (
     <div
       ref={flaeche}
+      onPointerDown={anfassen}
       className="size-full"
       data-testid="anlagen-buehne"
       data-szene={zustand.szene}
@@ -149,19 +164,22 @@ const UNTER_DER_LEISTE = 76
 /** Seitlicher Rand hochkant. */
 const RAND = 12
 
-/** Quer: `inset: 7% 3% 7% 30%`, als Anteile für die Verhältnisrechnung. */
-const QUER = { breite: 1 - 0.03 - 0.3, hoehe: 1 - 0.07 - 0.07 } as const
+/** Quer: Luft zur Screenkante rechts, oben und unten — als Anteil. */
+const QUER_RAND = { seite: 0.03, hoehe: 0.07 } as const
+
+/** Quer: so viel Fläche bleibt der Zeichnung mindestens, egal wie breit das Panel wird. */
+const QUER_MINDEST_BREITE = 0.3
 
 /**
- * Der Rahmen, in dem die Zeichnung sitzt — quer fest, hochkant gemessen —,
- * **und das Seitenverhältnis dieses Rahmens.**
+ * Der Rahmen, in dem die Zeichnung sitzt, **und sein Seitenverhältnis.**
  *
  * Gemessen wird das Panel der `StepShell` (`[data-testid="karte"]`) gegen die
- * eigene Fläche. Das ist derselbe Gedanke wie im `SichtfeldMesser`, nur ohne
- * Kamera: eine Zeichnung muss nichts nachführen, sie muss nur wissen, wo sie
- * aufhören darf. Der `SichtfeldMesser` selbst steht hier nicht zur Verfügung —
- * ihn stellt die Hülle nur den Steps mit `buehneInteraktiv` bereit, und das ist
- * an diesem Tag allein A4.
+ * eigene Fläche — hochkant seine Oberkante, quer seine rechte Kante. Das ist
+ * derselbe Gedanke wie im `SichtfeldMesser`, nur ohne Kamera: eine Zeichnung
+ * muss nichts nachführen, sie muss nur wissen, wo sie aufhören darf.
+ *
+ * Quer stand hier bis zuletzt ein fester Wert (30 % der Breite), und das war
+ * schlicht falsch geraten — s. den Kopf dieser Datei.
  *
  * **Der Rahmen nimmt jetzt die ganze freie Fläche.** Die Vorfassung rechnete
  * ihn auf das Seitenverhältnis der Zeichnung herunter und schob den Überschuss
@@ -173,27 +191,81 @@ const QUER = { breite: 1 - 0.03 - 0.3, hoehe: 1 - 0.07 - 0.07 } as const
  *
  * Solange nichts gemessen ist, gilt ein Festwert: ein Screen, der beim ersten
  * Bild einmal knapp danebenliegt, ist besser als einer, der springt.
+ *
+ * **Eine Ausnahme, quer: die Kulisse.** Auf A1.1 und A5 ist die
+ * Transporter-Innenansicht kein Schaubild, sondern die Stimmung eines Ortes —
+ * es gibt nichts darin abzulesen und nichts anzutippen. Für sie ist der
+ * gemessene Rahmen der falsche Handel: er schrumpfte die Zeichnung quer von
+ * 791 auf 399 px und stellte sie als hart berandete Platte neben 63 % leere
+ * schwarze Fläche. Ein Foto steht in dieser Hülle hinter dem Panel und nicht
+ * daneben (so hält es auch `Bild.useFreieFlaeche` in der Zerspanung), und
+ * genau so darf eine Kulisse es halten: sie beginnt bei
+ * `QUER_MINDEST_BREITE` und läuft unter dem Panel hindurch.
+ *
+ * Der Unterschied zu A1/A3/A6/A7/A8 ist nicht die Zeichenart, sondern die
+ * Frage, ob jemand etwas darin **finden** muss: den Speicher, die Heizkörper,
+ * das Manometer, den eigenen Leitungsweg. Wo ja, gilt die Panelkante — dafür
+ * wurde sie gemessen. Hochkant bleibt es überall bei der Kante: dort liegt
+ * das Panel unten, und eine Kulisse dahinter wäre zu 80 % verdeckt.
  */
-function useRahmen() {
+function useRahmen(kulisse: boolean) {
   const flaeche = useRef<HTMLDivElement>(null)
   const [rahmen, setRahmen] = useState<React.CSSProperties>({
     inset: '76px 12px 32% 12px',
   })
   const [seiten, setSeiten] = useState(320 / 260)
 
+  /**
+   * **Solange ein Finger auf der Zeichnung liegt, steht sie still.**
+   *
+   * Der Rahmen hängt an der Panelkante, und das Panel ist hochkant nur so hoch
+   * wie sein Inhalt. Auf A4 wächst es mitten in der Ziehgeste — die Abweisung
+   * an der tragenden Wand kommt hinzu, und schon rückt die ganze Zeichnung
+   * nach. Gemessen auf 390 × 844: der Rasterknoten (4,1) sprang während des
+   * Zugs um 40 px nach oben, mehr als eine Zellenhöhe. Das Raster wandert dann
+   * unter dem Finger weg, der gerade darauf zieht.
+   *
+   * Nachgemessen wird beim Loslassen. Wer die Hand hebt, sieht die Zeichnung
+   * einmal ruhig einrasten — wer zieht, zieht auf einem festen Bild.
+   */
+  const zieht = useRef(false)
+
   const messen = useCallback(() => {
+    if (zieht.current) return
     const el = flaeche.current
     const f = el?.getBoundingClientRect()
     if (!el || !f || f.width <= 0 || f.height <= 0) return
-    if (f.width > f.height) {
-      setRahmen({ inset: '7% 3% 7% 30%' })
-      setSeiten((f.width * QUER.breite) / (f.height * QUER.hoehe))
-      return
-    }
     const panel = el
       .closest('[data-testid="step"]')
       ?.querySelector('[data-testid="karte"]')
       ?.getBoundingClientRect()
+
+    if (f.width > f.height) {
+      /*
+        Quer steht das Panel links und nimmt keine Höhe weg — die Zeichnung
+        beginnt an seiner **rechten Kante**, nicht bei geratenen 30 %.
+
+        Der Deckel wirkt hier genauso wie hochkant, nur auf der anderen Achse:
+        ein Panel mit `karteBreit` (52 rem = 832 px auf 1180) ließe der
+        Zeichnung sonst 300 px. Ab `QUER_MINDEST_BREITE` wird lieber wieder
+        überlappt — dass der Titel auf dem Bild steht, ist ohnehin Absicht der
+        Hülle.
+      */
+      const links = Math.min(
+        panel && !kulisse
+          ? Math.max(0, panel.right - f.left + LUFT_ZUM_PANEL)
+          : f.width * QUER_MINDEST_BREITE,
+        f.width * (1 - QUER_RAND.seite - QUER_MINDEST_BREITE),
+      )
+      const breite = f.width - links - f.width * QUER_RAND.seite
+      const hoehe = f.height * (1 - 2 * QUER_RAND.hoehe)
+      setRahmen({
+        inset: `${(QUER_RAND.hoehe * 100).toFixed(0)}% ${(QUER_RAND.seite * 100).toFixed(0)}% ${(QUER_RAND.hoehe * 100).toFixed(0)}% ${Math.round(links)}px`,
+      })
+      setSeiten(Math.max(0.1, breite) / Math.max(1, hoehe))
+      return
+    }
+
     // Der Deckel ist die Reißleine für kleine Fenster: ein Panel, das fast die
     // ganze Höhe nimmt, dürfte den Rahmen nicht auf null oder ins Negative
     // drücken.
@@ -207,7 +279,25 @@ function useRahmen() {
     setSeiten(
       (f.width - 2 * RAND) / Math.max(1, f.height - UNTER_DER_LEISTE - Math.round(unten)),
     )
+  }, [kulisse])
+
+  const anfassen = useCallback(() => {
+    zieht.current = true
   }, [])
+
+  useEffect(() => {
+    const loslassen = () => {
+      if (!zieht.current) return
+      zieht.current = false
+      messen()
+    }
+    window.addEventListener('pointerup', loslassen)
+    window.addEventListener('pointercancel', loslassen)
+    return () => {
+      window.removeEventListener('pointerup', loslassen)
+      window.removeEventListener('pointercancel', loslassen)
+    }
+  }, [messen])
 
   useEffect(() => {
     messen()
@@ -232,5 +322,5 @@ function useRahmen() {
     }
   }, [messen])
 
-  return { flaeche, rahmen, seiten }
+  return { flaeche, rahmen, seiten, anfassen }
 }

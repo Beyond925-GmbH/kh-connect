@@ -44,6 +44,20 @@ const HUELLE: Huelle = {
   mitte: [3.0, 1.35, 0],
 }
 
+/**
+ * Hochkant zählt der Anhänger, nicht der Lkw: die Rückmeldung der Übung ist,
+ * dass die gezogenen Sachen auf der Ladefläche liegen — und auf 390 px Breite
+ * machte das volle 14-m-Gespann daraus eine 65-px-Miniatur. Die Hülle endet
+ * deshalb vor dem Kofferaufbau; die Transporter-Front schneidet rechts an,
+ * wie es die Hüllen-Doku für die Langseite ohnehin erlaubt (bewusste
+ * Inszenierung).
+ */
+const HUELLE_HOCHKANT: Huelle = {
+  min: [-4.2, 0, -1.6],
+  max: [6.6, 2.7, 1.6],
+  mitte: [1.2, 1.35, 0],
+}
+
 function Kamera() {
   const kamera = useThree((z) => z.camera)
   const szene = useThree((z) => z.scene)
@@ -58,7 +72,7 @@ function Kamera() {
 
   const lage = useMemo(() => {
     if (hoehe <= 0) return null
-    return passeEin(PRESET, HUELLE, breite / hoehe, {
+    return passeEin(PRESET, breite < hoehe ? HUELLE_HOCHKANT : HUELLE, breite / hoehe, {
       links: sfL,
       rechts: sfR,
       oben: sfO,

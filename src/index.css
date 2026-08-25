@@ -193,10 +193,14 @@
   text-wrap: balance;
 }
 
+/* `line-height: 1` steht fuer eine Zeile richtig und fuer zwei zu eng: Anton
+   traegt Oberlaengen ueber die Zeilenbox hinaus, und auf C5.1 beruehrten sich
+   die Zeilen des Zitats. 1.08 ist der kleinste Wert, der das aufloest, ohne
+   dass die einzeilige Verwendung (Dein Weg, Standpersonal) auseinanderfaellt. */
 @utility kh-titel-klein {
   font-family: var(--font-display);
   font-size: clamp(1.3rem, 1.05rem + 1.1vw, 1.85rem);
-  line-height: 1;
+  line-height: 1.08;
   text-transform: uppercase;
   color: var(--color-kh-paper);
 }

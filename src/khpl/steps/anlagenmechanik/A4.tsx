@@ -13,6 +13,7 @@ import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { useSchmal } from '@/khpl/shell/schmal'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Fachwort } from './Fachwort'
 
@@ -69,7 +70,15 @@ import { Fachwort } from './Fachwort'
  */
 const BOEGEN_GUT = 2
 
+/**
+ * Der Satz an der tragenden Wand. Er steht hier und nicht in der Zeichnung,
+ * damit die Copy an einer Stelle liegt — und weil er auf dem Handy an einem
+ * anderen Ort im Panel landet als quer (s. `schmal` unten).
+ */
+const ABWEISUNG = 'Da geht nichts durch — das ist tragend. Such einen anderen Weg.'
+
 export function A4() {
+  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.a4
   const [pfad, setPfad] = useState<KnotenId[]>(() => gespeichert?.pfad ?? [])
   const [fertig, setFertig] = useState(() => !!gespeichert?.fertig)
@@ -137,7 +146,21 @@ export function A4() {
         />
       }
       fachtext={
-        fertig ? undefined : (
+        /*
+          Handy hochkant trägt das Panel keinen Fachtext mehr — die fünf Zeilen
+          kosteten 95 px Scrollfenster, und darunter lagen ausgerechnet die
+          beiden Dinge, die beim Ziehen gebraucht werden: der Verlustbalken
+          samt *Neu ziehen* und die Abweisung an der tragenden Wand
+          (Sichtprüfung: Balken nur halb im Fenster, Abweisung gar nicht).
+
+          **Die beiden Fachwörter gehen dabei nicht verloren**, sie ziehen um —
+          „Wärmepumpe" und „Verteiler" stehen schmal in der Aufforderung, und
+          dort benennen sie genau das, was die Geste verbindet. Von den drei
+          Regeln, die hier wegfallen, sagt jede sich anderswo selbst: der Bogen
+          im Balken, die tragende Wand in der Abweisung, Halterung und Dämmung
+          in den beiden Einwürfen.
+        */
+        fertig || schmal ? undefined : (
           <p>
             Die Leitung muss von der <Fachwort id="waermepumpe">Wärmepumpe</Fachwort> zum{' '}
             <Fachwort id="verteiler">Verteiler</Fachwort>. Dabei gelten Regeln, die man
@@ -154,24 +177,32 @@ export function A4() {
           ) : (
             <div className="flex flex-col gap-3">
               <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-                Zieh die Leitung. Von der Wärmepumpe zum Verteiler.
+                {schmal ? (
+                  <>
+                    Zieh die Leitung. Von der{' '}
+                    <Fachwort id="waermepumpe">Wärmepumpe</Fachwort> zum{' '}
+                    <Fachwort id="verteiler">Verteiler</Fachwort>.
+                  </>
+                ) : (
+                  'Zieh die Leitung. Von der Wärmepumpe zum Verteiler.'
+                )}
               </p>
 
               <Verlustbalken
                 verlust={verlust}
                 boegen={boegen}
                 onNeu={gezogen ? neu : null}
+                schmal={schmal}
               />
 
-              <Rueckmeldung
-                ok={abgewiesen ? false : null}
-                text={
-                  abgewiesen
-                    ? 'Da geht nichts durch — das ist tragend. Such einen anderen Weg.'
-                    : null
-                }
-                testid="a4-rueckmeldung"
-              />
+              {/* Schmal steht die Abweisung im Fuß — s. dort. */}
+              {!schmal && (
+                <Rueckmeldung
+                  ok={abgewiesen ? false : null}
+                  text={abgewiesen ? ABWEISUNG : null}
+                  testid="a4-rueckmeldung"
+                />
+              )}
             </div>
           )}
         </Wechsel>
@@ -197,23 +228,45 @@ export function A4() {
         </>
       }
       fuss={
-        <StepFuss
-          id="A4"
-          uebungOffen={!fertig}
-          aktion={
-            fertig ? null : (
-              <Button
-                variant="aktion"
-                onClick={legen}
-                disabled={!angekommen}
-                data-testid="a4-legen"
-              >
-                Leitung liegt
-              </Button>
-            )
-          }
-          geschafft={fertig ? 'Leitung geführt' : null}
-        />
+        <div className="flex flex-col gap-2.5">
+          {/*
+            **Die Abweisung sitzt auf dem Handy im Fuß, und der Fuß scrollt
+            nie.** Sie ist die einzige Erklärung für das Einzige, was auf
+            diesem Screen schiefgehen kann. Im Scrollbereich lag sie bei
+            390 × 844 vollständig unter der Kante (y 750–828 bei einem Fenster
+            bis 739): man fährt gegen die tragende Wand, die Leitung bleibt
+            stehen, und kein Wort sagt warum. Der Auto-Scroll der
+            `Rueckmeldung` half nicht — er hält bei `nearest`, und darunter
+            steht nichts mehr, das ihn weiterzieht.
+
+            Quer bleibt sie, wo sie hingehört: dort ist das Panel breit, das
+            Fenster reicht, und der Fuß trägt nur die Knöpfe.
+          */}
+          {schmal && !fertig && (
+            <Rueckmeldung
+              ok={abgewiesen ? false : null}
+              text={abgewiesen ? ABWEISUNG : null}
+              testid="a4-rueckmeldung"
+            />
+          )}
+          <StepFuss
+            id="A4"
+            uebungOffen={!fertig}
+            aktion={
+              fertig ? null : (
+                <Button
+                  variant="aktion"
+                  onClick={legen}
+                  disabled={!angekommen}
+                  data-testid="a4-legen"
+                >
+                  Leitung liegt
+                </Button>
+              )
+            }
+            geschafft={fertig ? 'Leitung geführt' : null}
+          />
+        </div>
       }
     />
   )
@@ -227,10 +280,13 @@ function Verlustbalken({
   verlust,
   boegen,
   onNeu,
+  schmal = false,
 }: {
   verlust: number
   boegen: number
   onNeu: (() => void) | null
+  /** Handy hochkant: die Begründung in einem Satz statt in dreien. */
+  schmal?: boolean
 }) {
   return (
     <div className="kh-feld flex flex-col gap-2 px-3.5 py-2.5" data-testid="a4-verlust">
@@ -254,19 +310,30 @@ function Verlustbalken({
       </div>
       <div className="flex items-end justify-between gap-3">
         <p className="min-w-0 flex-1 text-[0.9375rem] leading-[1.4] text-kh-mute">
-          Jeder Bogen kostet Druck — wie viel genau, hängt an Rohrdurchmesser und
-          Fließgeschwindigkeit. Deshalb steht hier ein Balken und keine Zahl.
+          {schmal
+            ? 'Wie viel ein Bogen kostet, hängt am Rohr. Deshalb ein Balken und keine Zahl.'
+            : 'Jeder Bogen kostet Druck — wie viel genau, hängt an Rohrdurchmesser und Fließgeschwindigkeit. Deshalb steht hier ein Balken und keine Zahl.'}
         </p>
-        {onNeu && (
-          <Button
-            variant="leise"
-            onClick={onNeu}
-            data-testid="a4-neu"
-            className="-mr-2 shrink-0"
-          >
-            Neu ziehen
-          </Button>
-        )}
+        {/*
+          **Steht immer da, auch wenn noch nichts gezogen ist.** Vorher tauchte
+          der Knopf erst mit dem ersten Rasterschritt auf — und weil das Panel
+          hochkant nur so hoch ist wie sein Inhalt, wuchs es in dem Moment um
+          40 px nach oben. Die Zeichnung sitzt an der Panelkante, also rutschte
+          das Raster **mitten in der Ziehgeste** unter dem Finger weg
+          (nachgemessen: zwei von drei Zügen in die tragende Wand kamen nicht
+          mehr an). Ein reservierter Platz ist der Preis dafür, dass der Screen
+          während der Geste still steht — und der Notausgang ist von Anfang an
+          zu sehen, statt genau dann aufzutauchen, wenn man ihn braucht.
+        */}
+        <Button
+          variant="leise"
+          onClick={onNeu ?? undefined}
+          disabled={!onNeu}
+          data-testid="a4-neu"
+          className="-mr-2 shrink-0"
+        >
+          Neu ziehen
+        </Button>
       </div>
     </div>
   )

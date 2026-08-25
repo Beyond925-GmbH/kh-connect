@@ -112,11 +112,15 @@ export function M6() {
         </>
       }
       interaktion={
+        // Höhe wächst mit der Einblendung: die Chips kommen erst nach zwei
+        // Sekunden Ruhe, aber vorher stand das Panel schon auf voller Höhe —
+        // zwei Sekunden lang ein leeres dunkles Rechteck unter dem Fachtext.
+        // So bleibt das Panel erst klein und öffnet sich dann mit dem Inhalt.
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 2 }}
-          className="flex flex-col gap-2.5"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          transition={{ duration: 0.6, delay: 2, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col gap-2.5 overflow-hidden"
         >
           {/* Die Anleitung stand unter den drei Fragen — also hinter dem, was
               sie erklärt. Wer schon getippt hat, braucht sie nicht mehr; wer

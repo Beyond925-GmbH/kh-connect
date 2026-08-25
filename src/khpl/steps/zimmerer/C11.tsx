@@ -3,6 +3,7 @@ import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { Begriff } from './Begriff'
+import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
 
 /**
  * C1.1 — Die Maschine hat heute Nacht gearbeitet. Abstecher von C1, mündet in C2
@@ -51,11 +52,26 @@ const MASCHINEN = [
   },
 ]
 
+/**
+ * Für die `Klappliste`: die Überschrift ist hier der Maschinenname, der Text
+ * das, was sie tut. Hochkant stand nur die Hälfte davon über der Scrollkante
+ * und das Schlusszitat gar nicht mehr (Sichtbefund C1.1, 267 px Rest) — jetzt
+ * stehen alle drei Namen, und was eine Maschine tut, kommt auf Tipp.
+ */
+const MASCHINEN_FELDER: Abschnitt[] = MASCHINEN.map((m) => ({
+  frage: m.name,
+  antwort: m.was,
+}))
+
 export function C11() {
   return (
     <StepShell
       id="C1.1"
       titelZusatz="Abstecher"
+      // Quer 52 statt 44 rem: in der schmalen Spalte begann das Zitat unter
+      // der Scrollkante, während rechts eine halbe Fotowand leer stand
+      // (Sichtbefund C1.1 quer, 69 px Rest).
+      karteBreit
       interaktionOffen={false}
       buehne={<StepFoto id="C1.1" />}
       fachtext={
@@ -69,16 +85,21 @@ export function C11() {
       }
       interaktion={
         <div className="flex flex-col gap-2.5">
-          <dl className="flex flex-col gap-2">
-            {MASCHINEN.map((m) => (
-              <div key={m.name} className="kh-feld px-3.5 py-2.5">
-                <dt className="kh-etikett">{m.name}</dt>
-                <dd className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-                  {m.was}
-                </dd>
-              </div>
-            ))}
-          </dl>
+          {/* Ohne offenen ersten Eintrag: über der Liste steht schon der
+              Absatz mit den beiden Begriffen, der Screen fängt also nicht mit
+              zugeklappten Zeilen an — und die drei gewonnenen Zeilen sind
+              genau die, die das Zitat über die Scrollkante holen.
+
+              Quer drei Spalten, eine je Maschine: untereinander waren die drei
+              Felder 285 px hoch und schoben das Zitat unter die Kante, während
+              rechts eine halbe Fotowand leer stand. Nebeneinander ist es
+              ohnehin die richtige Figur — drei Maschinen, keine Rangfolge. */}
+          <Klappliste
+            kennung="c11"
+            abschnitte={MASCHINEN_FELDER}
+            spaltenQuer={3}
+            ersterOffen={false}
+          />
 
           {/* Zitat, nicht Merksatz: der Satz gehört der Person, die ihn gesagt
               hat. Deshalb Anführungszeichen, Sprecherzeile und die orange

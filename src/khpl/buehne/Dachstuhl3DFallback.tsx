@@ -32,9 +32,26 @@ export function Dachstuhl3DFallback({
 
   return (
     <div className="grid size-full place-items-center bg-kh-surface">
-      <p className="text-[15px] text-kh-mute">
-        {text} {punkte}
-      </p>
+      <div className="flex flex-col items-center gap-3">
+        {/* Angedeutete Giebel-Silhouette: eine leere Graufläche mit einer
+            Textzeile liest sich als Fehler — die Kontur sagt, dass hier
+            gleich ein Dach steht, nicht dass etwas kaputt ist. */}
+        <svg
+          viewBox="0 0 120 54"
+          className="w-[104px] animate-pulse text-kh-mute/45"
+          aria-hidden
+        >
+          <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round">
+            <path d="M8 48 L60 8 L112 48" />
+            <path d="M24 36 L96 36" />
+            <path d="M60 8 L60 48" />
+            <path d="M4 48 L116 48" />
+          </g>
+        </svg>
+        <p className="text-[15px] text-kh-mute">
+          {text} {punkte}
+        </p>
+      </div>
     </div>
   )
 }

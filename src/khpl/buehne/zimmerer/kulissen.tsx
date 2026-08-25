@@ -196,18 +196,26 @@ function Kontaktschatten({
 export function Halle({
   mitAuflage = false,
   ohneVordereStuetzen = false,
+  tischTiefe = 3.8,
 }: {
   mitAuflage?: boolean
   ohneVordereStuetzen?: boolean
+  /**
+   * Tiefe der Tischplatte in Metern. C4 legt vor dem Element eine Reihe
+   * Fensterrahmen ab; auf dem Regeltisch (3,8 m, Vorderkante bei z = 0,4)
+   * schwebten die über dem Hallenboden.
+   */
+  tischTiefe?: number
 }) {
   const tischZ = mitAuflage ? -H / 2 : 0
+  const beinZ = tischTiefe / 2 - 0.4
   const beine: [number, number][] = [
-    [-4.2, tischZ - 1.5],
-    [-4.2, tischZ + 1.5],
-    [0, tischZ - 1.5],
-    [0, tischZ + 1.5],
-    [4.2, tischZ - 1.5],
-    [4.2, tischZ + 1.5],
+    [-4.2, tischZ - beinZ],
+    [-4.2, tischZ + beinZ],
+    [0, tischZ - beinZ],
+    [0, tischZ + beinZ],
+    [4.2, tischZ - beinZ],
+    [4.2, tischZ + beinZ],
   ]
   return (
     <group>
@@ -217,7 +225,7 @@ export function Halle({
       </mesh>
       {/* Abbundtisch */}
       <mesh position={[0, TISCH_OBEN - 0.06, tischZ]}>
-        <boxGeometry args={[9.4, 0.12, 3.8]} />
+        <boxGeometry args={[9.4, 0.12, tischTiefe]} />
         <meshStandardMaterial color="#4A4E54" roughness={0.8} flatShading />
       </mesh>
       {beine.map(([x, z]) => (
@@ -226,7 +234,7 @@ export function Halle({
           <meshStandardMaterial color="#3C4046" roughness={0.8} flatShading />
         </mesh>
       ))}
-      <Kontaktschatten position={[0, 0.012, tischZ]} groesse={[9.8, 4.1]} />
+      <Kontaktschatten position={[0, 0.012, tischZ]} groesse={[9.8, tischTiefe + 0.3]} />
       {mitAuflage &&
         [-3, 3].map((x) => (
           <mesh key={x} position={[x, TISCH_OBEN + 0.08, -1.5]}>

@@ -3,6 +3,7 @@ import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
 
 /**
  * C3.1 — Holz ist der einzige Baustoff, der… Abstecher von C3, mündet in C4
@@ -52,11 +53,42 @@ import { StepShell } from '@/khpl/shell/StepShell'
 
 const NACHWACHSEND = ['Stroh', 'Hanf', 'Flachs', 'Schilf', 'Kork', 'Bambus']
 
+/**
+ * Die beiden Belege unter der Korrektur.
+ *
+ * **Warum sie in einer `Klappliste` stehen.** Hochkant lagen 172 px unter der
+ * Scrollkante: die Zahlenspanne brach mitten im Satz ab, und der Absatz über
+ * das Nicht-Ausmultiplizieren — auf einem Screen, der gerade eine Behauptung
+ * durchgestrichen hat, der glaubwürdigste Satz darauf — kam gar nicht vor.
+ * Kürzen ging nicht: die Spannen sind belegt und der zweite Absatz ist die
+ * Pointe. Also stehen beide als Zeile über der Kante und öffnen auf Tipp.
+ *
+ * ⚠️ **Die Überschriften sind die Aussage, nicht ein Etikett.** „Warum hier
+ * keine Tonnenzahl steht“ ist als Zeile stärker als derselbe Absatz im
+ * Kleingedruckten — der Screen sagt damit schon zugeklappt, worauf er hinaus
+ * will.
+ */
+const BELEGE: Abschnitt[] = [
+  {
+    frage: 'Was das Holz speichert',
+    antwort:
+      'In einem Kubikmeter verbautem Holz steckt ungefähr eine Tonne CO₂ — je nach Rechenweg zwischen 0,6 und 1,7 Tonnen. In einem Einfamilienhaus aus Holz sind 30 bis 70 Kubikmeter verbaut. Solange das Haus steht, bleibt der Kohlenstoff drin.',
+  },
+  {
+    frage: 'Warum hier keine Tonnenzahl steht',
+    antwort:
+      'Beides miteinander multipliziert ergäbe eine schöne, runde Tonnenzahl. Sie stünde auf zwei Spannen und wäre geraten — deshalb steht sie hier nicht.',
+  },
+]
+
 export function C31() {
   return (
     <StepShell
       id="C3.1"
       titelZusatz="Abstecher"
+      // Quer 52 statt 44 rem: die zwei Belegfelder stehen dort nebeneinander,
+      // und in der schmalen Spalte brach schon ihre Überschrift zweizeilig um.
+      karteBreit
       interaktionOffen={false}
       buehne={<StepFoto id="C3.1" />}
       fachtext={
@@ -100,19 +132,16 @@ export function C31() {
             </motion.ul>
           </div>
 
-          <div className="kh-feld flex flex-col gap-1.5 px-3.5 py-3">
-            <p className="kh-etikett">Was das Holz speichert</p>
-            <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-              In einem Kubikmeter verbautem Holz steckt ungefähr eine Tonne CO₂ — je nach
-              Rechenweg zwischen 0,6 und 1,7 Tonnen. In einem Einfamilienhaus aus Holz
-              sind 30 bis 70 Kubikmeter verbaut. Solange das Haus steht, bleibt der
-              Kohlenstoff drin.
-            </p>
-            <p className="text-[1rem] leading-snug text-kh-mute">
-              Beides miteinander multipliziert ergäbe eine schöne, runde Tonnenzahl. Sie
-              stünde auf zwei Spannen und wäre geraten — deshalb steht sie hier nicht.
-            </p>
-          </div>
+          {/* Zugeklappt ankommen: die Korrektur darüber ist die Aussage des
+              Screens und bleibt ganz stehen; diese beiden sind ihre Belege.
+              Quer stehen sie nebeneinander — untereinander schoben die zwei
+              ausgeschriebenen Felder den unteren unter die Kante. */}
+          <Klappliste
+            kennung="c31"
+            abschnitte={BELEGE}
+            spaltenQuer={2}
+            ersterOffen={false}
+          />
         </div>
       }
       aha={

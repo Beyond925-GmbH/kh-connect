@@ -23,9 +23,9 @@ import type { Sichtfeld } from '@/drei/kamera'
  * gegen hoch sowieso.
  */
 interface SichtfeldWerte {
-  /** Panelkante plus `LUFT` an den freien Kanten — für den Dachstuhl. */
+  /** Panelkante plus Sicherheitsstreifen an den freien Kanten — für den Dachstuhl. */
   mitLuft: Sichtfeld
-  /** Nur die gemessene Panelkante, ohne Sicherheitsstreifen — s. `LUFT`. */
+  /** Nur die gemessene Panelkante, ohne Sicherheitsstreifen — s. `luft`. */
   roh: Sichtfeld
 }
 
@@ -34,7 +34,7 @@ const SichtfeldKontext = createContext<SichtfeldWerte | null>(null)
 /**
  * Die Bühne fragt hier, wie viel Fläche ihr bleibt.
  *
- * `'mitLuft'` (Default) enthält den `LUFT`-Sicherheitsstreifen, der die zu
+ * `'mitLuft'` (Default) enthält den Sicherheitsstreifen (`luft`), der die zu
  * knappe Dachstuhl-Hülle ausgleicht. Bühnen mit **exakter** Hülle (Zuschnitt)
  * nehmen `'roh'`: für sie ist der Streifen reine Verschwendung — quer schrumpfte
  * das Schnittfenster damit auf gut die Hälfte und klebte links am Panel.
@@ -60,7 +60,8 @@ function grob(x: number): number {
  * optisch am Rand angeschnitten.
  *
  * Statt an der geprüften Kameramathematik zu drehen, bekommt das Fenster hier
- * einen Sicherheitsstreifen.
+ * einen Sicherheitsstreifen — **aber nur auf einer Achse, auf der das Fenster
+ * wirklich außermittig liegt**; sonst gilt `LUFT_MITTIG`.
  *
  * **Der Wert ist gemessen, nicht hergeleitet.** Die Einpassung rechnet gegen
  * `huelle` aus `berechneMasse`; auf dem Schirm ragen die gelattete Dachfläche
@@ -71,20 +72,58 @@ function grob(x: number): number {
  * diesen Wert wieder senken — bis dahin ist er der Preis dafür, dass auf keinem
  * der vier 3D-Screens ein angeschnittenes Dach steht.
  */
-const LUFT = 0.14
+const LUFT_VERSATZ = 0.14
+
+/**
+ * Dieselbe Achse, aber **beide** Kanten frei — dann genügt deutlich weniger.
+ *
+ * Der Versatzfehler oben entsteht daran, dass das Fenster *außermittig* liegt:
+ * `passeEin` passt auf die Größe des Fensters ein und schiebt es danach an
+ * seinen Platz, und dieses Schieben ist die ungenaue Hälfte. Steht auf einer
+ * Achse gar kein Panel, wird auch nichts geschoben — die Mitte des Fensters
+ * ist die Mitte des Bildes, und es bleibt nur der kleine Rest, den die zu
+ * knapp gerechnete Hülle braucht. Deshalb derselbe Wert wie senkrecht.
+ *
+ * **Genau das ist der Fall, der hochkant weh tat.** Dort nimmt das Panel
+ * *unten* Platz; links und rechts liegt nichts. Trotzdem zog die Vorfassung
+ * links **und** rechts 14 % ab, zusammen 28 % der Breite — und hochkant ist
+ * die Breite die bindende Kante, weil der Dachstuhl zweieinhalbmal so breit
+ * wie hoch ist. Auf dem Handy blieb von 390 px ein Fenster von 281 px, und
+ * das fertige Dach auf M8 stand mit 288 × 119 px in einem freien Feld von
+ * 390 × 507 px. Die 28 % waren der Preis für eine Korrektur an einer Achse,
+ * auf der es nichts zu korrigieren gab.
+ *
+ * **Auch dieser Wert ist gemessen.** Bei 1,5 % steht auf M5 und M8 hochkant
+ * die halbe Fahrerkabine außerhalb des Bildes; bei 6 % ragt nur noch die
+ * Stoßstange über die Kante — und genau das ist laut `Szene.tsx` gewollt
+ * („die Transporter-Front darf am Bildrand anschneiden"). Das Dach selbst
+ * steht auf allen sechs 3D-Screens in allen drei Formaten frei.
+ */
+const LUFT_MITTIG = 0.06
 
 /**
  * Luft an den **waagerechten** Kanten — oben und unten.
  *
- * `LUFT` gleicht aus, dass die gezeichnete Dachfläche breiter ist als die
- * gerechnete Hülle; das ist ein Problem der **Seiten**. Nach oben endet das
- * Modell am First, und der steht in `huelle.max[1]`; nach unten an der
+ * `LUFT_VERSATZ` gleicht aus, dass die gezeichnete Dachfläche breiter ist als
+ * die gerechnete Hülle; das ist ein Problem der **Seiten**. Nach oben endet
+ * das Modell am First, und der steht in `huelle.max[1]`; nach unten an der
  * Rohdecke, und die steht in `huelle.min[1]`. Oben dieselben 14 % abzuziehen
  * hat deshalb nichts abgefangen, sondern nur das freie Fenster verkürzt — und
  * seit das Panel quer wie hochkant **unten** Platz nimmt, ist die Höhe genau
  * die Kante, an der es knapp wird.
  */
 const LUFT_WAAGERECHT = 0.06
+
+/**
+ * Der Sicherheitsstreifen für eine freie Kante.
+ *
+ * `gegenueber` ist der Anteil, den das Panel auf der **anderen** Kante
+ * derselben Achse nimmt. Ist er null, liegt das Fenster auf dieser Achse
+ * mittig und braucht den vollen Streifen nicht.
+ */
+function luft(gegenueber: number | undefined): number {
+  return gegenueber ? LUFT_VERSATZ : LUFT_MITTIG
+}
 
 function gleich(a: Sichtfeld, b: Sichtfeld): boolean {
   return (
@@ -143,8 +182,8 @@ export function SichtfeldMesser({
     if (!f || f.width <= 0 || f.height <= 0) return
     const k = karte.current?.getBoundingClientRect()
 
-    // Gemessen wird nur die Panelkante; `LUFT` kommt danach auf die freien
-    // Kanten. Beide Fassungen wandern in den Kontext — welche Bühne welche
+    // Gemessen wird nur die Panelkante; der Sicherheitsstreifen kommt danach
+    // auf die freien Kanten. Beide Fassungen wandern in den Kontext — welche Bühne welche
     // braucht, entscheidet ihre Hüllengenauigkeit (s. `useSichtfeld`).
     const roh: Sichtfeld = { oben: 0, unten: 0, links: 0, rechts: 0 }
 
@@ -182,8 +221,8 @@ export function SichtfeldMesser({
       letztes.current = roh
       const mitLuft: Sichtfeld = k
         ? {
-            links: roh.links || LUFT,
-            rechts: roh.rechts || LUFT,
+            links: roh.links || luft(roh.rechts),
+            rechts: roh.rechts || luft(roh.links),
             oben: roh.oben || LUFT_WAAGERECHT,
             unten: roh.unten || LUFT_WAAGERECHT,
           }

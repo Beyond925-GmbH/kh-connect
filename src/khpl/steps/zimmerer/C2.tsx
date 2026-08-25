@@ -12,6 +12,7 @@ import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { useSchmal } from '@/khpl/shell/schmal'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
@@ -69,6 +70,9 @@ const START_CM = 90
 const cm = (n: number) => `${n.toLocaleString('de-DE', { maximumFractionDigits: 1 })} cm`
 
 export function C2() {
+  // Handy hochkant: jede Zeile Fachtext kostet unten die Reglerskala
+  // (s. `shell/schmal.ts`).
+  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.c2
   const [wert, setWert] = useState(() => gespeichert?.schaetzung ?? START_CM)
   const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
@@ -97,7 +101,16 @@ export function C2() {
         </Suspense>
       }
       fachtext={
-        aufgeloest ? undefined : (
+        // Hochkant eine Zeile kürzer: mit der vollen Fassung stand die
+        // Skalenbeschriftung des Reglers („30 cm“ / „120 cm“) unter der
+        // Scrollkante, und die sagt, in welchem Bereich überhaupt geschätzt
+        // wird (s. `shell/schmal.ts`).
+        aufgeloest ? undefined : schmal ? (
+          <p>
+            Die <Begriff id="staenderwerk">Ständer</Begriff> stehen im Raster — und das
+            Raster kommt nicht vom Zimmerer.
+          </p>
+        ) : (
           <p>
             Die <Begriff id="staenderwerk">Ständer</Begriff> stehen nicht nach Gefühl,
             sondern im Raster — und das Raster kommt nicht vom Zimmerer.

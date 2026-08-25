@@ -192,10 +192,23 @@ export function B41() {
         </div>
       }
       fachtext={
-        <p>
-          In der Halle liegt mehr, als du brauchst. Was für dieses Dach gebraucht wird,
-          kommt auf Transporter und Anhänger. Was du vergisst, fehlt dir morgen früh um
-          sieben auf der Baustelle.
+        /*
+          Zwei Fassungen desselben Gedankens: Auf dem Handy hochkant hat das
+          Panel nur 62 % der Höhe, und die fünf Zeilen der vollen Fassung
+          schoben zwei Kartenreihen unter die Scrollkante. Der Mittelsatz
+          („kommt auf Transporter und Anhänger“) steht dort ohnehin doppelt —
+          die Zeile über den Karten sagt „Zieh auf den Anhänger, was mit muss“.
+        */
+        <p className="max-sm:text-[1rem] max-sm:leading-[1.4]">
+          <span className="sm:hidden">
+            In der Halle liegt mehr, als du brauchst — was du vergisst, fehlt dir morgen
+            früh um sieben.
+          </span>
+          <span className="max-sm:hidden">
+            In der Halle liegt mehr, als du brauchst. Was für dieses Dach gebraucht wird,
+            kommt auf Transporter und Anhänger. Was du vergisst, fehlt dir morgen früh um
+            sieben auf der Baustelle.
+          </span>
         </p>
       }
       interaktion={
@@ -213,7 +226,7 @@ export function B41() {
             screenReaderInstructions: DND_ANLEITUNG,
           }}
         >
-          <div className="flex flex-col gap-2" data-wisch="aus">
+          <div className="flex flex-col gap-2 max-sm:gap-1.5" data-wisch="aus">
             <Ladefortschritt geladen={geladen.length} fertig={fertig} />
 
             <Rueckmeldung
@@ -222,7 +235,10 @@ export function B41() {
               testid="b41-feedback"
             />
 
-            <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2 landscape:grid-cols-3">
+            {/* Unterhalb `sm` drei Spalten: neun Karten in zweien sind fünf
+                Reihen, und die fünfte lag auch kompakt gesetzt noch unter der
+                Scrollkante. Drei Reihen passen; die Karten bleiben ≥ 44 px. */}
+            <ul className="grid min-h-0 flex-1 auto-rows-min grid-cols-2 content-start gap-2 max-sm:grid-cols-3 max-sm:gap-1.5 landscape:grid-cols-3">
               {ANGEZEIGT.map((t) => (
                 <li key={t.id}>
                   <Hallenteil
@@ -380,7 +396,7 @@ function Ladeflaeche({
 function Ladefortschritt({ geladen, fertig }: { geladen: number; fertig: boolean }) {
   return (
     <div className="shrink-0" data-testid="b41-fortschritt">
-      <p className="flex flex-wrap items-baseline gap-x-2.5 text-[1.0625rem] font-medium text-kh-paper">
+      <p className="flex flex-wrap items-baseline gap-x-2.5 text-[1.0625rem] font-medium text-kh-paper max-sm:text-[1rem]">
         {fertig
           ? 'Vollständig. Alles drauf, was heute gebraucht wird.'
           : 'Zieh auf den Anhänger, was mit muss.'}
@@ -390,7 +406,7 @@ function Ladefortschritt({ geladen, fertig }: { geladen: number; fertig: boolean
       </p>
       {/* Bewusst ohne Liste der geladenen Teile: die stehen abgehakt im Raster
           darunter, und zweimal dasselbe kostet nur Platz. */}
-      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10 max-sm:mt-1.5">
         <motion.div
           className={`h-full rounded-full ${fertig ? 'bg-kh-signal' : 'bg-kh-orange'}`}
           initial={false}
@@ -452,7 +468,10 @@ function Karte({
 }) {
   return (
     <div
-      className={`flex min-h-[54px] touch-none items-center gap-2 rounded-kh border-2 px-3 py-1.5 text-left text-[0.9375rem] leading-tight ${
+      // Unterhalb `sm` eine Stufe kompakter: neun Karten in zwei Spalten
+      // müssen mit dem 62-%-Panel auskommen, ohne unter die Kante zu rutschen.
+      // 44 px Mindesthöhe bleiben — die Karten sind die Greifziele der Übung.
+      className={`flex min-h-[54px] touch-none items-center gap-2 rounded-kh border-2 px-3 py-1.5 text-left text-[0.9375rem] leading-tight max-sm:min-h-[44px] max-sm:gap-1.5 max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.875rem] max-sm:leading-[1.2] ${
         gegriffen ? 'scale-105 shadow-[0_16px_40px_rgba(0,0,0,0.6)]' : ''
       } ${
         zustand === 'geladen'
@@ -466,7 +485,12 @@ function Karte({
         <Check className="size-4 shrink-0 text-kh-signal" strokeWidth={3.5} />
       )}
       {zustand === 'abgelehnt' && <X className="size-4 shrink-0" strokeWidth={3} />}
-      <span className="min-w-0">{teil.text}</span>
+      {/* `break-words`: hochkant stehen die neun Karten dreispaltig, und in
+          104 px Breite passt „Akkuschrauber“ nicht in eine Zeile. Ohne
+          Umbruch im Wort lief das Label über die Kartenkante und wurde
+          gekappt — sichtbar blieb „Akkuschraube“. Das Werkzeug gehört zu den
+          fünf richtigen Teilen; ein halbes Wort ist hier keine Kosmetik. */}
+      <span className="min-w-0 break-words hyphens-auto">{teil.text}</span>
     </div>
   )
 }

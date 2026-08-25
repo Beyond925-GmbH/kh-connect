@@ -3,6 +3,7 @@ import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { useSchmal } from '@/khpl/shell/schmal'
 import { Fachwort } from './Fachwort'
 
 /**
@@ -36,6 +37,7 @@ import { Fachwort } from './Fachwort'
  */
 
 export function A31() {
+  const schmal = useSchmal()
   const [aha, setAha] = useState(false)
 
   useEffect(() => {
@@ -61,11 +63,26 @@ export function A31() {
             ist Arbeit: Hydraulik, Speicher, Leitungen, oft größere Heizkörper — und
             jemand, der ausrechnet, was zu diesem Haus passt.
           </p>
+          {/*
+            Handy hochkant eine Zeile kürzer. Der Absatz lief dort über sechs
+            Zeilen, und die sechste — „Wer es genau wissen will, sieht bei der
+            KfW nach." — stand unter der Scrollkante (Sichtprüfung, A3.1
+            handy-hoch, `scrollRest` 25 px). Ausgerechnet der Satz, der sagt,
+            wo die Zahl steht, die dieser Screen bewusst nicht nennt.
+
+            Weggefallen ist nur die Begründung der Begründung („sie wäre
+            womöglich nächsten Monat falsch"); dass sich die Sätze mehrmals im
+            Jahr ändern, steht einen Halbsatz vorher. **Keine Zahl ist
+            gestrichen** — die belegten stehen alle in den ersten beiden
+            Absätzen, und „zuletzt im Juli 2026" bleibt.
+          */}
           <p className="mt-3">
             Gefördert wird der Umbau, und zwar erheblich. Wie viel genau, ändert sich
-            mehrmals im Jahr — zuletzt im Juli 2026. Deshalb steht hier keine Prozentzahl:
-            sie wäre womöglich nächsten Monat falsch. Wer es genau wissen will, sieht bei
-            der KfW nach.
+            mehrmals im Jahr — zuletzt im Juli 2026.{' '}
+            {schmal
+              ? 'Deshalb steht hier keine Prozentzahl.'
+              : 'Deshalb steht hier keine Prozentzahl: sie wäre womöglich nächsten Monat falsch.'}{' '}
+            Wer es genau wissen will, sieht bei der KfW nach.
           </p>
         </>
       }

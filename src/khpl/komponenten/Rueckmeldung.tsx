@@ -40,9 +40,31 @@ export function Rueckmeldung({
 }) {
   const anker = useRef<HTMLDivElement>(null)
 
+  /**
+   * Ins Bild holen — **einen Frame später**.
+   *
+   * Der Effekt läuft, während die Meldung noch gar nicht steht: `motion.p`
+   * fährt sie mit `AnimatePresence` ein, und im selben Durchlauf ist der Anker
+   * ein leeres `div` von null Pixel Höhe. `scrollIntoView` rechnet dann gegen
+   * die Scrollhöhe **vor** dem Einfügen, findet nichts zu tun und scrollt
+   * nicht — die Meldung wächst danach unter die Kante und bleibt dort.
+   *
+   * Gemessen: auf C6 hochkant war der Fehlertext nach einem falschen „So
+   * absetzen" **0 von 336 px** sichtbar, auf A4 die Abweisung „Da geht nichts
+   * durch — das ist tragend" 0 von 78. Beide Screens sind auf genau diese
+   * Meldung gebaut: der Fehler mit Preis ist der Inhalt, nicht die Zugabe.
+   *
+   * `requestAnimationFrame` wartet auf das Layout nach dem Commit. Ein zweiter
+   * Frame wäre nötig, wenn auf die *fertige* Einfahrt gewartet werden sollte —
+   * das ist hier falsch: gescrollt wird auf die Endposition, und die steht
+   * nach dem ersten Layout.
+   */
   useEffect(() => {
     if (text === null || ok === null) return
-    anker.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    const id = requestAnimationFrame(() => {
+      anker.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    })
+    return () => cancelAnimationFrame(id)
   }, [text, ok])
 
   return (

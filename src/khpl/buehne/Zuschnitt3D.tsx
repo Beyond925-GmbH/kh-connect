@@ -361,6 +361,21 @@ function Werkstatt({
   const teilRef = useRef<THREE.Group>(null)
   const verschnittLaenge = Math.max(roh - laenge - d, 0.001)
 
+  // Wo der gezeichnete Balken links beginnt. Beim Einstellen und Sägen ist die
+  // Kamera aufs Schnittfenster gerahmt, und der Rest des Rohlings verschwindet
+  // hinter dem Panel — lief er bis x = 0 durch, schaute sein Ende im
+  // Querformat links neben dem Panel als zusammenhangloser Stummel wieder
+  // heraus. Deshalb endet er dort einen guten Meter *hinter* der Panelkante.
+  // Sobald verladen wird, zählt das ganze Stück (es liegt gleich vollständig
+  // auf dem Anhänger) — die Ergänzung erscheint in dem Moment tief hinter dem
+  // Panel bzw. außerhalb des Bilds, nie im sichtbaren Ausschnitt.
+  // (`laenge - 0.5` als Schranke, damit das Teil auch bei einem extrem kurz
+  // gezogenen Maß nie auf Null oder ins Negative gezeichnet wird.)
+  const balkenAnfang =
+    phase === 'einstellen' || phase === 'saegen'
+      ? Math.max(0, Math.min(roh - 5, laenge - 0.5))
+      : 0
+
   // Nach dem Schnitt trägt das Teil das Band — „jetzt dein Sparren“.
   const [gesaegt, setGesaegt] = useState(phase === 'verladen' || phase === 'fertig')
   const nachSchnitt = gesaegt || phase === 'verladen' || phase === 'fertig'
@@ -426,8 +441,11 @@ function Werkstatt({
       <Bock x={roh - 2.3} />
 
       {/* Kontaktschatten unter dem Balken */}
-      <mesh position={[roh / 2, 0.014, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[roh, 0.7]} />
+      <mesh
+        position={[(balkenAnfang + roh) / 2, 0.014, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
+        <planeGeometry args={[roh - balkenAnfang, 0.7]} />
         <meshBasicMaterial
           color="#000000"
           transparent
@@ -438,7 +456,10 @@ function Werkstatt({
 
       {/* ---- Das Teil: links der Schnittkante, nach dem Schnitt „dein Sparren“ ---- */}
       <group ref={teilRef} position={phase === 'fertig' ? ladeziel : [0, 0, 0]}>
-        <mesh position={[laenge / 2, y0 + Q.h / 2, 0]} scale={[laenge, Q.h, Q.b]}>
+        <mesh
+          position={[(balkenAnfang + laenge) / 2, y0 + Q.h / 2, 0]}
+          scale={[laenge - balkenAnfang, Q.h, Q.b]}
+        >
           <boxGeometry args={[1, 1, 1]} />
           <meshStandardMaterial color={FARBE_TEIL} roughness={0.82} flatShading />
         </mesh>
@@ -495,12 +516,16 @@ function Werkstatt({
             </mesh>
           </group>
           {/* Maßlinie an der Unterkante, vom Balkenanfang bis zur unteren
-              Schnittecke — dort wird `laengeMm` gemessen. */}
-          <mesh position={[laenge / 2, y0 - 0.07, Q.b / 2 + 0.01]}>
-            <boxGeometry args={[laenge, 0.01, 0.01]} />
+              Schnittecke — dort wird `laengeMm` gemessen. Gezeichnet wird sie
+              wie der Balken erst ab `balkenAnfang`: gemessen wird ab x = 0,
+              aber der Anfang liegt per Konvention (Bruchkante) außerhalb des
+              Fensters, und alles davor endete sonst im Querformat als Strich
+              links neben dem Panel. */}
+          <mesh position={[(balkenAnfang + laenge) / 2, y0 - 0.07, Q.b / 2 + 0.01]}>
+            <boxGeometry args={[laenge - balkenAnfang, 0.01, 0.01]} />
             <meshBasicMaterial color={RISS_FARBEN.kante} />
           </mesh>
-          {[0, laenge].map((x) => (
+          {[balkenAnfang, laenge].map((x) => (
             <mesh key={x} position={[x, y0 - 0.07, Q.b / 2 + 0.01]}>
               <boxGeometry args={[0.012, 0.1, 0.012]} />
               <meshBasicMaterial color={RISS_FARBEN.kante} />

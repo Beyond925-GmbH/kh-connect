@@ -250,13 +250,21 @@ export function A6() {
                 onGezogen={() => setFolge(null)}
               />
 
-              <Faustformel />
-
+              {/*
+                Die Folge steht direkt unter dem Regler und **vor** der
+                Faustformel: auf einem Handy hochkant endet das Panel unter dem
+                Regler, und wer „Anlage starten" drückt, muss die Antwort der
+                Anlage sehen, ohne zu scrollen. Die Faustformel ist Erklärung —
+                sie darf als Scroll-Rest unter dem Verlauf liegen, eine
+                Rückmeldung nicht.
+              */}
               <Rueckmeldung
                 ok={folge ? folge.treffer : null}
                 text={folge ? folge.text : null}
                 testid="a6-rueckmeldung"
               />
+
+              <Faustformel />
             </div>
           )}
         </Wechsel>

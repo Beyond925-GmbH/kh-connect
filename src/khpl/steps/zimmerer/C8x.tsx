@@ -1,11 +1,11 @@
 import { useEffect, useRef } from 'react'
-import { motion } from 'motion/react'
 import type { StepId } from '@/khpl/flow/steps'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { karriereweg } from './karrierewege'
+import { Klappliste } from '@/khpl/komponenten/Klappliste'
 
 /**
  * C8.1 / C8.2 / C8.3 — Meister · Techniker · Studium.
@@ -57,32 +57,24 @@ export function C8x({ id }: { id: StepId }) {
     <StepShell
       id={id}
       titelZusatz="Karriere-Weg"
+      // Quer 52 statt 44 rem: die fünf Abschnitte sind die längsten Karten
+      // des Tages, und die schmale Spalte ließ auf C8.1 zwei von ihnen unter
+      // der Scrollkante beginnen, während rechts 440 px Foto standen
+      // (Sichtbefund C8.1–C8.3).
+      karteBreit
       interaktionOffen={false}
       buehne={<StepFoto id={id} />}
       // Kein Fachtext. Der Köder der Karte steht schon in C8, und ausgerechnet
       // der der Meisterkarte („Eigener Betrieb, eigene Azubis“) ist der Satz,
       // den khpl-tag-zimmerer.md 6 als Besitzstand-Sprache benennt — ihn hier
       // zu wiederholen verdoppelte genau das, was die Abschnitte korrigieren.
+      // Hochkant klappen die Abschnitte, quer liegen sie zweispaltig: fünf
+      // ausgeschriebene Abschnitte sind auf dem Handy rund 380 px höher als das
+      // Panel, und was darunter lag, war „Was es kostet“ und „Was du verdienst“
+      // — die beiden Angaben, wegen derer ein Karriere-Weg geöffnet wird
+      // (Sichtbefund C8.1–C8.3).
       interaktion={
-        <dl className="flex flex-col gap-2.5">
-          {weg.abschnitte.map((a, i) => (
-            <motion.div
-              key={a.frage}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-              // Je Frage ein eigenes Feld statt einer durchlaufenden
-              // Definitionsliste: die Abschnitte sind Antworten auf Fragen und
-              // lesen sich sonst wie ein Merkblatt.
-              className="kh-feld px-4 py-3"
-            >
-              <dt className="kh-etikett">{a.frage}</dt>
-              <dd className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90 sm:text-[1.1875rem]">
-                {a.antwort}
-              </dd>
-            </motion.div>
-          ))}
-        </dl>
+        <Klappliste kennung="c8" abschnitte={weg.abschnitte} spaltenQuer={2} />
       }
       fuss={<StepFuss id={id} />}
     />

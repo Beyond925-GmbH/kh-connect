@@ -73,7 +73,19 @@ export function Rail({
         </span>
       </span>
 
-      <span className="flex items-center gap-[3px]" aria-hidden>
+      {/*
+        Unter 640 px Breite tragen nur noch die Ziffern.
+
+        Zehn Segmente sind 11 px breit, das aktuelle 26, dazwischen 3 px — mit
+        Etikett und Innenabstand rund 258 px. Daneben stehen der 60-px-Zurück-
+        Knopf und, auf jedem dritten Step, „Karriere-Wege" mit rund 160 px. Auf
+        einem 390-px-Handy geht das nicht auf: die Segmente haben kein
+        `shrink-0`, wurden also unter ihre gesetzte Breite gedrückt und liefen
+        über das Etikett — auf M6 stand die Skala quer über „DACHDECKER", und
+        von zehn Kerben waren acht zu sehen. Eine Skala, die falsch zählt, ist
+        schlechter als keine; „6/10" daneben sagt dasselbe und stimmt.
+      */}
+      <span className="flex items-center gap-[3px] max-sm:hidden" aria-hidden>
         {graph.haupt.map((s, i) => {
           const zustand = i === jetzt ? 'aktuell' : wegzustand(graph, s.id, fortschritt)
           return (

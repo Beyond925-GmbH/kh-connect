@@ -22,6 +22,7 @@ import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
+import { useSchmal } from '@/khpl/shell/schmal'
 
 /**
  * Z1 — Null Komma null zwei eins.
@@ -91,6 +92,7 @@ const mm = (n: number) => `${n.toFixed(3).replace('.', ',')} mm`
 const RASTER = [...RASTER_KURVE] as [number, number, number, number]
 
 export function Z1() {
+  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.z1
   const [stufe, setStufe] = useState(() =>
     gespeichert ? stufeFuer(gespeichert.schaetzung) : START,
@@ -111,23 +113,37 @@ export function Z1() {
       // Erst nach der Auflösung: die Schätzphase bleibt schmal, die Auflösung
       // braucht die Breite für Zahl und Maßtabelle nebeneinander.
       karteBreit={aufgeloest}
+      // „Hinter jedem Maß steht eine Toleranz“ meint die Zeichnung — sie muss
+      // lesbar sein, bevor jemand über sie liest. Hochkant deckelt das den
+      // Panelwuchs auf 62 %, und wer die Bemaßung ganz sehen will, klappt ein.
+      buehnePlatz
       buehne={
         <Werkstueck zustand="zeichnung" massHervorgehoben toleranzfeld={aufgeloest} />
       }
       fachtext={
-        <p>
-          Eine technische Zeichnung sagt nicht, <em>wie groß</em> — sie sagt,{' '}
-          <em>wie genau</em>. Hinter jedem Maß steht eine{' '}
-          <Begriff id="toleranz">Toleranz</Begriff>, und die entscheidet über Preis,
-          Aufwand und Maschine.
-        </p>
+        // Auf dem Handy hochkant trägt das Panel nur den Kern des Satzes:
+        // mit der vollen Fassung lag der Slider — die Übung — unter der
+        // Scrollkante, und geschätzt hätte nur, wer scrollt (s. `schmal.ts`).
+        schmal ? (
+          <p>
+            Eine Zeichnung sagt nicht, <em>wie groß</em> — sie sagt, <em>wie genau</em>:
+            Hinter jedem Maß steht eine <Begriff id="toleranz">Toleranz</Begriff>.
+          </p>
+        ) : (
+          <p>
+            Eine technische Zeichnung sagt nicht, <em>wie groß</em> — sie sagt,{' '}
+            <em>wie genau</em>. Hinter jedem Maß steht eine{' '}
+            <Begriff id="toleranz">Toleranz</Begriff>, und die entscheidet über Preis,
+            Aufwand und Maschine.
+          </p>
+        )
       }
       interaktion={
         <Wechsel takt={aufgeloest ? 'aufgeloest' : 'schaetzen'}>
           {aufgeloest ? (
             <Aufloesung schaetzung={wert} />
           ) : (
-            <Schaetzung stufe={stufe} wert={wert} onStufe={setStufe} />
+            <Schaetzung stufe={stufe} wert={wert} onStufe={setStufe} schmal={schmal} />
           )}
         </Wechsel>
       }
@@ -171,28 +187,39 @@ function Schaetzung({
   stufe,
   wert,
   onStufe,
+  schmal = false,
 }: {
   stufe: number
   wert: number
   onStufe: (n: number) => void
+  /** Handy hochkant: das Feld wird eine Zeile, die Frage kürzer — sonst
+      läge der Slider unter der Scrollkante (s. `schmal.ts`). */
+  schmal?: boolean
 }) {
   return (
     <div className="flex flex-col gap-3">
       {/* Das Maß, um das es geht. Es steht im Panel und nicht nur auf der
           Zeichnung: wer schätzt, soll es lesen können, ohne am Bildrand danach
-          zu suchen — und `h7` ist der Begriff, den dieser Screen beibringt. */}
-      <div className="kh-feld flex flex-col gap-1 px-3.5 py-2.5">
-        <span className="kh-etikett">Auf der Zeichnung</span>
-        <span className="font-display text-[1.75rem] leading-none text-kh-paper tabular-nums">
-          Ø {NENNMASS} h7
-        </span>
-        <span className="text-[0.9375rem] text-kh-mute">
-          Die <Begriff id="passung">Passung</Begriff> hinter dem Maß sagt, wie genau.
-        </span>
-      </div>
+          zu suchen — und `h7` ist der Begriff, den dieser Screen beibringt.
+          Auf dem Handy entfällt das Feld: dort steht Ø 20 h7 groß und orange
+          direkt über dem Panel auf der Zeichnung, und jede Zeile im Panel
+          kostet den Slider (s. `schmal.ts`). */}
+      {!schmal && (
+        <div className="kh-feld flex flex-col gap-1 px-3.5 py-2.5">
+          <span className="kh-etikett">Auf der Zeichnung</span>
+          <span className="font-display text-[1.75rem] leading-none text-kh-paper tabular-nums">
+            Ø {NENNMASS} h7
+          </span>
+          <span className="text-[0.9375rem] text-kh-mute">
+            Die <Begriff id="passung">Passung</Begriff> hinter dem Maß sagt, wie genau.
+          </span>
+        </div>
+      )}
 
       <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-        Wie viel darf danebengehen? Zieh, bis du glaubst, das reicht.
+        {schmal
+          ? 'Wie viel darf danebengehen?'
+          : 'Wie viel darf danebengehen? Zieh, bis du glaubst, das reicht.'}
       </p>
 
       {/* Die Zahl trägt Anton und gehört solange dem Besucher — deshalb

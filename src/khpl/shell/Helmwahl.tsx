@@ -81,7 +81,13 @@ export function Helmwahl() {
             38 % Höhe, in dem der Helm auf **Höhe** skaliert (`h-full`),
             schließt beides zusammen: der Helm wird so groß wie sein Platz, und
             der Platz ist nur noch so groß wie der Helm. */}
-        <div className="flex h-[38%] min-h-0 shrink-0 flex-col items-center justify-center gap-3 landscape:h-auto landscape:w-[36%] landscape:flex-none">
+        {/* Auf dem Handy hochkant sind 38 % noch zu viel: darunter blieben für
+            Farbe **und** Werkzeug rund 420 px, und das Werkzeugraster war auf
+            einen 25-px-Streifen zusammengeschnitten — die zweite Frage des
+            Screens stand praktisch nicht auf ihm. Unter 640 px Breite trägt
+            das Band deshalb 26 %; auf dem iPad hochkant, wo der Platz reicht,
+            bleibt es bei 38 %. */}
+        <div className="flex h-[38%] max-sm:h-[26%] min-h-0 shrink-0 flex-col items-center justify-center gap-3 landscape:h-auto landscape:w-[36%] landscape:flex-none">
           <motion.div
             key={farbe}
             initial={{ scale: 0.9, opacity: 0, rotate: -4 }}
@@ -115,11 +121,17 @@ export function Helmwahl() {
             Platz (kleines Telefon, große Schrift). Automatische Ränder geben
             in dem Fall einfach nach.
           */}
+          {/* `overflow-y-auto` macht die x-Achse rechnerisch ebenfalls zu
+              `auto` — der Ring des gewählten Farbkreises liegt mit Skalierung
+              und Versatz rund 8 px außerhalb seines Kastens und wurde am linken
+              Rand abgeschnitten. Der Container bekommt den Platz als Polster und
+              holt ihn über den negativen Rand wieder heraus, damit die Kreise
+              weiter unter der Überschrift bündig stehen. */}
           <div
             data-scroll
-            className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain pr-0.5"
+            className="-mx-2.5 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-2.5"
           >
-            <div className="m-auto flex w-full flex-col gap-8 py-1 landscape:gap-6">
+            <div className="m-auto flex w-full flex-col gap-8 py-2.5 max-sm:gap-6 landscape:gap-6">
               <header className="flex shrink-0 flex-col gap-1.5">
                 <span className="kh-etikett flex items-center gap-2">
                   <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
@@ -135,7 +147,11 @@ export function Helmwahl() {
                 Systems. Als Etikett tragen sie so weit wie der Rest.
               */}
                 <h2 className="kh-etikett">Welche Farbe?</h2>
-                <div className="mt-4 flex flex-wrap gap-4 landscape:mt-3 landscape:gap-3">
+                {/* 4 × 88 px plus drei 16-px-Lücken sind 400 px — auf einem
+                    390-px-Handy bricht das auf zwei Zeilen um und schiebt das
+                    Werkzeugraster unter die Kante. 4 × 72 plus 3 × 12 sind
+                    324 px und passen in eine. */}
+                <div className="mt-4 flex flex-wrap gap-4 max-sm:gap-3 landscape:mt-3 landscape:gap-3">
                   {HELM_FARBEN.map((f) => (
                     <button
                       key={f.id}
@@ -147,7 +163,7 @@ export function Helmwahl() {
                       // weiße Kante im Kreis war auf dem weißen Helm unsichtbar,
                       // und genau der ist die Voreinstellung. Ein abgesetzter
                       // Ring in Signalfarbe trägt auf allen vier Farben.
-                      className={`size-[88px] rounded-kh-pill transition-transform active:scale-90 landscape:size-[64px] ${
+                      className={`size-[88px] max-sm:size-[72px] rounded-kh-pill transition-transform active:scale-90 landscape:size-[64px] ${
                         farbe === f.id
                           ? 'scale-105 ring-3 ring-kh-signal ring-offset-3 ring-offset-kh-ink'
                           : 'opacity-65'
@@ -176,7 +192,7 @@ export function Helmwahl() {
                         gewaehlt={gewaehlt}
                         data-testid={`werkzeug-${w.id}`}
                         onClick={() => setWerkzeug(gewaehlt ? '' : w.id)}
-                        className="min-h-[9rem] landscape:min-h-[104px]"
+                        className="min-h-[9rem] max-sm:min-h-[7.25rem] landscape:min-h-[104px]"
                       >
                         <Icon
                           className={`size-11 landscape:size-9 ${gewaehlt ? '' : 'text-kh-paper/70'}`}

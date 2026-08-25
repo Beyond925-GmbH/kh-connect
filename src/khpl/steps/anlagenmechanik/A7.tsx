@@ -282,7 +282,13 @@ export function A7() {
       }
       fachtext={
         imGespraech ? (
-          <p>
+          /*
+            Auf dem Handy hochkant entfällt der Rahmentext: mit ihm lag die
+            dritte Antwort unter der Scrollkante (Sichtprüfung, A7 handy-hoch,
+            `scrollRest` 55 px) — ausgerechnet die ausweichende, an der die
+            Übung hängt. „Sie fragt · 1 von 3" trägt die Situation auch allein.
+          */
+          <p className="max-sm:hidden">
             Die Bauherrin steht mit dir im Keller und will wissen, was du da gebaut hast.
             Das gehört zum Auftrag wie das Rohr an der Wand: zeigen, erklären, dann ist
             Feierabend.

@@ -139,7 +139,7 @@ export function M4() {
         </Suspense>
       }
       fachtext={
-        <p>
+        <p className="max-sm:text-[1rem] max-sm:leading-[1.4]">
           <Begriff id="abbundplan">Abbundplan</Begriff> lesen, Hölzer anzeichnen, ablängen
           — heute meist auf der <Begriff id="abbundanlage">Abbundanlage</Begriff>, bei
           Sonderteilen von Hand. Jedes Teil bekommt eine Nummer.
@@ -156,23 +156,31 @@ export function M4() {
         */
         <Wechsel takt={einstellbar ? 'einstellen' : 'geschnitten'}>
           {einstellbar ? (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 max-sm:gap-1.5">
               <Werkzeichnung />
 
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
                 <span
                   data-testid="m4-laenge"
-                  className="font-display text-[clamp(1.9rem,1.3rem+1.6vw,2.75rem)] leading-none text-kh-signal tabular-nums"
+                  className="font-display text-[clamp(1.9rem,1.3rem+1.6vw,2.75rem)] leading-none text-kh-signal tabular-nums max-sm:text-[1.6rem]"
                 >
                   {mm(laenge)}
                 </span>
-                <span className="text-[1.0625rem] text-kh-mute">
-                  Zieh die Schnittlinie auf das Maß — direkt am Balken.
+                <span className="text-[1.0625rem] text-kh-mute max-sm:text-[0.9375rem]">
+                  {/* Auf dem Handy einzeilig — der Nachsatz stand dort als
+                      zweite Zeile, und genau die schob die Winkelwahl unter
+                      die Scrollkante. */}
+                  <span className="sm:hidden">Zieh die Linie am Balken aufs Maß.</span>
+                  <span className="max-sm:hidden">
+                    Zieh die Schnittlinie auf das Maß — direkt am Balken.
+                  </span>
                 </span>
               </div>
 
-              <div className="flex shrink-0 flex-col gap-1.5">
-                <p className="text-[1.0625rem] text-kh-mute">Und der Winkel am First:</p>
+              <div className="flex shrink-0 flex-col gap-1.5 max-sm:gap-1">
+                <p className="text-[1.0625rem] text-kh-mute max-sm:text-[0.9375rem]">
+                  Und der Winkel am First:
+                </p>
                 <div className="flex gap-2">
                   {WINKEL.map((w) => (
                     <Wahlflaeche
@@ -192,9 +200,13 @@ export function M4() {
                       // für „das hast du geschafft“ reserviert; auf diesem
                       // Screen trägt es der Fuß, wenn der Schnitt sitzt.
                       ton="orange"
-                      className="flex-1 justify-center gap-2 font-semibold"
+                      className="flex-1 justify-center gap-2 font-semibold max-sm:min-h-[44px]"
                     >
-                      <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
+                      <svg
+                        viewBox="0 0 24 24"
+                        className="size-6 max-sm:size-5"
+                        aria-hidden
+                      >
                         <path
                           d={`M2 20 L22 20 L22 ${20 - 20 * Math.tan((w * Math.PI) / 180) * 0.5} Z`}
                           fill="currentColor"
@@ -363,14 +375,19 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
  *
  * Bleibt die flache 44-px-Variante: das Panel ist mit `buehneInteraktiv`
  * schmal (38 rem quer), und hochkant darf nichts scrollen (R9).
+ *
+ * Unterhalb `sm` fällt die Zeichnung weg und die beiden Sollwerte rücken zum
+ * Etikett in eine Zeile: auf dem Handy hochkant verdoppelte der Block nur,
+ * was auf der Bühne ohnehin am Balken steht, und seine ~130 px schoben
+ * Winkelwahl und Rückmeldung unter die Scrollkante.
  */
 function Werkzeichnung() {
   return (
-    <div className="kh-feld flex w-full flex-col gap-1.5 px-3.5 py-2.5">
+    <div className="kh-feld flex w-full flex-col gap-1.5 px-3.5 py-2.5 max-sm:flex-row max-sm:flex-wrap max-sm:items-baseline max-sm:gap-x-4 max-sm:gap-y-0.5">
       <p className="kh-etikett">Soll laut Plan</p>
       <svg
         viewBox="10 80 310 60"
-        className="h-[44px] w-full"
+        className="h-[44px] w-full max-sm:hidden"
         role="img"
         aria-label={`Werkzeichnung: Länge ${mm(ZIEL_MM)}, Winkel ${ZIEL_WINKEL} Grad`}
       >
@@ -385,16 +402,16 @@ function Werkzeichnung() {
       {/* Die beiden Sollwerte stehen als Zahlen daneben, nicht als 18-px-Text
           in der Zeichnung. Sie sind die Aufgabe — wer sie sucht, soll sie aus
           zwei Metern Entfernung finden, nicht in einer Vektorgrafik lesen. */}
-      <dl className="flex gap-5">
-        <div>
+      <dl className="flex gap-5 max-sm:gap-4">
+        <div className="max-sm:flex max-sm:items-baseline max-sm:gap-1.5">
           <dt className="text-[0.875rem] text-kh-mute">Länge</dt>
-          <dd className="font-display text-[1.5rem] leading-none text-kh-paper tabular-nums">
+          <dd className="font-display text-[1.5rem] leading-none text-kh-paper tabular-nums max-sm:text-[1.25rem]">
             {mm(ZIEL_MM)}
           </dd>
         </div>
-        <div>
+        <div className="max-sm:flex max-sm:items-baseline max-sm:gap-1.5">
           <dt className="text-[0.875rem] text-kh-mute">Winkel am First</dt>
-          <dd className="font-display text-[1.5rem] leading-none text-kh-paper tabular-nums">
+          <dd className="font-display text-[1.5rem] leading-none text-kh-paper tabular-nums max-sm:text-[1.25rem]">
             {ZIEL_WINKEL}°
           </dd>
         </div>

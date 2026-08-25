@@ -5,6 +5,7 @@ import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { useSchmal } from '@/khpl/shell/schmal'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
@@ -50,6 +51,12 @@ interface Schicht {
   /** Der eine Satz auf der Karte. */
   was: string
   /**
+   * Derselbe Satz fürs Handy hochkant, wo die Karte zugleich das Tippziel ist
+   * und in die Scrollfläche passen muss. Nur dort nötig, wo `was` über drei
+   * Zeilen läuft — sonst bleibt es beim einen Satz.
+   */
+  wasKurz?: string
+  /**
    * Relative Dicke im Querschnitt-Schema. Schematisch, **kein Maß** — die
    * Zeichnung soll zeigen, dass eine Dämmebene dick und eine Folie dünn ist,
    * nicht wie dick genau.
@@ -75,6 +82,8 @@ const SCHICHTEN: Schicht[] = [
     id: 'innen',
     name: 'Innenbeplankung',
     was: 'Die Platte, die im fertigen Zimmer die Wand ist. Davor liegt meist noch eine Installationsebene für Kabel und Dosen — damit später niemand durch die Dichtung bohrt.',
+    wasKurz:
+      'Die Platte, die im fertigen Zimmer die Wand ist. Davor liegt meist noch eine Installationsebene für Kabel und Dosen.',
     dicke: 2,
     farbe: '#DDD8CF', // Gipsplatte auf der Bühne
   },
@@ -109,6 +118,10 @@ const SCHICHTEN: Schicht[] = [
 ]
 
 export function C3() {
+  // Handy hochkant: Panel und Bühne teilen sich 844 px. Die Schichtkarte ist
+  // hier zugleich das Tippziel und muss ganz ins Bild — also trägt der Screen
+  // dort weniger Text (s. `shell/schmal.ts`).
+  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.c3
   const [gelegt, setGelegt] = useState<string[]>(() => gespeichert?.gelegt ?? [])
 
@@ -136,7 +149,16 @@ export function C3() {
         </Suspense>
       }
       fachtext={
-        fertig ? undefined : (
+        fertig ? undefined : schmal ? (
+          // Die Aufzählung steht Karte für Karte ohnehin darunter; hochkant
+          // bleibt der Satz, der sagt, warum die Reihenfolge zählt — samt
+          // der beiden Begriffe, die sonst nirgends im Tag anklickbar sind.
+          <p>
+            <Begriff id="dampfbremse">Dampfbremse</Begriff> innen,{' '}
+            <Begriff id="holzfaserplatte">Holzfaserplatte</Begriff> außen: die Reihenfolge
+            entscheidet, ob das Haus trocken bleibt.
+          </p>
+        ) : (
           <p>
             Der Aufbau von innen nach außen: <Begriff id="beplankung">Beplankung</Begriff>
             , <Begriff id="dampfbremse">Dampfbremse</Begriff>, Ständer mit Dämmung,{' '}
@@ -157,6 +179,7 @@ export function C3() {
                 gesamt={SCHICHTEN.length}
                 gelegt={gelegt.length}
                 onLegen={legen}
+                schmal={schmal}
               />
               {danach && (
                 <p
@@ -198,12 +221,15 @@ function Schichtkarte({
   gesamt,
   gelegt,
   onLegen,
+  schmal,
 }: {
   schicht: Schicht
   nummer: number
   gesamt: number
   gelegt: number
   onLegen: () => void
+  /** Handy hochkant: der kürzere Satz, damit die Karte ganz im Bild steht. */
+  schmal: boolean
 }) {
   return (
     <motion.button
@@ -222,7 +248,7 @@ function Schichtkarte({
         </span>
         <span className="kh-titel-klein mt-0.5 block text-kh-orange">{schicht.name}</span>
         <span className="mt-1 block text-[1rem] leading-snug text-kh-paper/80">
-          {schicht.was}
+          {schmal ? (schicht.wasKurz ?? schicht.was) : schicht.was}
         </span>
       </span>
     </motion.button>

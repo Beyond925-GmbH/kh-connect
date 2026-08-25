@@ -80,6 +80,20 @@ export interface Dachstuhl3DProps {
 // KEINE Wert-Exporte neben der Default-Komponente (Bundle-Regel, s. README —
 // Laufzeit-Konstanten der Buehnen leben in `kanon.ts`).
 
+/**
+ * Pick-Toleranz fuer den Tap auf ein Bauteil (B3.2).
+ *
+ * Ein einzelner Sparren ist auf dem Handy hochkant nur ~6 px breit — die
+ * 44-px-Faustregel ist mit exakter Trefferpruefung nicht zu halten, und der
+ * Step gilt erst nach zwei angetippten Bauteilen als gelaufen. Geht ein Tap
+ * daneben, wird deshalb in Ringen um den Beruehrpunkt nachgefasst: derselbe
+ * Raycast, nur an leicht versetzten Bildschirmpunkten. Das laeuft komplett
+ * diesseits der Leinwand (synthetische Zeigerereignisse auf dem Canvas) und
+ * laesst `src/drei/**` unangetastet.
+ */
+const PICK_RADIEN = [10, 18, 26]
+const PICK_STRAHLEN = 8
+
 export default function Dachstuhl3D({
   zielT,
   startT,
@@ -127,6 +141,14 @@ export default function Dachstuhl3D({
 
   const fortschritt = useRef(startT ?? zielT)
   const tap = useTapErkennung()
+
+  // ---- Pick-Toleranz (s. PICK_RADIEN oben) --------------------------------
+  const wurzel = useRef<HTMLDivElement>(null)
+  /** Wo der letzte echte Tap ansetzte — Startpunkt der Ringsuche. */
+  const zeigerOrt = useRef<{ x: number; y: number } | null>(null)
+  /** Laeuft gerade eine Ringsuche? Dann keine Rekursion, kein Fehl-Daneben. */
+  const suchlauf = useRef(false)
+  const sucheTraf = useRef(false)
 
   // Rückmeldungen laufen über ein Ref: `useFrame` liest den Fortschritt jeden
   // Frame, React rendert dabei nicht neu.
@@ -228,15 +250,69 @@ export default function Dachstuhl3D({
     return () => cancelAnimationFrame(id)
   }, [zielT, dauer, reduziert, fahrtLaeuft])
 
+  /**
+   * Fasst um den letzten Tap herum nach: dieselben Zeigerereignisse, die ein
+   * echter Tap ausloest, nur an ringfoermig versetzten Punkten. Trifft ein
+   * Strahl ein antippbares Bauteil, laeuft dessen normaler Weg (`tippen`)
+   * — die Suche merkt das ueber `sucheTraf` und bricht ab. Die Dispatches
+   * laufen synchron; `bubbles` bleibt aus, damit React (Wrapper-Handler,
+   * Fahrt-Skip) die Kunststrahlen nicht als neue Taps sieht.
+   */
+  const sucheNah = useCallback((): boolean => {
+    const p = zeigerOrt.current
+    const leinwand = wurzel.current?.querySelector('canvas')
+    if (!p || !leinwand || !onBauteil) return false
+    suchlauf.current = true
+    sucheTraf.current = false
+    try {
+      for (const radius of PICK_RADIEN) {
+        for (let i = 0; i < PICK_STRAHLEN && !sucheTraf.current; i++) {
+          const winkel = (i / PICK_STRAHLEN) * 2 * Math.PI
+          const x = p.x + radius * Math.cos(winkel)
+          const y = p.y + radius * Math.sin(winkel)
+          // Der Startpunkt der Tap-Erkennung muss mitwandern, sonst zaehlt
+          // der Versatz als Wischbewegung und `istTap` lehnt den Strahl ab.
+          tap.merken({ clientX: x, clientY: y })
+          for (const typ of ['pointerdown', 'pointerup'] as const) {
+            leinwand.dispatchEvent(
+              new PointerEvent(typ, {
+                clientX: x,
+                clientY: y,
+                pointerId: 999,
+                pointerType: 'mouse',
+                isPrimary: true,
+              }),
+            )
+          }
+        }
+        if (sucheTraf.current) break
+      }
+    } finally {
+      suchlauf.current = false
+    }
+    return sucheTraf.current
+  }, [onBauteil, tap])
+
   const tippen = useCallback(
     (teil: Bauteil) => {
-      if (teil.antippbar) onBauteil?.(teil)
-      else onDaneben?.()
+      if (teil.antippbar) {
+        sucheTraf.current = true
+        onBauteil?.(teil)
+        return
+      }
+      // Ein Suchstrahl streifte z. B. die Rohdecke — weitersuchen, nicht melden.
+      if (suchlauf.current) return
+      // Echter Tap auf ein stummes Teil: erst nachfassen (der gemeinte Sparren
+      // liegt oft direkt daneben), erst dann ist es wirklich ein Daneben.
+      if (!sucheNah()) onDaneben?.()
     },
-    [onBauteil, onDaneben],
+    [onBauteil, onDaneben, sucheNah],
   )
 
-  const daneben = useCallback(() => onDaneben?.(), [onDaneben])
+  const daneben = useCallback(() => {
+    if (suchlauf.current) return
+    if (!sucheNah()) onDaneben?.()
+  }, [onDaneben, sucheNah])
   const bereit = useCallback(() => {
     document.documentElement.dataset.dachstuhlBereit = 'true'
   }, [])
@@ -255,6 +331,7 @@ export default function Dachstuhl3D({
 
   return (
     <div
+      ref={wurzel}
       className="relative size-full"
       // Skip der Fahrt: `pointerdown` im Capture, vor OrbitControls (die
       // während der Fahrt ohnehin gesperrt sind). Der Tipp wird konsumiert.
@@ -265,7 +342,10 @@ export default function Dachstuhl3D({
         }
       }}
       onPointerDown={(e) => {
-        if (!fahrtLaeuft) tap.merken(e)
+        if (!fahrtLaeuft) {
+          tap.merken(e)
+          zeigerOrt.current = { x: e.clientX, y: e.clientY }
+        }
       }}
       data-wisch="aus"
     >

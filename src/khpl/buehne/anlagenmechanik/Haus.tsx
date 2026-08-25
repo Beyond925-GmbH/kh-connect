@@ -25,6 +25,7 @@ import {
   HAUS,
   HEIZKOERPER,
   RAHMEN,
+  RAHMEN_INBETRIEBNAHME_BAND,
   RICHTIGER_WEG,
   START,
   STRANG,
@@ -91,6 +92,20 @@ export function Haus({
   const ruhig = useReducedMotion() ?? false
   const szene = zustand.szene
   const sicht = sichtfeld(seiten)
+
+  /**
+   * Der Kamerarahmen der Szene — mit einer Ausnahme: ist die Fläche in A6 nur
+   * ein flaches Band (Handy hochkant, Panel aufgeklappt: ~366 × 103 px), zeigt
+   * die Kamera den Keller mit dem Manometer statt des ganzen Hauses, denn ein
+   * Manometer mit 18 px Durchmesser ist keine Anzeige. Die Schwelle 1,8 trifft
+   * nur dieses Band — iPad hochkant liegt bei ~1,3 und behält das Haus, und
+   * sobald die Anlage läuft und das Panel sich zusammenzieht, kippt das
+   * Verhältnis unter die Schwelle und die Wärme steigt im vollen Hausschnitt.
+   */
+  const blickfeld =
+    szene === 'inbetriebnahme' && seiten > 1.8
+      ? RAHMEN_INBETRIEBNAHME_BAND
+      : RAHMEN[szene]
 
   /**
    * Der Weg der Wärme. In A6 und A7 ist das **der Weg aus A4** und kein
@@ -176,7 +191,7 @@ export function Haus({
         fill="url(#am-grund-haus)"
       />
 
-      <g ref={feld} transform={kamera(RAHMEN[szene], sicht)}>
+      <g ref={feld} transform={kamera(blickfeld, sicht)}>
         <Himmel />
         <Erdreich />
         <Huelle />

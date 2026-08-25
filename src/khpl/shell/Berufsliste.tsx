@@ -87,9 +87,14 @@ export function Berufsliste() {
         // Hochkant stand hier `auto-rows-min`: vier Karten à 9,5 rem klebten
         // oben, darunter blieben auf der Stele rund 1.200 px Schwarz. Das ist
         // der Hauptauswahl-Screen des Standes — die Fläche gehört den Karten.
-        // `minmax(9.5rem, 1fr)` statt `fr` allein: die alte Mindesthöhe bleibt
-        // der Boden, damit ein kleines Telefon scrollt statt zu quetschen.
-        className="relative mt-4 grid min-h-0 flex-1 auto-rows-[minmax(9.5rem,1fr)] grid-cols-1 gap-4 overflow-y-auto overscroll-contain px-5 pb-6 landscape:mt-4 landscape:auto-rows-fr landscape:grid-cols-2 landscape:gap-3 landscape:px-8 landscape:pb-8"
+        // `minmax(min-content, 1fr)` statt `fr` allein: die Zeile wird nie
+        // kürzer als ihr Inhalt, wächst aber weiterhin in die freie Fläche.
+        // Mit dem festen Boden `9.5rem` blieben auf einem 390-px-Handy 161 px
+        // je Zeile für 184 px Inhalt — die Pille „Passt zu dir" wurde von der
+        // Kartenoberkante halbiert (`overflow-hidden`). Den Boden trägt jetzt
+        // die Karte selbst (`min-h-[9.5rem]`), damit ein kleines Telefon
+        // scrollt statt zu quetschen.
+        className="relative mt-4 grid min-h-0 flex-1 auto-rows-[minmax(min-content,1fr)] grid-cols-1 gap-4 overflow-y-auto overscroll-contain px-5 pb-6 landscape:mt-4 landscape:auto-rows-fr landscape:grid-cols-2 landscape:gap-3 landscape:px-8 landscape:pb-8"
       >
         {berufe.map((b, i) => (
           <Karte
@@ -165,7 +170,7 @@ function Karte({
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0E0D0B] via-[#0E0D0B]/45 to-transparent landscape:hidden" />
       </div>
 
-      <div className="relative flex min-w-0 flex-1 flex-col justify-end gap-2 p-6 landscape:gap-1.5 landscape:p-4">
+      <div className="relative flex min-w-0 flex-1 flex-col justify-end gap-2 p-6 max-sm:p-4 landscape:gap-1.5 landscape:p-4">
         <div className="flex flex-wrap items-center gap-1.5">
           {empfohlen && (
             <span className={`${CHIP} bg-kh-orange text-[#0E0D0B]`}>Passt zu dir</span>

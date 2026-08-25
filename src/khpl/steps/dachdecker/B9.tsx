@@ -39,7 +39,13 @@ export function B9({ id }: { id: StepId }) {
       // wie vorher die Abfrage gegen die Motivliste.
       buehne={<StepFoto id={id} />}
       interaktion={
-        <dl className="flex flex-col gap-2.5">
+        /*
+          Unterhalb `sm` eine Stufe kompakter: das Panel steht auf dem Handy
+          hochkant am 84-%-Anschlag, und in der vollen Setzung lag die vierte
+          Karte — ausgerechnet die Verdienstangabe, wegen der jemand den
+          Abstecher öffnet — komplett unter der Scrollkante (95 px Rest).
+        */
+        <dl className="flex flex-col gap-2.5 max-sm:gap-2">
           {weg.abschnitte.map((a, i) => (
             <motion.div
               key={a.frage}
@@ -50,10 +56,10 @@ export function B9({ id }: { id: StepId }) {
               // gemeinsamen Linie: „Was ist das · Wie lange · Was es kostet ·
               // Was du verdienst“ sind vier Antworten auf vier Fragen, und als
               // durchlaufende Definitionsliste liest sich das wie ein Merkblatt.
-              className="kh-feld px-4 py-3"
+              className="kh-feld px-4 py-3 max-sm:px-3.5 max-sm:py-2"
             >
               <dt className="kh-etikett">{a.frage}</dt>
-              <dd className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90 sm:text-[1.1875rem]">
+              <dd className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90 max-sm:mt-1 max-sm:text-[1rem] max-sm:leading-[1.4] sm:text-[1.1875rem]">
                 {a.antwort}
               </dd>
             </motion.div>
