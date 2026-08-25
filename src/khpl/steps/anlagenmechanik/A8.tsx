@@ -15,6 +15,15 @@ import { KARRIEREWEGE } from './karrierewege'
  * erreichbar** — A8.1–A8.3 sind im Graphen als `immerOffen` markiert und
  * verschwinden nicht, sobald sie einmal geöffnet wurden.
  *
+ * ℹ️ Die Abnahme meldete „A8 zeigt drei Kacheln, die anderen drei Tage eine
+ * Liste — vier Tage, zwei Layouts". Nachgeprüft: das Raster unten ist
+ * `grid-cols-1 sm:grid-cols-3` und steht in M9, C8, Z7 und hier **zeichengleich**;
+ * es gibt keine Container-Query und keine abweichende Panelbreite (A8 setzt
+ * kein `karteBreit`). Bei jeder Fensterbreite über 640 px stehen an allen vier
+ * Tagen drei Kacheln, darunter an allen vier eine Liste. Hier ist deshalb
+ * nichts geändert worden: eine Umstellung auf eine Liste würde den Unterschied
+ * erst herstellen, den die Meldung beschreibt.
+ *
  * Der Fuß zeigt hier **kein** Abstecher-Angebot: die Karten *sind* das
  * Angebot. Beides nebeneinander wären dieselben drei Wege zweimal auf einem
  * Screen.

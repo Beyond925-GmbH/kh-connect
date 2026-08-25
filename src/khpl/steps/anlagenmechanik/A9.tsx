@@ -147,11 +147,14 @@ export function A9() {
  * zeigt. `mix-blend-multiply` behält die Zeichnung des Fotos, statt es
  * zuzukleistern.
  *
- * ⚠️ **Für A9 ist kein Motiv vergeben** (Spec 10 nennt für den CTA dieses
- * Tages keins). Ohne Eintrag trägt die Farbfläche mit der Paderborner
- * Silhouette allein — bespielbar, aber schwächer: eine leere Farbfläche
- * fordert niemanden auf, mit einem Menschen zu sprechen. Sobald ein Motiv in
- * der Motivliste steht, liegt es hier ohne weitere Änderung darunter.
+ * ⚠️ **Spec 10 vergibt für den CTA dieses Tages kein Motiv.** Ohne Eintrag trug
+ * die Farbfläche mit der Paderborner Silhouette allein, und hochkant stand
+ * darunter rund ein Drittel Bildhöhe reines Orange (Abnahme, A9) — eine leere
+ * Farbfläche fordert niemanden auf, mit einem Menschen zu sprechen. Die
+ * Motivliste dieses Berufs führt deshalb für A9 das Kartenmotiv, wie es die
+ * Zerspanung für Z8 tut; die Begründung steht dort
+ * (`berufe/anlagenmechanik.ts`, `bilder`). Kommt ein eigenes Motiv, tritt es an
+ * dieselbe Stelle.
  */
 function Abschlussfeld() {
   const bild = useStepBild('A9')

@@ -282,6 +282,24 @@ export const ANLAGENMECHANIKER: BerufDef = {
     'A8.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
     'A8.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
     'A8.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
+    /*
+      A9 — der CTA. Spec 10 vergibt für ihn kein Motiv, und ohne Eintrag stand
+      auf der hochkanten Stele unter der Paderborner Silhouette rund ein Drittel
+      Bildhöhe reines Orange (Abnahme, A9). Eine leere Farbfläche fordert
+      niemanden auf, mit einem Menschen zu sprechen.
+
+      Deshalb dasselbe Vorgehen wie in der Zerspanung (Z8): **das Kartenmotiv
+      dieses Berufs**, das einzige verbliebene SHK-Foto ohne lesbares
+      Firmenlogo — gallery-3 und quiz-waermepumpe scheiden dafür aus
+      (MEDIEN-INVENTAR, Spec 10), gallery-1 und gallery-2 tragen bereits A3.1
+      und A4.1. Es zeigt einen Menschen bei der Arbeit an einer Anlage; genau
+      darum geht es auf diesem Screen.
+
+      `pos` sitzt links, weil hochkant nur rund ein Drittel der Bildbreite
+      stehen bleibt: dort ist der Kopf, nicht der Handschuh. Quer deckt das Bild
+      die Fläche ohnehin ganz ab.
+    */
+    A9: { src: '/medien/media/anlagenmechaniker/card.webp', pos: '28% 45%' },
   } satisfies Partial<Record<Id, StepBild>>,
   /**
    * S5 — die Auftragsannahme, in-fiction, ohne Meta-Erklärung. Wortlaut aus

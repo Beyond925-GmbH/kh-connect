@@ -32,16 +32,21 @@ import {
   THERMOSTAT_ORTE,
   TRAGENDE_WAND,
   TREPPE_ORT,
+  UMGEBUNG,
   WAERMEPUMPE_ORT,
   WELT,
   ZIEL,
+  amZiel,
   istVerstellt,
   kamera,
   knotenBei,
   knotenPunkt,
   pfadDatenWeich,
+  sichtfeld,
+  viewBoxVon,
   zieheNach,
   type Punkt,
+  type Rahmen,
 } from './zeichnung'
 
 /**
@@ -68,12 +73,15 @@ type HausZustand = Exclude<BuehnenZustand, { szene: 'anlage' } | { szene: 'trans
  * Zimmerers. Bei `prefers-reduced-motion` stehen die Endzustände sofort.
  */
 export function Haus({
+  seiten,
   zustand,
   onBauteil,
   onPfad,
   onAbgewiesen,
   onWaermeAngekommen,
 }: {
+  /** Das Seitenverhältnis der Bühnenfläche — die `viewBox` richtet sich danach. */
+  seiten: number
   zustand: HausZustand
   onBauteil?: (id: BauteilId) => void
   onPfad?: (pfad: readonly KnotenId[]) => void
@@ -82,6 +90,7 @@ export function Haus({
 }) {
   const ruhig = useReducedMotion() ?? false
   const szene = zustand.szene
+  const sicht = sichtfeld(seiten)
 
   /**
    * Der Weg der Wärme. In A6 und A7 ist das **der Weg aus A4** und kein
@@ -150,16 +159,25 @@ export function Haus({
 
   return (
     <svg
-      viewBox={`0 0 ${WELT.breite} ${WELT.hoehe}`}
+      viewBox={viewBoxVon(sicht)}
       preserveAspectRatio="xMidYMid meet"
       className="size-full touch-none"
       role="img"
       aria-label="Gebäudeschnitt mit Heizungskeller"
     >
       <Defs />
-      <rect width={WELT.breite} height={WELT.hoehe} fill="url(#am-grund-haus)" />
+      {/* Der Grundton liegt auf der ganzen Fläche und läuft an allen vier
+          Rändern auf null aus — er ist eine Vignette und keine Platte. */}
+      <rect
+        x={sicht.x}
+        y={sicht.y}
+        width={sicht.b}
+        height={sicht.h}
+        fill="url(#am-grund-haus)"
+      />
 
-      <g ref={feld} transform={kamera(RAHMEN[szene])} clipPath="url(#am-sicht)">
+      <g ref={feld} transform={kamera(RAHMEN[szene], sicht)}>
+        <Himmel />
         <Erdreich />
         <Huelle />
         <Raeume warm={waermeRaum} />
@@ -180,8 +198,10 @@ export function Haus({
           />
         ) : (
           <>
-            <VerteilerKasten warm={waermeStrang} />
-            <Waermepumpe warm={waermeStrang} />
+            {/* Im Raster sind die beiden Kästen Anfang und Ende der Aufgabe —
+                dort tragen sie die Farbe der Leitung, sonst die des Bestands. */}
+            <VerteilerKasten warm={waermeStrang} markiert={szene === 'raster'} />
+            <Waermepumpe warm={waermeStrang} markiert={szene === 'raster'} />
           </>
         )}
 
@@ -235,7 +255,7 @@ export function Haus({
         )}
       </g>
 
-      {szene === 'uebergabe' && <Feierabendlicht />}
+      {szene === 'uebergabe' && <Feierabendlicht sicht={sicht} />}
     </svg>
   )
 }
@@ -295,14 +315,41 @@ function useWaerme(
 function Defs() {
   return (
     <defs>
-      {/* Beschneidet die Kamerafahrt auf die `viewBox` — siehe `kamera`. */}
-      <clipPath id="am-sicht" clipPathUnits="userSpaceOnUse">
-        <rect x={0} y={0} width={WELT.breite} height={WELT.hoehe} />
-      </clipPath>
-      <radialGradient id="am-grund-haus" cx="50%" cy="44%" r="74%">
+      {/*
+        **Kein `clipPath` mehr.** Er beschnitt die Kameragruppe auf die Welt und
+        war die Reißleine gegen den Überschuss, den `meet` in einer zu hohen
+        Fläche stehen ließ. Seit die `viewBox` das Verhältnis der Fläche hat
+        (`sichtfeld`), ist der Rand des SVG-Elements der Rand der Bühne — und
+        was hochkant zusätzlich sichtbar wird, soll sichtbar werden: Erdreich
+        und Himmel sind großzügig über die Welt hinausgezeichnet. Ein Clip auf
+        einen gemessenen Wert wäre außerdem genau das, was er verhindern soll:
+        bei jeder Verzögerung eine harte Kante mitten im Bild.
+      */}
+      {/*
+        Der Grundton. `r="50%"` um die Mitte heißt: die Ellipse berührt alle
+        vier Kanten und ist dort auf null — deshalb gibt es keinen Rand, an dem
+        Grau auf Schwarz stößt. Vorher lag der Rand mit rund 37 % Deckung mitten
+        im Bild und las sich als „getönte Platte" (Abnahme, A1/A6/A8).
+      */}
+      <radialGradient id="am-grund-haus" cx="50%" cy="50%" r="50%">
         <stop offset="0%" stopColor={KALT.flaeche} stopOpacity={0.9} />
+        <stop offset="70%" stopColor={KALT.flaeche} stopOpacity={0.34} />
         <stop offset="100%" stopColor={KALT.flaeche} stopOpacity={0} />
       </radialGradient>
+      {/* Der Himmel über dem Haus: unten am Gelände am dichtesten, nach oben
+          auf null. Er hat keine Oberkante, die man sehen könnte. */}
+      <linearGradient
+        id="am-himmel-haus"
+        gradientUnits="userSpaceOnUse"
+        x1={0}
+        y1={-UMGEBUNG}
+        x2={0}
+        y2={HAUS.gelaende}
+      >
+        <stop offset="0%" stopColor={KALT.flaeche} stopOpacity={0} />
+        <stop offset="55%" stopColor={KALT.flaeche} stopOpacity={0.18} />
+        <stop offset="100%" stopColor={KALT.flaeche} stopOpacity={0.62} />
+      </linearGradient>
       <pattern
         id="am-erdreich"
         width={9}
@@ -348,15 +395,41 @@ function Defs() {
   )
 }
 
+/**
+ * **Der Himmel — die Umgebung über dem Gelände.**
+ *
+ * Er ist ausgespart, wo das Haus steht: sonst läge Himmel im Wohnzimmer. Die
+ * Silhouette folgt Dach, Traufe und Außenwänden, der Rest ist ein Verlauf, der
+ * zum Gelände hin dichter wird und nach oben auf null läuft.
+ *
+ * Es gibt ihn, seit die Bühne hochkant wirklich gefüllt wird: über dem First
+ * stand vorher Schwarz mit der Kante der Zeichnung darin. Jetzt steht dort
+ * Himmel, und das Haus steht in etwas statt in nichts.
+ */
+function Himmel() {
+  const h = HAUS
+  const links = -UMGEBUNG
+  const rechts = WELT.breite + UMGEBUNG
+  const oben = -UMGEBUNG
+  const flaeche = `M${links} ${oben} H${rechts} V${h.gelaende} H${links} Z`
+  const haus =
+    `M${h.aussenLinks} ${h.gelaende} V${h.traufe} L${h.dachLinks} ${h.traufe} ` +
+    `L160 ${h.first} L${h.dachRechts} ${h.traufe} L${h.aussenRechts} ${h.traufe} ` +
+    `V${h.gelaende} Z`
+  return <path d={`${flaeche} ${haus}`} fillRule="evenodd" fill="url(#am-himmel-haus)" />
+}
+
 function Erdreich() {
   const { aussenLinks, aussenRechts, gelaende, kellerBoden } = HAUS
   const unten = kellerBoden + 16
+  const links = -UMGEBUNG
+  const rechts = WELT.breite + UMGEBUNG
   return (
     <g>
       <rect
-        x={-40}
+        x={links}
         y={gelaende}
-        width={aussenLinks + 40}
+        width={aussenLinks - links}
         height={unten - gelaende}
         fill="url(#am-erdreich)"
         opacity={0.5}
@@ -364,25 +437,26 @@ function Erdreich() {
       <rect
         x={aussenRechts}
         y={gelaende}
-        width={WELT.breite - aussenRechts + 40}
+        width={rechts - aussenRechts}
         height={unten - gelaende}
         fill="url(#am-erdreich)"
         opacity={0.5}
       />
       {/* Unter der Sohle. Ohne das steht der Keller im Nichts, sobald der
-          Rahmen hoch genug ist, um darunter zu blicken. */}
+          Rahmen hoch genug ist, um darunter zu blicken — und hochkant ist er
+          das inzwischen immer. */}
       <rect
-        x={-40}
+        x={links}
         y={unten}
-        width={WELT.breite + 80}
-        height={90}
+        width={rechts - links}
+        height={UMGEBUNG}
         fill="url(#am-erdreich)"
         opacity={0.5}
       />
       <line
-        x1={-40}
+        x1={links}
         y1={gelaende}
-        x2={WELT.breite + 40}
+        x2={rechts}
         y2={gelaende}
         stroke={KALT.linie}
         strokeWidth={2}
@@ -622,7 +696,7 @@ function BauteilFigur({
     es bis A6" (Spec 6, A2). Ein hellerer Strich und ein Ring machen dieselbe
     Auswahl sichtbar, ohne die Temperatur vorwegzunehmen.
   */
-  const stroke = offen ? KALT.leitung : angetippt ? KALT.linie : KALT.linieMatt
+  const stroke = offen ? KALT.wahl : angetippt ? KALT.linie : KALT.linieMatt
 
   return (
     <g
@@ -680,7 +754,7 @@ function BauteilFigur({
           height={o.h + 10}
           rx={6}
           fill="none"
-          stroke={KALT.leitung}
+          stroke={KALT.wahl}
           strokeWidth={1.8}
           opacity={0.55}
         />
@@ -726,7 +800,7 @@ function Thermostatventile({
   offen: boolean
   onBauteil?: (id: BauteilId) => void
 }) {
-  const stroke = offen ? KALT.leitung : angetippt ? KALT.linie : KALT.linieMatt
+  const stroke = offen ? KALT.wahl : angetippt ? KALT.linie : KALT.linieMatt
   return (
     <g
       className={onBauteil ? 'cursor-pointer' : undefined}
@@ -745,7 +819,7 @@ function Thermostatventile({
               cy={v.y}
               r={10}
               fill="none"
-              stroke={KALT.leitung}
+              stroke={KALT.wahl}
               strokeWidth={1.8}
               opacity={0.55}
             />
@@ -798,10 +872,17 @@ function Vliesbahn({ ausgerollt, ruhig }: { ausgerollt: boolean; ruhig: boolean 
 // A4 · A6 · A7 — die neue Anlage
 // ---------------------------------------------------------------------------
 
-function VerteilerKasten({ warm }: { warm: MotionValue<number> }) {
+function VerteilerKasten({
+  warm,
+  markiert = false,
+}: {
+  warm: MotionValue<number>
+  markiert?: boolean
+}) {
   const o = BAUTEIL_ORTE.verteiler
   return (
     <g>
+      <title>Verteiler</title>
       <rect
         x={o.x}
         y={o.y}
@@ -809,8 +890,8 @@ function VerteilerKasten({ warm }: { warm: MotionValue<number> }) {
         height={o.h}
         rx={3}
         fill={KALT.flaeche}
-        stroke={KALT.linie}
-        strokeWidth={2.4}
+        stroke={markiert ? KALT.rohr : KALT.linie}
+        strokeWidth={markiert ? 2.8 : 2.4}
       />
       <motion.g style={{ opacity: warm }}>
         <path
@@ -825,10 +906,17 @@ function VerteilerKasten({ warm }: { warm: MotionValue<number> }) {
 }
 
 /** Die Wärmepumpe. Sie macht keine Wärme — sie holt sie. */
-function Waermepumpe({ warm }: { warm: MotionValue<number> }) {
+function Waermepumpe({
+  warm,
+  markiert = false,
+}: {
+  warm: MotionValue<number>
+  markiert?: boolean
+}) {
   const o = WAERMEPUMPE_ORT
   return (
     <g>
+      <title>Wärmepumpe</title>
       <rect
         x={o.x}
         y={o.y}
@@ -836,8 +924,8 @@ function Waermepumpe({ warm }: { warm: MotionValue<number> }) {
         height={o.h}
         rx={4}
         fill={KALT.flaeche}
-        stroke={KALT.linie}
-        strokeWidth={2.4}
+        stroke={markiert ? KALT.rohr : KALT.linie}
+        strokeWidth={markiert ? 2.8 : 2.4}
       />
       <path
         d={`M${o.x + 4} ${o.y + 12} H${o.x + o.b - 4} M${o.x + 4} ${o.y + 19} H${o.x + o.b - 4}`}
@@ -872,30 +960,50 @@ function Waermepumpe({ warm }: { warm: MotionValue<number> }) {
  * `pathLength` aufgedeckt — ein Verlauf, der an der Linie entlangwandert, und
  * keine Fläche, die aufblendet.
  *
- * **Sie hat einen eigenen kalten Ton** (`KALT.leitung`). Vorher lag sie in
- * derselben Farbe wie Kellerwände, Hülle und Bestand, nur breiter — auf dem
- * dunklen Schnitt war der eigene Weg damit kaum vom Gebäude zu unterscheiden.
- * Drei Lagen machen ihn eindeutig: ein dunkler Mantel, damit sie sich von
- * allem abhebt, worüber sie läuft, darauf der helle Strich, und darüber erst
- * das Warm aus A6. Die Farbregel bleibt gewahrt — der Keller ist bis A6 kalt.
+ * **Sie ist kein Strich, sondern ein Rohr** — und das ist der dritte Anlauf.
+ * Zuerst lag sie in `KALT.linie`, also in der Farbe von Kellerwänden, Hülle
+ * und Bestand, nur breiter. Dann in einem helleren Blaugrau, und die Abnahme
+ * hielt fest: „nur eine Helligkeitsstufe in derselben Graufamilie, streckenweise
+ * deckungsgleich mit der Kellerwand" — das Fadenobjekt des Tages blieb auf der
+ * Stele schwach.
+ *
+ * Jetzt hat sie einen eigenen **Charakter statt einer eigenen Helligkeit**,
+ * aus vier Lagen:
+ *
+ *  1. **Der Dämmschlauch** — breit, weich, halbdurchsichtig. Er ist der Grund,
+ *     warum ein Rohr im Keller doppelt so dick aussieht wie es ist, und er
+ *     steht als Aha-Karte ohnehin auf diesem Screen (GEG § 69, Anlage 8).
+ *  2. **Der Mantel**, fast schwarz: er trennt die Leitung von allem, worüber
+ *     sie läuft, auch wenn sie auf einer Wandlinie liegt.
+ *  3. **Das Rohr** in `KALT.rohr` — die Materialfarbe eines blanken Rohrs,
+ *     nicht die nächste Graustufe. Innerhalb der Bühne ist Material erlaubt;
+ *     die Farbregel („Kalt und Warm nur auf der Bühne", Spec 7) bleibt
+ *     unberührt, Orange bleibt A6 vorbehalten.
+ *  4. **Das Glanzlicht** als schmaler heller Kern darin: dunkle Kanten, helle
+ *     Mitte — das ist der Unterschied zwischen einer Linie und einem Zylinder.
+ *
+ * Darüber erst das Warm aus A6, über `pathLength` aufgedeckt — ein Verlauf,
+ * der an der Linie entlangwandert, und keine Fläche, die aufblendet.
  */
 function Leitung({ d, warm }: { d: string; warm: MotionValue<number> }) {
   const da = useAngefangen(warm)
   const schimmer = useTransform(da, (v) => v * 0.5)
   return (
     <g fill="none" strokeLinecap="round" strokeLinejoin="round">
-      <path d={d} stroke="#10161c" strokeWidth={8} opacity={0.85} />
-      <path d={d} stroke={KALT.leitung} strokeWidth={4.5} />
+      <path d={d} stroke={KALT.rohr} strokeWidth={13} opacity={0.12} />
+      <path d={d} stroke={KALT.rohrMantel} strokeWidth={9.5} opacity={0.92} />
+      <path d={d} stroke={KALT.rohr} strokeWidth={5.4} />
+      <path d={d} stroke={KALT.rohrGlanz} strokeWidth={2.2} />
       <motion.path
         d={d}
         stroke={WARM.schimmer}
-        strokeWidth={12}
+        strokeWidth={13}
         style={{ pathLength: warm, opacity: schimmer }}
       />
       <motion.path
         d={d}
         stroke={WARM.linie}
-        strokeWidth={4.5}
+        strokeWidth={5}
         style={{ pathLength: warm, opacity: da }}
       />
     </g>
@@ -1071,6 +1179,14 @@ function Rasterfeld({
   const kopf = knotenPunkt(weg[weg.length - 1])
   const start = knotenPunkt(START)
   const ziel = knotenPunkt(ZIEL)
+  /*
+    „Da bist du" — und zwar nach derselben großzügigen Regel, nach der der
+    Screen *Leitung liegt* freigibt (`amZiel`). Sobald sie greift, hört das
+    Pulsen auf und der Zielring wird geschlossen: die Zeichnung sagt dasselbe
+    wie der Knopf, sonst steht ein aktiver Knopf neben einem Ziel, das weiter
+    nach Aufmerksamkeit ruft.
+  */
+  const erreicht = fertig || amZiel(pfad)
 
   return (
     <g>
@@ -1091,30 +1207,76 @@ function Rasterfeld({
         )
       })}
 
+      {/*
+        **Woher und wohin — sichtbar, bevor jemand zieht.**
+
+        Vorher standen hier zwei dünne graue Ringe in derselben Farbe wie das
+        halbe Bild; die Abnahme las Wärmepumpe und Verteiler als „dieselben
+        grauen Kästen wie alles andere" und landete zweimal eine Rasterzeile
+        neben dem Ziel. Jetzt tragen beide Enden die Farbe der Leitung, die
+        gleich dazwischen liegt: der Start als gefüllter Punkt („hier hängt sie
+        schon"), das Ziel als offener Ring mit Fadenkreuz, der pulst, bis der
+        Weg angekommen ist. Die Anschlusskästen selbst hebt `Waermepumpe` und
+        `VerteilerKasten` im Rasterzustand mit.
+      */}
       {start && (
-        <circle
-          cx={start.x}
-          cy={start.y}
-          r={6}
-          fill="none"
-          stroke={KALT.linie}
-          strokeWidth={2}
-        />
+        <g>
+          <circle
+            cx={start.x}
+            cy={start.y}
+            r={8.5}
+            fill={KALT.rohrMantel}
+            opacity={0.8}
+          />
+          <circle
+            cx={start.x}
+            cy={start.y}
+            r={8.5}
+            fill="none"
+            stroke={KALT.rohr}
+            strokeWidth={2.4}
+          />
+          <circle cx={start.x} cy={start.y} r={3.6} fill={KALT.rohrGlanz} />
+        </g>
       )}
       {ziel && (
-        <circle
-          cx={ziel.x}
-          cy={ziel.y}
-          r={6}
-          fill="none"
-          stroke={KALT.linie}
-          strokeWidth={2}
-          strokeDasharray={fertig ? undefined : '3 3'}
-        />
+        <g>
+          <circle cx={ziel.x} cy={ziel.y} r={9} fill={KALT.rohrMantel} opacity={0.8} />
+          {!erreicht && !ruhig && (
+            <motion.circle
+              cx={ziel.x}
+              cy={ziel.y}
+              r={9}
+              fill="none"
+              stroke={KALT.rohr}
+              strokeWidth={2}
+              initial={{ scale: 1, opacity: 0.7 }}
+              animate={{ scale: 1.9, opacity: 0 }}
+              transition={{ duration: 2.2, repeat: Infinity, ease: 'easeOut' }}
+              style={{ transformOrigin: `${ziel.x}px ${ziel.y}px` }}
+            />
+          )}
+          <circle
+            cx={ziel.x}
+            cy={ziel.y}
+            r={9}
+            fill="none"
+            stroke={erreicht ? KALT.rohrGlanz : KALT.rohr}
+            strokeWidth={2.4}
+            strokeDasharray={erreicht ? undefined : '4 3.5'}
+          />
+          <path
+            d={`M${ziel.x - 4.5} ${ziel.y} H${ziel.x + 4.5} M${ziel.x} ${ziel.y - 4.5} V${ziel.y + 4.5}`}
+            stroke={KALT.rohrGlanz}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            opacity={0.85}
+          />
+        </g>
       )}
 
       {/* Wo es weitergeht. Ein ruhiger Puls, kein Blinken. */}
-      {kopf && !fertig && !ruhig && (
+      {kopf && !erreicht && !ruhig && (
         <motion.circle
           cx={kopf.x}
           cy={kopf.y}
@@ -1237,19 +1399,21 @@ function Manometer({ bar, imFenster }: { bar: number; imFenster: boolean }) {
  * ausdrücklich erlaubt (Spec 7), gefüllt ist hier nichts — die eine gefüllte
  * orange Fläche des Screens bleibt *Weiter*.
  */
-function Feierabendlicht() {
+function Feierabendlicht({ sicht }: { sicht: Rahmen }) {
+  const rechts = sicht.x + sicht.b
+  const unten = sicht.y + sicht.h
   return (
     <g style={{ mixBlendMode: 'screen' }}>
       <rect
-        x={0}
-        y={0}
-        width={WELT.breite}
-        height={WELT.hoehe}
+        x={sicht.x}
+        y={sicht.y}
+        width={sicht.b}
+        height={sicht.h}
         fill="url(#am-feierabend)"
       />
       {/* Das Licht kommt von schräg oben links herein — wie durch ein Fenster. */}
       <path
-        d={`M0 0 H${WELT.breite * 0.62} L${WELT.breite * 0.24} ${WELT.hoehe} H0 Z`}
+        d={`M${sicht.x} ${sicht.y} H${sicht.x + sicht.b * 0.62} L${rechts - sicht.b * 0.76} ${unten} H${sicht.x} Z`}
         fill="url(#am-feierabend-band)"
       />
     </g>

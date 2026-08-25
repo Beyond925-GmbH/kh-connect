@@ -34,20 +34,34 @@ export const KALT = {
   linieMatt: '#4a5866',
   flaeche: '#2a323a',
   /**
-   * **Die dritte Stufe — und sie gehört einem einzigen Strich:** der Leitung,
-   * die der Besucher in A4 selbst zieht.
-   *
-   * Vorher lag sie in `linie`, also in derselben Farbe wie Kellerwände, Hülle
-   * und Bestand, nur breiter. Auf dem dunklen Schnitt war der eigene Weg damit
-   * kaum vom Gebäude zu unterscheiden — ausgerechnet das Fadenobjekt dieses
-   * Tages („ab hier ist der Weg deiner", Spec 2 und 6 A4), das seinen Zweck
-   * sonst erst in A6 erfüllen könnte, wenn Warm darüberläuft.
-   *
-   * Ein hellerer Ton **derselben kalten Familie**: die Farbregel „der Keller
-   * bleibt kalt bis A6" bleibt gewahrt, Orange bleibt dem Moment in A6
-   * vorbehalten.
+   * Die dritte Stufe: **die Auswahl.** Das gerade geöffnete Bauteil in A2, der
+   * Ring um ein Thermostatventil — hell genug, um sich aus dem Grau zu heben,
+   * und kalt genug, um die Temperatur nicht vorwegzunehmen.
    */
-  leitung: '#a8c0d4',
+  wahl: '#a8c0d4',
+  /**
+   * **Das Fadenobjekt des Tages, als Farbe:** die Leitung, die der Besucher in
+   * A4 selbst zieht („ab hier ist der Weg deiner", Spec 2 und 6 A4).
+   *
+   * Zwei Anläufe hat sie gebraucht. Zuerst lag sie in `linie` — dieselbe Farbe
+   * wie Kellerwände, Hülle und Bestand, nur breiter. Dann in `wahl`, und das
+   * war laut Abnahme immer noch „nur eine Helligkeitsstufe in derselben
+   * Graufamilie": streckenweise lief der eigene Weg deckungsgleich mit der
+   * Kellerwand, und ausgerechnet das Fadenobjekt blieb auf der Stele schwach.
+   *
+   * Jetzt ein **gebürstetes Metallweiß** — die Materialfarbe eines blanken
+   * Rohrs, nicht die nächste Graustufe. Innerhalb der Bühne ist eine
+   * Materialfarbe ausdrücklich erlaubt; die Farbregel („Kalt und Warm leben nur
+   * auf der Bühne, nie in der Bedienung", Spec 7) bleibt unberührt, und Orange
+   * bleibt dem Moment in A6 vorbehalten. Den Rest macht die Zeichnung: dunkler
+   * Mantel, heller Kern, Dämmschlauch drumherum — ein Rohr sieht anders aus als
+   * eine Wandlinie, nicht nur heller (`Haus.tsx`, `Leitung`).
+   */
+  rohr: '#a9c6dd',
+  /** Das Glanzlicht auf dem Rohr — die Kante, an der es rund wird. */
+  rohrGlanz: '#eef6fd',
+  /** Der Mantel unter dem Rohr. Er trennt es von allem, worüber es läuft. */
+  rohrMantel: '#0a1014',
 } as const
 
 /**

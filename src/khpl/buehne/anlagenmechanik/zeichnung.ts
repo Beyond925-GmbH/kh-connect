@@ -138,28 +138,95 @@ export const RAHMEN = {
   raster: { x: 54, y: 112, b: 212, h: 172 },
   /** A6 — Keller und Haus zusammen. Die Wärme läuft durch beides. */
   inbetriebnahme: { x: 30, y: 12, b: 260, h: 238 },
-  /** A7 — der Keller, und darüber angeschnitten das Haus. */
-  uebergabe: { x: 42, y: 60, b: 236, h: 190 },
+  /**
+   * A7 — der Keller, und darüber angeschnitten das Haus.
+   *
+   * Der Rahmen ist acht Einheiten höher gerückt als in der Vorfassung. Vorher
+   * lief die Oberkante genau am First entlang: hochkant blieb von der Dachspitze
+   * ein waagerechter Anschnitt dicht unter der Spitze stehen, und das las sich
+   * als Fehler statt als Bildausschnitt (Abnahme, A7). Jetzt liegt der First auf
+   * der stehenden Fläche vollständig im Bild; quer schneidet die Bühnenkante das
+   * Dach weiterhin — dort aber am Rand des Screens und nicht an einer Kante
+   * mitten im Schwarzen.
+   */
+  uebergabe: { x: 42, y: 50, b: 236, h: 190 },
 } as const satisfies Record<string, Rahmen>
 
 /**
- * Der Transform, der `rahmen` bildfüllend in die Welt legt — dieselbe Rechnung
- * wie `preserveAspectRatio="xMidYMid meet"`, nur eine Ebene tiefer, damit die
- * `viewBox` konstant bleiben kann.
+ * **Das Sichtfeld — die `viewBox`, und sie richtet sich nach dem Screen.**
+ *
+ * Die Vorfassung gab allen Zeichnungen fest `0 0 320 260` mit
+ * `preserveAspectRatio="meet"`. Auf der hochkanten Stele (Fläche etwa 0,92:1)
+ * hieß das: die Zeichnung wurde auf Breite gerechnet, blieb 1,23:1 und lag als
+ * Kasten mitten im Schwarzen — mit einer harten Kante oben und unten, weil sie
+ * ihre eigene getönte Grundplatte mitbringt. Rund ein Drittel bis die Hälfte der
+ * Bühnenhöhe stand ungenutzt.
+ *
+ * Deshalb kennt die `viewBox` jetzt das Seitenverhältnis der Fläche, in der sie
+ * hängt. `sichtfeld` liefert den **kleinsten Ausschnitt dieses Verhältnisses,
+ * der die ganze Welt enthält**: hochkant wird er höher als 260, quer breiter als
+ * 320. Die Zeichnung wird dadurch nicht kleiner — der Maßstab bleibt derselbe
+ * wie vorher —, aber ihr Grund, das Erdreich und der Himmel reichen bis an die
+ * Ränder der Fläche, und es gibt keine Kante mehr, hinter der Schwarz anfängt.
+ */
+export function sichtfeld(seiten: number): Rahmen {
+  const s = Number.isFinite(seiten) && seiten > 0 ? seiten : WELT.breite / WELT.hoehe
+  const b = Math.max(WELT.breite, WELT.hoehe * s)
+  const h = b / s
+  return { x: (WELT.breite - b) / 2, y: (WELT.hoehe - h) / 2, b, h }
+}
+
+/**
+ * Die Gegenrichtung: der **größte Ausschnitt, der in die Welt passt** — was
+ * daneben liegt, wird angeschnitten.
+ *
+ * Für Zeichnungen, die wie ein Bild wirken sollen und keine Bauteile verlieren
+ * können, wenn am Rand etwas fehlt: der Transporter (A5, A1.1) ist ein Blick
+ * durch eine Scheibe, und ein Blick füllt das Fenster, statt darin zu schweben.
+ * Für die Schnitte wäre das falsch — dort steht am Rand die Regelung oder die
+ * Wärmepumpe.
+ */
+export function sichtfeldFuellend(seiten: number): Rahmen {
+  const s = Number.isFinite(seiten) && seiten > 0 ? seiten : WELT.breite / WELT.hoehe
+  const b = Math.min(WELT.breite, WELT.hoehe * s)
+  const h = b / s
+  return { x: (WELT.breite - b) / 2, y: (WELT.hoehe - h) / 2, b, h }
+}
+
+/** Ein Rahmen als `viewBox`-Zeichenkette. */
+export function viewBoxVon(r: Rahmen): string {
+  const z = (n: number) => Math.round(n * 100) / 100
+  return `${z(r.x)} ${z(r.y)} ${z(r.b)} ${z(r.h)}`
+}
+
+/**
+ * Der Transform, der `rahmen` in `sicht` legt — dieselbe Rechnung wie
+ * `preserveAspectRatio="xMidYMid meet"`, nur eine Ebene tiefer, damit ein
+ * Szenenwechsel eine Kamerafahrt sein kann und kein Bildwechsel.
  *
  * ⚠️ **Der Rahmen ist ein Mindestausschnitt, kein Fenster.** Er wird auf das
- * Seitenverhältnis der `viewBox` aufgezogen, und was dann noch daneben liegt,
- * würde weiterhin gezeichnet — ein SVG beschneidet an seinem Element, nicht an
- * seiner `viewBox`. Deshalb liegt die Kameragruppe in einem `clipPath`; ohne
- * ihn ragen bei A4 die Geschosse über dem Keller ins Bild, und der Screen sieht
- * aus, als sei er falsch zugeschnitten.
+ * Seitenverhältnis von `sicht` aufgezogen, und was dann noch daneben liegt,
+ * wird weiterhin gezeichnet — beschnitten wird erst am Rand des SVG-Elements.
+ * Seit die `viewBox` dasselbe Verhältnis hat wie die Fläche, ist das genau
+ * richtig: der Rand des Elements **ist** der Rand der Bühne. Erdreich und
+ * Himmel müssen deshalb großzügig über die Welt hinaus gezeichnet sein — was
+ * hochkant zusätzlich sichtbar wird, ist Umgebung und kein Loch.
  */
-export function kamera(rahmen: Rahmen): string {
-  const k = Math.min(WELT.breite / rahmen.b, WELT.hoehe / rahmen.h)
-  const tx = WELT.breite / 2 - k * (rahmen.x + rahmen.b / 2)
-  const ty = WELT.hoehe / 2 - k * (rahmen.y + rahmen.h / 2)
+export function kamera(rahmen: Rahmen, sicht: Rahmen): string {
+  const k = Math.min(sicht.b / rahmen.b, sicht.h / rahmen.h)
+  const tx = sicht.x + sicht.b / 2 - k * (rahmen.x + rahmen.b / 2)
+  const ty = sicht.y + sicht.h / 2 - k * (rahmen.y + rahmen.h / 2)
   return `translate(${tx} ${ty}) scale(${k})`
 }
+
+/**
+ * Wie weit Erdreich und Himmel über die Welt hinausgezeichnet werden.
+ *
+ * Großzügig und bewusst kein gemessener Wert: die Bühnenfläche ändert ihr
+ * Verhältnis mit jeder Panelhöhe, und eine Umgebung, die genau bis zur
+ * gemessenen Kante reicht, hätte bei jeder Verzögerung wieder eine Kante.
+ */
+export const UMGEBUNG = 220
 
 // ---------------------------------------------------------------------------
 // Das Kellerraster (A4)
@@ -326,6 +393,35 @@ export function zieheNach(pfad: readonly KnotenId[], ziel: KnotenId): Zug {
   return { art: 'weiter', pfad: [...weg, ziel] }
 }
 
+/**
+ * **Ist der Weg am Verteiler angekommen?** — und zwar großzügig gefragt.
+ *
+ * Die Vorfassung verlangte `pfad.at(-1) === ZIEL`, auf den Knoten genau. In der
+ * Abnahme ist der Finger zweimal eine Rasterzeile daneben gelandet: auf dem
+ * Screen lag ein fertig aussehender Strang, *Leitung liegt* blieb tot, und
+ * erklärt hat das niemand. Auf einem Raster mit 15 Einheiten Zeilenabstand ist
+ * das kein Bedienfehler, sondern eine zu enge Prüfung.
+ *
+ * Deshalb zählt jetzt auch der **Nachbarknoten des Verteilers**: wer bis
+ * unmittelbar davor gezogen hat, ist da. Den letzten Schritt macht
+ * `rasteAufZiel` — gespeichert und in A6/A7 gezeigt wird immer der Weg, der
+ * wirklich am Verteiler endet.
+ */
+export function amZiel(pfad: readonly KnotenId[]): boolean {
+  if (pfad.length < 2) return false
+  const letzter = pfad[pfad.length - 1]
+  if (letzter === ZIEL) return true
+  return benachbart(letzter, ZIEL) && !pfad.includes(ZIEL)
+}
+
+/** Hängt den Verteiler an, wenn der Weg direkt davor endet. */
+export function rasteAufZiel(pfad: readonly KnotenId[]): readonly KnotenId[] {
+  if (pfad.length < 2) return pfad
+  const letzter = pfad[pfad.length - 1]
+  if (letzter === ZIEL || pfad.includes(ZIEL)) return pfad
+  return benachbart(letzter, ZIEL) ? [...pfad, ZIEL] : pfad
+}
+
 /** Der Weg als SVG-Pfad. Leer, solange nichts gezogen ist. */
 export function pfadDaten(pfad: readonly KnotenId[]): string {
   const punkte = pfad.map(knotenPunkt).filter((p): p is Punkt => p !== null)
@@ -464,5 +560,12 @@ export const ANLAGENPUNKTE: readonly {
   { id: 'regelung', label: 'Regelung', x: 256, y: 146 },
 ]
 
-/** Der Rahmen des Anlagenausschnitts. Eigene Zeichnung, eigene Welt. */
-export const RAHMEN_ANLAGE: Rahmen = { x: 28, y: 24, b: 256, h: 212 }
+/**
+ * Der Rahmen des Anlagenausschnitts. Eigene Zeichnung, eigene Welt.
+ *
+ * Er ist nach oben und unten gewachsen, weil es die Zeichnung ist: Warmwasser
+ * läuft jetzt bis zu den Zapfstellen weiter hinauf und Kaltwasser weiter
+ * hinunter, damit der Ausschnitt hochkant nicht als flaches Band in einer hohen
+ * Fläche liegt.
+ */
+export const RAHMEN_ANLAGE: Rahmen = { x: 28, y: 16, b: 256, h: 220 }

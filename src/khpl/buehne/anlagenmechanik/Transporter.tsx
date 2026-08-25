@@ -1,4 +1,5 @@
 import { KALT, WARM } from './kanon'
+import { WELT, sichtfeldFuellend, viewBoxVon } from './zeichnung'
 
 /**
  * **Der Transporter** — der Blick über das Armaturenbrett, von innen.
@@ -38,16 +39,31 @@ import { KALT, WARM } from './kanon'
  * **Sie bewegt sich nicht.** Eine Pause, die animiert ist, ist keine.
  */
 
-const WELT = { breite: 320, hoehe: 260 } as const
-
 /** Die Windschutzscheibe — alles, was draußen liegt, liegt in dieser Form. */
 const SCHEIBE = 'M34 18 L286 18 L302 132 L18 132 Z'
 
-export function Transporter({ licht }: { licht: 'mittag' | 'nacht' }) {
+/**
+ * **Diese Zeichnung füllt, statt sich einzupassen** (`sichtfeldFuellend`).
+ *
+ * Sie ist kein Schema mit Bauteilen am Rand, sondern ein Blick durch eine
+ * Scheibe — und ein Blick füllt sein Fenster. Hochkant wird links und rechts
+ * angeschnitten, was in einer Kabine ohnehin der A-Säule gehört; dafür steht
+ * kein Schwarz mehr über und unter dem Bild. Lenkrad, Kombiinstrument und iPad
+ * liegen weit genug innen, dass sie in jedem Format vollständig im Bild sind.
+ */
+export function Transporter({
+  seiten,
+  licht,
+}: {
+  /** Das Seitenverhältnis der Bühnenfläche — die `viewBox` richtet sich danach. */
+  seiten: number
+  licht: 'mittag' | 'nacht'
+}) {
   const nacht = licht === 'nacht'
+  const sicht = sichtfeldFuellend(seiten)
   return (
     <svg
-      viewBox={`0 0 ${WELT.breite} ${WELT.hoehe}`}
+      viewBox={viewBoxVon(sicht)}
       preserveAspectRatio="xMidYMid meet"
       className="size-full"
       role="img"
@@ -99,9 +115,10 @@ export function Transporter({ licht }: { licht: 'mittag' | 'nacht' }) {
         <rect width={WELT.breite} height={WELT.hoehe} fill="url(#am-sonne)" />
       </g>
 
-      {/* Die Kabine liegt über allem: A-Säulen, Dachkante, Armaturenbrett. */}
+      {/* Die Kabine liegt über allem: A-Säulen, Dachkante, Armaturenbrett.
+          Sie reicht bis an die Ränder der Fläche, in jedem Format. */}
       <path
-        d={`M0 0 H${WELT.breite} V${WELT.hoehe} H0 Z ${SCHEIBE}`}
+        d={`M${sicht.x} ${sicht.y} H${sicht.x + sicht.b} V${sicht.y + sicht.h} H${sicht.x} Z ${SCHEIBE}`}
         fillRule="evenodd"
         fill="url(#am-brett)"
       />

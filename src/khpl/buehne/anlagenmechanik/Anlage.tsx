@@ -1,6 +1,13 @@
 import { motion, useReducedMotion } from 'motion/react'
 import { KALT, WARM, type PruefungId } from './kanon'
-import { ANLAGENPUNKTE, RAHMEN_ANLAGE, WELT, kamera } from './zeichnung'
+import {
+  ANLAGENPUNKTE,
+  RAHMEN_ANLAGE,
+  kamera,
+  sichtfeld,
+  viewBoxVon,
+  type Rahmen,
+} from './zeichnung'
 
 /**
  * **A1 — der Anlagenausschnitt.** Speicher, Zirkulation, Mischer,
@@ -21,12 +28,15 @@ import { ANLAGENPUNKTE, RAHMEN_ANLAGE, WELT, kamera } from './zeichnung'
  * solange die Liste offen ist.
  */
 export function Anlage({
+  seiten,
   geprueft,
   laeuft,
   ursache,
   geloest,
   onPruefpunkt,
 }: {
+  /** Das Seitenverhältnis der Bühnenfläche — die `viewBox` richtet sich danach. */
+  seiten: number
   geprueft: readonly PruefungId[]
   laeuft: PruefungId | null
   ursache: PruefungId | null
@@ -34,25 +44,31 @@ export function Anlage({
   onPruefpunkt?: (id: PruefungId) => void
 }) {
   const ruhig = useReducedMotion() ?? false
+  const sicht = sichtfeld(seiten)
 
   return (
     <svg
-      viewBox={`0 0 ${WELT.breite} ${WELT.hoehe}`}
+      viewBox={viewBoxVon(sicht)}
       preserveAspectRatio="xMidYMid meet"
       className="size-full"
       role="img"
       aria-label="Anlagenschema der Warmwasserbereitung: Speicher, Zirkulation, Mischer, Speicherladepumpe, Wärmeerzeuger und Regelung"
     >
-      <Grundton />
-      <g transform={kamera(RAHMEN_ANLAGE)}>
-        {/* Warmwasser nach oben zu den Zapfstellen — die kalte Seite des Falls. */}
-        <Leitung d="M96 88 L96 58 L258 58 L258 42" warm={geloest} stark />
-        <Pfeilspitze x={258} y={38} warm={geloest} />
+      <Grundton sicht={sicht} />
+      <g transform={kamera(RAHMEN_ANLAGE, sicht)}>
+        {/*
+          Warmwasser nach oben zu den Zapfstellen — die kalte Seite des Falls.
+          Der Steigstrang läuft bis dicht an den oberen Bildrand: hochkant ist
+          die Fläche höher als breit, und ein Schema, das mittig als flaches
+          Band darin liegt, war genau die Ursache des gemeldeten „Lochs".
+        */}
+        <Leitung d="M96 88 L96 58 L258 58 L258 26" warm={geloest} stark />
+        <Pfeilspitze x={258} y={22} warm={geloest} />
         {/* Zirkulation: was oben nicht abgenommen wird, läuft zurück. */}
         <Leitung d="M230 58 L230 116 L118 116" warm={geloest} />
         {/* Kaltwasser von unten. Bleibt kalt, und das ist richtig so. */}
-        <Leitung d="M96 196 L96 214 L46 214" warm={false} />
-        <Pfeilspitze x={68} y={214} warm={false} richtung="rechts" />
+        <Leitung d="M96 196 L96 226 L46 226" warm={false} />
+        <Pfeilspitze x={68} y={226} warm={false} richtung="rechts" />
 
         {/* Der Heizkreis. Er ist warm — deshalb wird die Heizung warm. */}
         <Leitung d="M118 132 L196 132 L226 132 L226 178" warm stark />
@@ -85,17 +101,29 @@ export function Anlage({
  * Der Grund, auf dem die Zeichnung liegt. Kein eigener Ton, nur ein Hauch
  * Kaltfläche in der Mitte — die Bühne steht auf `bg-kh-ink` der `StepShell`,
  * und ein zweiter deckender Grund darüber macht sie flach.
+ *
+ * Er liegt auf der **ganzen Fläche** und läuft an allen vier Rändern auf null
+ * aus (`r="50%"` um die Mitte: die Ellipse berührt jede Kante). Vorher endete
+ * er mit rund einem Drittel Deckung mitten im Bild — das war die „getönte
+ * Platte mit harter Kante", die die Abnahme auf jedem A-Screen gefunden hat.
  */
-function Grundton() {
+function Grundton({ sicht }: { sicht: Rahmen }) {
   return (
     <>
       <defs>
-        <radialGradient id="am-grund-anlage" cx="50%" cy="46%" r="72%">
+        <radialGradient id="am-grund-anlage" cx="50%" cy="50%" r="50%">
           <stop offset="0%" stopColor={KALT.flaeche} stopOpacity={0.85} />
+          <stop offset="70%" stopColor={KALT.flaeche} stopOpacity={0.32} />
           <stop offset="100%" stopColor={KALT.flaeche} stopOpacity={0} />
         </radialGradient>
       </defs>
-      <rect width={WELT.breite} height={WELT.hoehe} fill="url(#am-grund-anlage)" />
+      <rect
+        x={sicht.x}
+        y={sicht.y}
+        width={sicht.b}
+        height={sicht.h}
+        fill="url(#am-grund-anlage)"
+      />
     </>
   )
 }

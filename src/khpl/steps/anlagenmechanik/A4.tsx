@@ -6,7 +6,7 @@ import {
   zaehleBoegen,
   type KnotenId,
 } from '@/khpl/buehne/anlagenmechanik/kanon'
-import { ZIEL } from '@/khpl/buehne/anlagenmechanik/zeichnung'
+import { amZiel, rasteAufZiel } from '@/khpl/buehne/anlagenmechanik/zeichnung'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
@@ -78,11 +78,20 @@ export function A4() {
   const boegen = zaehleBoegen(pfad)
   const verlust = druckverlust(pfad)
   const gezogen = pfad.length >= 2
-  // „Leitung liegt" gibt es erst, wenn die Leitung wirklich am Verteiler
-  // ankommt — sonst ließe sich ein Stummel als fertig erklären, und in A6/A7
-  // liefe die Wärme eine Leitung entlang, die im Nichts endet. *Weiter* bleibt
-  // davon unberührt; nur die Übungsaktion wartet (Hüllenvertrag: kein Blockieren).
-  const angekommen = gezogen && pfad.at(-1) === ZIEL
+  /*
+    „Leitung liegt" gibt es erst, wenn die Leitung wirklich am Verteiler
+    ankommt — sonst ließe sich ein Stummel als fertig erklären, und in A6/A7
+    liefe die Wärme eine Leitung entlang, die im Nichts endet. *Weiter* bleibt
+    davon unberührt; nur die Übungsaktion wartet (Hüllenvertrag: kein Blockieren).
+
+    **Aber nicht auf den Knoten genau.** Die Vorfassung prüfte
+    `pfad.at(-1) === ZIEL`; in der Abnahme ist der Finger zweimal eine
+    Rasterzeile daneben gelandet, und dann lag da ein fertig aussehender Strang
+    neben einem toten Knopf, ohne ein Wort dazu. `amZiel` lässt den
+    Nachbarknoten gelten, `rasteAufZiel` setzt den letzten Schritt beim Legen —
+    gespeichert wird immer ein Weg, der am Verteiler endet.
+  */
+  const angekommen = amZiel(pfad)
 
   const ziehen = (neu: readonly KnotenId[]) => {
     setPfad([...neu])
@@ -106,8 +115,13 @@ export function A4() {
   }
 
   const legen = () => {
+    // Einrasten, bevor gespeichert wird: wer einen Knoten vor dem Verteiler
+    // aufgehört hat, bekommt den letzten Schritt geschenkt. In A6 läuft die
+    // Wärme dann bis zum Verteiler und nicht bis kurz davor.
+    const weg = [...rasteAufZiel(pfad)]
+    setPfad(weg)
     setFertig(true)
-    merkeAntwort('a4', { pfad, boegen, fertig: true })
+    merkeAntwort('a4', { pfad: weg, boegen: zaehleBoegen(weg), fertig: true })
   }
 
   return (

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Clock } from 'lucide-react'
+import { Check, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
@@ -318,6 +318,20 @@ function Suchen({
         <Uhr geprueft={geprueft.length} />
       </div>
 
+      {/*
+        **Gelbgrün markiert höchstens eine Fläche, und nur die offene.**
+
+        Die Vorfassung setzte `gewaehlt` auf jede erledigte Prüfung: nach drei
+        Taps standen drei vollflächig gelbgrüne Balken über die ganze
+        Panelbreite, dazu der ebenfalls gelbgrüne Aktionsknopf — vier
+        Signalflächen auf einem Screen (Abnahme, A1). `index.css` reserviert das
+        Warnwesten-Gelbgrün für „das hast du geschafft"; „schon angetippt" ist
+        etwas anderes.
+
+        Jetzt dieselbe Geste wie in A2 und A4.1 an diesem Tag: markiert ist die
+        Prüfung, deren Ergebnis gerade unten steht, alle anderen erledigten
+        tragen einen Haken. Erledigtes bleibt sichtbar, ohne zu leuchten.
+      */}
       <div className="grid gap-2 landscape:grid-cols-2">
         {PRUEFUNGEN.map((p) => {
           const fertig = geprueft.includes(p.id)
@@ -328,9 +342,16 @@ function Suchen({
               // Die schon gemachten Prüfungen bleiben stehen und bleiben
               // lesbar — gesperrt sind nur die, für die keine Zeit mehr ist.
               disabled={!fertig && offen <= 0}
-              gewaehlt={fertig}
+              gewaehlt={fertig && p.id === zuletzt}
               data-testid={`a1-pruefung-${p.id}`}
             >
+              {fertig && p.id !== zuletzt && (
+                <Check
+                  className="size-4 shrink-0 text-kh-signal"
+                  strokeWidth={3}
+                  aria-hidden
+                />
+              )}
               {p.frage}
             </Wahlflaeche>
           )

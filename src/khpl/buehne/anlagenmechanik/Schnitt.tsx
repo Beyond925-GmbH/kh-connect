@@ -59,6 +59,16 @@ import { Transporter } from './Transporter'
  * Panelkante, und die Zeichnung füllt den Raum, den sie tatsächlich hat.
  * Quer bleibt es beim festen Rahmen: dort steht das Panel links und nimmt
  * keine Höhe weg.
+ *
+ * **Und sie füllt ihn wirklich.** Das Messen allein reichte nicht: die
+ * Zeichnungen trugen weiterhin eine feste `viewBox` von 320 × 260 mit
+ * `preserveAspectRatio="meet"` und lagen damit als 1,23:1-Kasten in einer
+ * 0,92:1-Fläche — ein grau getöntes Rechteck, das im schwarzen Feld schwebte,
+ * mit harter Kante oben und unten (Abnahme, A1/A6/A8). Deshalb reicht der
+ * Rahmen jetzt sein **Seitenverhältnis** an die Zeichnung durch, und die
+ * richtet ihre `viewBox` danach (`sichtfeld`). Der Maßstab bleibt derselbe;
+ * was hochkant dazukommt, ist Umgebung — Erdreich, Himmel, der Grundton —,
+ * und keine Kante.
  */
 export interface SchnittProps {
   /** Welche Zeichnung, in welchem Zustand. */
@@ -94,7 +104,7 @@ export function Schnitt({
   onAbgewiesen,
   onWaermeAngekommen,
 }: SchnittProps) {
-  const { flaeche, rahmen } = useRahmen()
+  const { flaeche, rahmen, seiten } = useRahmen()
 
   return (
     <div
@@ -106,6 +116,7 @@ export function Schnitt({
       <div className="absolute" style={rahmen}>
         {zustand.szene === 'anlage' ? (
           <Anlage
+            seiten={seiten}
             geprueft={zustand.geprueft}
             laeuft={zustand.laeuft}
             ursache={zustand.ursache}
@@ -113,9 +124,10 @@ export function Schnitt({
             onPruefpunkt={onPruefpunkt}
           />
         ) : zustand.szene === 'transporter' ? (
-          <Transporter licht={zustand.licht} />
+          <Transporter seiten={seiten} licht={zustand.licht} />
         ) : (
           <Haus
+            seiten={seiten}
             zustand={zustand}
             onBauteil={onBauteil}
             onPfad={onPfad}
@@ -137,16 +149,12 @@ const UNTER_DER_LEISTE = 76
 /** Seitlicher Rand hochkant. */
 const RAND = 12
 
-/**
- * Das Seitenverhältnis aller drei Zeichnungen dieses Tages (320 × 260,
- * `WELT`). Alle drei stehen in derselben `viewBox`, deshalb reicht **eine**
- * Zahl — und der Rahmen kann sich nach ihr richten, statt die Zeichnung in
- * einem zu hohen Kasten schweben zu lassen.
- */
-const SEITENVERHAELTNIS = 320 / 260
+/** Quer: `inset: 7% 3% 7% 30%`, als Anteile für die Verhältnisrechnung. */
+const QUER = { breite: 1 - 0.03 - 0.3, hoehe: 1 - 0.07 - 0.07 } as const
 
 /**
- * Der Rahmen, in dem die Zeichnung sitzt — quer fest, hochkant gemessen.
+ * Der Rahmen, in dem die Zeichnung sitzt — quer fest, hochkant gemessen —,
+ * **und das Seitenverhältnis dieses Rahmens.**
  *
  * Gemessen wird das Panel der `StepShell` (`[data-testid="karte"]`) gegen die
  * eigene Fläche. Das ist derselbe Gedanke wie im `SichtfeldMesser`, nur ohne
@@ -155,14 +163,23 @@ const SEITENVERHAELTNIS = 320 / 260
  * ihn stellt die Hülle nur den Steps mit `buehneInteraktiv` bereit, und das ist
  * an diesem Tag allein A4.
  *
- * Solange nichts gemessen ist, gilt der alte Festwert: ein Screen, der beim
- * ersten Bild einmal zu klein zeichnet, ist besser als einer, der springt.
+ * **Der Rahmen nimmt jetzt die ganze freie Fläche.** Die Vorfassung rechnete
+ * ihn auf das Seitenverhältnis der Zeichnung herunter und schob den Überschuss
+ * nach oben — das machte aus dem Streifen zwischen Zeichnung und Panel zwar
+ * einen kleineren, aber der Kasten blieb ein Kasten im Schwarzen. Die Zeichnung
+ * bekommt stattdessen die volle Fläche und richtet ihre `viewBox` nach deren
+ * Verhältnis (`sichtfeld` in `zeichnung.ts`): sie füllt sie, statt darin zu
+ * schweben.
+ *
+ * Solange nichts gemessen ist, gilt ein Festwert: ein Screen, der beim ersten
+ * Bild einmal knapp danebenliegt, ist besser als einer, der springt.
  */
 function useRahmen() {
   const flaeche = useRef<HTMLDivElement>(null)
   const [rahmen, setRahmen] = useState<React.CSSProperties>({
     inset: '76px 12px 32% 12px',
   })
+  const [seiten, setSeiten] = useState(320 / 260)
 
   const messen = useCallback(() => {
     const el = flaeche.current
@@ -170,6 +187,7 @@ function useRahmen() {
     if (!el || !f || f.width <= 0 || f.height <= 0) return
     if (f.width > f.height) {
       setRahmen({ inset: '7% 3% 7% 30%' })
+      setSeiten((f.width * QUER.breite) / (f.height * QUER.hoehe))
       return
     }
     const panel = el
@@ -183,22 +201,12 @@ function useRahmen() {
       panel ? Math.max(0, f.bottom - panel.top + LUFT_ZUM_PANEL) : f.height * 0.32,
       f.height - UNTER_DER_LEISTE - 80,
     )
-    /*
-      **Der Überschuss fällt überwiegend nach oben.** Hochkant ist der freie
-      Kasten viel höher, als die Zeichnung breit ist: sie ist
-      breitenbegrenzt, und `preserveAspectRatio="xMidYMid meet"` verteilt den
-      Rest gleichmäßig — die Hälfte davon lag als schwarzer Streifen zwischen
-      Zeichnung und Panel. Der Rahmen bekommt deshalb nur die Höhe, die die
-      Zeichnung wirklich braucht, und der Rest wandert zu 60 % nach oben unter
-      die Leiste, wo bei einem Gebäudeschnitt ohnehin Himmel wäre. Übrig
-      bleibt unten eine Kante Luft, keine Lücke.
-    */
-    const noetig = (f.width - 2 * RAND) / SEITENVERHAELTNIS
-    const frei = f.height - UNTER_DER_LEISTE - unten
-    const oben = UNTER_DER_LEISTE + Math.max(0, frei - noetig) * 0.6
     setRahmen({
-      inset: `${Math.round(oben)}px ${RAND}px ${Math.round(unten)}px ${RAND}px`,
+      inset: `${UNTER_DER_LEISTE}px ${RAND}px ${Math.round(unten)}px ${RAND}px`,
     })
+    setSeiten(
+      (f.width - 2 * RAND) / Math.max(1, f.height - UNTER_DER_LEISTE - Math.round(unten)),
+    )
   }, [])
 
   useEffect(() => {
@@ -224,5 +232,5 @@ function useRahmen() {
     }
   }, [messen])
 
-  return { flaeche, rahmen }
+  return { flaeche, rahmen, seiten }
 }
