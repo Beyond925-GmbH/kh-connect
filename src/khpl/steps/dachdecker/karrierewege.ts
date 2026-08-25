@@ -3,17 +3,46 @@ import type { StepId } from '@/khpl/flow/steps'
 /**
  * Die drei Karrierewege (khpl-flow.md 7 B9.1–B9.3 und 11).
  *
- * **Alle Zahlen `FREIGEGEBEN`** (recherchiert und am 18.08.2026 von der
- * Kreishandwerkerschaft freigegeben, Quellen in flow 10). Es bleibt eine
- * Formulierungsregel, die auch nach der Freigabe gilt: was aus Gehalts- und
- * Handwerkerportalen stammt, erscheint **nur als Spanne oder mit „rund“**, nie
- * als exakter Wert und nie als Versprechen. Die Texte unten halten das ein —
- * beim Ändern mitdenken.
+ * **Die Meister-Karte trägt seit dem 25.08.2026 Dachdecker-Zahlen.** Vorher
+ * standen dort die Werte des Zimmererhandwerks unter einer
+ * Dachdecker-Überschrift — khpl-tage.md 0c weist sie einzeln als falsch nach,
+ * und die drei neuen Tage führen längst ihren eigenen Spaltensatz. Ersetzt
+ * wurden: „1.120 Stunden, in Vollzeit etwa ein Jahr“ → rund 1.530 Stunden,
+ * August bis Mai; „8.000 bis 10.000 Euro“ → rund 13.500 Euro; „rund 45.000 Euro
+ * im Jahr“ → rund 54.000 Euro.
  *
- * Die Meistergründungsprämie NRW (seit 2025 11.500 €, gestaffelt bis 15.000 €)
+ * **Diese Zahlen stammen aus `belege/ausbildung-karriere.md`, Spalte
+ * Dachdecker**, recherchiert am 24.08.2026. Verdikt und Quelle stehen je
+ * Abschnitt im Kommentar:
+ *
+ * | Aussage | Verdikt |
+ * | --- | --- |
+ * | Lehrgang 12.000 € + Prüfung 1.550 € ≈ 13.500 €, ca. 1.530 h, Aug–Mai | `BELEGT` (Lorenz-Burmann-Schule Eslohe, HWK Südwestfalen, Kursjahr 2026/27) |
+ * | Aufstiegs-BAföG → höchstens rund ein Viertel Eigenanteil | `BELEGT` (AFBG, Sätze seit 8/2024) |
+ * | NRW-Meisterprämie 2.500 € | `BELEGT` — gilt hier, weil Handwerk |
+ * | Meister Ø rund 54.000 €/Jahr | `TEILWEISE BELEGT` (Stepstone 10/2025: 4.541 €/Monat) |
+ * | Studium ohne Abitur nach BBHZVO, TH OWL Detmold | `BELEGT` — Detmold/Holzbau passt für dieses Gewerk |
+ *
+ * Es bleibt eine Formulierungsregel, die auch nach einer Freigabe gilt: was aus
+ * Gehalts- und Handwerkerportalen stammt, erscheint **nur als Spanne oder mit
+ * „rund“**, nie als exakter Wert und nie als Versprechen. Die Texte unten
+ * halten das ein — beim Ändern mitdenken. Was `NICHT BELEGBAR` war, steht nicht
+ * da: der Bestandssatz „mit Erfahrung deutlich mehr“ ist ersatzlos entfallen,
+ * für das Dachdeckerhandwerk gibt es dazu keinen Wert im Beleg.
+ *
+ * Die Meistergründungsprämie NRW (seit 1.1.2025 11.500 €, im Einzelfall bis
+ * 16.000 € — nicht „bis 15.000“, das war die Deckelung des Aufstiegs-BAföG)
  * ist bewusst **nicht** aufgenommen: flow 7 stellt selbst die Frage, ob das an
  * einem Schüler:innen-Stand die richtige Botschaft ist. Für begleitende Eltern
  * wäre sie eine — das entscheidet die Kreishandwerkerschaft, nicht der Code.
+ *
+ * B9.2 nannte als Technikerfachrichtung „Holztechnik oder Bautechnik“ und
+ * B9.3 das Biberacher Modell — der Beleg (6 und 7) weist beides dem Zimmerer
+ * zu. Aufgelöst nach der Regel „streichen statt weichzeichnen“: Holztechnik
+ * entfällt (für Dachdecker steht im Beleg allenfalls Bautechnik), das
+ * Biberacher Modell entfällt ersatzlos (ein reines Zimmerer-Modell; einen
+ * belegten Dachdecker-Ersatz gibt es nicht). Der Detmold-Anker in B9.3 ist
+ * für Dachdecker ausdrücklich belegt (Beleg 7) und bleibt.
  */
 
 export interface Karriereweg {
@@ -35,27 +64,39 @@ export const KARRIEREWEGE: Karriereweg[] = [
     abschnitte: [
       {
         frage: 'Was ist das',
+        // Der Titel heißt im Dachdeckerhandwerk „Dachdeckermeister/in“
+        // (belege 5, Spalte Dachdecker). `BELEGT`.
         antwort:
-          'Der Meisterbrief. Damit darfst du einen eigenen Betrieb führen und selbst ausbilden.',
+          'Der Meisterbrief im Dachdeckerhandwerk. Damit darfst du einen eigenen Betrieb führen und selbst ausbilden.',
       },
       {
         frage: 'Wie lange',
+        // Vollzeit ca. 8 Monate von August bis Mai, ca. 1.530 h
+        // (Lorenz-Burmann-Schule Eslohe); berufsbegleitend 2–3 Jahre
+        // (belege 5, Spalte Dachdecker). `BELEGT` für diesen Anbieter.
         antwort:
-          'Teil I und II sind rund 1.120 Stunden — in Vollzeit etwa ein Jahr, neben dem Beruf zwei bis drei.',
+          'Teil I und II sind rund 1.530 Stunden — in Vollzeit von August bis Mai, neben dem Beruf zwei bis drei Jahre.',
       },
       {
         frage: 'Was es kostet',
+        // 12.000 € Lehrgang (Eslohe) + 1.550 € Prüfungsgebühr (HWK
+        // Südwestfalen, alle vier Teile) ≈ 13.500 €, zzgl. Teil III/IV.
+        // `BELEGT` für diesen Anbieter. Aufstiegs-BAföG: 50 % Zuschuss auf
+        // Lehrgangs- und Prüfungskosten, dazu 50 % Darlehenserlass bei
+        // bestandener Prüfung → höchstens rund ein Viertel Eigenanteil.
+        // NRW-Meisterprämie 2.500 € nach bestandener Handwerks-Meisterprüfung —
+        // gilt hier, weil Dachdecker ein Handwerksberuf ist. Beides `BELEGT`.
         antwort:
-          'Rund 8.000 bis 10.000 Euro für Lehrgang und Prüfung. Aufstiegs-BAföG übernimmt einen großen Teil davon.',
+          'Rund 13.500 Euro für Lehrgang und Prüfung. Das Aufstiegs-BAföG übernimmt davon den größten Teil — wer besteht, zahlt am Ende etwa ein Viertel selbst. Nordrhein-Westfalen legt noch 2.500 Euro Meisterprämie drauf.',
       },
       {
         frage: 'Was du verdienst',
-        // ⚠️ ZAHL GEHÖRT ZUM ZIMMERERHANDWERK (khpl-flow.md §10). Der gebaute
-        // Tag heißt seit dem Umbenennen Dachdecker; für das Dachdeckerhandwerk
-        // ist der Wert **nicht** nachgeschlagen. Vor der Messe belegen oder
-        // ersetzen — hier steht eine Zahl vor einem Vierzehnjährigen.
-        antwort:
-          'Als Meister:in im Schnitt rund 45.000 Euro im Jahr, mit Erfahrung deutlich mehr.',
+        // Ø ca. 4.500 €/Monat (Stepstone 10/2025: 4.541 €) → rund 54.000 €/Jahr
+        // (belege 5 und khpl-tage.md 0c, Spalte Dachdecker).
+        // `TEILWEISE BELEGT` — Portaldaten, deshalb nur mit „rund“ und ohne
+        // Zusatz nach oben: eine Erfahrungsspanne steht für dieses Gewerk in
+        // keinem Beleg.
+        antwort: 'Als Dachdeckermeister:in im Schnitt rund 54.000 Euro im Jahr.',
       },
     ],
     aufhaenger:
@@ -69,7 +110,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Was ist das',
         antwort:
-          'Staatlich geprüfte:r Techniker:in, Fachrichtung Holztechnik oder Bautechnik. Du planst, rechnest und leitest, statt selbst auf dem Dach zu stehen.',
+          'Staatlich geprüfte:r Techniker:in, Fachrichtung Bautechnik. Du planst, rechnest und leitest, statt selbst auf dem Dach zu stehen.',
       },
       {
         frage: 'Wie lange',
@@ -102,11 +143,6 @@ export const KARRIEREWEGE: Karriereweg[] = [
         frage: 'Und das geht hier',
         antwort:
           'Die TH OWL hat ihren Fachbereich Bauingenieurwesen in Detmold, mit einem eigenen Fachgebiet Holzbau. Bachelor, sieben Semester, 30 Kilometer von hier.',
-      },
-      {
-        frage: 'Beides gleichzeitig',
-        antwort:
-          'Es gibt Modelle, die Ausbildung, Meister und Ingenieurstudium zusammenlegen — in Biberach dauert das Ganze gut fünf Jahre. Am Ende hast du den Gesellenbrief, den Meister und den Bachelor.',
       },
     ],
     aufhaenger:

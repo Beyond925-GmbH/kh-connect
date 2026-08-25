@@ -183,6 +183,15 @@ export function M4() {
                       }}
                       data-testid={`m4-winkel-${w}`}
                       gewaehlt={winkel === w}
+                      // `ton="orange"` aus demselben Grund wie in M1: die Wahl
+                      // ist hier **vorläufig**. Geprüft wird sie erst mit
+                      // „Schnitt setzen“, und bis dahin kann sie falsch sein —
+                      // ein gelbgrün gefüllter 30°-Knopf sagte „geschafft“ über
+                      // eine Antwort, die den Sparren gerade zu Ausschuss
+                      // macht. Gelbgrün ist laut Hüllenvertrag (khpl-tage.md 3)
+                      // für „das hast du geschafft“ reserviert; auf diesem
+                      // Screen trägt es der Fuß, wenn der Schnitt sitzt.
+                      ton="orange"
                       className="flex-1 justify-center gap-2 font-semibold"
                     >
                       <svg viewBox="0 0 24 24" className="size-6" aria-hidden>
@@ -300,24 +309,34 @@ interface Rueckmeldung {
 
 /**
  * Reihenfolge mit Absicht: erst die Länge, dann der Winkel. Wer 20 Zentimeter
- * daneben liegt, will nicht über den Winkel belehrt werden.
+ * daneben liegt, will nicht über den Winkel belehrt werden — **erfahren muss er
+ * aber, dass auch der danebenliegt.** Sonst sagt der Screen „36 Zentimeter zu
+ * kurz“, man zieht das Maß zurecht, drückt wieder, und bekommt den zweiten
+ * Fehler einzeln nachgereicht. Deshalb hängt an den beiden Längenfehlern ein
+ * Halbsatz zum Winkel, wenn einer gewählt und falsch ist; die Erklärung, was
+ * ein falscher Winkel am First anrichtet, bleibt dem eigenen Takt vorbehalten.
+ *
  * Texte aus flow 11 (M4); der Zu-kurz-Fall ist zahlenfrei formuliert — die
  * alte Euro-Angabe war auf den früheren 4820-mm-Balken gemünzt und wäre für
  * diesen Balken erfunden (NICHT-ERFINDEN-Policy).
  */
 function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
   const ab = laenge - ZIEL_MM
+  // Nur ein *gewählter* falscher Winkel ist ein Fehler. Ein noch gar nicht
+  // gewählter ist keiner — der fehlt bloß, und das sagt der eigene Zweig.
+  const auchWinkel =
+    winkel !== null && winkel !== ZIEL_WINKEL ? ' Und der Winkel stimmt auch nicht.' : ''
   if (ab < -TOLERANZ_MM) {
     const cm = Math.round(-ab / 10)
     return {
       treffer: false,
-      text: `${cm} Zentimeter zu kurz. Der Balken ist Ausschuss — das Maß holst du nicht zurück.`,
+      text: `${cm} Zentimeter zu kurz. Der Balken ist Ausschuss — das Maß holst du nicht zurück.${auchWinkel}`,
     }
   }
   if (ab > TOLERANZ_MM) {
     return {
       treffer: false,
-      text: 'Zu lang lässt sich kürzen. Kostet dich Zeit, nicht Material — noch mal.',
+      text: `Zu lang lässt sich kürzen. Kostet dich Zeit, nicht Material — noch mal.${auchWinkel}`,
     }
   }
   if (winkel === null) {

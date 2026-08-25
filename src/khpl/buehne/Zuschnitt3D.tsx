@@ -506,6 +506,21 @@ function Werkstatt({
               <meshBasicMaterial color={RISS_FARBEN.kante} />
             </mesh>
           ))}
+          {/* Bruchkante am linken Fensterrand (Zeichnungskonvention): Balken
+              und Maßlinie laufen links weiter, gemessen wird ab dem
+              Balkenanfang außerhalb des Schnittfensters. Das Fenster selbst
+              bleibt bewusst eng — weiter aufziehen würde ±30 mm und die
+              Winkel unlesbar machen (siehe huelleSchnitt). */}
+          {[0, 0.06].map((dx) => (
+            <mesh
+              key={dx}
+              position={[roh - 2.35 + dx, y0 + Q.h / 2 - 0.05, Q.b / 2 + 0.01]}
+              rotation={[0, 0, 0.35]}
+            >
+              <boxGeometry args={[0.012, Q.h + 0.3, 0.012]} />
+              <meshBasicMaterial color={RISS_FARBEN.kante} />
+            </mesh>
+          ))}
           <GriffProjektion ziel={[laenge, y0 - 0.02, Q.b / 2]} el={griffEl} />
         </>
       )}
