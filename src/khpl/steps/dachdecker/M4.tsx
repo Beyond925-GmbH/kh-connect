@@ -114,6 +114,12 @@ export function M4() {
   return (
     <StepShell
       id="M4"
+      auftrag={geloest ? null : 'Zieh die Schnittlinie auf das Maß aus dem Plan.'}
+      ansage={{
+        geste: 'ziehen-frei',
+        text: 'Du längst deinen Sparren selbst ab — einen von rund hundertzehn.',
+        haken: 'Zu kurz geschnitten ist Ausschuss. Holz wächst nicht nach.',
+      }}
       buehneInteraktiv
       interaktionOffen={!geloest}
       buehne={
@@ -138,11 +144,11 @@ export function M4() {
           />
         </Suspense>
       }
-      fachtext={
-        <p className="max-sm:text-[1rem] max-sm:leading-[1.4]">
-          <Begriff id="abbundplan">Abbundplan</Begriff> lesen, Hölzer anzeichnen, ablängen
-          — heute meist auf der <Begriff id="abbundanlage">Abbundanlage</Begriff>, bei
-          Sonderteilen von Hand. Jedes Teil bekommt eine Nummer.
+      warum={
+        <p>
+          Plan lesen, anzeichnen, ablängen. Die großen Serien macht die{' '}
+          <Begriff id="abbundanlage">Abbundanlage</Begriff>, die Sonderteile macht jemand
+          von Hand. Jedes Stück bekommt seine Nummer.
         </p>
       }
       interaktion={
@@ -191,15 +197,16 @@ export function M4() {
                       }}
                       data-testid={`m4-winkel-${w}`}
                       gewaehlt={winkel === w}
-                      // `ton="orange"` aus demselben Grund wie in M1: die Wahl
-                      // ist hier **vorläufig**. Geprüft wird sie erst mit
+                      // `ton="vorlaeufig"` aus demselben Grund wie in M1: die
+                      // Wahl ist hier **vorläufig**. Geprüft wird sie erst mit
                       // „Schnitt setzen“, und bis dahin kann sie falsch sein —
                       // ein gelbgrün gefüllter 30°-Knopf sagte „geschafft“ über
                       // eine Antwort, die den Sparren gerade zu Ausschuss
-                      // macht. Gelbgrün ist laut Hüllenvertrag (khpl-tage.md 3)
-                      // für „das hast du geschafft“ reserviert; auf diesem
-                      // Screen trägt es der Fuß, wenn der Schnitt sitzt.
-                      ton="orange"
+                      // macht. Der vorläufige Ton (limetter Rand, kaum Füllung)
+                      // sagt „getippt, noch nicht geprüft“; die satte Füllung
+                      // trägt der Fuß, wenn der Schnitt sitzt. Orange gehört
+                      // nach R3 der Welt, nicht der Wahl.
+                      ton="vorlaeufig"
                       className="flex-1 justify-center gap-2 font-semibold max-sm:min-h-[44px]"
                     >
                       <svg
@@ -270,9 +277,8 @@ export function M4() {
       }
       aha={
         <AhaKarte sichtbar={geloest} eyebrow="Schneidet das heute noch jemand von Hand?">
-          Den Zuschnitt macht im Betrieb meist eine CNC-Maschine — die Abbundanlage — nach
-          genau dem Plan, den du gezeichnet hast. Von Hand kommt, was sie nicht kann. Das
-          ist mehr, als man denkt.
+          Den Zuschnitt macht meist eine Maschine, nach genau dem Plan, den du gezeichnet
+          hast. Von Hand kommt, was sie nicht kann — mehr, als man denkt.
         </AhaKarte>
       }
       fuss={

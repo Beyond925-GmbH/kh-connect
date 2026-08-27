@@ -38,9 +38,11 @@ export function Z7() {
   return (
     <StepShell
       id="Z7"
+      auftrag={'Sieh dir an, welcher Weg dich interessiert.'}
+      ansage={null}
       interaktionOffen={false}
       buehne={<StepFoto id="Z7" />}
-      fachtext={
+      warum={
         <p>
           Dreieinhalb Jahre Ausbildung, dann Facharbeiter:in. Danach hört es nicht auf —
           es fängt an. Drei Wege, alle offen. Schau dir an, was dich interessiert.

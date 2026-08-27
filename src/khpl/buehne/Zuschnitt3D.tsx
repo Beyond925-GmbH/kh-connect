@@ -14,6 +14,7 @@ import {
 import { keil, versatz } from '@/dachstuhl/schnitt'
 import { Gespann, SparrenBand } from '@/drei/fahrzeug'
 import { FOV, passeEin } from '@/drei/kamera'
+import type { Sichtfeld } from '@/drei/kamera'
 import type { Huelle } from '@/dachstuhl/mass'
 import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
 import { Hallenlicht } from '@/khpl/buehne/Hallenlicht'
@@ -77,7 +78,68 @@ const PRESET = {
   beschreibung: 'Seitenblick auf das Schnittfenster',
 }
 
-function Kamerafahrt({ huelle, reduziert }: { huelle: Huelle; reduziert: boolean }) {
+/**
+ * Höhen-Füllung für die Gespann-Phasen (Design-Review, R1).
+ *
+ * Das Werkhof-Motiv ist um ein Mehrfaches breiter als hoch. `passeEin` passt
+ * die Hülle vollständig ein — quer bindet dann die Breite, und die Szene
+ * steht als schmaler Streifen in einem überwiegend leeren Fenster („Leerer
+ * dunkler Raum über der Karte = kaputt“). Deshalb wird die Hülle hier quer
+ * so weit auf ihre Mitte zusammengezogen, bis die **Höhe** die Einpassung
+ * bindet — die Balken- und Anhänger-Enden schneiden dann am Bildrand an, wie
+ * es die Bruchkanten-Konvention dieses Steps ohnehin vorlebt („ein reales
+ * Werkstück ist länger als der Blick“).
+ *
+ * `FUELL_MIN` deckelt den Anschnitt: mindestens dieser Anteil der
+ * Quer-Ausdehnung bleibt sichtbar, damit vom markierten Sparren nie mehr als
+ * die Enden fehlen. Hochkant bindet die Breite ohnehin — dort bleibt alles
+ * beim vollen Einpassen. Beim Einstellen und Sägen gilt die Füllung nicht:
+ * das Schnittfenster ist Messwerkzeug (±30 mm, Winkel) und darf nicht
+ * anschneiden. (Gleiche Mechanik wortgleich in `Beladen3D.tsx` — eine
+ * geteilte Datei gibt der Zuschnitt der Bühnen-Module nicht her.)
+ */
+const FUELL_MIN = 0.62
+
+function fuelleHoehe(huelle: Huelle, aspect: number, sichtfeld: Sichtfeld): Huelle {
+  if (aspect <= 1) return huelle
+  const voll = passeEin(PRESET, huelle, aspect, sichtfeld)
+  const strich: Huelle = {
+    min: [huelle.mitte[0], huelle.min[1], huelle.mitte[2]],
+    max: [huelle.mitte[0], huelle.max[1], huelle.mitte[2]],
+    mitte: huelle.mitte,
+  }
+  const hoch = passeEin(PRESET, strich, aspect, sichtfeld)
+  // Bindet die Höhe schon (s ≥ 1), bleibt die Hülle unangetastet. Sonst wird
+  // quer linear auf die Mitte zusammengezogen: die Einpass-Distanz wächst,
+  // solange die Breite bindet, etwa proportional zur Quer-Halbausdehnung.
+  const s = Math.max(FUELL_MIN, Math.min(1, hoch.distanz / voll.distanz))
+  if (s >= 1) return huelle
+  const quer = (wert: number, mitte: number) => mitte + (wert - mitte) * s
+  return {
+    min: [
+      quer(huelle.min[0], huelle.mitte[0]),
+      huelle.min[1],
+      quer(huelle.min[2], huelle.mitte[2]),
+    ],
+    max: [
+      quer(huelle.max[0], huelle.mitte[0]),
+      huelle.max[1],
+      quer(huelle.max[2], huelle.mitte[2]),
+    ],
+    mitte: huelle.mitte,
+  }
+}
+
+function Kamerafahrt({
+  huelle,
+  fuellen,
+  reduziert,
+}: {
+  huelle: Huelle
+  /** Höhen-Füllung an (Gespann-Phasen) — s. `fuelleHoehe`. */
+  fuellen: boolean
+  reduziert: boolean
+}) {
   const kamera = useThree((z) => z.camera)
   const szene = useThree((z) => z.scene)
   const breite = useThree((z) => z.size.width)
@@ -94,13 +156,11 @@ function Kamerafahrt({ huelle, reduziert }: { huelle: Huelle; reduziert: boolean
 
   const lage = useMemo(() => {
     if (hoehe <= 0) return null
-    return passeEin(PRESET, huelle, breite / hoehe, {
-      links: sfL,
-      rechts: sfR,
-      oben: sfO,
-      unten: sfU,
-    })
-  }, [huelle, breite, hoehe, sfL, sfR, sfO, sfU])
+    const aspect = breite / hoehe
+    const sf: Sichtfeld = { links: sfL, rechts: sfR, oben: sfO, unten: sfU }
+    const rahmen = fuellen ? fuelleHoehe(huelle, aspect, sf) : huelle
+    return passeEin(PRESET, rahmen, aspect, sf)
+  }, [huelle, fuellen, breite, hoehe, sfL, sfR, sfO, sfU])
 
   const stand = useRef<{ pos: THREE.Vector3; blick: THREE.Vector3 } | null>(null)
 
@@ -383,19 +443,23 @@ function Werkstatt({
   const verschnittWeg = nachSchnitt
 
   // Schnittfenster: die letzten zwei Meter des Rohlings ± 0,5 m — das ist per
-  // M4-Ableitung genau MIN−0,5 .. MAX+0,5.
+  // M4-Ableitung genau MIN−0,5 .. MAX+0,5. Nach oben endet die Hülle knapp
+  // über dem Anriss (er ragt Q.h + 0,35 über die Balkenunterkante): die alte
+  // Kante bei y0 + 0,9 reservierte ~0,3 m leere Luft, und weil quer die Höhe
+  // bindet, stand genau diese Luft als dunkler Streifen über der Szene (R1).
   const huelleSchnitt = useMemo<Huelle>(
     () => ({
       min: [roh - 2.5, 0, -0.4],
-      max: [roh + 0.5, y0 + 0.9, 0.4],
-      mitte: [roh - 1, (y0 + 0.9) / 2, 0],
+      max: [roh + 0.5, y0 + Q.h + 0.45, 0.4],
+      mitte: [roh - 1, (y0 + Q.h + 0.45) / 2, 0],
     }),
     [roh, y0],
   )
-  // Finale: rechter Bock + Gespann. Die volle Fassung (Balkenanfang bis
-  // Kofferaufbau, 16,4 m) machte das Motiv quer zu einem ~80 px hohen Streifen
-  // in leerem Rahmen — deshalb fällt der leere linke Balkenrest aus der Hülle,
-  // und rechts schneidet der Transporter an (laut Beschluss erlaubt).
+  // Verladen: rechter Bock + Gespann + Flugbahn. Die volle Fassung
+  // (Balkenanfang bis Kofferaufbau, 16,4 m) machte das Motiv quer zu einem
+  // ~80 px hohen Streifen in leerem Rahmen — deshalb fällt der leere linke
+  // Balkenrest aus der Hülle, und rechts schneidet der Transporter an (laut
+  // Beschluss erlaubt). Die 2,7 m Höhe braucht nur der Wurfbogen des Teils.
   const gespannX = roh + 5.0
   const huelleWeit = useMemo<Huelle>(
     () => ({
@@ -404,6 +468,18 @@ function Werkstatt({
       mitte: [(roh - 3.4 + gespannX + 5.6) / 2, 1.35, -0.9],
     }),
     [roh, gespannX],
+  )
+  // Endbild: nur noch der Anhänger mit deinem Sparren obenauf (R1, Befund
+  // M4). Ladungsoberkante + Band liegen bei ~2,05 m; der Transporter trägt
+  // zum Motiv nichts mehr bei und darf anschneiden. Die Kamera gleitet nach
+  // der Landung weich von `huelleWeit` hierher (Lerp in `Kamerafahrt`).
+  const huelleFertig = useMemo<Huelle>(
+    () => ({
+      min: [gespannX - 4.4, 0, GESPANN_Z - 1.25],
+      max: [gespannX + 4.4, 2.15, GESPANN_Z + 1.25],
+      mitte: [gespannX, 1.05, GESPANN_Z],
+    }),
+    [gespannX],
   )
 
   // Ziel der Verladung: oben auf der Anhänger-Ladung (Gruppenversatz).
@@ -427,7 +503,10 @@ function Werkstatt({
       <directionalLight position={[-6, 4, -7]} intensity={0.7} />
 
       <Kamerafahrt
-        huelle={gespannDa ? huelleWeit : huelleSchnitt}
+        huelle={
+          phase === 'fertig' ? huelleFertig : gespannDa ? huelleWeit : huelleSchnitt
+        }
+        fuellen={gespannDa}
         reduziert={reduziert}
       />
 

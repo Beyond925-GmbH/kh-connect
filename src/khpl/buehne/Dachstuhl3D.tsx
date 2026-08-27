@@ -7,7 +7,7 @@ import type { Auswahl } from '@/dachstuhl/debug'
 import type { Ansicht } from '@/drei/kamera'
 import type { KulisseProps } from '@/dachstuhl/Dachstuhl'
 import type { Lichtstimmung } from '@/drei/Beleuchtung'
-import { phaseAt } from '@/dachstuhl/zeitachse'
+import { huelleBeiT, phaseAt } from '@/dachstuhl/zeitachse'
 import { useTapErkennung } from '@/drei/useTapErkennung'
 import { Szene } from '@/drei/Szene'
 import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
@@ -130,6 +130,11 @@ export default function Dachstuhl3D({
       ),
     [lattung],
   )
+  // Kamera auf den Baustand statt auf das fertige Dach: sonst rahmt sie bei
+  // liegender Rohdecke schon die Firsthoehe ein und der Unterbau sitzt als
+  // Streifen unter leerer Flaeche (R1). Ueber `zielT`, damit der Sprung nur
+  // am Tap-Wechsel passiert — s. `huelleBeiT`.
+  const kameraHuelle = useMemo(() => huelleBeiT(masse, zielT), [masse, zielT])
   const teile = useMemo(() => erzeugeTeile(masse), [masse])
   const einheiten = useMemo(() => bildeEinheiten(teile), [teile])
   const schritte = useMemo(() => schritteJePhase(teile), [teile])
@@ -352,6 +357,7 @@ export default function Dachstuhl3D({
       <Szene
         key={neustart}
         masse={masse}
+        kameraHuelle={kameraHuelle}
         einheiten={einheiten}
         schritte={schritte}
         fortschrittRef={fortschritt}

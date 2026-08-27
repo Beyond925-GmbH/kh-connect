@@ -29,12 +29,14 @@ export function M9() {
   return (
     <StepShell
       id="M9"
+      auftrag={'Sieh dir an, welcher Weg dich interessiert.'}
+      ansage={null}
       interaktionOffen={false}
       buehne={<StepFoto id="M9" />}
-      fachtext={
+      warum={
         <p>
           Drei Jahre Ausbildung, dann Geselle. Danach hört es nicht auf — es fängt an.
-          Drei Wege, alle offen. Schau dir an, was dich interessiert.
+          Drei Wege, alle offen.
         </p>
       }
       interaktion={

@@ -110,7 +110,7 @@ const ACHSEN = [
       },
     ],
     warum:
-      'Nach außen käme dann die Dampfbremse. Raumfeuchte wandert in die Wand, kondensiert an der kalten dichten Schicht — und die Wand trocknet nie wieder. In fünf Jahren ist die Dämmung nass und das Holz faul.',
+      'Dann läge die dichte Folie außen. Die Feuchte aus dem Raum bliebe in der Wand stehen — in fünf Jahren ist die Dämmung nass und das Holz faul.',
     warumKurz:
       'Nach außen käme die Dampfbremse. In fünf Jahren ist die Dämmung nass und das Holz faul.',
   },
@@ -134,7 +134,7 @@ const ACHSEN = [
       },
     ],
     warum:
-      'Dann hinge das Element auf dem Kopf. Über die Schwelle geht die Last der ganzen Wand in die Bodenplatte — sie gehört nach unten. Und dein Fenster säße an der falschen Stelle.',
+      'Dann hinge es auf dem Kopf. Der unterste Balken trägt die Last der ganzen Wand — er gehört nach unten. Und dein Fenster säße falsch.',
     warumKurz:
       'Verkehrt herum — die Schwelle trägt die Last nach unten, und dein Fenster säße falsch.',
   },
@@ -251,6 +251,37 @@ export function C6() {
   return (
     <StepShell
       id="C6"
+      /*
+        Zwei Beats, zwei Aufträge. Beat 1 fragt nach der Lage, Beat 2 setzt
+        das Element ab — dieselbe Zeile für beides wäre auf einem der beiden
+        falsch.
+      */
+      auftrag={
+        takt === 'fertig'
+          ? null
+          : takt === 'einweisen'
+            ? 'Führ das Element über die Schwelle und lass es ab.'
+            : 'Dreh das Element so, wie es stehen muss.'
+      }
+      /*
+        Zwei Beats, zwei Gesten, zwei Ansagen. `StepShell` verschlüsselt sie an
+        der Geste, deshalb geht das zweite Aufklappen auf.
+      */
+      ansage={
+        takt === 'lage'
+          ? {
+              geste: 'drehen' as const,
+              text: 'Das Element hängt am Kran. Du sagst, wie herum es abgesetzt wird.',
+              haken: 'Den ganzen Vormittag lag es flach. Jetzt steht es.',
+            }
+          : takt === 'einweisen'
+            ? {
+                geste: 'ziehen-frei' as const,
+                text: 'Jetzt führst du die Last über die Schwelle und lässt sie ab.',
+                haken: 'Eine hängende Last pendelt. Zieh langsam.',
+              }
+            : null
+      }
       buehneInteraktiv
       interaktionOffen={takt !== 'fertig'}
       buehne={
@@ -278,7 +309,7 @@ export function C6() {
           />
         </Suspense>
       }
-      fachtext={
+      warum={
         takt === 'fertig' ? (
           <p>
             Steht. Das ist die Westwand des Hauses — heute früh lag sie noch flach auf dem
@@ -293,21 +324,16 @@ export function C6() {
         // Arbeit dann getan, und ihre Zeilen sind genau die, die der Meldung
         // und den Kacheln zusammen fehlen. Quer geht damit beides ganz ins
         // Bild, hochkant Meldung und erste Frage.
-        meldung ? undefined : schmal ? (
-          // Der Kern des Satzes samt beider Begriffe. Die volle Fassung war
-          // hochkant sieben Zeilen und schob die zweite Frage aus dem Bild.
+        // Vorher zwei Fassungen und zwei Fachwörter in einem Satz. Beides
+        // ist weg: der Auftrag steht im Band, und „Rähm" und „Schwelle"
+        // stehen an den Antwortknöpfen, wo sie gebraucht werden.
+        meldung ? undefined : (
+          // Zwei Fachwörter in einem Satz waren eines zu viel (Regel R2), und
+          // was zu tun ist, steht jetzt im Auftragsband. Übrig bleibt der
+          // Grund, warum es überhaupt schwer ist.
           <p>
-            Es dreht sich am Haken. Wie herum setzt es ab —{' '}
-            <Begriff id="raehm">Rähm</Begriff> oben oder{' '}
-            <Begriff id="schwelle">Schwelle</Begriff>?
-          </p>
-        ) : (
-          <p>
-            Das Element hängt am Haken und dreht sich langsam. Den ganzen Vormittag lag es
-            flach vor dir — jetzt steht es, und du musst wissen, wie herum, bevor es
-            absetzt: welche Seite nach außen kommt, und ob das{' '}
-            <Begriff id="raehm">Rähm</Begriff> oben ist oder die{' '}
-            <Begriff id="schwelle">Schwelle</Begriff>.
+            Den ganzen Vormittag lag das Element flach vor dir. Jetzt hängt es senkrecht —
+            und du musst es dir gedreht vorstellen, bevor es absetzt.
           </p>
         )
       }
@@ -367,13 +393,15 @@ export function C6() {
                   <p className="kh-etikett text-kh-paper/55">{achse.frage}</p>
                   <div className="grid grid-cols-2 gap-2">
                     {achse.optionen.map((o) => (
-                      // `ton="orange"` wie M1/M4: das Antippen ist vorläufig —
-                      // die Prüfung „So absetzen“ färbt danach, und Gelbgrün
-                      // bliebe sonst auf einer falschen Wahl stehen.
+                      // `ton="vorlaeufig"`: das Antippen ist die eigene Wahl
+                      // (Limette = du, Designregel R3), aber erst die Prüfung
+                      // „So absetzen“ färbt — deshalb limetter Rand ohne
+                      // Füllung statt der satten Fläche, die nach „richtig“
+                      // aussähe, bevor geprüft ist.
                       <Wahlflaeche
                         key={o.wert}
                         form="karte"
-                        ton="orange"
+                        ton="vorlaeufig"
                         gewaehlt={gewaehlt[achse.id] === o.wert}
                         onClick={() => waehle(achse.id, o.wert)}
                         data-testid={`c6-${achse.id}-${o.wert}`}
@@ -399,8 +427,9 @@ export function C6() {
           sichtbar={takt !== 'lage'}
           eyebrow="Wer steht eigentlich unter der Last?"
         >
-          Niemand. Nie. Wer die Anschlagmittel einhängt, arbeitet seitlich und führt das
-          Element erst kurz vor dem Absetzen an seinen Platz.
+          Niemand. Nie. Wer die <Begriff id="anschlagmittel">Anschlagmittel</Begriff>{' '}
+          einhängt, arbeitet seitlich und führt das Element erst kurz vor dem Absetzen an
+          seinen Platz.
         </AhaKarte>
       }
       fuss={

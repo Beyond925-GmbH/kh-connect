@@ -196,6 +196,17 @@ export function M7() {
   return (
     <StepShell
       id="M7"
+      /*
+        Der Auftrag steht erst, wenn die Vorführung durch ist. Während
+        `zeigen` und `zurueck` läuft, gibt es nichts zu tun — eine
+        Aufforderung, die man noch nicht befolgen kann, ist eine Falle.
+      */
+      auftrag={takt === 'bauen' && !fertig ? 'Zieh das Teil an seinen Platz.' : null}
+      ansage={{
+        geste: 'ziehen-karte',
+        text: 'Jetzt baust du die zweite Hälfte selbst — in der Reihenfolge, in der es geht.',
+        haken: 'Was noch nicht dran ist, hält nicht.',
+      }}
       buehneInteraktiv
       interaktionOffen={!fertig}
       buehne={
@@ -221,17 +232,16 @@ export function M7() {
           />
         </Suspense>
       }
-      fachtext={
+      warum={
         fertig ? (
           <p>
             Steht. Von der Fußpfette bis zur letzten Dachlatte — in der Reihenfolge, in
             der es geht. Morgen kommen die Ziegel drauf.
           </p>
         ) : takt === 'bauen' ? (
-          <p>
-            Die zweite Hälfte des Dachs fehlt noch. Bau sie — in der Reihenfolge, in der
-            es geht. Was noch nicht dran ist, hält nicht.
-          </p>
+          // Die Aufforderung stand hier und noch einmal auf den Karten. Sie
+          // steht jetzt einmal, im Auftragsband.
+          <p>Die zweite Hälfte des Dachs fehlt noch.</p>
         ) : (
           <p>
             So sieht die zweite Hälfte fertig aus. Schau dir an, was in welcher
@@ -368,11 +378,14 @@ export function M7() {
 /**
  * Was während der Vorführung im Panel steht.
  *
- * Nur der Name dessen, was gerade einfliegt — das ist der Inhalt, den der
- * Besucher gleich abrufen soll. Der Ausweg für den, der die Reihenfolge schon
- * kennt, steht im Fuß an der Primärposition, nicht hier.
+ * Name **und** Ein-Satz-Erklärung dessen, was gerade einfliegt (R10): drei
+ * der fünf Begriffe kommen in M5 nie vor — die Vorführung ist die eine
+ * Stelle, an der sie erklärt sind, bevor die Abfrage sie als Zieh-Karten
+ * abruft. Der Ausweg für den, der die Reihenfolge schon kennt, steht im Fuß
+ * an der Primärposition, nicht hier.
  */
 function Vorfuehrung({ label, zurueck }: { label: string; zurueck: boolean }) {
+  const schritt = M7_SCHRITTE.find((s) => s.label === label)
   return (
     <div className="flex flex-col items-start gap-2.5" data-testid="m7-vorfuehrung">
       <div className="flex w-fit items-center gap-3 rounded-kh-pill border-2 border-kh-orange/40 bg-kh-orange/12 py-2.5 pr-5 pl-3">
@@ -389,6 +402,14 @@ function Vorfuehrung({ label, zurueck }: { label: string; zurueck: boolean }) {
           </p>
         </span>
       </div>
+      {!zurueck && schritt && (
+        <p
+          data-testid="m7-gezeigt-was"
+          className="text-[1.0625rem] leading-[1.45] text-kh-paper/85"
+        >
+          {schritt.was}
+        </p>
+      )}
     </div>
   )
 }
@@ -446,6 +467,12 @@ function Bauteilkarte({ schritt, gebaut }: { schritt: Bauschritt; gebaut: string
  * Werkzeug vom Tisch. Links das Schema mit dem Stand, den das Dach **gerade**
  * hat, und dem Teil darin orange — die Karte zeigt also nicht nur, was sie
  * ist, sondern auch, wo es hinkäme.
+ *
+ * Unter dem Namen steht der `was`-Satz aus M5s Kartenmuster (R10): ohne ihn
+ * waren „Windrispenbänder“ und „Konterlattung“ nackte Vokabeln neben einer
+ * 44-px-Zeichnung. Auf dem Handy hochkant entfällt der Satz (`max-sm:hidden`)
+ * — dort zählt jedes Pixel Panelhöhe, und die Vorführung hat die Begriffe
+ * bereits erklärt.
  */
 function Kartenflaeche({
   schritt,
@@ -466,7 +493,12 @@ function Kartenflaeche({
       <span className="grid size-11 shrink-0 place-items-center rounded-[10px] bg-[#0E0D0B] p-1">
         <DachSchema hervor={schritt.label} gebaut={gebaut} className="size-full" />
       </span>
-      {schritt.name}
+      <span className="min-w-0">
+        <span className="block">{schritt.name}</span>
+        <span className="block max-w-[30ch] text-[0.8125rem] leading-snug font-normal text-[#0E0D0B]/70 max-sm:hidden">
+          {schritt.was}
+        </span>
+      </span>
     </div>
   )
 }

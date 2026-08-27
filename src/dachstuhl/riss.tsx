@@ -6,7 +6,7 @@ import type { DachstuhlMasse } from './mass'
 import type { Bauteil, Einheit } from './teileliste'
 import { erzeugeGeometrien } from './geometrien'
 import type { Geometrien } from './geometrien'
-import { RISS_FARBEN } from './bauteil-texte'
+import { AUSWAHL_EMISSIV, RISS_FARBEN } from './bauteil-texte'
 
 /**
  * Die Planansicht (M3): der Dachstuhl als Abbundplan — dasselbe Objekt wie in
@@ -22,6 +22,16 @@ import { RISS_FARBEN } from './bauteil-texte'
  * Die Teile kommen aus den Einheiten, die die Szene ohnehin haelt — kein
  * zweiter `erzeugeTeile`-Lauf. Der Matrixaufbau repliziert exakt die
  * Transformationskette aus `Bauteil.tsx` und `Dachflaeche.tsx`.
+ *
+ * **Ein Sparren ist hervorgehoben, der Rest gedimmt** (Design-Review, R10):
+ * ~15 Sparren plus Innenstreben in derselben Helligkeit sind fuer jemanden
+ * ohne Vorwissen eine Wand aus Linien. Hervorgehoben wird der vorderste
+ * Sparren der z+-Seite — genau der, an dessen Unterkante die Sparrenlaengen-
+ * Masskette (`lS`) anliegt: Zeichnung und Mass zeigen damit auf dasselbe
+ * Holz. Der uebrige Kantenzug faellt auf ~45 % Deckkraft; die Massketten
+ * bleiben voll lesbar (R9: eine technische Zeichnung ist Inhalt, nicht Deko).
+ * Diese Datei wird nur von M3 (Dachdecker) gerendert — der Zweig braucht
+ * deshalb keinen Schalter.
  */
 
 function geometrieFuer(g: Geometrien, t: Bauteil): THREE.BufferGeometry {
@@ -80,12 +90,15 @@ function nurPosition(g: THREE.BufferGeometry): THREE.BufferGeometry {
 export interface Riss {
   fuellung: THREE.BufferGeometry
   kanten: THREE.BufferGeometry
+  /** Der eine hervorgehobene Sparren (R10) — `null` nur ohne Sparren im Modell. */
+  hervor: THREE.BufferGeometry | null
   entsorge: () => void
 }
 
 /**
  * Ein gemergter Kantenzug plus ein gemergter Fuellkoerper ueber alle Teile.
  * Zonen (`form === 'zone'`) sind Pick-Volumen, keine Zeichnung — ausgefiltert.
+ * Der hervorgehobene Sparren (s. Modulkopf) bekommt seinen eigenen Kantenzug.
  */
 export function erzeugeRiss(
   g: Geometrien,
@@ -103,28 +116,54 @@ export function erzeugeRiss(
     return k
   }
 
-  const fuellungen: THREE.BufferGeometry[] = []
-  const kanten: THREE.BufferGeometry[] = []
+  // Erst sammeln, dann mergen: das Ziel der Hervorhebung steht erst fest,
+  // wenn alle Sparren gesehen sind (der vorderste der z+-Seite, also die
+  // groesste Welt-x-Translation — dort sitzt auch die lS-Masskette).
+  const teile: { matrix: THREE.Matrix4; basis: THREE.BufferGeometry }[] = []
+  let ziel = -1
+  let zielX = -Infinity
   for (const e of einheiten) {
     for (const t of e.teile) {
       if (t.form === 'zone') continue
-      const basis = geometrieFuer(g, t)
-      const matrix = weltmatrix(t, e, m)
-      fuellungen.push(nurPosition(basis.clone()).applyMatrix4(matrix))
-      kanten.push(kantenVon(basis).clone().applyMatrix4(matrix))
+      const eintrag = { matrix: weltmatrix(t, e, m), basis: geometrieFuer(g, t) }
+      // z+-Seite eines Sparrenpaars ist `spiegelZ: false` — ein `rahmen`
+      // tragen Sparren nicht (der gehoert den Dachflaechen-Teilen wie
+      // Windrispen); sie stehen im Welt-Frame und spiegeln nur.
+      if (t.typ === 'sparren' && !t.spiegelZ) {
+        const x = eintrag.matrix.elements[12]
+        if (x > zielX) {
+          zielX = x
+          ziel = teile.length
+        }
+      }
+      teile.push(eintrag)
     }
+  }
+
+  const fuellungen: THREE.BufferGeometry[] = []
+  const kanten: THREE.BufferGeometry[] = []
+  let hervor: THREE.BufferGeometry | null = null
+  for (let i = 0; i < teile.length; i++) {
+    const { matrix, basis } = teile[i]
+    fuellungen.push(nurPosition(basis.clone()).applyMatrix4(matrix))
+    const kante = kantenVon(basis).clone().applyMatrix4(matrix)
+    if (i === ziel) hervor = kante
+    else kanten.push(kante)
   }
 
   const fuellung = mergeGeometries(fuellungen, false)
   const kantenzug = mergeGeometries(kanten, false)
   for (const zw of [...fuellungen, ...kanten, ...kantenBasis.values()]) zw.dispose()
 
+  const hervorZug: THREE.BufferGeometry | null = hervor
   return {
     fuellung,
     kanten: kantenzug,
+    hervor: hervorZug,
     entsorge: () => {
       fuellung.dispose()
       kantenzug.dispose()
+      hervorZug?.dispose()
     },
   }
 }
@@ -244,9 +283,28 @@ export function Planriss({
           polygonOffsetUnits={1}
         />
       </mesh>
+      {/* Der Kantenzug gedimmt, ein Sparren in Orange obenauf (R10) — die
+          Zeichnung bleibt vollstaendig, aber sie zeigt, wo man hinschauen
+          soll: auf das eine Holz, dessen Laenge die Masskette daneben nennt. */}
       <lineSegments geometry={riss.kanten} renderOrder={1}>
-        <lineBasicMaterial color={RISS_FARBEN.kante} fog={false} />
+        {/* Dimmen nur, wenn es auch ein hervorgehobenes Holz gibt — sonst
+            waere die ganze Zeichnung leiser, ohne auf etwas zu zeigen. */}
+        <lineBasicMaterial
+          color={RISS_FARBEN.kante}
+          fog={false}
+          transparent
+          opacity={riss.hervor ? 0.45 : 1}
+        />
       </lineSegments>
+      {riss.hervor && (
+        <lineSegments geometry={riss.hervor} renderOrder={2}>
+          {/* Ohne Tiefentest: die Hidden-Line-Fuellkoerper der davorliegenden
+              Konstruktion wuerden den Sparren sonst bis auf einen Zipfel am
+              Ueberstand verdecken. Die Hervorhebung ist eine Zeigegeste der
+              Zeichnung, kein Bauteil — sie darf durchscheinen. */}
+          <lineBasicMaterial color={AUSWAHL_EMISSIV} fog={false} depthTest={false} />
+        </lineSegments>
+      )}
 
       <lineSegments geometry={kettenGeo} renderOrder={1}>
         <lineBasicMaterial

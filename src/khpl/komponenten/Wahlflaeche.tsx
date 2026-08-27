@@ -23,14 +23,16 @@ import { cn } from '@/lib/utils'
  * einem Formular mit acht Schaltern gemacht; die Stellen behalten ihren
  * Inhalt und teilen sich den Grund.
  *
- * **Der gewählte Zustand ist Signalfarbe — außer wo das Antippen vorläufig
- * ist.** `index.css` hält fest, dass das Warnwesten-Gelbgrün genau eine Sache
- * markiert: „das hast du geschafft“. Eine getroffene Wahl ist davon nur einen
- * Schritt entfernt, und Fragen und Helmwahl setzen es längst so. M1 und M4
- * sind die Ausnahmen, und zwar aus dem Grund, der die Regel bestätigt: dort
- * ist das Antippen **vorläufig** — die Prüfung danach färbt die richtigen
- * Treffer, und wenn schon das Auswählen Signalfarbe wäre, hätte die
- * Auswertung keine Farbe mehr übrig. Deshalb `ton="orange"` genau dort.
+ * **Der gewählte Zustand ist Signalfarbe — als Fläche nur, wo die Wahl auch
+ * gilt.** Limette heißt „du“ (R3): jede Wahl ist eine Handlung des Besuchers
+ * und trägt darum seine Farbe. Aber die satte Füllung sieht nach „richtig“
+ * aus — und wo das Antippen **vorläufig** ist (M1, M4: die Prüfung danach
+ * färbt erst die echten Treffer), wäre das ein Versprechen, das die
+ * Auswertung noch einlösen muss. Dafür gibt es `ton="vorlaeufig"`: limetter
+ * Rand, kaum Füllung, helle Schrift — „du hast getippt, geprüft ist noch
+ * nichts“. `ton="orange"` ist der alte Ausweg für dieselben Stellen und
+ * bleibt funktionsfähig, bis die Aufrufer migriert sind (Orange gehört nach
+ * R3 der Welt, nicht der Wahl).
  */
 export const wahlflaeche = cva(
   [
@@ -58,6 +60,7 @@ export const wahlflaeche = cva(
       ton: {
         signal: '',
         orange: '',
+        vorlaeufig: '',
       },
       gewaehlt: { true: '', false: '' },
       /** Die nicht gewählten Flächen, nachdem die Wahl gefallen ist. */
@@ -77,6 +80,11 @@ export const wahlflaeche = cva(
         gewaehlt: true,
         ton: 'orange',
         className: 'border-kh-orange bg-kh-orange font-semibold text-[#0E0D0B]',
+      },
+      {
+        gewaehlt: true,
+        ton: 'vorlaeufig',
+        className: 'border-kh-signal bg-kh-signal/10 font-semibold text-kh-paper',
       },
     ],
     defaultVariants: { form: 'zeile', ton: 'signal', gewaehlt: false, gedaempft: false },

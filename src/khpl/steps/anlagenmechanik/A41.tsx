@@ -29,21 +29,27 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * vorliegt, trägt es den Screen.
  */
 
+/*
+  Ohne unerklärte Werkstattwörter (R10): „Lot" heißt hier Lötzinn, „Fitting"
+  Verbindungsstück, und „entgraten" bekommt seinen Handgriff mitgeliefert.
+  Wer den Screen liest, lernt die Sache — die Fachnamen kommen im Betrieb von
+  selbst.
+*/
 const ARTEN = [
   {
     id: 'loeten',
     label: 'Löten',
-    text: 'Zwei Kupferteile ineinander, Flamme drauf, Lot dazu. Das Lot läuft von selbst in den schmalen Spalt und dichtet ihn. Hält, solange das Haus steht — aber es braucht Übung, eine ruhige Hand und eine offene Flamme in der Wohnung von jemandem. Deshalb wird vorher abgedeckt und hinterher noch eine Weile hingeschaut.',
+    text: 'Zwei Kupferteile ineinander, Flamme drauf, Lötzinn dazu. Das geschmolzene Zinn läuft von selbst in den Spalt und dichtet ihn. Hält, solange das Haus steht — braucht aber Übung und eine offene Flamme.',
   },
   {
     id: 'pressen',
     label: 'Pressen',
-    text: 'Fitting aufschieben, Zange ansetzen, ein Druck — der Ring im Fitting wird auf das Rohr gequetscht und ist dicht. Schnell, ohne Flamme, und auch dort möglich, wo neben der Leitung Holz liegt. Der Normalfall auf den meisten Baustellen. Die Zange läuft mit Akku, wie fast alles im Transporter.',
+    text: 'Verbindungsstück aufs Rohr schieben, Zange ansetzen, ein Druck — und es ist dicht. Schnell, ohne Flamme, auch da möglich, wo Holz neben der Leitung liegt. Der Normalfall.',
   },
   {
     id: 'stecken',
     label: 'Stecken',
-    text: 'Rohr ablängen, entgraten, in den Fitting schieben. Es rastet ein und hält. Von den dreien der schnellste Weg und je Verbindung der teuerste — deshalb nimmt man ihn dort, wo es schnell gehen muss oder wo für eine Zange kein Platz mehr ist.',
+    text: 'Rohr auf Länge schneiden, die scharfe Kante abfeilen — entgraten heißt das —, dann ins Verbindungsstück schieben. Es rastet ein und hält. Der schnellste Weg, und je Verbindung der teuerste.',
   },
 ] as const
 
@@ -63,24 +69,21 @@ export function A41() {
   return (
     <StepShell
       id="A4.1"
+      auftrag={'Tipp an, was dich interessiert.'}
+      ansage={null}
       titelZusatz="Abstecher"
       interaktionOffen={false}
       buehne={<StepFoto id="A4.1" />}
-      fachtext={
+      warum={
         <p>
-          Drei Arten, zwei Rohre zu verbinden — und wann was. Dicht müssen alle drei sein.
-          Was genommen wird, entscheiden der Werkstoff, der Ort und wie viel Platz die
-          Hand da hinten noch hat.
+          Drei Arten, zwei Rohre zu verbinden. Dicht müssen alle drei sein. Was genommen
+          wird, entscheiden Werkstoff, Ort und Platz.
         </p>
       }
       interaktion={
         <div className="flex flex-col gap-2.5">
-          {!art && (
-            <p className="px-1 text-[1rem] text-kh-paper/55">
-              Tipp an, was dich interessiert.
-            </p>
-          )}
-
+          {/* Keine Hinweiszeile über den Chips: sie stand wortgleich schon im
+              Auftragsband — genau ein Anweisungssatz pro Screen (R4). */}
           <div className="flex flex-wrap gap-2">
             {ARTEN.map((a) => (
               <Wahlflaeche

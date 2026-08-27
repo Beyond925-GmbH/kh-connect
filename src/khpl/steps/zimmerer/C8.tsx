@@ -42,12 +42,14 @@ export function C8() {
   return (
     <StepShell
       id="C8"
+      auftrag={'Sieh dir an, welcher Weg dich interessiert.'}
+      ansage={null}
       interaktionOffen={false}
       buehne={<StepFoto id="C8" />}
-      fachtext={
+      warum={
         <p>
           Drei Jahre Ausbildung, dann Geselle. Danach hört es nicht auf — es fängt an.
-          Drei Wege, alle drei offen. Schau dir an, was dich interessiert.
+          Drei Wege, alle drei offen.
         </p>
       }
       interaktion={

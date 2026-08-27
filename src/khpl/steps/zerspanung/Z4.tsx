@@ -75,19 +75,19 @@ const FRAGEN = [
     id: 'grad',
     frage: 'Warum genau 20 Grad?',
     antwort:
-      'Weil das die Temperatur ist, auf die sich alle geeinigt haben — sie steht in der Norm, und jedes Maß auf jeder Zeichnung meint sie. Stahl dehnt sich mit der Wärme: auf zehn Zentimeter Länge sind das gut ein Tausendstel Millimeter je Grad. Bei einer Toleranz von einundzwanzig Tausendsteln frisst ein warmer Raum davon einen ordentlichen Teil. Ein Messraum ohne feste Temperatur misst das Wetter mit.',
+      'Darauf haben sich alle geeinigt — jedes Maß auf jeder Zeichnung meint 20 Grad. Stahl dehnt sich mit der Wärme, und ein Messraum ohne feste Temperatur misst das Wetter mit.',
   },
   {
     id: 'tausendstel',
     frage: 'Wie genau ist das Gerät hier?',
     antwort:
-      'Es zeigt drei Zahlen hinterm Komma an — Tausendstel Millimeter. Anzeigen und Messen sind aber zweierlei: wirklich sicher sind wenige Tausendstel, nicht eines. Wer den Unterschied kennt, weiß, warum in diesem Raum niemand die Tür offen stehen lässt.',
+      'Es zeigt Tausendstel Millimeter an. Anzeigen und Messen sind aber zweierlei — sicher sind wenige Tausendstel, nicht eines.',
   },
   {
     id: 'tuer',
     frage: 'Warum ist die Maschinentür verriegelt?',
     antwort:
-      'Nicht nur, damit niemand hineingreift. Bei mehreren tausend Umdrehungen in der Minute wird alles, was sich löst — ein Werkstück, eine Schneide —, zum Geschoss. Die Verriegelung ist der Grund, warum man daneben stehen und zusehen kann.',
+      'Nicht nur, damit niemand hineingreift. Bei tausenden Umdrehungen wird alles, was sich löst, zum Geschoss. Deshalb kann man danebenstehen und zusehen.',
   },
 ] as const
 
@@ -111,9 +111,11 @@ export function Z4() {
   return (
     <StepShell
       id="Z4"
+      auftrag={'Tipp an, was dich im Messraum wundert.'}
+      ansage={null}
       interaktionOffen={false}
       buehne={<StepFoto id="Z4" />}
-      fachtext={
+      warum={
         <>
           <p>
             Zwei Türen weiter, und die Halle ist weg. Hier ist es leise, sauber und immer

@@ -97,7 +97,9 @@ const SCHICHTEN: Schicht[] = [
   {
     id: 'daemmung',
     name: 'Ständerwerk mit Dämmung',
-    was: 'Das tragende Skelett — und zwischen den Ständern, im Gefach, die Dämmung. Hier steckt die Wärme des Hauses drin.',
+    // Ohne „im Gefach": das Fachwort trüge hier nichts Neues und stünde ohne
+    // Glossar-Chip mitten im Satz (Designregel R10).
+    was: 'Das tragende Skelett — und zwischen den Ständern die Dämmung. Hier steckt die Wärme des Hauses drin.',
     dicke: 7,
     farbe: '#D8C48F', // die Gefachdämmung auf der Bühne
   },
@@ -141,6 +143,9 @@ export function C3() {
   return (
     <StepShell
       id="C3"
+      auftrag={fertig ? null : 'Tipp die Schichten an, von innen nach außen.'}
+      // Angetippt, nicht gezogen — also keine Ansage.
+      ansage={null}
       buehneInteraktiv
       interaktionOffen={!fertig}
       buehne={
@@ -148,22 +153,15 @@ export function C3() {
           <Wandelement3D zustand="schichten" schichten={gelegt.length} />
         </Suspense>
       }
-      fachtext={
-        fertig ? undefined : schmal ? (
-          // Die Aufzählung steht Karte für Karte ohnehin darunter; hochkant
-          // bleibt der Satz, der sagt, warum die Reihenfolge zählt — samt
-          // der beiden Begriffe, die sonst nirgends im Tag anklickbar sind.
+      warum={
+        // Eine Fassung statt zweier, ein Fachwort statt dreier (Regel R2).
+        // Die Schichten heißen jetzt nach ihrer Aufgabe; wie sie im Betrieb
+        // heißen, steht auf den Karten darunter, eine nach der anderen.
+        fertig ? undefined : (
           <p>
-            <Begriff id="dampfbremse">Dampfbremse</Begriff> innen,{' '}
-            <Begriff id="holzfaserplatte">Holzfaserplatte</Begriff> außen: die Reihenfolge
-            entscheidet, ob das Haus trocken bleibt.
-          </p>
-        ) : (
-          <p>
-            Der Aufbau von innen nach außen: <Begriff id="beplankung">Beplankung</Begriff>
-            , <Begriff id="dampfbremse">Dampfbremse</Begriff>, Ständer mit Dämmung,{' '}
-            <Begriff id="holzfaserplatte">Holzfaserplatte</Begriff>, Fassade. Die
-            Reihenfolge entscheidet, ob das Haus trocken bleibt.
+            Innen eine Folie, die keine feuchte Luft ins Holz lässt. Außen eine Platte,
+            die trotzdem noch atmet. Die Folie heißt{' '}
+            <Begriff id="dampfbremse">Dampfbremse</Begriff>.
           </p>
         )
       }
@@ -214,6 +212,11 @@ export function C3() {
  * Die Karte für die nächste Schicht — die ganze Übung von C3. Sie ist **selbst
  * der Knopf**: ein Kasten mit Zeichnung und Text und daneben ein
  * „Auflegen“-Button hätte zwei Ziele für eine Handlung.
+ *
+ * **Und weil sie der Knopf ist, trägt sie Limette** (Designregeln R3/R8):
+ * das antippbare Objekt bekommt die Handlungs-Affordanz. Orange bleibt dem
+ * Querschnitt-Schema (`Wandschnitt`) vorbehalten — dort heißt es „diese
+ * Schicht wird gerade behandelt", eine Lese-Info, keine Handlung.
  */
 function Schichtkarte({
   schicht,
@@ -237,7 +240,7 @@ function Schichtkarte({
       onClick={onLegen}
       data-testid="c3-legen"
       whileTap={{ scale: 0.975 }}
-      className="flex w-full items-center gap-3.5 rounded-kh border-2 border-kh-orange/50 bg-kh-orange/10 p-3 text-left"
+      className="flex w-full items-center gap-3.5 rounded-kh border-2 border-kh-signal/60 bg-kh-signal/10 p-3 text-left"
     >
       <span className="grid size-[76px] shrink-0 place-items-center rounded-kh bg-black/35 p-2 sm:size-[86px]">
         <Wandschnitt bis={gelegt} hervor={nummer - 1} />
@@ -246,7 +249,7 @@ function Schichtkarte({
         <span className="kh-etikett block text-kh-paper/45">
           Schicht {nummer} von {gesamt} · Tippen zum Auflegen
         </span>
-        <span className="kh-titel-klein mt-0.5 block text-kh-orange">{schicht.name}</span>
+        <span className="kh-titel-klein mt-0.5 block text-kh-signal">{schicht.name}</span>
         <span className="mt-1 block text-[1rem] leading-snug text-kh-paper/80">
           {schmal ? (schicht.wasKurz ?? schicht.was) : schicht.was}
         </span>
@@ -328,9 +331,8 @@ function Prinzip() {
       <p className="kh-titel-klein text-kh-signal">Innen dichter als außen.</p>
 
       <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-        Von innen nach außen muss jede Schicht offener sein als die davor. Andersherum
-        wandert die Raumfeuchte in die Wand, kondensiert an der kalten dichten Schicht —
-        und dann steht Wasser in der Dämmung, wo niemand hinsieht.
+        Nach außen hin muss jede Schicht offener sein als die davor. Andersherum bleibt
+        die Feuchte in der Wand stehen — und zwar da, wo niemand hinsieht.
       </p>
 
       <p className="text-[1rem] leading-snug text-kh-mute">

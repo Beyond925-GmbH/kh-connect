@@ -50,6 +50,8 @@ export function B32() {
   return (
     <StepShell
       id="B3.2"
+      auftrag={genug ? null : 'Tipp die Teile an, die du im Plan wiedererkennst.'}
+      ansage={null}
       buehneInteraktiv
       titelZusatz="Abstecher"
       // Das Modell will jede Geste selbst: Drehen darf nie den Step wechseln
@@ -74,13 +76,11 @@ export function B32() {
           />
         </Suspense>
       }
-      fachtext={
+      warum={
         <p>
-          Auf dem Papier liegen Grundriss, Schnitt und Ansicht nebeneinander — flach. Im
-          Kopf müssen sie ein Gebäude ergeben. <Begriff id="sparren">Sparren</Begriff>,{' '}
-          <Begriff id="kehlbalken">Kehlbalken</Begriff>,{' '}
-          <Begriff id="pfette">Pfetten</Begriff>: Wer sie im Plan findet, findet sie auch
-          auf dem Dach.
+          Auf dem Papier liegt alles flach nebeneinander. Im Kopf muss daraus ein Gebäude
+          werden. Die schrägen Balken heißen <Begriff id="sparren">Sparren</Begriff> — wer
+          sie im Plan findet, findet sie auch auf dem Dach.
         </p>
       }
       interaktion={

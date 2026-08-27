@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss } from '@/khpl/shell/StepFuss'
@@ -35,6 +36,8 @@ import { StepShell } from '@/khpl/shell/StepShell'
 
 export function A11() {
   const [aha, setAha] = useState(false)
+  /** Die Klappzeile zu Rotation und Bezahlung — zu, bis jemand fragt. */
+  const [dienst, setDienst] = useState(false)
 
   useEffect(() => {
     const id = window.setTimeout(() => setAha(true), 800)
@@ -44,32 +47,60 @@ export function A11() {
   return (
     <StepShell
       id="A1.1"
+      auftrag={null}
+      ansage={null}
       titelZusatz="Abstecher"
       buehne={<Schnitt zustand={{ szene: 'transporter', licht: 'nacht' }} />}
-      fachtext={
+      warum={
         <>
           <p>
             Notdienst, Bereitschaft, Wochenende. Ehrlich: es gehört dazu, es ist nicht
             jeden Tag, und es wird bezahlt.
           </p>
-          <p className="mt-3">
-            Wenn samstags die Heizung ausfällt, ruft niemand eine Zentrale an — es fährt
-            jemand aus dem Team. Wer dran ist, wechselt reihum, meist wochenweise. Wie die
-            Rotation läuft, legt der Betrieb fest und kein Tarifvertrag; in kleinen
-            Betrieben fährt oft der Chef selbst.
-          </p>
-          <p className="mt-3">
-            Bezahlt wird beides getrennt: das Erreichbarsein und der Einsatz. Der Einsatz
-            zählt als Arbeitszeit, mit Zuschlägen. Was das je Stunde ist, steht in keinem
-            bundesweiten Tarif — das regelt jedes Bundesland für sich.
-          </p>
+          {/*
+            **Wortbudget (R5): offen steht nur der erste Absatz.** Vier
+            Absätze gleichzeitig — Warum-Block plus Aha — waren ~106 Wörter
+            auf einem Lese-Step. Rotation und Bezahlung kommen auf Tipp;
+            gestrichen ist nichts, die Ehrlichkeit des ersten Satzes bleibt
+            sichtbar stehen.
+          */}
+          <button
+            type="button"
+            onClick={() => setDienst((v) => !v)}
+            aria-expanded={dienst}
+            data-testid="a11-dienst-schalter"
+            className="mt-2 flex min-h-[44px] w-full items-center justify-between gap-2 text-left transition-transform active:scale-[0.99]"
+          >
+            <span className="kh-etikett">Wer fährt, und wie wird das bezahlt?</span>
+            <ChevronDown
+              aria-hidden
+              className={`size-4 shrink-0 text-kh-paper/45 transition-transform ${
+                dienst ? 'rotate-180' : ''
+              }`}
+              strokeWidth={2.25}
+            />
+          </button>
+          {dienst && (
+            <>
+              <p>
+                Wenn samstags die Heizung ausfällt, ruft niemand eine Zentrale an — es
+                fährt jemand aus dem Team. Wer dran ist, wechselt reihum, meist
+                wochenweise. Wie die Rotation läuft, legt der Betrieb fest und kein
+                Tarifvertrag; in kleinen Betrieben fährt oft der Chef selbst.
+              </p>
+              <p className="mt-3">
+                Bezahlt wird beides getrennt: das Erreichbarsein und der Einsatz. Der
+                Einsatz zählt als Arbeitszeit, mit Zuschlägen. Wie viel, regelt jedes
+                Bundesland selbst.
+              </p>
+            </>
+          )}
         </>
       }
       aha={
         <AhaKarte sichtbar={aha} eyebrow="Muss das jeder machen?">
-          Bereitschaft ist ein Dienst im Team, der reihum geht — nicht jede Woche und
-          nicht allein. Sie ist der Grund, warum am Sonntagabend überhaupt jemand ans
-          Telefon geht, wenn ein Haus kalt wird.
+          Der Dienst geht reihum — nicht jede Woche und nicht allein. Er ist der Grund,
+          warum sonntagabends überhaupt jemand ans Telefon geht.
         </AhaKarte>
       }
       fuss={<StepFuss id="A1.1" />}

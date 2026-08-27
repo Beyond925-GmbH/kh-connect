@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { FRAGEN } from '@/khpl/match/fragen'
-import { merkeFrage, zeigeVorschlag } from '@/khpl/store/fortschritt'
+import { merkeFrage, zeigeBerufe } from '@/khpl/store/fortschritt'
 
 /**
  * S2 — die vier Fragen. Eine pro Screen, Antwort per Tap, dann weiter.
@@ -31,7 +31,7 @@ export function Fragen() {
 
   const weiter = () => {
     setGewaehlt(null)
-    if (letzte) zeigeVorschlag()
+    if (letzte) zeigeBerufe()
     else setIndex((i) => i + 1)
   }
 
@@ -95,7 +95,17 @@ export function Fragen() {
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="flex min-h-0 flex-1 flex-col justify-center gap-6 landscape:mx-auto landscape:w-full landscape:max-w-[52rem]"
           >
-            <h1 className="kh-plakat shrink-0">{frage.frage}</h1>
+            {/* Das Warum in einer Zeile: ohne sie sind die vier Fragen ein
+                Quiz mit unbekannten Regeln. Auf jedem der vier Screens, weil
+                jeder für sich stehen muss — wer bei Frage drei kurz aussteigt,
+                soll nicht zurückblättern müssen. */}
+            <div className="flex shrink-0 flex-col gap-2">
+              <span className="kh-etikett flex items-center gap-2">
+                <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
+                Vier Fragen — dann siehst du, was zu dir passt
+              </span>
+              <h1 className="kh-plakat">{frage.frage}</h1>
+            </div>
 
             {/*
               Die Antworten sind schmaler als die Frage. Über die volle

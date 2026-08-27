@@ -61,7 +61,11 @@ type ZerspanungStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher'> & 
 const STEPS = [
   {
     id: 'Z1',
-    titel: 'Null Komma null zwei eins',
+    // R6: Der alte Titel „Null Komma null zwei eins“ sprach die Zahl aus, die
+    // der Slider gerade erraten soll — wer lesen kann, kannte die Antwort vor
+    // dem ersten Zug. Die ausgeschriebene Zahl steht jetzt dort, wo sie stark
+    // ist: als Zwischentitel der Auflösung (`Z1.tsx`, `Aufloesung`).
+    titel: 'Der Spielraum, den niemand sieht',
     kurz: 'Zeichnung und Toleranz',
     art: 'haupt',
     weiter: 'Z2',
@@ -231,8 +235,8 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
    * Szenario-Video die zweite echte Medienlücke des Tages und die wichtigere,
    * weil sie die Pointe trägt (§10).
    *
-   * Ungenutzt und verfügbar bleibt `schaetzen-spindel.webp` (Spindel mit
-   * Kühlmittelzuführung); `gallery-1.webp` trägt seit dem Ausbau Z7.
+   * `gallery-1.webp` trägt seit dem Ausbau Z7, `schaetzen-spindel.webp` seit
+   * dem Review Z7.1 — der Bestand ist damit ausgeschöpft.
    */
   bilder: {
     /*
@@ -265,9 +269,23 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
     // — anders als `schaetzen-spindel.webp`, das neben `gallery-3` (Z2.1)
     // zweimal dasselbe Kühlmittel zeigte.
     Z7: { src: '/medien/media/zerspanungsmechaniker/gallery-1.webp', pos: '55% 55%' },
-    // Die drei Karrierefotos sind gemeinsam und zeigen niemandes Gewerk
-    // (khpl-tage.md §6.1 V2).
-    'Z7.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
+    /*
+      Z7.1 trägt nicht mehr das geteilte Meisterfoto (`b91-meister.webp`):
+      das zeigt eine Holzwerkstatt, und der Text daneben sagt ausdrücklich
+      „kein Handwerksmeister, sondern Industriemeister **Metall**“ — Bild und
+      Satz widersprachen sich wörtlich (R13/R14). `schaetzen-spindel.webp`
+      (Werkzeug im Futter einer Metall-CNC, sauber, unverkennbar dieses
+      Gewerk) ist der beste Ersatz im Bestand; ein echtes
+      Industriemeister-Motiv mit Mensch steht in
+      `ui-review/medien-luecken-zerspanung.md`.
+
+      Techniker und Studium bleiben gemeinsam — dort zeigt kein Bild ein
+      fremdes Gewerk (khpl-tage.md §6.1 V2).
+    */
+    'Z7.1': {
+      src: '/medien/media/zerspanungsmechaniker/schaetzen-spindel.webp',
+      pos: '50% 50%',
+    },
     'Z7.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
     'Z7.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
     /*

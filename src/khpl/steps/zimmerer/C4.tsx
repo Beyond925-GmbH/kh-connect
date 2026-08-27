@@ -12,7 +12,6 @@ import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { useSchmal } from '@/khpl/shell/schmal'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
@@ -170,11 +169,6 @@ function beurteile(breiteMm: number): Rahmenurteil {
 type Phase = 'wahl' | 'probe' | 'aufrichten' | 'fertig'
 
 export function C4() {
-  // Handy hochkant teilen sich Panel und Element dieselben 844 px, und der
-  // Klappgriff deckelt das Panel dort auf 62 %. Was hier nicht in die
-  // Scrollfläche passt, ist unsichtbar — also trägt der Screen dort weniger
-  // Text, nie weniger Übung (s. `shell/schmal.ts`).
-  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.c4
   const fertigLautStore = !!gespeichert?.getroffen
 
@@ -228,7 +222,7 @@ export function C4() {
       return
     }
     merkeAntwort('c4', { getroffen: false, versuche: n })
-    setText(fehlertext(angebot.breiteMm, schmal))
+    setText(fehlertext(angebot.breiteMm))
     // Der Rahmen bleibt kurz liegen, wo er gelandet ist — das Bild ist die
     // halbe Aussage —, dann geht er zurück auf den Tisch und man ist wieder
     // dran. Ohne Knopf: der nächste Tap auf einen Rahmen ist der nächste Versuch.
@@ -241,6 +235,19 @@ export function C4() {
   return (
     <StepShell
       id="C4"
+      /*
+        Acht Wörter, ein Verb, und sie sagt die Sache statt der Bedienung:
+        nicht „tippe eine Karte an“, sondern was der Tap im Beruf bedeutet.
+
+        Ist der Rahmen drin, wird sie `null` — dann rückt die Rückmeldung an
+        ihre Stelle. Der Kasten bewegt sich nicht, er füllt sich um.
+      */
+      auftrag={geloest ? null : 'Wähl den Rahmen, der in den Ausschnitt passt.'}
+      /*
+        Antippen erklärt sich selbst (`gesten.ts`). Das ist eine Entscheidung
+        und keine Lücke — genau dafür ist die Angabe erforderlich.
+      */
+      ansage={null}
       buehneInteraktiv
       interaktionOffen={!geloest}
       buehne={
@@ -262,24 +269,31 @@ export function C4() {
           />
         </Suspense>
       }
-      fachtext={
-        // Auf dem Handy entfällt der Fachtext, solange gewählt wird: mit ihm
-        // lagen Aufforderung und Rückmeldung unter der Scrollkante, und ein
-        // Screen, der nicht mehr sagt, was zu tun ist, ist kein Screen mehr.
-        // Der Begriff kommt in der Aha-Karte wieder.
-        !geloest && !schmal ? (
-          <p>
-            Der Ausschnitt ist geschnitten, das{' '}
-            <Begriff id="wechselholz">Wechselholz</Begriff> sitzt. Jetzt kommt der Rahmen
-            — denn ein Fenster hängt nicht in der Dämmung, es hängt im Holz.
-          </p>
-        ) : undefined
+      /*
+        Der frühere Fachtext, hinter der Klappzeile — und in **einer** Fassung
+        statt zweier.
+
+        Vorher gab es ihn lang und kurz (`useSchmal`), weil er sich auf einem
+        Handy hochkant mit der Aufgabe um dieselbe Fläche stritt und dann
+        ausgerechnet die Aufforderung unter die Scrollkante schob. Der Streit
+        ist weg: der Auftrag steht außerhalb der Scrollfläche, und das Warum
+        ist zu, bis jemand es aufmacht. Geblieben ist die kürzere Fassung —
+        sie war ohnehin die bessere.
+
+        Ein Fachwort, nicht zwei (Regel R2): „Wechselholz" wird in der
+        Aha-Karte erklärt, und der Alltagssatz steht davor.
+      */
+      warum={
+        <p>
+          Ein Fenster hängt nicht in der Dämmung, es hängt im Holz. Rundum sitzt dafür ein
+          Rahmen aus <Begriff id="wechselholz">Wechselholz</Begriff>.
+        </p>
       }
       interaktion={
         <Wechsel takt={geloest ? 'gesetzt' : 'wahl'}>
           {!geloest ? (
             <div className="flex flex-col gap-3">
-              <Auftrag schmal={schmal} />
+              <Planmass />
               <Rueckmeldung
                 ok={text ? false : null}
                 text={text}
@@ -328,23 +342,36 @@ export function C4() {
           {/* Der eigentliche Fachinhalt des Screens — die Fuge ist Absicht.
               Als Frage formuliert steht er hier besser als im Auftragsfeld:
               gefragt wird er ohnehin erst, wenn der passgenaue Rahmen
-              aufgesetzt hat und liegen geblieben ist. */}
+              aufgesetzt hat und liegen geblieben ist.
+
+              Der Chip für „Dichtstoff" sitzt hier, nicht im Treffertext:
+              `Rueckmeldung` nimmt nur Klartext, und diese Karte steht im
+              selben Takt direkt darunter (Designregel R10). */}
           <AhaKarte sichtbar={geloest} eyebrow="Wozu überhaupt eine Fuge?">
             Der Rahmen ist {m(RICHTIG.breiteMm)} breit, der Ausschnitt{' '}
             {m(AUSSCHNITT_BREITE_MM)}. Die {FUGE_MIN_MM} Millimeter dazwischen werden
-            gedämmt und abgedichtet und fangen die Bewegung des Materials auf. Ein
-            Fenster, das passgenau in die Öffnung geklemmt wird, ist falsch eingebaut —
-            und das <Begriff id="wechselholz">Wechselholz</Begriff> rundum hält es.
+            gedämmt, mit <Begriff id="dichtstoff">Dichtstoff</Begriff> verschlossen — und
+            sie fangen die Bewegung des Materials auf. Ein Fenster, das passgenau in die
+            Öffnung geklemmt wird, ist falsch eingebaut — und das{' '}
+            <Begriff id="wechselholz">Wechselholz</Begriff> rundum hält es.
           </AhaKarte>
           {/* Zwei Regeln, kein Rechenweg: 1,5 mm/m und die Deckelung auf 3 mm
               stehen im Beleg nebeneinander (belege/zimmerer.md 5). „1,5 × 3 = 3“
-              wäre ein Rechenfehler — auf einem Präzisionsscreen der teuerste. */}
-          <AhaKarte sichtbar={geloest} eyebrow="Wie genau muss so ein Ausschnitt sitzen?">
+              wäre ein Rechenfehler — auf einem Präzisionsscreen der teuerste.
+
+              Ab dem zweiten Einwurf zugeklappt (R5): drei zugleich offene
+              Karten wären eine Textwand unter der Aha-Karte zur Fuge. */}
+          <AhaKarte
+            sichtbar={geloest}
+            zugeklappt
+            eyebrow="Wie genau muss so ein Ausschnitt sitzen?"
+          >
             Wasserwaagengenauigkeit: höchstens anderthalb Millimeter Abweichung je Meter —
             und bei Elementen bis drei Meter nie mehr als drei Millimeter insgesamt.
           </AhaKarte>
           <AhaKarte
             sichtbar={geloest}
+            zugeklappt
             eyebrow="Warum kostet ein Fehler hier eine Stunde?"
           >
             Weil nicht das Holz teuer ist, sondern der Takt. Um elf kommt der Lkw. Was
@@ -372,35 +399,29 @@ export function C4() {
 // ---------------------------------------------------------------------------
 
 /**
- * Was zu tun ist. **Die Zahlen der drei Rahmen stehen nicht hier, sondern auf
- * der Bühne** — an den Rahmen selbst, als Etikett. Sie doppelt im Panel zu
- * führen hieße, den Blick zwischen zwei Listen zu schicken, und die Übung ist
- * ein Vergleich zwischen dem Plan und dem, was auf dem Tisch liegt.
+ * Das Planmaß — die eine Zahl, gegen die verglichen wird.
+ *
+ * **Die Zahlen der drei Rahmen stehen nicht hier, sondern auf der Bühne**, an
+ * den Rahmen selbst, als Etikett. Sie doppelt im Panel zu führen hieße, den
+ * Blick zwischen zwei Listen zu schicken; die Übung ist ein Vergleich zwischen
+ * dem Plan und dem, was auf dem Tisch liegt.
+ *
+ * **Was hier weggefallen ist:** die große Frage „Welchen Rahmen nimmst du?" in
+ * Signalgelb und die Zeile „Drei liegen auf dem Tisch. Tipp einen an." Beides
+ * war die Aufgabe — und die steht jetzt im Auftragsband, auf jedem Screen an
+ * derselben Stelle. Zweimal dieselbe Aufforderung, einmal groß und einmal
+ * klein, war genau die Dopplung, die den Screen dicht gemacht hat.
  */
-function Auftrag({ schmal }: { schmal: boolean }) {
+function Planmass() {
   return (
-    <div className="flex flex-col gap-2">
-      <p
-        data-testid="c4-plan"
-        className="text-[1rem] leading-snug text-kh-mute tabular-nums"
-      >
-        <span className="text-kh-paper/55">Ausschnitt laut Plan:</span>{' '}
-        <span className="text-kh-paper">{m(AUSSCHNITT_BREITE_MM)}</span> breit ·
-        Unterkante <span className="text-kh-paper">{m(AUSSCHNITT_Y_MM)}</span> — so ist er
-        geschnitten.
-      </p>
-      <p
-        data-testid="c4-frage"
-        className="font-display text-[clamp(1.9rem,1.3rem+1.6vw,2.75rem)] leading-none text-kh-signal"
-      >
-        Welchen Rahmen nimmst du?
-      </p>
-      <p className="text-[1.0625rem] text-kh-mute">
-        {schmal
-          ? 'Drei liegen auf dem Tisch. Tipp einen an.'
-          : 'Drei liegen auf dem Tisch, jeder mit seinem Maß. Tipp einen an.'}
-      </p>
-    </div>
+    <p
+      data-testid="c4-plan"
+      className="kh-feld px-3.5 py-2.5 text-[1rem] leading-snug text-kh-mute tabular-nums"
+    >
+      <span className="text-kh-paper/55">Ausschnitt laut Plan:</span>{' '}
+      <span className="text-kh-paper">{m(AUSSCHNITT_BREITE_MM)}</span> breit · Unterkante{' '}
+      <span className="text-kh-paper">{m(AUSSCHNITT_Y_MM)}</span>
+    </p>
   )
 }
 
@@ -413,14 +434,13 @@ function Auftrag({ schmal }: { schmal: boolean }) {
  * belegt und steht in der Aha-Karte, die Obergrenze ist es nicht (siehe
  * `FUGE_MAX_MM`).
  */
-function fehlertext(breiteMm: number, schmal: boolean): string {
+function fehlertext(breiteMm: number): string {
   if (beurteile(breiteMm) === 'zu-gross') {
-    return schmal
-      ? 'Passgenau heißt: geht nicht rein. Er setzt auf und bleibt liegen. Nachschneiden kostet Zeit — um elf steht der Lkw.'
-      : 'Passgenau — und genau deshalb geht er nicht rein. Er setzt auf und bleibt oben liegen. Kein Ausschnitt ist auf den Millimeter genau, kein Rahmen auch. Nachschneiden geht, das dauert, und um elf steht der Lkw.'
+    return 'Passgenau heißt: geht nicht rein. Er setzt auf und bleibt liegen. Nachschneiden kostet Zeit — um elf steht der Lkw.'
   }
+  // „Zu breit zum Abdichten", nicht „fürs Dichtband": ein zweiter, hier
+  // unerklärbarer Fachbegriff neben „Dichtstoff" (Designregel R10) — und
+  // `Rueckmeldung` kann keinen Glossar-Chip tragen.
   const f = fuge(breiteMm)
-  return schmal
-    ? `${f} mm Luft je Seite — er fällt durch. Zu breit fürs Dichtband: Element auf, neues Wechselholz, eine Stunde weg.`
-    : `${f} Millimeter Luft auf jeder Seite — der Rahmen fällt durch. So breit fasst das Dichtband die Fuge nicht mehr: Das Element muss auf, ein neues Wechselholz rein. Eine Stunde weg, und um elf steht der Lkw.`
+  return `${f} mm Luft je Seite — er fällt durch. Zu breit zum Abdichten: Element auf, neues Wechselholz, eine Stunde weg.`
 }

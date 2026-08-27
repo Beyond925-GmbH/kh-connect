@@ -192,14 +192,23 @@ function Kontaktschatten({
  * (Abnahme-Befund). Die Kontaktschatten geben den verbleibenden Stützen ihren
  * Bodenkontakt — auf dem dunklen Boden lasen sie sich sonst als frei
  * schwebende schwarze Balken.
+ *
+ * **`mitTor` stellt hinter die Stützen eine Rückwand mit offenem Hallentor.**
+ * Für die Zäsur in C5: nach der Abfahrt blieb dort nur der leere Tisch in
+ * strukturlosem Braun zurück, und die erzählte Leere las sich wie ein
+ * unbespielter Screen (Designregel R1). Die Wand macht die Halle als Raum
+ * lesbar, und das warm erleuchtete Tor sagt ohne ein Wort, wo das Gespann
+ * geblieben ist — die Leere wird Kameraeinstellung statt Ladefehler.
  */
 export function Halle({
   mitAuflage = false,
   ohneVordereStuetzen = false,
+  mitTor = false,
   tischTiefe = 3.8,
 }: {
   mitAuflage?: boolean
   ohneVordereStuetzen?: boolean
+  mitTor?: boolean
   /**
    * Tiefe der Tischplatte in Metern. C4 legt vor dem Element eine Reihe
    * Fensterrahmen ab; auf dem Regeltisch (3,8 m, Vorderkante bei z = 0,4)
@@ -253,6 +262,35 @@ export function Halle({
             <Kontaktschatten position={[x, 0.012, z]} groesse={[1.1, 1.1]} />
           </group>
         )),
+      )}
+      {mitTor && (
+        <group>
+          {/* Rückwand hinter der Stützenreihe. Sie steht im Dunst und darf
+              dort versinken — sie muss nur als Wand lesbar sein. */}
+          <mesh position={[0, 4, -9.8]}>
+            <boxGeometry args={[44, 8, 0.3]} />
+            <meshStandardMaterial color="#3A342C" roughness={1} flatShading />
+          </mesh>
+          {/* Das offene Tor: warmes Tageslicht von draußen, elf Uhr. Ohne
+              Nebel (`fog={false}`), damit es als hellste Stelle des Bildes
+              stehen bleibt — es ist die Pointe, nicht die Kulisse. Bei x = 5,5
+              steht es unter dem C5-Blick ganz im Bild, zwischen den
+              Stützenprojektionen statt hinter einer. */}
+          <mesh position={[5.5, 2.3, -9.6]}>
+            <planeGeometry args={[5.2, 4.6]} />
+            <meshBasicMaterial color="#D8A96B" fog={false} />
+          </mesh>
+          {/* Die Lichtbahn, die vom Tor in die Halle fällt. */}
+          <mesh position={[5.5, 0.014, -6.9]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[5.0, 5.4]} />
+            <meshBasicMaterial
+              color="#D8A96B"
+              transparent
+              opacity={0.16}
+              depthWrite={false}
+            />
+          </mesh>
+        </group>
       )}
     </group>
   )

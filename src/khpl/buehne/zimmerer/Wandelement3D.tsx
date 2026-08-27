@@ -499,8 +499,10 @@ export default function Wandelement3D(props: Wandelement3DProps) {
             {/* Ohne die kamerazugewandte Stützenreihe: unter dem schrägen
                 Blick der Zäsur stand sie als Vordergrund vor dem Gespann und
                 las sich ohne Bodenkontakt als Renderfehler (Abnahme-Befund
-                C5). */}
-            <Halle ohneVordereStuetzen />
+                C5). `mitTor`: nach der Abfahrt bleibt sonst nur strukturloses
+                Braun zurück — Rückwand und offenes Tor machen die leere Halle
+                als Raum lesbar (Designregel R1). */}
+            <Halle ohneVordereStuetzen mitTor />
             {/* x = −2,8 zentriert das Gespann in der Kamerahülle (±7,6 m):
                 der Anhänger trägt die Ladung um x = 0, der Transporter ragt
                 bis fast +10 — unverschoben lief der Innenlader rechts aus

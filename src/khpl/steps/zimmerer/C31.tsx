@@ -72,7 +72,7 @@ const BELEGE: Abschnitt[] = [
   {
     frage: 'Was das Holz speichert',
     antwort:
-      'In einem Kubikmeter verbautem Holz steckt ungefähr eine Tonne CO₂ — je nach Rechenweg zwischen 0,6 und 1,7 Tonnen. In einem Einfamilienhaus aus Holz sind 30 bis 70 Kubikmeter verbaut. Solange das Haus steht, bleibt der Kohlenstoff drin.',
+      'In einem Kubikmeter Holz steckt ungefähr eine Tonne CO₂. In einem Holzhaus stecken 30 bis 70 Kubikmeter. Solange das Haus steht, bleibt das drin.',
   },
   {
     frage: 'Warum hier keine Tonnenzahl steht',
@@ -85,13 +85,15 @@ export function C31() {
   return (
     <StepShell
       id="C3.1"
+      auftrag={null}
+      ansage={null}
       titelZusatz="Abstecher"
       // Quer 52 statt 44 rem: die zwei Belegfelder stehen dort nebeneinander,
       // und in der schmalen Spalte brach schon ihre Überschrift zweizeilig um.
       karteBreit
       interaktionOffen={false}
       buehne={<StepFoto id="C3.1" />}
-      fachtext={
+      warum={
         <>
           {/* Kein Rot. Der Strich ist orange, weil Rot im ganzen System nicht
               vorkommt — und weil hier niemand bewertet wird, sondern die App

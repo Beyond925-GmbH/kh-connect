@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Check } from 'lucide-react'
+import { Check, ChevronDown } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
+import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -94,6 +95,8 @@ export function A5() {
   const gespeichert = useFortschritt().answers.a5
   const [offen, setOffen] = useState<FrageId | null>(null)
   const [gelesen, setGelesen] = useState<string[]>(() => gespeichert?.gelesen ?? [])
+  /** Die Klappzeile zur Kehrseite — zu, bis jemand fragt. */
+  const [kunde, setKunde] = useState(false)
 
   const waehle = (id: FrageId) => {
     setOffen((vorher) => (vorher === id ? null : id))
@@ -109,6 +112,8 @@ export function A5() {
   return (
     <StepShell
       id="A5"
+      auftrag={null}
+      ansage={null}
       // Keine Übung, kein Prüfknopf: der Karriere-Link darf hier auftauchen,
       // und *Weiter* bleibt der eine laute Knopf.
       interaktionOffen={false}
@@ -122,7 +127,7 @@ export function A5() {
         `technik: 0.85`.
       */
       buehne={<Schnitt zustand={{ szene: 'transporter', licht: 'mittag' }} />}
-      fachtext={
+      warum={
         <>
           <p>
             Halb eins. Der Transporter steht im Schatten, die Brote liegen auf dem Schoß,
@@ -130,28 +135,40 @@ export function A5() {
             Adressen ist das die Pause.
           </p>
           {/*
-            Die Kehrseite. Ein Satz, in Anton, an der Stelle, an der er
-            hingehört — und direkt darunter das, was der Beruf dagegensetzt.
-            Ohne den zweiten Absatz wäre der erste eine Warnung; mit ihm ist er
-            eine Auskunft.
+            Die Kehrseite. Sie stand hier offen und trieb den Screen beim
+            Ankommen auf ~68 Wörter (R5) — jetzt liegt sie hinter einer
+            Klappzeile, deren Frage sie nicht versteckt: wer sie antippt,
+            bekommt den Anton-Satz und direkt darunter das, was der Beruf
+            dagegensetzt. Ohne den zweiten Absatz wäre der erste eine Warnung;
+            mit ihm ist er eine Auskunft.
           */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 1.2 }}
-            className="kh-titel-klein mt-4 text-kh-orange"
+          <button
+            type="button"
+            onClick={() => setKunde((v) => !v)}
+            aria-expanded={kunde}
+            data-testid="a5-kunde-schalter"
+            className="mt-3 flex min-h-[44px] w-full items-center justify-between gap-2 text-left transition-transform active:scale-[0.99]"
           >
-            Nicht jeder Kunde ist geduldig.
-          </motion.p>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1.2, delay: 1.6 }}
-            className="mt-2"
-          >
-            Das ist nicht vermeidbar. Man bleibt trotzdem nett, macht ruhig weiter — und
-            am Ende ist auch der Kunde wieder beruhigt.
-          </motion.p>
+            <span className="kh-etikett">Und wenn der Kunde ungeduldig wird?</span>
+            <ChevronDown
+              aria-hidden
+              className={`size-4 shrink-0 text-kh-paper/45 transition-transform ${
+                kunde ? 'rotate-180' : ''
+              }`}
+              strokeWidth={2.25}
+            />
+          </button>
+          {kunde && (
+            <>
+              <p className="kh-titel-klein mt-1 text-kh-orange">
+                Nicht jeder Kunde ist geduldig.
+              </p>
+              <p className="mt-2">
+                Das ist nicht vermeidbar. Man bleibt trotzdem nett, macht ruhig weiter —
+                und am Ende ist auch der Kunde wieder beruhigt.
+              </p>
+            </>
+          )}
         </>
       }
       interaktion={
@@ -168,21 +185,24 @@ export function A5() {
             </p>
           )}
 
+          {/*
+            Dieselbe Geste, dieselbe Fläche: „tipp an, um aufzuklappen" heißt
+            in A2 und A4.1 `Wahlflaeche` mit Signal-Ton, und hier ist nichts
+            vorläufig — die Wahl gilt, sobald sie fällt. Die alte Fassung
+            baute die Chips von Hand und färbte sie orange, die Farbe der
+            Welt (R3): derselbe Griff sah damit auf drei Screens verschieden
+            aus.
+          */}
           <div className="flex flex-wrap gap-2">
             {FRAGEN.map((f) => {
               const aktiv = offen === f.id
               return (
-                <button
+                <Wahlflaeche
                   key={f.id}
-                  type="button"
                   onClick={() => waehle(f.id)}
-                  aria-pressed={aktiv}
+                  gewaehlt={aktiv}
                   data-testid={`a5-frage-${f.id}`}
-                  className={`flex min-h-[52px] items-center gap-2 rounded-kh-pill border-2 px-4 text-left text-[1.0625rem] font-semibold transition-transform active:scale-95 ${
-                    aktiv
-                      ? 'border-kh-orange bg-kh-orange text-[#0E0D0B]'
-                      : 'border-kh-line-strong bg-white/5 text-kh-paper'
-                  }`}
+                  className="w-auto rounded-kh-pill font-semibold"
                 >
                   {/* Der Haken markiert Gelesenes, ohne es wegzunehmen. */}
                   {gelesen.includes(f.id) && !aktiv && (
@@ -193,7 +213,7 @@ export function A5() {
                     />
                   )}
                   {f.frage}
-                </button>
+                </Wahlflaeche>
               )
             })}
           </div>

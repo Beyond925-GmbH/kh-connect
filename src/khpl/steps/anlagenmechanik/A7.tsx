@@ -274,13 +274,21 @@ export function A7() {
   return (
     <StepShell
       id="A7"
+      /*
+        Die beste Übung der Anwendung: dem Kunden erklären, was du gebaut hast.
+        Sie trainiert genau das, worum es in `khpl-vereinfachung.md` geht —
+        deshalb sagt der Auftrag „so, dass sie es versteht", nicht „wähle eine
+        Antwort".
+      */
+      auftrag={imGespraech ? 'Erklär es so, dass sie es versteht.' : null}
+      ansage={null}
       interaktionOffen={imGespraech}
       buehne={
         <Schnitt
           zustand={{ szene: 'uebergabe', pfad: fortschritt.answers.a4?.pfad ?? [] }}
         />
       }
-      fachtext={
+      warum={
         imGespraech ? (
           /*
             Auf dem Handy hochkant entfällt der Rahmentext: mit ihm lag die

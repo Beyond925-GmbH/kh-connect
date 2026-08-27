@@ -139,8 +139,10 @@ export const KARRIEREWEGE: Karriereweg[] = [
     abschnitte: [
       {
         frage: 'Warum erst eine Ausbildung?',
+        // „fachgebunden" nicht als nacktes Verwaltungswort am Satzende
+        // (Designregel R10): der Satz sagt jetzt selbst, was es einschränkt.
         antwort:
-          'Weil sie den Weg nicht zumacht, sondern aufmacht. In Nordrhein-Westfalen berechtigt der Meisterbrief — und auch der Techniker — zur Einschreibung in jeden Studiengang an jeder Hochschule des Landes. Ohne Abitur, ohne Zugangsprüfung. Mit dem Gesellenbrief und drei Jahren im Beruf geht es fachgebunden.',
+          'Weil sie den Weg nicht zumacht, sondern aufmacht. In Nordrhein-Westfalen berechtigt der Meisterbrief — und auch der Techniker — zur Einschreibung in jeden Studiengang an jeder Hochschule des Landes. Ohne Abitur, ohne Zugangsprüfung. Mit dem Gesellenbrief und drei Jahren im Beruf geht es auch — dann aber nur in einem verwandten Studiengang, etwa Bauingenieurwesen (»fachgebunden«).',
       },
       {
         frage: 'Und das geht hier',

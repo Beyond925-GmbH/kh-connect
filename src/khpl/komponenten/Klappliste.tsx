@@ -32,12 +32,12 @@ const SPALTEN: Record<number, string> = {
  * drei Maschinen auf C1.1 (267 px, das Schlusszitat fehlte ganz). Am Messestand
  * wird in einem Panel nicht gescrollt.
  *
- * Die Antwort ist dieselbe wie beim Zerspanungstag: auf schmalen Screens steht
- * jede **Überschrift** über der Kante, der Text kommt auf Tipp; der erste
- * Eintrag kommt offen an, damit der Screen nicht mit einer Reihe zugeklappter
- * Zeilen anfängt. Immer nur einer ist offen — zwei offene Einträge holen die
- * Scrollkante zurück. **Gekürzt wird nichts**: was in den Feldern steht, ist
- * recherchiert (`belege/`).
+ * Die Antwort ist dieselbe wie beim Zerspanungstag: jede **Überschrift**
+ * bleibt sichtbar (das ist die Verzeichnis-Funktion der Liste), der Text kommt
+ * auf Tipp; der erste Eintrag kommt offen an, damit der Screen nicht mit einer
+ * Reihe zugeklappter Zeilen anfängt. Immer nur einer ist offen — zwei offene
+ * Einträge holen die Scrollkante zurück. **Gekürzt wird nichts**: was in den
+ * Feldern steht, ist recherchiert (`belege/`).
  *
  * `ersterOffen={false}` ist für Screens, die über der Liste schon einen Absatz
  * tragen: dort fängt nichts mit zugeklappten Zeilen an, und die Liste ist eher
@@ -46,9 +46,12 @@ const SPALTEN: Record<number, string> = {
  * Liste das geöffnete Feld selbst heran. Das Scrollen macht dann die App und
  * nicht der Besucher, und das ist der ganze Unterschied.
  *
- * Überall sonst stehen alle Texte da. `spaltenQuer` legt sie quer im breiten
- * Panel (`karteBreit`) nebeneinander — dort ist Höhe knapp und Breite im
- * Überfluss vorhanden.
+ * Das gilt auch quer auf der Kiosk-Stele. Die Vorfassung schrieb dort alle
+ * Texte gleichzeitig aus — fünf volle Absätze auf einem Screen, und das
+ * Wortbudget (R5, ~50 Wörter sichtbar) gilt im Querformat genauso wie
+ * hochkant. `spaltenQuer` legt die Felder im breiten Panel (`karteBreit`) in
+ * Spalten nebeneinander — dort ist Höhe knapp und Breite im Überfluss
+ * vorhanden.
  *
  * ⚠️ **Gemeldete Doppelung.** `zerspanung/Z7Weg.tsx` trägt dieselbe Liste mit
  * derselben Begründung, und die Karrierekarten sind in allen vier Tagen gleich
@@ -85,48 +88,21 @@ export function Klappliste({
     felder.current[offen]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
   }, [offen])
 
-  if (!schmal) {
-    return (
-      // Quer **Spalten statt Raster**. Mit `grid-cols-2` bestimmt der längste
-      // Abschnitt einer Zeile deren Höhe — auf C8.1 stand unter „Was ist das“
-      // ein 170 px hohes Loch, weil daneben der lange Meister-Alltag liegt, und
-      // „Was du verdienst“ fiel trotzdem unter die Kante. Der Spaltenumbruch
-      // verteilt nach Höhe statt nach Reihenfolge und liest sich wie eine
-      // Zeitungsseite: erst die linke Spalte hinunter, dann die rechte.
-      <dl
-        className={`flex flex-col gap-2.5 ${
-          spaltenQuer > 1
-            ? `landscape:block landscape:gap-2.5 ${SPALTEN[spaltenQuer]}`
-            : ''
-        }`}
-      >
-        {abschnitte.map((a, i) => (
-          <motion.div
-            key={a.frage}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
-            // Je Eintrag ein eigenes Feld statt einer durchlaufenden
-            // Definitionsliste: das sind Antworten auf Fragen und lesen sich
-            // sonst wie ein Merkblatt. Kein Feld darf über den Spaltenumbruch
-            // reißen — ein Text, der in der einen Spalte anfängt und in der
-            // anderen aufhört, ist schlechter als jede Scrollkante.
-            className={`kh-feld break-inside-avoid px-4 py-3 ${
-              spaltenQuer > 1 ? 'landscape:mb-2.5' : ''
-            }`}
-          >
-            <dt className="kh-etikett">{a.frage}</dt>
-            <dd className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90 sm:text-[1.1875rem]">
-              {a.antwort}
-            </dd>
-          </motion.div>
-        ))}
-      </dl>
-    )
-  }
-
   return (
-    <div className="flex flex-col gap-2" data-testid={`${kennung}-abschnitte`}>
+    // Quer **Spalten statt Raster**. Mit `grid-cols-2` bestimmt der längste
+    // Abschnitt einer Zeile deren Höhe — auf C8.1 stand unter „Was ist das“
+    // ein 170 px hohes Loch, weil daneben der lange Meister-Alltag liegt, und
+    // „Was du verdienst“ fiel trotzdem unter die Kante. Der Spaltenumbruch
+    // verteilt nach Höhe statt nach Reihenfolge und liest sich wie eine
+    // Zeitungsseite: erst die linke Spalte hinunter, dann die rechte.
+    <div
+      className={`flex flex-col gap-2.5 ${
+        !schmal && spaltenQuer > 1
+          ? `landscape:block landscape:gap-2.5 ${SPALTEN[spaltenQuer]}`
+          : ''
+      }`}
+      data-testid={`${kennung}-abschnitte`}
+    >
       {abschnitte.map((a, i) => {
         const auf = offen === i
         return (
@@ -142,7 +118,13 @@ export function Klappliste({
             // untersten Zeilen des Panels. Ohne den Rand endet das
             // herangeholte Feld genau darunter und seine letzte Zeile ist
             // ausgeblendet.
-            className="kh-feld scroll-mb-10 overflow-hidden"
+            //
+            // `break-inside-avoid`: kein Feld darf über den Spaltenumbruch
+            // reißen — ein Text, der in der einen Spalte anfängt und in der
+            // anderen aufhört, ist schlechter als jede Scrollkante.
+            className={`kh-feld scroll-mb-10 overflow-hidden break-inside-avoid ${
+              !schmal && spaltenQuer > 1 ? 'landscape:mb-2.5' : ''
+            }`}
           >
             <button
               type="button"
@@ -163,7 +145,7 @@ export function Klappliste({
               />
             </button>
             {auf && (
-              <p className="px-4 pb-3 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+              <p className="px-4 pb-3 text-[1.0625rem] leading-[1.45] text-kh-paper/90 sm:text-[1.1875rem]">
                 {a.antwort}
               </p>
             )}

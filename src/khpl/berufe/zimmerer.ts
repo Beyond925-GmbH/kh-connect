@@ -55,7 +55,7 @@ type ZimmererStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher'> & {
  * Die Reihenfolge dieser Liste **ist** die Board-Reihenfolge: Abstecher stehen
  * direkt hinter ihrem Elternschritt, `haupt` und die Segmentzahl der Rail
  * fallen daraus ab. Titel und `kurz` wörtlich aus `khpl-tag-zimmerer.md` 3
- * und 4 (`VALIDIERT`).
+ * und 4 (`VALIDIERT`) — mit einer Ausnahme, die am C2-Eintrag begründet ist.
  */
 const STEPS = [
   {
@@ -78,7 +78,12 @@ const STEPS = [
   },
   {
     id: 'C2',
-    titel: 'Zweiundsechzig Komma fünf',
+    // Nicht mehr der validierte Wortlaut „Zweiundsechzig Komma fünf": der
+    // stand als ausgeschriebene Lösung dauerhaft über dem laufenden
+    // Schätz-Regler — wortwörtlich das Negativbeispiel aus Designregel R6.
+    // Der Titel nennt jetzt das Thema, nie den gesuchten Wert; die
+    // ausgeschriebene Zahl ist als Titel der Auflösung gewandert (C2.tsx).
+    titel: 'Das Raster, das keiner sich ausdenkt',
     kurz: 'Ständerwerk',
     art: 'haupt',
     weiter: 'C3',

@@ -7,7 +7,6 @@ import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
-import { useSchmal } from '@/khpl/shell/schmal'
 
 /**
  * Z2 — Alles muss sitzen, bevor irgendwas läuft.
@@ -20,7 +19,7 @@ import { useSchmal } from '@/khpl/shell/schmal'
  * Der Höhepunkt ist der Werkstücknullpunkt. Verschiebt er sich um einen
  * Zehntel, sind alle 400 Teile um einen Zehntel falsch — der Moment, in dem
  * ein Besucher versteht, warum jemand dafür dreieinhalb Jahre lernt. Deshalb
- * ist die vierte Karte die einzige, die farbig aus der Reihe tanzt.
+ * ist die vierte Karte die einzige, die kräftiger aus der Reihe tanzt.
  *
  * Und der Morgen hat einen Auftakt, den niemand rät: die Maschine läuft erst
  * einmal warm. `INTERVIEW` — „Warmlaufen macht man jeden Morgen.“
@@ -78,7 +77,6 @@ const HANDGRIFFE: readonly Handgriff[] = [
 ]
 
 export function Z2() {
-  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.z2
   const [gesetzt, setGesetzt] = useState(() =>
     gespeichert?.fertig ? HANDGRIFFE.length : (gespeichert?.geruestet.length ?? 0),
@@ -100,11 +98,14 @@ export function Z2() {
   return (
     <StepShell
       id="Z2"
+      auftrag={fertig ? null : 'Tipp dich durch die vier Handgriffe.'}
+      // Antippen, in fester Reihenfolge. Man kann nichts falsch machen — das
+      // ist das Worked Example zu Z3.
+      ansage={null}
       interaktionOffen={!fertig}
       // Die Rückmeldung auf jeden Handgriff — Backen fahren zu, der Nullpunkt
       // leuchtet — passiert auf der Bühne. Hochkant blieb ihr sonst ein
       // Streifen, in dem vom Höhepunkt des Screens nichts zu sehen war.
-      buehnePlatz
       buehne={
         <Werkstueck
           zustand="rohling"
@@ -112,33 +113,20 @@ export function Z2() {
           nullpunkt={gesetzt >= HANDGRIFFE.length}
         />
       }
-      fachtext={
-        // Auf dem Handy hochkant fällt der Warmlauf-Absatz weg: mit beiden
-        // Absätzen lag der Handgriff — die Übung — unter der Scrollkante
-        // (s. `schmal.ts`). Der Satz, der den Beruf trägt, bleibt.
-        schmal ? (
-          <p>
-            <Begriff id="ruesten">Rüsten</Begriff>:{' '}
-            <Begriff id="rohling">Rohling</Begriff> spannen, Werkzeuge bestücken, den{' '}
-            <Begriff id="werkstuecknullpunkt">Werkstücknullpunkt</Begriff> setzen. Die
-            Maschine zerspant; der Mensch richtet ein.
-          </p>
-        ) : (
-          <>
-            <p>
-              Zuerst läuft die Maschine warm — dafür gibt es ein eigenes Programm, und das
-              macht man jeden Morgen. Eine Maschine ist kein Schalter; sie ist eher wie
-              ein Auto im Winter.
-            </p>
-            <p className="mt-3">
-              <Begriff id="ruesten">Rüsten</Begriff>:{' '}
-              <Begriff id="rohling">Rohling</Begriff> spannen, Werkzeuge bestücken,
-              Werkzeuglängen vermessen, den{' '}
-              <Begriff id="werkstuecknullpunkt">Werkstücknullpunkt</Begriff> setzen. Das
-              ist der eigentliche Beruf. Die Maschine zerspant; der Mensch richtet ein.
-            </p>
-          </>
-        )
+      /*
+        Eine Fassung statt zweier, ein Fachwort statt dreier.
+
+        Vorher standen hier „Rüsten", „Rohling" und „Werkstücknullpunkt" in
+        zwei Sätzen — drei Chips, bevor irgendetwas passiert ist. Die vier
+        Handgriffe darunter erklären dieselben Dinge einzeln und im Moment
+        ihres Gebrauchs; hier steht nur noch, worum es geht.
+      */
+      warum={
+        <p>
+          Bevor das erste Teil läuft, wird die Maschine eingerichtet: Werkstück spannen,
+          Werkzeuge einsetzen, Nullpunkt setzen. Das heißt{' '}
+          <Begriff id="ruesten">Rüsten</Begriff>.
+        </p>
       }
       interaktion={
         <Wechsel takt={fertig ? 'fertig' : dran.id}>
@@ -187,7 +175,13 @@ export function Z2() {
             trotzdem der größte Zeitblock des ganzen Auftrags. Deshalb ist Rüstzeit das,
             worüber in der Halle geredet wird.
           </AhaKarte>
-          <AhaKarte sichtbar={gesetzt > 0} eyebrow="Und wenn du nicht weiterweißt?">
+          {/* Ab dem zweiten Einwurf zugeklappt (R5) — während der Übung steht
+              so nur die Frage da, nicht der ganze Absatz. */}
+          <AhaKarte
+            sichtbar={gesetzt > 0}
+            zugeklappt
+            eyebrow="Und wenn du nicht weiterweißt?"
+          >
             Dann fragst du. Am Anfang steht beim Einrichten ohnehin jemand daneben, und
             Fragen sind hier ausdrücklich erwünscht — allein an der Maschine steht in
             diesem Beruf niemand.
@@ -226,10 +220,17 @@ function Handgriffkarte({
       onClick={onErledigen}
       data-testid="z2-erledigen"
       whileTap={{ scale: 0.975 }}
+      /*
+        Die Karte ist der einzige Knopf des Screens — sie trägt deshalb die
+        Limette-Affordanz der Primärhandlung (R8, R3: Limette = du), nicht
+        das Orange der Welt. Der Fachbegriff darin bleibt orange. Der
+        Höhepunkt (Nullpunkt) hebt sich über Randstärke und Glow ab, nicht
+        über eine andere Farbe.
+      */
       className={`flex w-full items-center gap-3.5 rounded-kh border-2 p-3 text-left ${
         griff.hoehepunkt
-          ? 'border-kh-orange bg-kh-orange/16'
-          : 'border-kh-orange/50 bg-kh-orange/10'
+          ? 'border-kh-signal bg-kh-signal/14 shadow-[0_0_18px_rgba(216,246,60,0.35)]'
+          : 'border-kh-signal/55 bg-kh-signal/8'
       }`}
     >
       <span

@@ -15,9 +15,10 @@ import { BEMASSUNG, HILFE, STRICH } from './stil'
  * Titel und Panel über die Bühne — hochkant unten, quer links. Ein Bild, das
  * seine Mitte in die Screenmitte legt, liegt damit zur Hälfte unter dem Panel.
  * Deshalb wird die Fläche **gemessen** (`useFreieFlaeche`) und das SVG in den
- * Rest gestellt, der wirklich frei bleibt; quer sind das die rechten Fünftel,
- * und für Z3 fällt das mit der Spec zusammen: **Code links, Werkzeugweg
- * rechts.**
+ * Rest gestellt, der wirklich frei bleibt; quer ist das je nach Panel der
+ * Streifen rechts daneben **oder** der darüber — genommen wird der größere.
+ * Für Z3 (hohes, schmales Panel) fällt das mit der Spec zusammen: **Code
+ * links, Werkzeugweg rechts.**
  *
  * **Zwei Ausschnitte, nicht einer** (`viewBoxHoch`). Die Fläche ist quer breit
  * und hochkant hoch, und ein einziger querformatiger `viewBox` bekommt in einem
@@ -214,7 +215,7 @@ const LEISTE = 74
  * nicht „mit Titel überlagert“, sondern weg — auf Z6 quer verschwand so die
  * Fahne „Nr. 1“, auf Z3 quer das halbe Futter. Deshalb gilt jetzt: Die Bühne
  * bekommt den Rest, der wirklich frei ist, auch wenn er klein wird; ein Step,
- * dessen Panel der Zeichnung zu viel nimmt, setzt `buehnePlatz` und gibt dem
+ * dessen Panel der Zeichnung zu viel nimmt, kürzt seine Interaktion und gibt dem
  * Besucher den Klappgriff, statt hinter sich selbst zu zeichnen.
  *
  * Die Bremsen bleiben nur für den Fall, dass ein sehr kleines Fenster mit
@@ -289,9 +290,24 @@ function useFreieFlaeche(rahmen: RefObject<HTMLDivElement | null>): Rand {
       const oben = Math.min(panel.offsetTop, titel?.offsetTop ?? panel.offsetTop)
 
       if (b > h) {
-        // Quer nimmt das Panel die linke Spalte. Der Streifen darüber ist frei,
-        // aber schmal — ein Bild, das dort hineinragt, sieht aus wie ein Fehler.
-        neu.links = grob(panel.offsetLeft + panel.offsetWidth + LUFT, b)
+        // Quer nimmt das Panel die linke Spalte, und der Bühne stand bisher
+        // immer nur der Streifen **rechts daneben** zu. Bei einem breiten
+        // oder halbhohen Panel ist aber der Streifen **über** Titel und Panel
+        // die größere Fläche — auf Z1 (aufgelöst, `karteBreit`) blieb die
+        // ganze obere Hälfte leer, während die Einzelheit in einen schmalen
+        // Reststreifen gequetscht war. Deshalb wird beides gerechnet und die
+        // größere Fläche genommen; die Prüffrage von R1 („Was steht in der
+        // oberen Hälfte?“) hat damit auf jedem Takt eine Antwort. Bei Gleich-
+        // stand gewinnt rechts — der Ausschnitt, für den die Blattlagen der
+        // Ansichten gebaut sind (Z3: Code links, Werkzeugweg rechts).
+        const rechts =
+          (b - (panel.offsetLeft + panel.offsetWidth + LUFT) - LUFT) * (h - LEISTE - LUFT)
+        const drueber = (b - 2 * LUFT) * (oben - LEISTE - LUFT)
+        if (rechts >= drueber) {
+          neu.links = grob(panel.offsetLeft + panel.offsetWidth + LUFT, b)
+        } else {
+          neu.unten = grob(h - oben + LUFT, h)
+        }
       } else {
         neu.unten = grob(h - oben + LUFT, h)
       }

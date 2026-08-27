@@ -99,9 +99,8 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
     los: 'wird getauscht',
     tut: (
       <>
-        Die <Fachwort id="umwaelzpumpe">Umwälzpumpe</Fachwort> schiebt das Wasser durch
-        die Rohre. Ohne sie bliebe die Wärme dort, wo sie entsteht. Diese hier ist so alt
-        wie der Kessel und läuft immer gleich stark — eine neue regelt sich selbst.
+        Sie schiebt das Wasser durch die Rohre — ohne sie bliebe die Wärme im Keller.
+        Diese läuft immer gleich stark; eine neue regelt sich selbst.
       </>
     ),
   },
@@ -110,10 +109,9 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
     tut: (
       <>
         Wasser dehnt sich aus, wenn es warm wird. Das{' '}
-        <Fachwort id="ausdehnungsgefaess">Ausdehnungsgefäß</Fachwort> nimmt diesen Zuwachs
-        auf. Ob es zur neuen Anlage passt, misst man — nachsehen kostet Minuten, ein zu
-        kleines Gefäß kostet später das{' '}
-        <Fachwort id="sicherheitsventil">Sicherheitsventil</Fachwort>.
+        <Fachwort id="ausdehnungsgefaess">Ausdehnungsgefäß</Fachwort> nimmt das auf. Ob es
+        zur neuen Anlage passt, misst man — nachsehen kostet Minuten, ein zu kleines Gefäß
+        kostet später Bauteile.
       </>
     ),
   },
@@ -161,6 +159,8 @@ export function A2() {
   return (
     <StepShell
       id="A2"
+      auftrag={genug ? null : 'Tipp an, was in diesem Keller steht.'}
+      ansage={null}
       karteBreit
       interaktionOffen={!genug}
       buehne={
@@ -169,7 +169,7 @@ export function A2() {
           onBauteil={vlies ? tippen : undefined}
         />
       }
-      fachtext={
+      warum={
         vlies ? (
           <p>
             Der zweite Auftrag beginnt mit Hinsehen: Ölkessel, Tank, Verteiler, Pumpe,

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
-import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 
@@ -30,6 +29,17 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * Öko-Institut beziffert den tatsächlichen Speichersaldo auf 600–1.700 kg CO₂
  * je geerntetem Kubikmeter, „rund fünf Tonnen“ bleibt damit im belegten
  * Rahmen, „genau fünf Tonnen“ wäre zu viel behauptet (flow 7 B3.1).
+ *
+ * **Nur die erste Aha-Karte öffnet sich von selbst** (Design-Review, R5): mit
+ * beiden Karten plus Warum-Absatz standen ~85 Wörter gleichzeitig auf dem
+ * Screen. Die Ausbildungsordnung ist laut Spec der stärkere Aufhänger — sie
+ * bleibt automatisch offen, die CO₂-Karte startet als Klappzeile
+ * (`zugeklappt`) und kommt auf Tipp.
+ *
+ * **Kein Glossar-Chip mehr auf „Holz“** (Design-Review, R10): der Chip
+ * verlinkte auf `brettschichtholz` — der Satz redet aber von gewachsenem
+ * Holz, der Eintrag erklärt verleimte Bretter. Das Wort „Holz“ braucht am
+ * Messestand keine Erklärung.
  */
 
 export function B31() {
@@ -43,30 +53,32 @@ export function B31() {
   return (
     <StepShell
       id="B3.1"
+      auftrag={null}
+      ansage={null}
       titelZusatz="Abstecher"
       buehne={<StepFoto id="B3.1" />}
-      fachtext={
+      warum={
         <p>
-          Aus dem <Begriff id="abbundplan">Abbundplan</Begriff> wird eine Materialliste.
-          Fichte für die <Begriff id="sparren">Sparren</Begriff>,{' '}
-          <Begriff id="brettschichtholz">Brettschichtholz</Begriff> für die weiten
-          Spannweiten. Du bestellst, koordinierst die Liefertermine und prüfst jeden
-          Balken, wenn er ankommt — Holz ist ein Naturprodukt, keiner ist wie der andere.
+          Aus der Zeichnung wird eine Einkaufsliste. Du bestellst, planst die
+          Liefertermine und prüfst jeden Balken, wenn er ankommt: Holz wächst, keiner ist
+          wie der andere.
         </p>
       }
       aha={
         <>
           <AhaKarte sichtbar={aha} eyebrow="Einkaufen — gehört das wirklich zum Beruf?">
-            Einkaufen gehört zum Beruf. „Arbeiten planen“ und „Baustoffe auswählen“ stehen
-            wörtlich im Ausbildungsberufsbild — und seit dem 1. August 2026 gilt dafür
-            eine neue Ausbildungsordnung. Wer diesen Sommer anfängt, ist der erste
-            Jahrgang danach.
+            Ja. „Arbeiten planen“ und „Baustoffe auswählen“ stehen wörtlich im
+            Ausbildungsberufsbild — seit dem 1. August 2026 in einer neuen
+            Ausbildungsordnung.
           </AhaKarte>
-          <AhaKarte sichtbar={aha} eyebrow="Wie viel CO₂ steckt in diesem Dach?">
-            In dem Dachstuhl von eben stecken rund fünf Kubikmeter Holz — und damit etwa
-            fünf Tonnen CO₂, die dort die nächsten hundert Jahre bleiben. Holz ist einer
-            der wenigen Baustoffe, die nachwachsen, und der einzige, aus dem man
-            hierzulande ein Dach tragen lässt.
+          <AhaKarte
+            sichtbar={aha}
+            zugeklappt
+            eyebrow="Wie viel CO₂ steckt in diesem Dach?"
+          >
+            In diesem Dachstuhl stecken rund fünf Kubikmeter Holz — und damit etwa fünf
+            Tonnen CO₂, die dort hundert Jahre bleiben. Holz wächst nach. Kein anderer
+            tragender Baustoff tut das.
           </AhaKarte>
         </>
       }

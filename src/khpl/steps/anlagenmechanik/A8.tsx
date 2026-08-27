@@ -50,11 +50,13 @@ export function A8() {
   return (
     <StepShell
       id="A8"
+      auftrag={'Sieh dir an, welcher Weg dich interessiert.'}
+      ansage={null}
       interaktionOffen={false}
       buehne={
         <Schnitt zustand={{ szene: 'haus', schaetzungKw: null, aufgeloest: true }} />
       }
-      fachtext={
+      warum={
         // Dreieinhalb Jahre, `BELEGT` (`belege/ausbildung-karriere.md` 2:
         // SHKAMAusbV, 42 Monate). Nicht drei wie beim Dachdecker.
         <p>

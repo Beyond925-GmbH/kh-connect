@@ -5,6 +5,7 @@ import { SZENE_FARBEN } from '@/dachstuhl/bauteil-texte'
 import { Gespann } from '@/drei/fahrzeug'
 import type { RequisitId } from '@/drei/fahrzeug'
 import { FOV, passeEin } from '@/drei/kamera'
+import type { Sichtfeld } from '@/drei/kamera'
 import type { Huelle } from '@/dachstuhl/mass'
 import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
 
@@ -39,9 +40,12 @@ const PRESET = {
 const HUELLE: Huelle = {
   // z etwas weiter als die Fahrzeugbreite: die Requisiten stehen an der
   // kamerazugewandten Flanke (bis z ≈ 1,55) und sollen im Bild bleiben.
+  // Nach oben endet die Hülle knapp über dem Kofferaufbau (Oberkante 2,35 m):
+  // die alte Kante bei 2,7 m war leere Luft, und die zentrierte Einpassung
+  // schob die Szene um genau diese Luft nach unten (R1).
   min: [-4.2, 0, -1.6],
-  max: [10.2, 2.7, 1.6],
-  mitte: [3.0, 1.35, 0],
+  max: [10.2, 2.45, 1.6],
+  mitte: [3.0, 1.2, 0],
 }
 
 /**
@@ -54,8 +58,47 @@ const HUELLE: Huelle = {
  */
 const HUELLE_HOCHKANT: Huelle = {
   min: [-4.2, 0, -1.6],
-  max: [6.6, 2.7, 1.6],
-  mitte: [1.2, 1.35, 0],
+  max: [6.6, 2.45, 1.6],
+  mitte: [1.2, 1.2, 0],
+}
+
+/**
+ * Höhen-Füllung quer (Design-Review, R1) — dieselbe Mechanik wie in
+ * `Zuschnitt3D.tsx` (dort ausführlich begründet): das Gespann ist ~6-mal so
+ * breit wie hoch, `passeEin` lässt quer deshalb rund die halbe Bühnenhöhe
+ * leer. Die Hülle wird quer auf ihre Mitte zusammengezogen, bis die Höhe
+ * bindet; `FUELL_MIN` deckelt den Anschnitt so, dass Ladefläche und alle
+ * Requisiten (bis x ≈ 7,6 an der Transporter-Flanke) im Bild bleiben — nur
+ * Haubenspitze und leeres Anhänger-Ende schneiden an. Hochkant übernimmt
+ * weiter `HUELLE_HOCHKANT` das Beschneiden, dort bindet die Breite ohnehin.
+ */
+const FUELL_MIN = 0.7
+
+function fuelleHoehe(huelle: Huelle, aspect: number, sichtfeld: Sichtfeld): Huelle {
+  if (aspect <= 1) return huelle
+  const voll = passeEin(PRESET, huelle, aspect, sichtfeld)
+  const strich: Huelle = {
+    min: [huelle.mitte[0], huelle.min[1], huelle.mitte[2]],
+    max: [huelle.mitte[0], huelle.max[1], huelle.mitte[2]],
+    mitte: huelle.mitte,
+  }
+  const hoch = passeEin(PRESET, strich, aspect, sichtfeld)
+  const s = Math.max(FUELL_MIN, Math.min(1, hoch.distanz / voll.distanz))
+  if (s >= 1) return huelle
+  const quer = (wert: number, mitte: number) => mitte + (wert - mitte) * s
+  return {
+    min: [
+      quer(huelle.min[0], huelle.mitte[0]),
+      huelle.min[1],
+      quer(huelle.min[2], huelle.mitte[2]),
+    ],
+    max: [
+      quer(huelle.max[0], huelle.mitte[0]),
+      huelle.max[1],
+      quer(huelle.max[2], huelle.mitte[2]),
+    ],
+    mitte: huelle.mitte,
+  }
 }
 
 function Kamera() {
@@ -72,12 +115,10 @@ function Kamera() {
 
   const lage = useMemo(() => {
     if (hoehe <= 0) return null
-    return passeEin(PRESET, breite < hoehe ? HUELLE_HOCHKANT : HUELLE, breite / hoehe, {
-      links: sfL,
-      rechts: sfR,
-      oben: sfO,
-      unten: sfU,
-    })
+    const aspect = breite / hoehe
+    const sf: Sichtfeld = { links: sfL, rechts: sfR, oben: sfO, unten: sfU }
+    const rahmen = breite < hoehe ? HUELLE_HOCHKANT : fuelleHoehe(HUELLE, aspect, sf)
+    return passeEin(PRESET, rahmen, aspect, sf)
   }, [breite, hoehe, sfL, sfR, sfO, sfU])
 
   useFrame(() => {

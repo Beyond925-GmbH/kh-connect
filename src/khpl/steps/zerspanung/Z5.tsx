@@ -261,6 +261,26 @@ export function Z5() {
   return (
     <StepShell
       id="Z5"
+      /*
+        R4: Der eine Anweisungssatz sagt, was **jetzt** zu tun ist — je Takt
+        ein anderer. „Dreh die Messschraube zu“ über dem Korrektor war eine
+        abgeschlossene Handlung über einer anderen Übung. `gemessen` trägt
+        keinen: dort ist die Aktion der Knopf „Nächstes Teil“ im Fuß.
+      */
+      auftrag={
+        takt === 'zudrehen'
+          ? 'Dreh die Messschraube zu, bis sie anliegt.'
+          : takt === 'urteilen'
+            ? 'Sag, was mit diesem Teil passiert.'
+            : takt === 'korrigieren'
+              ? 'Stell den Korrektor nach und lass noch eins laufen.'
+              : null
+      }
+      ansage={{
+        geste: 'ziehen-regler',
+        text: 'Du misst dein Teil selbst nach — mit einer Schraube, die Tausendstel anzeigt.',
+        haken: 'Zu fest gedreht misst du deine eigene Kraft mit.',
+      }}
       interaktionOffen={!fertig}
       buehne={
         <Werkstueck
@@ -270,7 +290,7 @@ export function Z5() {
           korrigiert={fertig}
         />
       }
-      fachtext={
+      warum={
         takt === 'zudrehen' ? (
           <p>
             Das erste Teil ist durch. Es liegt in der{' '}

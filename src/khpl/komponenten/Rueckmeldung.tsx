@@ -9,10 +9,12 @@ import { Check, X } from 'lucide-react'
  * Rückmeldung der ganze Ertrag. Deshalb sind die beiden Fälle hier nicht zwei
  * Graustufen, sondern zwei verschiedene Ereignisse:
  *
- * **Richtig** kommt in Warnwestengelb, springt einmal über, und das Häkchen
- * dreht sich dabei ein. Gelbgrün ist im ganzen System für genau das
- * reserviert — es taucht sonst nirgends als Fläche auf, und deshalb heißt es
- * hier etwas.
+ * **Richtig** springt einmal über, und das Häkchen dreht sich dabei ein.
+ * Gefeiert wird mit Rand, Schrift und Bewegung — nicht mit einer gefüllten
+ * Fläche: die einzige satte Gelbgrün-Fläche eines Screens ist der
+ * Weiter-Knopf (khpl-designregeln.md R8), und genau in dem Moment, in dem
+ * diese Meldung erscheint, steht er darunter. Zwei gefüllte Signalflächen
+ * zugleich hießen zweimal „hier geht's weiter“.
  *
  * **Falsch** bleibt ruhig: dunkler Grund, oranger Rand, ein einzelnes
  * Kopfschütteln. Kein Rot. Rot bewertet, und bewertet wird hier nicht (flow
@@ -87,7 +89,7 @@ export function Rueckmeldung({
             data-ok={ok}
             className={`flex items-start gap-3 rounded-kh px-4 py-3.5 text-[1.0625rem] leading-snug ${
               ok
-                ? 'bg-kh-signal font-semibold text-[#0E0D0B]'
+                ? 'border-2 border-kh-signal bg-kh-signal/12 font-semibold text-kh-signal'
                 : 'border-2 border-kh-orange/45 bg-kh-orange/10 text-kh-paper/90'
             }`}
           >
@@ -97,7 +99,7 @@ export function Rueckmeldung({
               animate={ok ? { rotate: 0, scale: 1 } : {}}
               transition={{ type: 'spring', stiffness: 400, damping: 16, delay: 0.06 }}
               className={`mt-0.5 grid size-6 shrink-0 place-items-center rounded-full ${
-                ok ? 'bg-[#0E0D0B] text-kh-signal' : 'bg-kh-orange text-[#0E0D0B]'
+                ok ? 'bg-kh-signal text-[#0E0D0B]' : 'bg-kh-orange text-[#0E0D0B]'
               }`}
             >
               {ok ? (

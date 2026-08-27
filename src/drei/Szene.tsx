@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react'
 import type { RefObject } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import type { DachstuhlMasse } from '@/dachstuhl/mass'
+import type { DachstuhlMasse, Huelle } from '@/dachstuhl/mass'
 import type { Bauteil as BauteilDaten, Einheit } from '@/dachstuhl/teileliste'
 import { Beleuchtung, Schattenauffrischung } from './Beleuchtung'
 import type { Lichtstimmung } from './Beleuchtung'
@@ -78,6 +78,7 @@ export function Szene({
   fahrtRef = null,
   deinSparren = false,
   steuerungGesperrt = false,
+  kameraHuelle,
 }: {
   masse: DachstuhlMasse
   einheiten: Einheit[]
@@ -107,6 +108,11 @@ export function Szene({
   deinSparren?: boolean
   /** Sperrt OrbitControls, ohne die Ansicht zu wechseln (Fahrt). */
   steuerungGesperrt?: boolean
+  /**
+   * Huelle nur fuer die Kamera-Einpassung — z. B. die baustandsabhaengige aus
+   * `huelleBeiT`. Licht und Kulisse rechnen weiter mit `masse.huelle`.
+   */
+  kameraHuelle?: Huelle
 }) {
   const hintergrund = (dunkel ? SZENE_FARBEN.dunkel : SZENE_FARBEN.hell).hintergrund
   const mitte = useRef(new THREE.Vector3(...masse.huelle.mitte))
@@ -117,14 +123,14 @@ export function Szene({
   // Transporter-Front darf am Bildrand anschneiden (bewusste Inszenierung).
   const mitGespann = kulisse !== null || fahrtRef !== null
   const huelle = useMemo(() => {
-    if (!mitGespann) return masse.huelle
-    const h = masse.huelle
+    const h = kameraHuelle ?? masse.huelle
+    if (!mitGespann) return h
     return {
       min: h.min,
       max: [h.max[0], h.max[1], h.max[2] + 3.0] as [number, number, number],
       mitte: h.mitte,
     }
-  }, [masse.huelle, mitGespann])
+  }, [masse.huelle, kameraHuelle, mitGespann])
 
   return (
     <Canvas

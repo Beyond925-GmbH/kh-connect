@@ -170,6 +170,12 @@ export function A6() {
   return (
     <StepShell
       id="A6"
+      auftrag={laeuft ? null : 'Dreh auf, bis der Druck stimmt.'}
+      ansage={{
+        geste: 'ziehen-regler',
+        text: 'Du füllst die Anlage und baust Druck auf — zum ersten Mal läuft sie.',
+        haken: 'Zu wenig Druck, und oben kommt nichts an.',
+      }}
       interaktionOffen={!laeuft}
       buehne={
         <Schnitt
@@ -185,7 +191,7 @@ export function A6() {
           onWaermeAngekommen={() => setAngekommen(true)}
         />
       }
-      fachtext={
+      warum={
         laeuft ? undefined : (
           <p>
             Anlage füllen, entlüften, Druck aufbauen, Regelung parametrieren, starten —
@@ -399,11 +405,15 @@ function Faustformel() {
       data-testid="a6-faustformel"
     >
       <p className="kh-etikett">Faustformel</p>
+      {/* „bar" bekommt seinen Körper-Anker (R12): der Luftdruck, der ohnehin
+          auf jedem liegt, ist ungefähr 1 bar. */}
       <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-        Gebäudehöhe in Metern geteilt durch zehn, plus 0,3 bar. Je höher das Haus, desto
-        mehr Druck — sonst kommt oben kein Wasser an. Für ein Einfamilienhaus landet man
-        damit bei {bar(FUELLDRUCK.min)} bis {bar(FUELLDRUCK.max)}. Darüber öffnet
-        irgendwann das <Fachwort id="sicherheitsventil">Sicherheitsventil</Fachwort>.
+        Gebäudehöhe in Metern geteilt durch zehn, plus 0,3 bar — je höher das Haus, desto
+        mehr Druck, sonst kommt oben kein Wasser an. Für ein Einfamilienhaus landet man
+        damit bei {bar(FUELLDRUCK.min)} bis {bar(FUELLDRUCK.max)}; darüber öffnet
+        irgendwann das <Fachwort id="sicherheitsventil">Sicherheitsventil</Fachwort>. Zum
+        Anfassen: 1 bar ist ungefähr der Luftdruck, der gerade auf dir liegt — die Anlage
+        braucht nur ein bisschen mehr.
       </p>
     </motion.div>
   )

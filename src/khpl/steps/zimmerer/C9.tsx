@@ -54,6 +54,8 @@ export function C9() {
   return (
     <StepShell
       id="C9"
+      auftrag={null}
+      ansage={null}
       interaktionOffen={false}
       buehne={<Abschlussfeld />}
       interaktion={

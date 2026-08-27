@@ -70,8 +70,10 @@ export const KARRIEREWEGE: Karriereweg[] = [
         // Kursjahr 2026), zzgl. Teil III/IV. `BELEGT` für diesen Anbieter.
         // Aufstiegs-BAföG: 50 % Zuschuss, 50 % Darlehenserlass bei bestandener
         // Prüfung → höchstens rund ein Viertel Eigenanteil. `BELEGT`.
+        // Der eingeschobene Halbsatz erklärt die Abkürzung (R10): sie fiele
+        // sonst als einziger unerklärter Behördenname des Tages.
         antwort:
-          'Rund 11.000 Euro für Lehrgang und Prüfung. Das Aufstiegs-BAföG übernimmt davon den größten Teil — wer besteht, zahlt am Ende etwa ein Viertel selbst.',
+          'Rund 11.000 Euro für Lehrgang und Prüfung. Das Aufstiegs-BAföG — ein staatlicher Zuschuss für Weiterbildungen wie den Meister — übernimmt davon den größten Teil; wer besteht, zahlt am Ende etwa ein Viertel selbst.',
       },
       {
         frage: 'Was du verdienst',

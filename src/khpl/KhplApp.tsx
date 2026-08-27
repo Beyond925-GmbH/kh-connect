@@ -8,7 +8,6 @@ import { Fragen } from '@/khpl/shell/Fragen'
 import { Helmwahl } from '@/khpl/shell/Helmwahl'
 import { KioskGuard } from '@/khpl/shell/KioskGuard'
 import { Splash } from '@/khpl/shell/Splash'
-import { Vorschlag } from '@/khpl/shell/Vorschlag'
 import { Platzhalter } from '@/khpl/steps/Platzhalter'
 import {
   useAktiverBeruf,
@@ -26,11 +25,12 @@ import {
  *
  * Die Reihenfolge unten **ist** der Ablauf:
  *
- *   Splash → Helm → Fragen → Vorschlag → (Berufsliste) → Auftrag → Step
+ *   Splash → Helm → Fragen → Berufsliste → Auftrag → Step
  *
- * Die Berufsliste steht in Klammern, weil sie zwei Rollen hat: Station im
- * Trichter für den, der den Vorschlag nicht will, und Daueradresse für jeden,
- * der später den Beruf wechselt.
+ * Die Berufsliste hat zwei Rollen: Station im Trichter — sie trägt seit
+ * `khpl-vereinfachung.md` §5 auch den Vorschlag, der vorher ein eigener
+ * Screen davor war — und Daueradresse für jeden, der später den Beruf
+ * wechselt.
  */
 export function KhplApp() {
   const bildschirm = useBildschirm()
@@ -43,7 +43,6 @@ export function KhplApp() {
       {bildschirm === 'splash' && <Splash />}
       {bildschirm === 'helm' && <Helmwahl />}
       {bildschirm === 'fragen' && <Fragen />}
-      {bildschirm === 'vorschlag' && <Vorschlag />}
       {bildschirm === 'berufe' && <Berufsliste />}
       {bildschirm === 'bald' && angesehen && <BerufBald id={angesehen} />}
       {bildschirm === 'intro' && <Auftragsannahme />}

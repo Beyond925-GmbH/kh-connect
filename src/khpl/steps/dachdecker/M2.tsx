@@ -14,6 +14,7 @@ import { Begriff } from '@/khpl/komponenten/Begriff'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
+import { RATEN_HAKEN } from '@/khpl/komponenten/gesten'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
@@ -42,12 +43,27 @@ const SCHRITT = 500
 const START = 12000 - 2500 // bewusst nicht auf der Lösung, aber auch nicht am Rand
 const ECHT = 12000
 
-const POSTEN = [
-  { was: 'Holz', detail: 'ca. 5 m³ Fichte', betrag: 3600 },
-  { was: 'Schrauben, Beschläge, Folien', detail: '', betrag: 600 },
-  { was: 'Abbund und Aufrichten', detail: 'ca. 105 Stunden', betrag: 6800 },
-  { was: 'Kran', detail: 'ein Tag', betrag: 1000 },
-]
+/**
+ * `label` nur, wo eine Zeile einen Glossar-Chip trägt (R10: kein unerklärter
+ * Fachbegriff auf dem Screen — „Abbund“ hat einen Eintrag im Glossar).
+ * `was` bleibt String und dient als Schlüssel.
+ */
+const POSTEN: { was: string; label?: React.ReactNode; detail: string; betrag: number }[] =
+  [
+    { was: 'Holz', detail: 'ca. 5 m³ Fichte', betrag: 3600 },
+    { was: 'Schrauben, Beschläge, Folien', detail: '', betrag: 600 },
+    {
+      was: 'Abbund und Aufrichten',
+      label: (
+        <>
+          <Begriff id="abbund">Abbund</Begriff> und Aufrichten
+        </>
+      ),
+      detail: 'ca. 105 Stunden',
+      betrag: 6800,
+    },
+    { was: 'Kran', detail: 'ein Tag', betrag: 1000 },
+  ]
 
 const euro = (n: number) => n.toLocaleString('de-DE') + ' €'
 
@@ -73,6 +89,17 @@ export function M2() {
   return (
     <StepShell
       id="M2"
+      auftrag={aufgeloest ? null : 'Schätz, was dieses Dach kostet.'}
+      /*
+        Einer der vier Rate-Regler. Der Haken kommt aus `gesten.ts` und ist auf
+        allen vier Tagen wörtlich derselbe: ohne ihn ist das eine verdeckte
+        Prüfung, die man verliert, mit ihm ein Angebot.
+      */
+      ansage={{
+        geste: 'ziehen-regler',
+        text: 'Du gibst ein Angebot ab — für ein Dach, das du eben zum ersten Mal gesehen hast.',
+        haken: RATEN_HAKEN,
+      }}
       interaktionOffen={!aufgeloest}
       // Erst nach der Aufloesung: die Schaetzphase bleibt schmal und
       // konzentriert, die Aufloesung braucht die Breite fuer den Zweispalter
@@ -83,13 +110,11 @@ export function M2() {
       // die Skizze getragen hat — 45 Grad, 120 m², Satteldach —, stehen ohnehin
       // wörtlich im Fachtext daneben; die Zeichnung hat sie nur wiederholt.
       buehne={<StepFoto id="M2" />}
-      fachtext={
-        aufgeloest ? undefined : (
-          <p>
-            Einfamilienhaus, Satteldach, 45 Grad. 120 Quadratmeter Dachfläche. Fichte (
-            <Begriff id="kvh">KVH</Begriff>), keine <Begriff id="gaube">Gaube</Begriff>.
-          </p>
-        )
+      warum={
+        <p>
+          Einfamilienhaus, Satteldach, 45 Grad, 120 Quadratmeter. Fichte, keine{' '}
+          <Begriff id="gaube">Gaube</Begriff> — also der einfache Fall.
+        </p>
       }
       interaktion={<Schaetzung wert={wert} onWert={setWert} aufgeloest={aufgeloest} />}
       aha={
@@ -98,12 +123,11 @@ export function M2() {
             sichtbar={aufgeloest}
             eyebrow="Warum ist Holz nicht der teuerste Posten?"
           >
-            Mehr als die Hälfte davon ist Arbeitszeit, nicht Holz. Bezahlt wird nicht das
-            Material — bezahlt wird, dass jemand weiß, wie es zusammengehört.
+            Mehr als die Hälfte ist Arbeitszeit. Bezahlt wird nicht das Material — bezahlt
+            wird, dass jemand weiß, wie es zusammengehört.
           </AhaKarte>
           <AhaKarte sichtbar={aufgeloest} eyebrow="Und wenn der Bauherr nein sagt?">
-            Dann kommt der Satz, den jeder Betrieb kennt: Viele Angebote führen nie zum
-            Auftrag. Gerechnet hast du trotzdem.
+            Viele Angebote führen nie zu einem Auftrag. Gerechnet hast du trotzdem.
           </AhaKarte>
         </>
       }
@@ -185,7 +209,7 @@ function Schaetzung({
                 className="flex items-baseline justify-between gap-3 border-b border-kh-line py-2 text-[1.0625rem] last:border-0"
               >
                 <span className="min-w-0 text-kh-paper">
-                  {p.was}
+                  {p.label ?? p.was}
                   {p.detail && <span className="text-kh-mute"> · {p.detail}</span>}
                 </span>
                 <span className="shrink-0 text-kh-mute tabular-nums">
@@ -260,7 +284,22 @@ function Schaetzung({
  * sähe trotzdem aus wie ein Bedienelement und kostete den Platz von einem: das
  * hier ist eine Skala mit zwei Marken und einer Strecke dazwischen. Die
  * Strecke ist die Aussage des Screens.
+ *
+ * Der Abstand bekommt eine Einordnung, die auf ihn reagiert (R11: Daneben-
+ * liegen ist Inhalt, nie Versagen — die Abweichung wird zum Kompliment an den
+ * Beruf umgemünzt, statt als nackter Fehlbetrag stehen zu bleiben). Die
+ * Schwellen: bis 2.000 € (vier Reglerschritte) ist das ein guter Schuss, ab
+ * der halben echten Summe ist es der Normalfall, für den es den Beruf gibt.
  */
+function einordnung(abstand: number): string {
+  if (abstand === 0)
+    return 'Auf den Euro getroffen. Kalkuliert wird trotzdem — Glück ist kein Angebot.'
+  if (abstand <= 2000) return 'Nah dran — gutes Auge. Den Rest holt die Kalkulation.'
+  if (abstand >= ECHT / 2)
+    return 'Genau deshalb braucht’s dafür eine Ausbildung — kein Bauchgefühl.'
+  return 'Daneben ist hier der Normalfall. Deshalb wird gerechnet, nicht geraten.'
+}
+
 function Vergleich({
   schaetzung,
   anteil,
@@ -313,6 +352,9 @@ function Vergleich({
           </>
         )}
       </p>
+      <p className="text-[1rem] text-kh-paper/75" data-testid="m2-einordnung">
+        {einordnung(abstand)}
+      </p>
     </div>
   )
 }
@@ -327,10 +369,8 @@ function Mathe() {
       <DialogContent>
         <DialogTitle>Achte Klasse</DialogTitle>
         <DialogDescription>
-          Die 120 Quadratmeter hat niemand gemessen. Das Haus ist 85 Quadratmeter groß,
-          das Dach steht 45 Grad schräg — Grundfläche geteilt durch den Kosinus, und du
-          hast die Dachfläche. Dreisatz und Pythagoras, achte Klasse. Hier zum ersten Mal
-          an etwas, das gebaut wird.
+          Die 120 Quadratmeter hat niemand gemessen. Das Haus ist 85 groß, das Dach 45
+          Grad schräg — daraus rechnet man die Dachfläche. Pythagoras, achte Klasse.
         </DialogDescription>
       </DialogContent>
     </Dialog>

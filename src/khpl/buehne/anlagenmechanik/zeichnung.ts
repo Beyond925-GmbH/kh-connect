@@ -243,6 +243,30 @@ export function kamera(rahmen: Rahmen, sicht: Rahmen): string {
 }
 
 /**
+ * Was durch diese Kamera **tatsächlich zu sehen ist**, in Weltkoordinaten.
+ *
+ * `kamera` legt den Rahmen als Mindestausschnitt in die Sicht: die knappere
+ * Achse bestimmt den Maßstab (`Math.min`), auf der anderen kommt Sicht hinzu.
+ * Für eine querformatige Zeichnung in einer hochkanten Fläche — die Stele,
+ * oder quer der Streifen neben dem Panel — heißt das: ober- und unterhalb des
+ * Rahmens wird bis zur halben Sichthöhe frei. Eine Zeichnung, die dort nichts
+ * hinlegt, steht als Band im Schwarzen, und die obere Bildhälfte ist leer
+ * (Designregel R1). Das Haus füllt diese Zonen mit seiner Umgebung; wer wie
+ * die Anlage keine hat, fragt hier nach den Rändern und zeichnet bis dorthin.
+ */
+export function sichtbareWelt(rahmen: Rahmen, sicht: Rahmen): Rahmen {
+  const k = Math.min(sicht.b / rahmen.b, sicht.h / rahmen.h)
+  const b = sicht.b / k
+  const h = sicht.h / k
+  return {
+    x: rahmen.x + rahmen.b / 2 - b / 2,
+    y: rahmen.y + rahmen.h / 2 - h / 2,
+    b,
+    h,
+  }
+}
+
+/**
  * Wie weit Erdreich und Himmel über die Welt hinausgezeichnet werden.
  *
  * Großzügig und bewusst kein gemessener Wert: die Bühnenfläche ändert ihr

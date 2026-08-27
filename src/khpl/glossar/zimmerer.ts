@@ -6,11 +6,11 @@ import { BEGRIFFE, type Begriffseintrag } from './begriffe'
  * **Zwei Hälften.** Acht Einträge stehen schon im gemeinsamen Bestand und
  * werden hier nur durchgereicht — `CAD`, `Abbund`, `Abbundanlage`, `KVH`,
  * `Statik`, `Gewerk`, `PSA` und `laufender Meter` sind nicht gewerkespezifisch
- * und würden als Kopie zweimal gepflegt und einmal vergessen. Zehn Einträge
+ * und würden als Kopie zweimal gepflegt und einmal vergessen. Zwölf Einträge
  * kommen neu dazu; sie handeln vom Holzrahmenbau und haben im Dachdecker-Tag
  * nichts zu suchen.
  *
- * ⚠️ **Die zehn neuen Texte sind `ENTWURF – UNGEPRÜFT`.** khpl-tag-zimmerer.md
+ * ⚠️ **Die zwölf neuen Texte sind `ENTWURF – UNGEPRÜFT`.** khpl-tag-zimmerer.md
  * 11 führt sie ausdrücklich als „fachlich abzunehmen“ — das prüft ein Mensch
  * aus dem Gewerk, keine Suchmaschine. Wo eine Aussage einen Beleg hat, steht er
  * im Kommentar darüber; alles andere ist Formulierung, die gegengelesen gehört.
@@ -24,18 +24,24 @@ import { BEGRIFFE, type Begriffseintrag } from './begriffe'
  */
 
 /**
- * Die zehn neuen Begriffe dieses Tages.
+ * Die zwölf neuen Begriffe dieses Tages.
  *
- * Reihenfolge: erst die Wand von unten nach oben (Schwelle, Ständerwerk, Rähm,
- * Achsmaß), dann ihre Schichten (Dampfbremse, Beplankung, Holzfaserplatte),
- * dann die Öffnung (Wechselholz), dann Transport und Kran (Innenlader,
- * Anschlagmittel). Wer die Liste am Stück liest, liest den Tag.
+ * Reihenfolge: erst die Wand von unten nach oben (Schwelle, Ausklinkung,
+ * Ständerwerk, Rähm, Achsmaß), dann ihre Schichten (Dampfbremse, Beplankung,
+ * Holzfaserplatte), dann die Öffnung (Wechselholz, Dichtstoff), dann Transport
+ * und Kran (Innenlader, Anschlagmittel). Wer die Liste am Stück liest, liest
+ * den Tag.
  */
 const NEU = {
   schwelle: {
     label: 'Schwelle',
     erklaerung:
       'Das untere waagerechte Holz einer Wand. Es liegt auf der Bodenplatte oder der Geschossdecke, und in ihm stehen die Ständer. Über die Schwelle geht die Last der ganzen Wand in den Untergrund.',
+  },
+  ausklinkung: {
+    label: 'Ausklinkung',
+    erklaerung:
+      'Eine gefräste Kerbe am Ende des Holzes, mit der es passgenau auf der Schwelle sitzt. Zwei gleich lange Hölzer unterscheiden sich oft nur in dieser Bearbeitung.',
   },
   staenderwerk: {
     label: 'Ständerwerk',
@@ -77,6 +83,11 @@ const NEU = {
     label: 'Wechselholz',
     erklaerung:
       'Ein waagerechtes Holz über und unter einer Öffnung. Wo ein Fenster das Ständerwerk unterbricht, nimmt das Wechselholz die Last der fehlenden Ständer auf und gibt dem Rahmen seinen Anschlag.',
+  },
+  dichtstoff: {
+    label: 'Dichtstoff',
+    erklaerung:
+      'Die elastische Masse, die die Fuge zwischen Fensterrahmen und Holz rundum verschließt. Sie bleibt weich und macht die Bewegung des Materials mit. Als vorgefertigtes Band heißt sie Dichtband.',
   },
   // Transportart `BELEGT` (belege/zimmerer.md 4): stehend zwischen den
   // Radschwingen, damit das Element unter die zulässige Transporthöhe passt und

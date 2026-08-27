@@ -46,6 +46,10 @@ export function M3() {
   return (
     <StepShell
       id="M3"
+      // Reine Lese-Bühne: der Plan zeichnet sich, man schaut zu. Bewusst
+      // ohne Auftragszeile — dieser Screen wird gelesen, nicht bedient.
+      auftrag={null}
+      ansage={null}
       buehneInteraktiv
       interaktionOffen={false}
       buehne={
@@ -53,26 +57,25 @@ export function M3() {
           <Dachstuhl3D zielT={1} darstellung="riss" ansicht="iso" lattung={0} />
         </Suspense>
       }
-      fachtext={
-        // Wortlaut aus flow 11 (M3), um einen Satz ergänzt: die beiden losen
+      warum={
+        // Wortlaut aus flow 11 (M3), zweimal ergänzt: die beiden losen
         // Board-Stickies `CAD` und `Abbund` sind laut 6.3 hier einzulösen,
-        // kommen im Entwurfstext aber nicht vor. Dafür ist „Parallel stimmst du
-        // Termine ab“ zu „Dann die Termine“ gekürzt — so bleibt der Fachtext
-        // trotz der beiden zusätzlichen Begriffe im 250-Zeichen-Budget (6.2).
+        // kommen im Entwurfstext aber nicht vor. Und der Halbsatz „du musst
+        // noch keins davon lesen können“ lizenziert das Nichtwissen (R10):
+        // die Zeichnung zeigt ~15 Sparren auf einmal, und ohne diesen Satz
+        // liest ein Anfänger sie als Prüfung statt als Ausblick. Dafür ist
+        // „Parallel stimmst du Termine ab“ zu „Danach müssen …“ gekürzt.
         <p>
-          Unterschrieben. Jetzt entsteht aus der <Begriff id="statik">Statik</Begriff> der{' '}
-          <Begriff id="abbundplan">Abbundplan</Begriff>: jedes Holz mit Länge, Winkel und
-          eigener Nummer. Gezeichnet wird er im <Begriff id="cad">CAD</Begriff>,
-          zugeschnitten wird danach beim <Begriff id="abbund">Abbund</Begriff>. Parallel
-          stimmst du Termine ab — Bauherr, Kranfirma, Gerüstbauer. Alle müssen am selben
-          Tag können.
+          Unterschrieben. Jetzt wird gezeichnet: jedes Holz mit Länge, Winkel und eigener
+          Nummer — du musst noch keins davon lesen können. Diese Zeichnung heißt{' '}
+          <Begriff id="abbundplan">Abbundplan</Begriff>. Danach müssen Bauherr, Kran und
+          Gerüst am selben Tag können.
         </p>
       }
       aha={
         <AhaKarte sichtbar={aha} eyebrow="Was passiert, wenn es regnet?">
-          Terminplanung ist ein Puzzle. Kran, Wetter, Materiallieferung und Gerüst müssen
-          zusammenpassen — ein verregneter Tag verschiebt die ganze Kette. Im Büro nennt
-          man das Projektmanagement.
+          Kran, Wetter, Lieferung und Gerüst müssen zusammenpassen — ein verregneter Tag
+          verschiebt die ganze Kette.
         </AhaKarte>
       }
       fuss={<StepFuss id="M3" />}

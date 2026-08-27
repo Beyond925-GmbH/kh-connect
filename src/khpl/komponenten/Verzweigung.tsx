@@ -2,11 +2,15 @@ import { useState } from 'react'
 import { Dialog as BaseDialog } from '@base-ui/react/dialog'
 import { ArrowRight, Check } from 'lucide-react'
 import { motion } from 'motion/react'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
-import { Wahlflaeche } from './Wahlflaeche'
+import { wahlflaeche } from './Wahlflaeche'
 import type { StepId } from '@/khpl/flow/steps'
+import { step } from '@/khpl/flow/steps'
+import type { StepBild } from '@/khpl/berufe/typen'
+import { beruf } from '@/khpl/berufe/registry'
 import { beschreibung, einladung, weiterText } from '@/khpl/flow/uebergaenge'
-import { useGraph } from '@/khpl/store/fortschritt'
+import { useAktiverBeruf, useGraph } from '@/khpl/store/fortschritt'
 
 /**
  * Der Fuß eines Step-Screens (khpl-ui-shell.md 5).
@@ -29,9 +33,10 @@ import { useGraph } from '@/khpl/store/fortschritt'
  * damit wörtlicher erfüllt als vorher: die Wahl hat ihren eigenen Augenblick,
  * statt als Dauerwerbung am Fußrand mitzulaufen.
  *
- * Farbregeln unverändert:
- *   Orange (`weiter`)   — der Weg nach vorn. Genau einer pro Screen.
- *   Gelbgrün (`aktion`) — die Handlung *in* der Übung: prüfen, auflösen.
+ * Farbregel (R3/R8): **Orange = die Welt** (Fakten, Maße, Zeichnung),
+ * **Limette = du.** Gefüllt ist Limette genau einmal pro Screen und heißt
+ * „hier geht's weiter“ (`weiter`); die Handlung *in* der Übung (`aktion`:
+ * prüfen, auflösen) trägt dieselbe Farbe als Kontur.
  */
 export function Verzweigung({
   offen,
@@ -95,14 +100,16 @@ export function Verzweigung({
     <div className="flex flex-wrap items-center justify-end gap-2.5">
       {geschafft && (
         <motion.p
-          initial={{ opacity: 0, scale: 0.8, rotate: -6 }}
-          animate={{ opacity: 1, scale: 1, rotate: -2 }}
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{ type: 'spring', stiffness: 460, damping: 18 }}
           data-testid="geschafft"
-          // Der Stempel. Leicht gedreht, in Warnwestengelb, mit schwarzer
-          // Schrift darauf — die einzige Stelle im System, an der die
-          // Signalfarbe Fläche wird, ohne Knopf zu sein.
-          className="mr-auto flex items-center gap-2 rounded-kh-pill bg-kh-signal px-3.5 py-1.5 text-[0.9375rem] font-bold text-[#0E0D0B] uppercase"
+          // Eine Statuszeile, kein Knopf: Haken und Versaltext in der
+          // Signalfarbe, ohne Füllfläche und ohne Pillenform. Als gefüllte
+          // Pille sah sie dem limetten Weiter-Knopf daneben zum Verwechseln
+          // ähnlich — und gefüllte Limette heißt „hier geht's weiter“ (R8),
+          // nicht „das ist fertig“.
+          className="mr-auto flex items-center gap-2 text-[0.9375rem] font-bold text-kh-signal uppercase"
         >
           <Check className="size-4 shrink-0" strokeWidth={3.5} aria-hidden />
           {geschafft}
@@ -149,10 +156,28 @@ export function Verzweigung({
 }
 
 /**
- * Die Wahl beim Weitergehen. Ein eigener Moment statt Kästen am Fußrand: eine
- * Frage, die Abstecher als antippbare Karten, der Hauptweg als der eine
- * gefüllte Knopf zuunterst — an der Stelle, an der eben noch *Weiter* saß.
- * Wer einfach durch will, ist mit einem zweiten Tap durch.
+ * Die Wahl beim Weitergehen — als Bild, nicht als Liste.
+ *
+ * **Die Wege werden gezeigt, nicht beschrieben.** Die Vorfassung stellte
+ * dieselbe Entscheidung als zwei Textzeilen in einem grauen Kasten plus einen
+ * orangen Knopf darunter: drei Schriftgrößen, zwei Bauformen, kein einziges
+ * Bild. Am Stand liest das niemand — der Besucher steht vor einer Stele,
+ * entscheidet in zwei Sekunden und tippt das, was nach dem interessanteren Ort
+ * aussieht. Deshalb trägt jetzt jeder Weg das Motiv des Screens, auf dem er
+ * endet: dasselbe Foto, das der Besucher gleich vollflächig sieht. Der Tap ist
+ * damit keine Textwahl mehr, sondern das Antippen eines Ortes.
+ *
+ * **Der Hauptweg ist eine Karte wie die anderen — nur limette.** Er war vorher
+ * die einzige Fläche mit Farbe und stand als Knopf unter einem Trennstrich;
+ * die Abstecher sahen daneben aus wie Kleingedrucktes. Gleiche Bauform,
+ * gleiche Größe, unterschiedliche Lautstärke: das ist die echte Wahl aus
+ * flow 6.7, und die Vorgabe („einer geht geradeaus weiter“) bleibt an der
+ * Farbe ablesbar — Limette, weil der Hauptweg der Weiter-Knopf dieses
+ * Fensters ist (R8), nicht Orange: das gehört der Welt.
+ *
+ * Zwei Wege stehen nebeneinander, drei füllen zwei Reihen — die ungerade Karte
+ * ist immer der Hauptweg und nimmt die volle Breite. Bei den drei
+ * Karrierekarten (flow 7 M9) ergibt das ein 2 × 2-Feld.
  *
  * Kein X und kein Abbrechen-Knopf: jede Option führt vorwärts. Der
  * Backdrop-Tap schließt für den seltenen Fall, dass jemand doch noch einmal
@@ -174,59 +199,197 @@ function WegeDialog({
   onWeiter: () => void
 }) {
   const graph = useGraph()
+  const berufId = useAktiverBeruf()
+  /**
+   * Das Motiv eines Steps — dasselbe, das seine Bühne trägt.
+   *
+   * **Ohne eigenes Motiv das Kartenbild des Berufs.** Neun der fünfzehn
+   * Übergänge münden in einen 3D-Schritt, und der führt kein Foto: die Bühne
+   * *ist* dort das Modell. Auf einer leeren Karte kippt das Fenster zurück in
+   * eine Textliste mit Dekoration daneben — ausgerechnet beim Hauptweg, der
+   * öfter betroffen ist als jeder Abstecher. Das Kartenbild ist nicht der
+   * Screen, auf dem der Weg endet, aber es ist derselbe Beruf und ein echtes
+   * Motiv; auf der Berufsliste hat der Besucher es zuletzt vor zwei Minuten
+   * gesehen. Besser eine Werkstatt als ein Loch.
+   */
+  const motiv = (id: StepId | null): StepBild | undefined => {
+    if (!berufId) return undefined
+    const b = beruf(berufId)
+    return (id ? b.bilder[id] : undefined) ?? { src: b.medien.karte }
+  }
+
+  // Der Hauptweg zeigt, wo er landet: das Motiv des nächsten Hauptschritts.
+  // Die 3D-Schritte führen keines — dort tritt das Pfeilfeld ein.
+  const ziel = step(graph, weiterVon).weiter
+  // Ungerade Kartenzahl heißt: der Hauptweg schließt die letzte Reihe allein
+  // ab und darf sie ganz nehmen.
+  const breit = (angebote.length + 1) % 2 === 1
+
   return (
     <BaseDialog.Root open={offen} onOpenChange={(auf) => !auf && onSchliessen()}>
       <BaseDialog.Portal>
         <BaseDialog.Backdrop className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
         <BaseDialog.Popup
           data-testid="wege-dialog"
-          className="fixed top-1/2 left-1/2 z-50 w-[min(34rem,92vw)] -translate-x-1/2 -translate-y-1/2 rounded-kh-lg border-t-4 border-kh-orange bg-kh-raised p-6 shadow-[0_28px_80px_rgba(0,0,0,0.7)] ring-1 ring-white/10 outline-none transition-all duration-200 data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0 data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0 sm:p-7"
+          className="fixed top-1/2 left-1/2 z-50 max-h-[92svh] w-[min(40rem,94vw)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-kh-lg border-t-4 border-kh-orange bg-kh-raised p-5 shadow-[0_28px_80px_rgba(0,0,0,0.7)] ring-1 ring-white/10 outline-none transition-all duration-200 data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0 data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0 sm:p-6"
         >
           <BaseDialog.Title className="kh-titel-klein">
             Wohin als Nächstes?
           </BaseDialog.Title>
-          <BaseDialog.Description className="mt-1.5 text-[1rem] text-kh-mute">
-            Du entscheidest — jeder Weg bringt dich ans Ziel.
+          {/*
+            Die erklärende Zeile stand hier sichtbar und sagte, was die Karten
+            darunter zeigen. Für den Screenreader bleibt sie, für das Auge ist
+            sie Ballast vor der eigentlichen Wahl.
+          */}
+          <BaseDialog.Description className="sr-only">
+            Tippe den Weg an, auf dem du weitermachen willst. Jeder bringt dich ans Ziel.
           </BaseDialog.Description>
 
-          <div className="mt-4 flex flex-col gap-2">
-            {angebote.map((id) => {
-              const zeile = beschreibung(graph, id)
-              return (
-                <Wahlflaeche
-                  key={id}
-                  onClick={() => onAbstecher(id)}
-                  data-testid={`abstecher-${id}`}
-                  className="min-h-[60px] px-4 py-2.5"
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[1.0625rem] leading-tight font-semibold text-kh-paper">
-                      {einladung(graph, id)}
-                    </span>
-                    {zeile && (
-                      <span className="mt-0.5 block text-[0.9375rem] leading-snug text-kh-mute">
-                        {zeile}
-                      </span>
-                    )}
-                  </span>
-                  <ArrowRight
-                    className="size-5 shrink-0 text-kh-orange"
-                    strokeWidth={2.5}
-                    aria-hidden
-                  />
-                </Wahlflaeche>
-              )
-            })}
-          </div>
-
-          <div className="mt-4 flex justify-end border-t border-kh-line pt-4">
-            <Button onClick={onWeiter} variant="weiter" data-testid="wege-weiter">
-              {weiterText(graph, weiterVon)}
-              <ArrowRight className="size-5" strokeWidth={2.5} />
-            </Button>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {angebote.map((id, i) => (
+              <Wegkarte
+                key={id}
+                index={i}
+                bild={motiv(id)}
+                titel={einladung(graph, id)}
+                zeile={beschreibung(graph, id)}
+                onClick={() => onAbstecher(id)}
+                testid={`abstecher-${id}`}
+              />
+            ))}
+            <Wegkarte
+              haupt
+              breit={breit}
+              index={angebote.length}
+              bild={motiv(ziel)}
+              titel={weiterText(graph, weiterVon)}
+              onClick={onWeiter}
+              testid="wege-weiter"
+            />
           </div>
         </BaseDialog.Popup>
       </BaseDialog.Portal>
     </BaseDialog.Root>
+  )
+}
+
+/**
+ * Ein Weg als antippbare Karte: Motiv oben, Beschriftung unten, Pfeil rechts.
+ *
+ * Die Fläche kommt aus `wahlflaeche` (`form: 'karte'`) — Radius, Kante, Grund
+ * und die Rückmeldung beim Drücken sind dieselben wie bei jeder anderen Wahl
+ * der App. Überschrieben wird nur, was ein randloses Bild braucht: kein
+ * Innenabstand, kein Abstand zwischen den Teilen, geschnittene Ecken.
+ */
+function Wegkarte({
+  bild,
+  titel,
+  zeile = null,
+  haupt = false,
+  breit = false,
+  index,
+  onClick,
+  testid,
+}: {
+  bild: StepBild | undefined
+  titel: string
+  zeile?: string | null
+  /** Der Weg geradeaus. Genau einer je Fenster, und nur er trägt Limette. */
+  haupt?: boolean
+  /** Nimmt beide Spalten — die letzte Karte einer ungeraden Reihe. */
+  breit?: boolean
+  index: number
+  onClick: () => void
+  testid: string
+}) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.05 * index, type: 'spring', stiffness: 420, damping: 32 }}
+      className={cn(
+        wahlflaeche({ form: 'karte' }),
+        'min-h-0 gap-0 overflow-hidden p-0',
+        haupt && 'border-kh-signal',
+        breit && 'col-span-2',
+      )}
+      data-testid={testid}
+    >
+      <span
+        className={cn(
+          'relative block w-full shrink-0 overflow-hidden bg-kh-surface',
+          // Die breite Karte trägt einen Streifen, kein Panorama: 16 : 6 wären
+          // auf der Stele über 200 px hoch und machten den Hauptweg zum
+          // Plakat über der eigentlichen Wahl.
+          breit ? 'h-28' : 'aspect-[16/10]',
+        )}
+      >
+        {bild ? (
+          <img
+            src={bild.src}
+            alt=""
+            aria-hidden
+            loading="lazy"
+            decoding="async"
+            style={{ objectPosition: bild.pos, filter: 'saturate(1.12) contrast(1.06)' }}
+            className="size-full object-cover"
+          />
+        ) : (
+          // Die 3D-Schritte führen kein Foto. Statt eines schwarzen Lochs ein
+          // Feld, das dasselbe sagt wie das Motiv: „hier geht es lang“.
+          <span
+            className={cn(
+              'flex size-full items-center justify-center bg-gradient-to-br',
+              haupt
+                ? 'from-kh-signal-dim/40 to-kh-surface'
+                : 'from-white/10 to-kh-surface',
+            )}
+          >
+            <ArrowRight
+              className={cn('size-9', haupt ? 'text-kh-signal' : 'text-kh-mute')}
+              strokeWidth={2.5}
+              aria-hidden
+            />
+          </span>
+        )}
+      </span>
+
+      <span
+        className={cn(
+          'flex w-full flex-1 items-center gap-2 px-3.5 py-2.5',
+          haupt && 'bg-kh-signal text-[#0E0D0B]',
+        )}
+      >
+        <span className="min-w-0 flex-1">
+          <span
+            className={cn(
+              'block text-[1rem] leading-tight font-semibold',
+              haupt ? 'text-[#0E0D0B]' : 'text-kh-paper',
+            )}
+          >
+            {titel}
+          </span>
+          {zeile && (
+            // Kein `block`: `line-clamp-2` setzt selbst ein `display`, und wer
+            // beides schreibt, bekommt je nach Regelreihenfolge drei Zeilen.
+            //
+            // Auf Handybreite fällt die Zeile ganz weg. Zwei halbe Karten
+            // nebeneinander lassen ihr drei Wörter je Zeile, und was davon
+            // übrig bleibt, ist ein abgeschnittener Halbsatz — das Foto sagt
+            // an dieser Stelle mehr als „Jemand hat das konstru…“.
+            <span className="mt-0.5 line-clamp-2 text-[0.8125rem] leading-snug text-kh-mute max-sm:hidden">
+              {zeile}
+            </span>
+          )}
+        </span>
+        <ArrowRight
+          className={cn('size-5 shrink-0', haupt ? 'text-[#0E0D0B]' : 'text-kh-orange')}
+          strokeWidth={2.5}
+          aria-hidden
+        />
+      </span>
+    </motion.button>
   )
 }

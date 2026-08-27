@@ -127,6 +127,9 @@ export function M8() {
   return (
     <StepShell
       id="M8"
+      // Rückblick. Man liest, was man getan hat.
+      auftrag={null}
+      ansage={null}
       buehneInteraktiv
       interaktionOffen={false}
       buehne={

@@ -1,3 +1,5 @@
+import type { DachstuhlMasse, Huelle } from './mass'
+
 /**
  * Zeitachse der Aufbau-Animation (Bauplan 4). Reine Funktionen, kein React,
  * kein three — der Fortschritt t kommt immer von aussen.
@@ -153,4 +155,30 @@ export function phaseAt(t: number): Phase {
     if (g < p.bis) return p
   }
   return PHASEN[PHASEN.length - 1]
+}
+
+/**
+ * Die Kamerahuelle zum Baustand `t` — grob gestuft, nicht stetig.
+ *
+ * `masse.huelle` reserviert die volle Firsthoehe, auch wenn bei `t` erst die
+ * Rohdecke liegt: die Kamera passt dann einen fast leeren Kasten ein, und der
+ * gebaute Unterbau sitzt als schmaler Streifen unter viel dunkler Flaeche
+ * (khpl-designregeln.md R1, Befund M5). Drei Stufen statt einer stetigen
+ * Funktion, und gerechnet wird ueber `zielT`, nicht ueber den animierten
+ * Fortschritt: die Kamera springt beim Einpassen (`Kamerasteuerung` setzt
+ * hart) — mit Stufen tut sie das hoechstens an einem Tap-Wechsel, nie
+ * waehrend ein Teil einfliegt.
+ */
+export function huelleBeiT(m: DachstuhlMasse, t: number): Huelle {
+  const nr = phaseAt(t).nr
+  // Ab der Firstpfette steht die volle Hoehe wirklich im Raum.
+  if (nr >= 6) return m.huelle
+  // Stuhlsaeulen/Mittelpfetten: oben schliesst die Mittelpfette ab. Davor
+  // (Rohdecke bis Stuhlschwellen) die Schwellenoberkante — bewusst auch fuer
+  // die leere Rohdecke, sonst zoomte die Kamera auf eine fast flache Huelle.
+  const deckel = nr >= 4 ? m.yMPuk + m.p.q.mittelpfette.h : m.ySchwelleOk
+  const maxY = Math.min(m.huelle.max[1], deckel)
+  const min = m.huelle.min
+  const max: [number, number, number] = [m.huelle.max[0], maxY, m.huelle.max[2]]
+  return { min, max, mitte: [0, (min[1] + maxY) / 2, 0] }
 }
