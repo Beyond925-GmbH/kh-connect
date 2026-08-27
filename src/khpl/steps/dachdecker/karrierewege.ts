@@ -84,10 +84,14 @@ export const KARRIEREWEGE: Karriereweg[] = [
         // `BELEGT` für diesen Anbieter. Aufstiegs-BAföG: 50 % Zuschuss auf
         // Lehrgangs- und Prüfungskosten, dazu 50 % Darlehenserlass bei
         // bestandener Prüfung → höchstens rund ein Viertel Eigenanteil.
-        // NRW-Meisterprämie 2.500 € nach bestandener Handwerks-Meisterprüfung —
-        // gilt hier, weil Dachdecker ein Handwerksberuf ist. Beides `BELEGT`.
+        // Der Körper-Anker (R12): ein Viertel ≈ 3.400 €, Azubi-Vergütung
+        // 3. Lehrjahr Dachdecker 1.400 €/Monat (belege 1, Spalte Dachdecker)
+        // → knapp zweieinhalb Monatslöhne. Die Beleg-Details (Name
+        // Aufstiegs-BAföG, NRW-Meisterprämie 2.500 € — beides `BELEGT`) sind
+        // im Review als R5-Kürzung aus dem Screentext gefallen; sie bleiben
+        // hier dokumentiert, falls ein Eltern-Handout sie braucht.
         antwort:
-          'Rund 13.500 Euro für Lehrgang und Prüfung. Das Aufstiegs-BAföG übernimmt davon den größten Teil — wer besteht, zahlt am Ende etwa ein Viertel selbst. Nordrhein-Westfalen legt noch 2.500 Euro Meisterprämie drauf.',
+          'Rund 13.500 Euro für Lehrgang und Prüfung. Die staatliche Förderung übernimmt den größten Teil — wer besteht, zahlt am Ende etwa ein Viertel selbst: knapp zweieinhalb Azubi-Monatslöhne.',
       },
       {
         frage: 'Was du verdienst',
@@ -95,8 +99,12 @@ export const KARRIEREWEGE: Karriereweg[] = [
         // (belege 5 und khpl-tage.md 0c, Spalte Dachdecker).
         // `TEILWEISE BELEGT` — Portaldaten, deshalb nur mit „rund“ und ohne
         // Zusatz nach oben: eine Erfahrungsspanne steht für dieses Gewerk in
-        // keinem Beleg.
-        antwort: 'Als Dachdeckermeister:in im Schnitt rund 54.000 Euro im Jahr.',
+        // keinem Beleg. Der Körper-Anker (R12): 4.500 €/Monat gegen 1.400 €
+        // Azubi-Vergütung im 3. Lehrjahr (belege 1, Spalte Dachdecker) ≈
+        // Faktor 3,2 — „etwa dreimal“ hält auch nach der Tariferhöhung
+        // 10/2026 (1.460 €, Faktor 3,1).
+        antwort:
+          'Als Dachdeckermeister:in im Schnitt rund 54.000 Euro im Jahr — etwa dreimal so viel wie ein Azubi im dritten Lehrjahr.',
       },
     ],
     aufhaenger:

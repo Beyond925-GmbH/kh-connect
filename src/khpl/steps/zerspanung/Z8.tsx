@@ -58,6 +58,8 @@ export function Z8() {
   return (
     <StepShell
       id="Z8"
+      auftrag={null}
+      ansage={null}
       interaktionOffen={false}
       buehne={<Abschlussfeld />}
       interaktion={

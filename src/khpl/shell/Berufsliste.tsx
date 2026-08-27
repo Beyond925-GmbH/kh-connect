@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
-import { ArrowLeft, ArrowRight, Check, Clock } from 'lucide-react'
+import { ArrowRight, Check, Clock } from 'lucide-react'
 import { BerufBild } from '@/khpl/komponenten/BerufBild'
+import { MERKMAL_TEXTE } from '@/khpl/match/merkmale'
 import { useMatch } from '@/khpl/match/useMatch'
 import type { BerufDef } from '@/khpl/berufe/typen'
 import {
@@ -9,7 +10,6 @@ import {
   useBesuchteBerufe,
   useFertigeBerufe,
   useSitzung,
-  zeigeVorschlag,
 } from '@/khpl/store/fortschritt'
 import { useStaffAusgang } from './staffAusgang'
 
@@ -25,9 +25,20 @@ import { useStaffAusgang } from './staffAusgang'
  * der beste Treffer vorn und trägt ein Etikett; ohne Antworten bleibt die
  * Reihenfolge der Registry. Eine gewürfelte Reihenfolge wäre schlimmer als
  * eine feste: sie sähe nach Empfehlung aus.
+ *
+ * **Hier steht jetzt auch der Vorschlag** (`khpl-vereinfachung.md` §5). Er war
+ * ein eigener Screen davor (S0.3) und hat den Trichter auf neun Taps bis zum
+ * ersten Handwerk gebracht. Was er konnte, kann diese Liste besser: die
+ * Begründung steht auf der empfohlenen Karte, die Alternativen liegen im
+ * selben Blick daneben statt einen Screen später — und „Dicht dahinter“, das
+ * dort ein Nachsatz war, ist hier ein Etikett auf der Karte, die es meint.
+ *
+ * Der Kaltstart-Sonderfall des Vorschlags („ohne Aussage kein Vorschlag“)
+ * löst sich damit von selbst auf: ohne Antworten hat die Liste eben keine
+ * hervorgehobene Karte.
  */
 export function Berufsliste() {
-  const { rangfolge, kaltstart, bester } = useMatch()
+  const { rangfolge, kaltstart, bester, zweiter, merkmale } = useMatch()
   const aktiv = useAktiverBeruf()
   const besuchte = useBesuchteBerufe()
   const fertige = useFertigeBerufe()
@@ -36,9 +47,24 @@ export function Berufsliste() {
 
   const berufe = rangfolge.map((t) => t.beruf)
   const empfohlen = kaltstart ? null : bester?.beruf.id
+  const zweitbester = kaltstart ? null : zweiter?.beruf.id
 
-  /** Zurück zum Vorschlag — nur wenn es einen gibt und er nicht gerade kam. */
-  const zurueck = !kaltstart && !aktiv
+  /**
+   * Die Begründung auf der empfohlenen Karte — wörtlich die des früheren
+   * Vorschlag-Screens. Ohne zitierbares Merkmal ist es ein Einstieg und kein
+   * Treffer; dann bleibt die Zeile des Berufs stehen. Der Unterschied kostet
+   * einen Satz und ist der ganze Unterschied zwischen einer Auskunft und einer
+   * Verkaufszeile.
+   */
+  const gruende = bester
+    ? bester.merkmale.length > 0
+      ? bester.merkmale
+      : merkmale.slice(0, 2)
+    : []
+  const begruendung =
+    gruende.length > 0
+      ? `Du magst ${gruende.map((m) => MERKMAL_TEXTE[m]).join(' — und ')}. Genau davon lebt dieser Beruf.`
+      : null
 
   return (
     <div
@@ -51,23 +77,14 @@ export function Berufsliste() {
       />
 
       <header className="relative flex shrink-0 items-center gap-3 px-5 pt-6 pb-1 landscape:px-8 landscape:pt-6 landscape:pb-0">
-        {zurueck && (
-          <button
-            type="button"
-            onClick={zeigeVorschlag}
-            data-testid="berufe-zurueck"
-            aria-label="Zurück zum Vorschlag"
-            className="grid size-[52px] shrink-0 place-items-center rounded-kh-pill bg-white/6 text-kh-paper transition-transform active:scale-90"
-          >
-            <ArrowLeft className="size-6" strokeWidth={2.25} />
-          </button>
-        )}
         <div className="min-w-0">
           <h1 className="kh-titel">Vier Berufe</h1>
           <p className="text-[1.125rem] text-kh-mute landscape:text-[1rem]">
             {sitzung.aktiverBeruf
               ? 'Wechsle, wann du willst — dein Fortschritt bleibt.'
-              : 'Such dir einen aus. Umentscheiden geht jederzeit.'}
+              : empfohlen
+                ? 'Der erste passt am besten zu dir. Ansehen darfst du alle.'
+                : 'Such dir einen aus. Umentscheiden geht jederzeit.'}
           </p>
         </div>
         {/* Die Dehnfuge trägt wie in der Step-Leiste die Staff-Geste. */}
@@ -102,6 +119,8 @@ export function Berufsliste() {
             beruf={b}
             index={i}
             empfohlen={b.id === empfohlen}
+            begruendung={b.id === empfohlen ? begruendung : null}
+            zweitbester={b.id === zweitbester}
             angefangen={besuchte.includes(b.id)}
             fertig={fertige.includes(b.id)}
             aktiv={b.id === aktiv}
@@ -123,6 +142,8 @@ function Karte({
   beruf,
   index,
   empfohlen,
+  begruendung,
+  zweitbester,
   angefangen,
   fertig,
   aktiv,
@@ -130,6 +151,14 @@ function Karte({
   beruf: BerufDef
   index: number
   empfohlen: boolean
+  /** Warum ausgerechnet dieser — nur auf der empfohlenen Karte. */
+  begruendung: string | null
+  /**
+   * „Dicht dahinter“. Zimmerer und Dachdecker liegen im Merkmalsraum fast
+   * deckungsgleich; drei Fragen trennen sie nicht sicher. Den Zweiten zu
+   * benennen macht aus einem knappen Ergebnis eine ehrliche Auskunft.
+   */
+  zweitbester: boolean
   angefangen: boolean
   fertig: boolean
   aktiv: boolean
@@ -188,6 +217,13 @@ function Karte({
           <div className="flex flex-wrap items-center gap-1.5">
             {empfohlen && (
               <span className={`${CHIP} bg-kh-orange text-[#0E0D0B]`}>Passt zu dir</span>
+            )}
+            {zweitbester && !aktiv && !angefangen && !fertig && (
+              <span
+                className={`${CHIP} border border-kh-orange/45 bg-kh-orange/12 text-kh-orange`}
+              >
+                Dicht dahinter
+              </span>
             )}
             {aktiv && (
               <span
@@ -266,7 +302,7 @@ function Karte({
             )}
           </h2>
           <p className="max-w-[42ch] text-[1.125rem] leading-snug text-kh-paper/75 landscape:text-[0.9375rem] landscape:text-kh-paper/70">
-            {beruf.zeile}
+            {begruendung ?? beruf.zeile}
           </p>
         </div>
       </button>

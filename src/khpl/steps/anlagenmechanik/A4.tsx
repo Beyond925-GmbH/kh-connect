@@ -136,6 +136,34 @@ export function A4() {
   return (
     <StepShell
       id="A4"
+      /*
+        Sieben Wörter. „Zieh" statt „ziehen Sie", und die beiden Fachwörter
+        stehen hier **nicht**: die Leitung geht sichtbar von einem Kasten zum
+        anderen, und wer die Namen wissen will, findet sie im Warum darunter.
+        Die alte Fassung trug „Wärmepumpe" und „Verteiler" in der Aufforderung
+        selbst — zwei Chips in dem einen Satz, den jeder lesen muss.
+      */
+      auftrag={fertig ? null : 'Zieh die Leitung von der Pumpe zum Verteiler.'}
+      /*
+        **Die Referenz-Ansage der Anwendung** (`komponenten/Ansage.tsx`).
+
+        Freies Ziehen über eine Bühne ist die am wenigsten selbsterklärende
+        Geste der vier Tage: es gibt keinen Griff, den man sieht, und die
+        Fläche sieht aus wie ein Bild. Ohne Ansage fasst man ins Leere und
+        hält den Screen für kaputt.
+
+        Der Haken sagt vorweg, was die Übung sonst als Strafe nachreicht — der
+        kürzeste Weg ist nicht der beste. Das ist kein Verrat der Pointe: die
+        Zahl der Bögen und ihr Preis stehen weiterhin nur auf dem Balken.
+
+        Sie erscheint **je Geste**: wer `ziehen-frei` an diesem Tag schon
+        einmal gesehen hat, bekommt sie hier nicht noch einmal.
+      */
+      ansage={{
+        geste: 'ziehen-frei',
+        text: 'Du verlegst die Leitung selbst — mit dem Finger, quer durch den Keller.',
+        haken: 'Der kürzeste Weg ist nicht immer der beste.',
+      }}
       buehneInteraktiv
       interaktionOffen={!fertig}
       buehne={
@@ -145,7 +173,7 @@ export function A4() {
           onAbgewiesen={fertig ? undefined : setAbgewiesen}
         />
       }
-      fachtext={
+      warum={
         /*
           Handy hochkant trägt das Panel keinen Fachtext mehr — die fünf Zeilen
           kosteten 95 px Scrollfenster, und darunter lagen ausgerechnet die
@@ -160,15 +188,11 @@ export function A4() {
           im Balken, die tragende Wand in der Abweisung, Halterung und Dämmung
           in den beiden Einwürfen.
         */
-        fertig || schmal ? undefined : (
-          <p>
-            Die Leitung muss von der <Fachwort id="waermepumpe">Wärmepumpe</Fachwort> zum{' '}
-            <Fachwort id="verteiler">Verteiler</Fachwort>. Dabei gelten Regeln, die man
-            nicht sieht, wenn man nur auf die Länge schaut: jeder Bogen kostet Druck,
-            Halterungen brauchen Abstand, durch manche Wände darf man nicht, und
-            Warmwasser will gedämmt sein.
-          </p>
-        )
+        <p>
+          Das Wasser läuft von der <Fachwort id="waermepumpe">Wärmepumpe</Fachwort> zu dem
+          Kasten, der es auf die Räume verteilt. Jeder Bogen kostet Druck — und durch
+          manche Wände darf man nicht.
+        </p>
       }
       interaktion={
         <Wechsel takt={fertig ? 'liegt' : 'ziehen'}>
@@ -176,18 +200,9 @@ export function A4() {
             <Bewertung boegen={boegen} />
           ) : (
             <div className="flex flex-col gap-3">
-              <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-                {schmal ? (
-                  <>
-                    Zieh die Leitung. Von der{' '}
-                    <Fachwort id="waermepumpe">Wärmepumpe</Fachwort> zum{' '}
-                    <Fachwort id="verteiler">Verteiler</Fachwort>.
-                  </>
-                ) : (
-                  'Zieh die Leitung. Von der Wärmepumpe zum Verteiler.'
-                )}
-              </p>
-
+              {/* Die Aufforderung stand hier doppelt — einmal fett im Panel und
+                  einmal als Fachtext darüber. Sie steht jetzt einmal, im
+                  Auftragsband, auf jedem Screen an derselben Stelle. */}
               <Verlustbalken
                 verlust={verlust}
                 boegen={boegen}
@@ -213,17 +228,12 @@ export function A4() {
             sichtbar={gezogen}
             eyebrow="Wie oft muss so ein Rohr befestigt werden?"
           >
-            Ein Kupferrohr mit 22 Millimetern Durchmesser bekommt alle zwei Meter eine
-            Schelle, ein dünneres alle anderthalb, ein dickes erst nach dreieinhalb. Ein
-            Verbundrohr aus Kunststoff braucht deutlich mehr davon — es ist weicher und
-            hängt sonst durch. Wer die Abstände nicht kennt, sieht es ein Jahr später an
-            der Leitung.
+            Ein 22-Millimeter-Kupferrohr bekommt alle zwei Meter eine Schelle. Kunststoff
+            braucht mehr davon — es ist weicher und hängt sonst durch.
           </AhaKarte>
           <AhaKarte sichtbar={fertig} eyebrow="Warum kriegen die Rohre einen Mantel?">
-            Weil ein warmes Rohr im kalten Keller Wärme abgibt, die niemand bestellt hat —
-            und weil es im Gesetz steht: Gebäudeenergiegesetz, Paragraf 69 mit Anlage 8.
-            Bis 22 Millimeter Rohr sind 20 Millimeter Dämmung vorgeschrieben. Bei dicken
-            Leitungen ist der Mantel so dick wie das Rohr selbst.
+            Weil ein warmes Rohr im kalten Keller Wärme abgibt, die niemand bestellt hat.
+            Bis 22 Millimeter Rohr schreibt das Gesetz 20 Millimeter Dämmung vor.
           </AhaKarte>
         </>
       }
@@ -254,11 +264,19 @@ export function A4() {
             uebungOffen={!fertig}
             aktion={
               fertig ? null : (
+                /*
+                  `grayscale` zusätzlich zur 40-%-Deckkraft der Hülle: der
+                  Knopf wird während der ganzen Übung angesehen, und ob er
+                  gerade „noch nicht" oder „jetzt" sagt, muss man am Kiosk im
+                  Vorbeigehen sehen (R8). Nur Alpha reichte dafür nicht — in
+                  der Abnahme sahen alle drei Zieh-Zustände gleich aus.
+                */
                 <Button
                   variant="aktion"
                   onClick={legen}
                   disabled={!angekommen}
                   data-testid="a4-legen"
+                  className="disabled:grayscale"
                 >
                   Leitung liegt
                 </Button>
@@ -353,8 +371,8 @@ function Bewertung({ boegen }: { boegen: number }) {
       </p>
       <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/85">
         {gut
-          ? 'Zwei Bögen — weniger lässt dieser Keller nicht zu. Du bist unter der tragenden Wand durch und in einem Zug zum Verteiler. Genau so baut man es: lieber ein Stück Rohr mehr als einen Bogen mehr, denn gegen den arbeitet die Pumpe den Rest ihres Lebens an.'
-          : 'Er passt, er ist dicht, und er bleibt so. Kürzer ist er dadurch nicht geworden — jeder Bogen darin kostet die Pumpe Kraft. Gleich, wenn die Anlage anläuft, wirst du sehen, dass die Wärme etwas länger braucht.'}
+          ? 'Zwei Bögen — weniger lässt dieser Keller nicht zu. Genau so baut man es: lieber ein Stück Rohr mehr als einen Bogen mehr.'
+          : 'Er passt, er ist dicht, und er bleibt so. Jeder Bogen darin kostet die Pumpe Kraft — gleich, wenn die Anlage anläuft, siehst du es.'}
       </p>
     </div>
   )

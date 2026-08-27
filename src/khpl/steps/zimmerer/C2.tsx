@@ -10,15 +10,20 @@ import {
 } from '@/khpl/buehne/zimmerer/kanon'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
+import { RATEN_HAKEN } from '@/khpl/komponenten/gesten'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { useSchmal } from '@/khpl/shell/schmal'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
 /**
- * C2 — Zweiundsechzig Komma fünf. **Der eine Schätzmoment dieses Tages**
- * (khpl-tage.md 1, Mechanismus 3; khpl-tag-zimmerer.md 6, C2).
+ * C2 — Das Raster, das keiner sich ausdenkt. **Der eine Schätzmoment dieses
+ * Tages** (khpl-tage.md 1, Mechanismus 3; khpl-tag-zimmerer.md 6, C2).
+ *
+ * **Der Titel nennt das Thema, nie den Wert** (Designregel R6). Die frühere
+ * Überschrift „Zweiundsechzig Komma fünf" stand ausgeschrieben über dem
+ * laufenden Schätz-Regler und war die Lösung; sie steht jetzt als Titel der
+ * Auflösung — dort, wo die Überraschung hingehört.
  *
  * Drei Takte wie in M2: Vorgabe zeigen → schätzen → auflösen. Die Übung steht
  * vor der Erklärung, die Überraschung **ist** der Lerninhalt.
@@ -70,9 +75,6 @@ const START_CM = 90
 const cm = (n: number) => `${n.toLocaleString('de-DE', { maximumFractionDigits: 1 })} cm`
 
 export function C2() {
-  // Handy hochkant: jede Zeile Fachtext kostet unten die Reglerskala
-  // (s. `shell/schmal.ts`).
-  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.c2
   const [wert, setWert] = useState(() => gespeichert?.schaetzung ?? START_CM)
   const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
@@ -85,6 +87,21 @@ export function C2() {
   return (
     <StepShell
       id="C2"
+      auftrag={aufgeloest ? null : 'Schätz, wie weit die Ständer auseinanderstehen.'}
+      /*
+        Rate-Regler — mit einem Anker, der die Antwort nicht verrät.
+
+        Die Zahl kommt nicht vom Zimmerer, sie kommt von der Platte: eine
+        Gipsplatte ist 125 cm breit, und sie muss auf beiden Rändern auf Holz
+        enden. Wer das vorher weiß, schätzt; wer es nicht weiß, rät. Genau der
+        Unterschied ist der Grund für diese Ansage — die Zahl selbst (62,5)
+        steht weiterhin nur in der Auflösung.
+      */
+      ansage={{
+        geste: 'ziehen-regler',
+        text: 'Eine Gipsplatte ist 1,25 m breit und muss auf beiden Seiten auf Holz enden.',
+        haken: RATEN_HAKEN,
+      }}
       // Der Regler sitzt im Panel, das Ständerwerk auf der Bühne — und es
       // folgt dem Regler live. Deshalb `buehneInteraktiv`: das Panel bleibt
       // schmal, und der Sichtfeld-Messer sagt der Kamera, wie viel Fläche ihr
@@ -100,22 +117,11 @@ export function C2() {
           />
         </Suspense>
       }
-      fachtext={
-        // Hochkant eine Zeile kürzer: mit der vollen Fassung stand die
-        // Skalenbeschriftung des Reglers („30 cm“ / „120 cm“) unter der
-        // Scrollkante, und die sagt, in welchem Bereich überhaupt geschätzt
-        // wird (s. `shell/schmal.ts`).
-        aufgeloest ? undefined : schmal ? (
-          <p>
-            Die <Begriff id="staenderwerk">Ständer</Begriff> stehen im Raster — und das
-            Raster kommt nicht vom Zimmerer.
-          </p>
-        ) : (
-          <p>
-            Die <Begriff id="staenderwerk">Ständer</Begriff> stehen nicht nach Gefühl,
-            sondern im Raster — und das Raster kommt nicht vom Zimmerer.
-          </p>
-        )
+      warum={
+        <p>
+          Die <Begriff id="staenderwerk">Ständer</Begriff> stehen im Raster — und das
+          Raster kommt nicht vom Zimmerer.
+        </p>
       }
       interaktion={
         <Wechsel takt={aufgeloest ? 'aufgeloest' : 'schaetzen'}>
@@ -136,8 +142,12 @@ export function C2() {
             schmaler als 62,5 Zentimeter, weil sie zwischen die Ständer klemmen müssen.
             Das Maß kommt von der Platte, nicht von der Wolle.
           </AhaKarte>
+          {/* Ab dem zweiten Einwurf zugeklappt (R5): unter der Auflösung
+              stehen schon Zahl, Abstand und Herleitung — zwei offene Karten
+              dazu sprengen das Wortbudget. */}
           <AhaKarte
             sichtbar={aufgeloest}
+            zugeklappt
             eyebrow="Warum entscheidet das nicht der Zimmerer?"
           >
             Weil im Bau alles an etwas anderem hängt. Das Skelett der Wand steht in dem
@@ -215,15 +225,28 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
 
   return (
     <div className="flex flex-col gap-3">
-      <motion.span
-        initial={{ opacity: 0, transform: 'translateY(18px) scale(0.9)' }}
-        animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
-        transition={{ type: 'spring', stiffness: 380, damping: 26 }}
-        data-testid="c2-zahl"
-        className="kh-zahl text-kh-orange"
-      >
-        {cm(ACHSMASS_CM)}
-      </motion.span>
+      {/* Die ausgeschriebene Zahl ist der Titel der Auflösung — hier löscht
+          sie keinen Aha-Moment mehr, hier ist sie er (Designregel R6). */}
+      <div>
+        <motion.p
+          initial={{ opacity: 0, transform: 'translateY(10px)' }}
+          animate={{ opacity: 1, transform: 'translateY(0px)' }}
+          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          data-testid="c2-aufloesung-titel"
+          className="kh-etikett text-kh-orange/80"
+        >
+          Zweiundsechzig Komma fünf
+        </motion.p>
+        <motion.span
+          initial={{ opacity: 0, transform: 'translateY(18px) scale(0.9)' }}
+          animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
+          transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+          data-testid="c2-zahl"
+          className="kh-zahl mt-1 block text-kh-orange"
+        >
+          {cm(ACHSMASS_CM)}
+        </motion.span>
+      </div>
 
       {/* Der Abstand zwischen der eigenen und der echten Zahl ist die Aussage
           des Screens — deshalb steht er als Zahl da und muss nicht aus zwei
@@ -277,6 +300,11 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
           {cm(ACHSMASS_CM)} — so trifft jeder Plattenstoß genau die Mitte eines Ständers,
           und es bleibt fast kein Verschnitt übrig. Das heißt{' '}
           <Begriff id="achsmass">Achsmaß</Begriff>: von Ständermitte zu Ständermitte.
+        </p>
+        {/* Der Körper-Anker (Designregel R12): die Regel nennt genau diese
+            Zahl als Referenzbeispiel — 62,5 cm muss man fühlen können. */}
+        <p className="text-[1.0625rem] leading-snug text-kh-paper/90">
+          {cm(ACHSMASS_CM)} — ungefähr deine eigene Schulterbreite.
         </p>
         <p className="text-[1rem] leading-snug text-kh-mute">
           Meist. Nicht immer — 83,3 und {cm(PLATTENBREITE_CM)} kommen auch vor, und rund

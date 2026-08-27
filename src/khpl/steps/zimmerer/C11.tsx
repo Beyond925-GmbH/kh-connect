@@ -67,6 +67,8 @@ export function C11() {
   return (
     <StepShell
       id="C1.1"
+      auftrag={null}
+      ansage={null}
       titelZusatz="Abstecher"
       // Quer 52 statt 44 rem: in der schmalen Spalte begann das Zitat unter
       // der Scrollkante, während rechts eine halbe Fotowand leer stand
@@ -74,12 +76,11 @@ export function C11() {
       karteBreit
       interaktionOffen={false}
       buehne={<StepFoto id="C1.1" />}
-      fachtext={
+      warum={
         <p>
-          Das Klischee vom Zimmermann mit dem Beil gegen die Realität: digitales Aufmaß —
-          auf der Baustelle mit dem Laserscanner —, daraus ein{' '}
-          <Begriff id="cad">CAD</Begriff>-Modell, daraus die Abbundliste. Die{' '}
-          <Begriff id="abbundanlage">Abbundanlage</Begriff> macht daraus über Nacht einen
+          Das Klischee ist der Zimmermann mit dem Beil. In Wirklichkeit wird die Baustelle
+          mit dem Laser vermessen und am Rechner gezeichnet. Die{' '}
+          <Begriff id="abbundanlage">Abbundanlage</Begriff> sägt daraus über Nacht einen
           Stapel fertiger Hölzer.
         </p>
       }

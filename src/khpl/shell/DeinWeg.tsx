@@ -289,7 +289,11 @@ function Zeile({
           />
           <span className="ml-7 grid size-6 shrink-0 place-items-center" aria-hidden>
             {zustand === 'besucht' ? (
-              <span className="grid size-6 place-items-center rounded-full bg-kh-orange text-[#0E0D0B]">
+              // „Erledigt“ ist app-weit limette (R3) — wie die
+              // geschafft-Zeile im Step-Fuß. Als Kontur, nicht gefüllt:
+              // das stärkste Element bleibt der gefüllte „du bist
+              // hier“-Punkt.
+              <span className="grid size-6 place-items-center rounded-full border-2 border-kh-signal/60 text-kh-signal">
                 <Check className="size-3.5" strokeWidth={3.5} />
               </span>
             ) : zustand === 'aktuell' ? (
@@ -385,11 +389,15 @@ function Zeile({
  * Der Knoten eines Hauptschritts — und der Grund, warum das Sheet und die Rail
  * jetzt dieselbe Zählung zeigen. Die Nummer steht **im** Knoten: sie ist
  * dadurch Teil der Achse und braucht keine eigene Spalte.
+ *
+ * „Besucht“ ist limette wie jede Erledigt-Marke der App (R3) — aber als
+ * Kontur, eine Stufe leiser als „aktuell“: nur der Punkt, an dem der
+ * Besucher gerade steht, ist die gefüllte Fläche mit Ring.
  */
 function Knoten({ nummer, zustand }: { nummer: number | null; zustand: Wegzustand }) {
   const stil =
     zustand === 'besucht'
-      ? 'bg-kh-orange text-[#0E0D0B]'
+      ? 'border-2 border-kh-signal/60 bg-kh-surface text-kh-signal'
       : zustand === 'aktuell'
         ? 'bg-kh-signal text-[#0E0D0B] ring-4 ring-kh-signal/20'
         : 'border-2 border-white/18 bg-kh-surface text-kh-mute/70'

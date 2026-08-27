@@ -65,13 +65,15 @@ const AM_KRAN: Abschnitt[] = [
   {
     frage: 'Wer am Kran wo steht',
     antwort:
-      'Am Kran hat jeder seinen Platz: einer hängt die Last an und hat den Kranführer im Blick, die anderen nehmen das Element oben in Empfang. In dem Betrieb, den wir gefragt haben, sind es beim Aufstellen vier — vorgeschrieben ist diese Zahl nicht. Vorgeschrieben ist, dass keiner von ihnen darunter steht.',
+      'Einer hängt die Last an und hat den Kranführer im Blick, die anderen nehmen sie oben in Empfang. Vorgeschrieben ist nur eines: keiner steht darunter.',
   },
 ]
 export function C51() {
   return (
     <StepShell
       id="C5.1"
+      auftrag={null}
+      ansage={null}
       titelZusatz="Abstecher"
       // Quer 52 statt 44 rem: die Zeile „Wer am Kran wo steht“ trägt quer ihre
       // Überschrift mit, und die 22 px, die das kostet, holt die breitere
@@ -79,7 +81,7 @@ export function C51() {
       karteBreit
       interaktionOffen={false}
       buehne={<StepFoto id="C5.1" />}
-      fachtext={
+      warum={
         <p>
           Wer die <Begriff id="anschlagmittel">Anschlagmittel</Begriff> einhängt, arbeitet
           seitlich und führt das Element erst kurz vor dem Absetzen an seinen Platz. Unter

@@ -101,7 +101,10 @@ export const PROGRAMM: readonly Programmzeile[] = [
   { code: '(SCHLICHTEN WELLE D20 H7)', kommentar: 'Programmkopf' },
   {
     code: 'G21 G40 G90',
-    kommentar: 'Millimeter, keine Schneidenradiuskorrektur, absolut',
+    // „Schneidenradiuskorrektur“ flog raus (R10): ein hochspezifischer
+    // Fachbegriff ohne Glossar-Chip, in einer Rüstzeile, die für die Lektion
+    // des Screens keine Rolle spielt. Sachlich bleibt es dieselbe Zeile.
+    kommentar: 'Grundeinstellung der Steuerung',
   },
   { code: 'T0101', kommentar: 'Schlichtdrehmeißel' },
   { code: 'G50 S4000', kommentar: 'Drehzahl begrenzen' },

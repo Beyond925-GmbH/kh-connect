@@ -49,14 +49,16 @@ export function Z11() {
   return (
     <StepShell
       id="Z1.1"
+      auftrag={null}
+      ansage={null}
       titelZusatz="Abstecher"
       interaktionOffen={false}
       buehne={<StepFoto id="Z1.1" />}
-      fachtext={
+      warum={
         <p>
-          Jemand hat das konstruiert — <Begriff id="cad">CAD</Begriff>, und daraus wird{' '}
-          <Begriff id="cam">CAM</Begriff>, und daraus das Programm. Der Zerspaner steht am
-          Ende einer Kette, die am Rechner anfängt, und ein Teil davon ist sein Job.
+          Am Anfang hat jemand das Teil am Rechner gezeichnet —{' '}
+          <Begriff id="cad">CAD</Begriff>. Daraus wird der Weg des Werkzeugs, daraus das
+          Programm. Der Zerspaner steht am Ende dieser Kette.
         </p>
       }
       interaktion={

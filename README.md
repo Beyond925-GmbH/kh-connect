@@ -31,16 +31,26 @@ aber leer. Siehe [Vier Berufe](#vier-berufe-srckhplberufe).
 - [`khpl-ui-shell.md`](./khpl-ui-shell.md) — the **shell** around it: splash, in-fiction
   intro, progress rail, "Dein Weg" sheet, the discreet career skip, and the
   localStorage resume model. Read before building any screen.
+- [`khpl-vereinfachung.md`](./khpl-vereinfachung.md) — **why the shell looks
+  different since 25.08.2026**, and what still has to happen in the four
+  Tage. It overrides the two above where they disagree; the affected passages
+  in `khpl-ui-shell.md` carry a pointer. Read it before touching any step.
 
 ## Run
 
 ```bash
 pnpm install
-pnpm dev        # http://localhost:5173
-pnpm build      # prueft nebenbei die Buendel-Budgets, s. u.
-pnpm check      # typecheck + lint + format:check
-pnpm format     # prettier --write .
+pnpm dev             # http://localhost:5173
+pnpm build           # prueft nebenbei die Buendel-Budgets, s. u.
+pnpm check           # typecheck + lint + format:check
+pnpm format          # prettier --write .
+pnpm pruefe:sprache  # Wortbudgets und Form der Auftragszeilen
 ```
+
+`pruefe:sprache` ist die Abnahme fuer `khpl-vereinfachung.md`: es bricht ab,
+wenn eine Auftragszeile keine Aufgabe ist oder eine Ansage zu lang wird, und
+berichtet den Rest als Arbeitsliste. Mit `--streng` bricht es zusaetzlich beim
+Wortbudget ab — das kommt in `pnpm check`, sobald die vier Tage umgebaut sind.
 
 ## Der Flow (`src/khpl/`)
 
@@ -105,6 +115,15 @@ neue Parameter mit Default, keine geänderte Signatur (khpl-tage.md §6.1 V7).
    Die Zeitachse ist Animationsparameter, kein Vertragswert.
 
 ### Ein Layout, nicht drei
+
+> ⚠️ **Seit `khpl-vereinfachung.md` sind es drei Ebenen statt zwei**, und die
+> mittlere ist die wichtigste: **das Auftragsband**. Der Fachtext ist nicht
+> mehr der Standardinhalt des Panels, sondern liegt hinter einer geschlossenen
+> Klappzeile („Warum das so ist"), in der auch die Aha-Karte erscheint. Das
+> Panel ist damit rund drei Zeilen hoch statt 62–84 % des Screens; Klappgriff,
+> `buehnePlatz` und `einklappbar` sind ersatzlos entfallen. Der Abschnitt
+> darunter beschreibt weiterhin richtig, **warum der Titel auf der Bühne
+> steht** — das ist unverändert.
 
 Jeder Step — Haupt wie Abstecher — rendert gleich, aus zwei Ebenen:
 

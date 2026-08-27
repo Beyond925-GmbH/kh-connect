@@ -337,7 +337,9 @@
    ist das die einzige Variante, die zuverlaessig zieht, ohne dass man
    Pointer-Capture von Hand nachbaut. Der Griff ist jetzt 52 px und traegt
    einen Ring — er ist auf diesem Screen das Einzige, was man anfassen
-   kann, und soll auch so aussehen.
+   kann, und soll auch so aussehen. Er ist limette, nicht orange: der
+   Griff traegt den **eigenen** Schaetzwert des Besuchers, und Limette
+   heisst „du“ (R3) — Orange gehoert den echten Werten der Welt.
 ------------------------------------------------------------------ */
 @utility kh-regler {
   -webkit-appearance: none;
@@ -368,16 +370,16 @@
     margin-top: -18px;
     border-radius: 999px;
     border: 4px solid #0e0d0b;
-    background: var(--color-kh-orange);
-    box-shadow: 0 6px 20px rgb(255 122 26 / 0.45);
+    background: var(--color-kh-signal);
+    box-shadow: 0 6px 20px rgb(216 246 60 / 0.45);
   }
   &::-moz-range-thumb {
     width: 52px;
     height: 52px;
     border-radius: 999px;
     border: 4px solid #0e0d0b;
-    background: var(--color-kh-orange);
-    box-shadow: 0 6px 20px rgb(255 122 26 / 0.45);
+    background: var(--color-kh-signal);
+    box-shadow: 0 6px 20px rgb(216 246 60 / 0.45);
   }
 
   /* Nach der Aufloesung steht der Griff still, bleibt aber sichtbar: er

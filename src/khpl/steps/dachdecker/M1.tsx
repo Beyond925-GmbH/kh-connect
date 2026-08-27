@@ -39,8 +39,6 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * Information: die vollständige Begründung steht in `grund` und erscheint in
  * der Auswertung.
  */
-const FRAGE = 'Was nimmst du vom Ortstermin mit zurück in den Betrieb?'
-
 interface Punkt {
   id: string
   text: string
@@ -54,8 +52,7 @@ const PUNKTE: Punkt[] = [
     id: 'aufmass',
     text: 'Aufmaß: Länge, Breite, Neigung',
     richtig: true,
-    grund:
-      'Ohne Maße kein Angebot. Für die Kante reicht der Zollstock, für den First nimmst du den Laser.',
+    grund: 'Ohne Maße kein Angebot.',
   },
   {
     id: 'fotos',
@@ -73,50 +70,35 @@ const PUNKTE: Punkt[] = [
     id: 'kran',
     text: 'Zufahrt für den Kran',
     richtig: true,
-    grund:
-      'Kommt der Kran nicht hin, ändert sich das ganze Angebot. Besser jetzt gemerkt als am Aufrichtetag.',
-  },
-  {
-    id: 'budget',
-    text: 'Wunsch und Budget',
-    richtig: true,
-    grund:
-      'Was er will und was er ausgeben kann, sind zwei Fragen. Beide musst du stellen.',
-  },
-  {
-    id: 'anschluesse',
-    text: 'Anschlüsse und Gauben',
-    richtig: true,
-    grund: 'Alles, was durchs Dach geht oder daran stößt, ist Mehrarbeit.',
-  },
-  {
-    id: 'material',
-    text: 'Material gleich bestellen',
-    richtig: false,
-    grund:
-      'Noch nicht. Es gibt weder Auftrag noch Abbundplan — und ohne den weißt du nicht, was du brauchst.',
+    grund: 'Kommt der Kran nicht hin, ändert sich das ganze Angebot.',
   },
   {
     id: 'preis',
     text: 'Einen Preis nennen',
     richtig: false,
-    grund:
-      'Aus dem Bauch? Das kostet dich entweder den Auftrag oder die Marge. Der Preis kommt aus der Kalkulation.',
-  },
-  {
-    id: 'statik',
-    text: 'Die Statik berechnen',
-    richtig: false,
-    grund: 'Die kommt vom Statiker. Ihr baut nach ihr — ihr erfindet sie nicht.',
+    grund: 'Aus dem Bauch? Das kostet dich den Auftrag oder die Marge.',
   },
   {
     id: 'termin',
     text: 'Aufrichtetermin zusagen',
     richtig: false,
-    grund:
-      'Verlockend. Aber ohne Kran, Wetter und Lieferzeiten ist jedes Datum geraten. Termine kommen in Schritt 3.',
+    grund: 'Ohne Kran, Wetter und Lieferzeiten ist jedes Datum geraten.',
   },
 ]
+
+/**
+ * **Zwei hat der Chef schon gesagt** — sie stehen beim Ankommen angehakt da.
+ *
+ * Das ist die Vorführung vor der Abfrage (khpl-vereinfachung.md R1). Vorher
+ * lagen hier zehn leere Kästchen und die Aufforderung, aus dem Nichts eine
+ * Ortstermin-Checkliste zu erinnern — freies Erinnern von etwas, das man nie
+ * gelernt hat. Mit zwei gesetzten Beispielen ist dieselbe Übung
+ * Wiedererkennen: „ach so eine Sorte Sache ist gemeint."
+ *
+ * Abwählbar bleiben sie. Ein Kästchen, das sich nicht anfassen lässt, sieht
+ * am Stand nach Defekt aus.
+ */
+const VORGABE = ['aufmass', 'fotos']
 
 const RICHTIGE = PUNKTE.filter((p) => p.richtig).length
 
@@ -134,18 +116,7 @@ const RICHTIGE = PUNKTE.filter((p) => p.richtig).length
  * Fest verdrahtet statt zufällig: eine Reihenfolge, die sich bei jedem Rendern
  * ändert, macht das Zurückspringen aus „Dein Weg“ unbrauchbar.
  */
-const REIHENFOLGE = [
-  'aufmass',
-  'material',
-  'preis',
-  'fotos',
-  'balken',
-  'kran',
-  'statik',
-  'anschluesse',
-  'termin',
-  'budget',
-]
+const REIHENFOLGE = ['aufmass', 'preis', 'fotos', 'balken', 'termin', 'kran']
 
 const ANGEZEIGT = REIHENFOLGE.map((id) => PUNKTE.find((p) => p.id === id)!).filter(
   Boolean,
@@ -155,7 +126,11 @@ export function M1() {
   // Aus dem Store vorbelegt: wer über „Dein Weg“ zurückspringt, soll seine
   // Auswertung wiederfinden und nicht von vorn anfangen müssen.
   const gespeichert = useFortschritt().answers.m1
-  const [gewaehlt, setGewaehlt] = useState<string[]>(() => gespeichert?.gewaehlt ?? [])
+  // `??`, nicht `||`: wer alles abgewählt hat und zurückkommt, findet seine
+  // leere Liste wieder statt der Vorgabe.
+  const [gewaehlt, setGewaehlt] = useState<string[]>(
+    () => gespeichert?.gewaehlt ?? VORGABE,
+  )
   const [ausgewertet, setAusgewertet] = useState(() => !!gespeichert?.ausgewertet)
 
   const umschalten = (id: string) =>
@@ -173,6 +148,9 @@ export function M1() {
   return (
     <StepShell
       id="M1"
+      auftrag={ausgewertet ? null : 'Tipp an, was du sonst noch mitnimmst.'}
+      // Antippen erklärt sich selbst (`komponenten/gesten.ts`).
+      ansage={null}
       // Das breite Panel: zehn Chips plus Auswertung brauchen die Fläche in
       // der Breite, sonst holen sie sie sich in der Höhe — und dann scrollt
       // der Screen, was flow 5 ausschließt.
@@ -185,14 +163,12 @@ export function M1() {
       // Nach der Auswertung fällt der Einstiegstext weg — er ist dann gelesen,
       // und die drei Zeilen fehlen sonst genau der Auswertung, die ohne
       // Scrollen auf den Screen passen muss. M2 macht es genauso.
-      fachtext={
-        ausgewertet ? undefined : (
-          <p className="max-sm:text-[1rem] max-sm:leading-[1.4]">
-            Ein Anruf, eine Adresse, ein altes Dach. Du fährst hin, misst auf —{' '}
-            <Begriff id="aufmass">vom Zollstock bis zum Laser</Begriff> —, machst Fotos
-            und hörst zu. Was du hier übersiehst, fehlt dir später im Angebot.
-          </p>
-        )
+      warum={
+        <p>
+          Ein Anruf, eine Adresse, ein altes Dach. Du misst, fotografierst und hörst zu.
+          Was du hier übersiehst, fehlt dir später im{' '}
+          <Begriff id="aufmass">Angebot</Begriff>.
+        </p>
       }
       interaktion={
         ausgewertet ? (
@@ -203,8 +179,8 @@ export function M1() {
       }
       aha={
         <AhaKarte sichtbar={ausgewertet} eyebrow="Was kauft der Kunde eigentlich?">
-          Der Kunde kauft kein Holz. Er kauft Sicherheit über seinem Kopf. Deshalb ist der
-          Ortstermin halbe Detektivarbeit — und deshalb fährst du als Azubi oft mit.
+          Kein Holz. Er kauft Sicherheit über seinem Kopf. Deshalb ist der Ortstermin
+          halbe Detektivarbeit — und deshalb fährst du als Azubi mit.
         </AhaKarte>
       }
       fuss={
@@ -248,10 +224,11 @@ function Liste({
 }) {
   return (
     <div className="flex flex-col gap-2.5">
-      <p className="text-[1.125rem] leading-snug font-semibold text-kh-paper max-sm:text-[1.0625rem] sm:text-[1.25rem]">
-        {FRAGE}{' '}
-        <span className="font-normal text-kh-mute">Tipp alles an, was dazugehört.</span>
-      </p>
+      {/* Die Frage stand hier fett und die Aufforderung gleich daneben —
+          beides ist jetzt das Auftragsband, auf jedem Screen an derselben
+          Stelle. Geblieben ist der Hinweis auf die zwei gesetzten Haken: ohne
+          ihn sähen sie aus, als hätte der Screen sich etwas gemerkt. */}
+      <p className="text-[1rem] text-kh-mute">Zwei hat dein Chef dir schon gesagt.</p>
 
       {/* Zwei Spalten in **allen drei** Formaten — auch auf dem Handy. Zehn
           Punkte untereinander sind dort ~950 px Liste in einem 635-px-Panel:
@@ -277,19 +254,21 @@ function Liste({
                 data-testid={`m1-${p.id}`}
                 whileTap={{ scale: 0.95 }}
                 transition={{ type: 'spring', stiffness: 600, damping: 26 }}
-                // `ton="orange"`: hier ist das Antippen **vorläufig**. Die
-                // Auswertung danach färbt die Treffer in Signalfarbe, und die
-                // wäre verbraucht, wenn schon das Auswählen sie benutzte
-                // (siehe `Wahlflaeche`).
-                className={`${wahlflaeche({ ton: 'orange', gewaehlt: an })} max-sm:min-h-[44px] max-sm:gap-2 max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.9375rem] max-sm:leading-tight`}
+                // `ton="vorlaeufig"`: hier ist das Antippen **vorläufig** —
+                // limetter Rand, kaum Füllung: „du hast getippt, geprüft ist
+                // noch nichts“ (siehe `Wahlflaeche`). Die satte Signal-Füllung
+                // bleibt der Auswertung vorbehalten, die danach die echten
+                // Treffer färbt. Orange gehört nach R3 der Welt, nicht der
+                // Wahl.
+                className={`${wahlflaeche({ ton: 'vorlaeufig', gewaehlt: an })} max-sm:min-h-[44px] max-sm:gap-2 max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.9375rem] max-sm:leading-tight`}
               >
                 <span
                   aria-hidden
                   className={`grid size-6 shrink-0 place-items-center rounded-full border-2 transition-colors max-sm:size-5 ${
-                    an ? 'border-[#0E0D0B] bg-[#0E0D0B]' : 'border-white/35'
+                    an ? 'border-kh-signal bg-kh-signal' : 'border-white/35'
                   }`}
                 >
-                  {an && <Check className="size-4 text-kh-orange" strokeWidth={3.5} />}
+                  {an && <Check className="size-4 text-[#0E0D0B]" strokeWidth={3.5} />}
                 </span>
                 <span className="min-w-0">{p.text}</span>
               </motion.button>

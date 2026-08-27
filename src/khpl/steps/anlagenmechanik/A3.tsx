@@ -12,6 +12,7 @@ import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { RATEN_HAKEN } from '@/khpl/komponenten/gesten'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Fachwort } from './Fachwort'
 
@@ -96,6 +97,12 @@ export function A3() {
   return (
     <StepShell
       id="A3"
+      auftrag={aufgeloest ? null : 'Schätz, wie viel Wärme dieses Haus braucht.'}
+      ansage={{
+        geste: 'ziehen-regler',
+        text: 'Du legst die Heizung aus — zu klein friert die Familie, zu groß zahlt sie drauf.',
+        haken: RATEN_HAKEN,
+      }}
       interaktionOffen={!aufgeloest}
       // Die Schätzphase bleibt schmal und konzentriert; die Auflösung braucht
       // die Breite für den Zweispalter aus Zahl und Jahresbilanz.
@@ -109,7 +116,7 @@ export function A3() {
           }}
         />
       }
-      fachtext={
+      warum={
         aufgeloest ? undefined : (
           <p>
             Einfamilienhaus, Baujahr in den Siebzigern. {HAUS.flaeche} Quadratmeter
@@ -218,6 +225,12 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
             </span>
           </div>
           <Vergleich schaetzung={schaetzung} drin={drin} />
+          {/* Der Körper-Anker zur Zahl (R12): ein Wasserkocher zieht rund
+              zwei Kilowatt — das kennt jeder aus der Küche. */}
+          <p className="mt-2 text-[1rem] leading-[1.4] text-kh-mute">
+            {ZIEL.von} bis {ZIEL.bis} Kilowatt — so viel ziehen fünf bis sieben
+            Wasserkocher gleichzeitig.
+          </p>
           <div className="pt-2.5">
             <Rechnung />
           </div>
@@ -255,7 +268,12 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
               </div>
             </div>
           ))}
+          {/* 7,4 t brauchen einen Körper-Anker (R12): ein Kleinwagen wiegt
+              rund anderthalb Tonnen. */}
           <p className="mt-2.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
+            7,4 Tonnen — das wiegt so viel wie fünf Kleinwagen.
+          </p>
+          <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
             Dieselbe Wärme, ein Bruchteil der Energie. Die alte Ölheizung war kein Fehler
             — sie war jahrzehntelang Standard. Sie zu ersetzen ist der Job.
           </p>
@@ -340,11 +358,10 @@ function Rechnung() {
         <DialogDescription>
           Ein ungedämmtes Haus aus den Siebzigern verliert im Winter grob{' '}
           {HAUS.spezifisch.von} bis {HAUS.spezifisch.bis} Watt je Quadratmeter. Mal{' '}
-          {HAUS.flaeche} Quadratmeter sind das {ZIEL.von} bis {ZIEL.bis} Kilowatt. Das ist
-          die Faustformel — sie liegt im Einzelfall um ein Fünftel daneben. Im Betrieb
-          wird deshalb Raum für Raum gerechnet, nach der Norm DIN EN 12831: jedes Fenster,
-          jede Außenwand, jede Tür einzeln. Erst diese Rechnung sagt, wie groß die
-          Wärmepumpe wird.
+          {HAUS.flaeche} Quadratmeter sind das {ZIEL.von} bis {ZIEL.bis} Kilowatt — fünf
+          bis sieben Wasserkocher gleichzeitig. Das ist die Faustformel; im Einzelfall
+          liegt sie um ein Fünftel daneben. Verbindlich wird erst die Rechnung Raum für
+          Raum: jedes Fenster, jede Außenwand.
         </DialogDescription>
       </DialogContent>
     </Dialog>

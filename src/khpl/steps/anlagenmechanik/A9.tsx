@@ -62,6 +62,8 @@ export function A9() {
   return (
     <StepShell
       id="A9"
+      auftrag={null}
+      ansage={null}
       interaktionOffen={false}
       buehne={<Abschlussfeld />}
       interaktion={

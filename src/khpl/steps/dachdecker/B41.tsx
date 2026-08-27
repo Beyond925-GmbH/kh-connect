@@ -56,7 +56,10 @@ interface Teil {
 const TEILE: Teil[] = [
   {
     id: 'sparren',
-    text: 'Sparren und Pfetten, nummeriert',
+    // Vorher „Sparren und Pfetten, nummeriert". Beide Wörter kennt der
+    // Besucher an dieser Stelle noch nicht, und die Karte muss ohne Glossar
+    // lesbar sein — sie ist die Aufgabe, nicht der Lehrstoff.
+    text: 'Das nummerierte Holz fürs Dach',
     mit: true,
     grund: 'Das Dach selbst. Zuletzt geladen ist zuerst gebraucht.',
   },
@@ -73,7 +76,7 @@ const TEILE: Teil[] = [
   },
   {
     id: 'anker',
-    text: 'Sparrenanker und Schrauben',
+    text: 'Schrauben und Metallwinkel',
     mit: true,
     grund: 'Ohne Verbindungsmittel ist ein Dachstuhl ein Stapel Holz.',
   },
@@ -85,7 +88,7 @@ const TEILE: Teil[] = [
   },
   {
     id: 'psa',
-    text: 'Seitenschutz und Auffanggurte',
+    text: 'Gurte und Geländer gegen Absturz',
     mit: true,
     grund: 'Kommt zuerst runter und wird zuerst aufgebaut. Vor dem ersten Sparren.',
   },
@@ -179,6 +182,12 @@ export function B41() {
   return (
     <StepShell
       id="B4.1"
+      auftrag={fertig ? null : 'Zieh auf den Anhänger, was morgen gebraucht wird.'}
+      ansage={{
+        geste: 'ziehen-karte',
+        text: 'Du belädst den Anhänger für morgen früh — allein aus dem Kopf.',
+        haken: 'Was du vergisst, fehlt um sieben auf der Baustelle.',
+      }}
       titelZusatz="Abstecher"
       buehneInteraktiv
       interaktionOffen={!fertig}
@@ -191,25 +200,11 @@ export function B41() {
           </Suspense>
         </div>
       }
-      fachtext={
-        /*
-          Zwei Fassungen desselben Gedankens: Auf dem Handy hochkant hat das
-          Panel nur 62 % der Höhe, und die fünf Zeilen der vollen Fassung
-          schoben zwei Kartenreihen unter die Scrollkante. Der Mittelsatz
-          („kommt auf Transporter und Anhänger“) steht dort ohnehin doppelt —
-          die Zeile über den Karten sagt „Zieh auf den Anhänger, was mit muss“.
-        */
-        <p className="max-sm:text-[1rem] max-sm:leading-[1.4]">
-          <span className="sm:hidden">
-            In der Halle liegt mehr, als du brauchst — was du vergisst, fehlt dir morgen
-            früh um sieben.
-          </span>
-          <span className="max-sm:hidden">
-            In der Halle liegt mehr, als du brauchst. Was für dieses Dach gebraucht wird,
-            kommt auf Transporter und Anhänger. Was du vergisst, fehlt dir morgen früh um
-            sieben auf der Baustelle.
-          </span>
-        </p>
+      warum={
+        // Vorher zwei Fassungen desselben Gedankens, lang und kurz. Der
+        // Grund dafür ist weg (das Panel streitet nicht mehr mit der Bühne
+        // um Höhe); geblieben ist die kürzere.
+        <p>In der Halle liegt mehr, als du brauchst.</p>
       }
       interaktion={
         <DndContext

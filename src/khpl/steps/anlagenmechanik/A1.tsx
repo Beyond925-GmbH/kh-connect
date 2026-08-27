@@ -44,12 +44,11 @@ import { Fachwort } from './Fachwort'
  * Regelung hält ihn für voll geladen. Wer beides prüft, hat die Ursache.
  *
  * **Die Uhr steht im Panel und nicht oben rechts auf der Bühne**, obwohl Spec 6
- * das so beschreibt. Oben rechts sitzt die `EinwurfBuehne` der Hülle
- * (`StepShell`), und genau dort meldet sich am Ende dieses Steps die Aha-Karte
- * zur Rechnung. Zwei Dinge in derselben Ecke wäre ein Layoutfehler; die Hülle
- * dafür zu ändern verbietet khpl-tage.md 6.2. Gemeldet, nicht gebaut — die
- * Uhr erfüllt ihren Zweck („nicht als Druck, sondern als Anzeige") auch neben
- * der Aufgabe.
+ * das so beschreibt. Sie erfüllt ihren Zweck („nicht als Druck, sondern als
+ * Anzeige") auch neben der Aufgabe, und die Hülle dafür zu ändern verbietet
+ * khpl-tage.md 6.2. (Der Grund, aus dem die Ecke oben rechts früher besetzt
+ * war — der zeitgesteuerte Einwurf —, ist mit `khpl-vereinfachung.md`
+ * entfallen; der Einwurf liegt jetzt in der Warum-Zeile im Panel.)
  *
  * **`answers.a1`** `{ geprueft, ursache, richtig }` (Spec 6).
  */
@@ -95,8 +94,10 @@ const PRUEFUNGEN: readonly Pruefung[] = [
   {
     id: 'kessel',
     frage: 'Läuft der Kessel?',
+    // Ohne „Vorlauf": das Wort fiele hier unerklärt (R10) — der Glossar-Chip
+    // erreicht diesen String nicht, und die Beobachtung geht auch ohne ihn.
     ergebnis:
-      'Er läuft. Der Vorlauf ist heiß, die Heizkörper werden warm. Am Wärmeerzeuger liegt es nicht.',
+      'Er läuft. Das Wasser geht heiß hinaus, die Heizkörper werden warm. Am Wärmeerzeuger liegt es nicht.',
   },
   {
     id: 'speicher',
@@ -223,15 +224,11 @@ export function A1() {
   return (
     <StepShell
       id="A1"
+      auftrag={geloest ? null : 'Wähl drei Prüfungen und finde die Ursache.'}
+      ansage={null}
+      // Die sechs Prüfungen im Panel sind der Kern des Screens, die Anlage
+      // daneben erklärt sie — quer darf die Spalte deshalb breiter werden.
       karteBreit
-      /*
-        Nur der Griff, nicht `buehnePlatz`: die sechs Prüfungen im Panel sind
-        der Kern des Screens, die Anlage daneben erklärt sie. Der 62-%-Deckel,
-        den `buehnePlatz` mitbringt, hätte hier ausgerechnet den Scroll-Befund
-        verschärft, um den es ging. Wer die Anlage einmal ganz sehen will,
-        klappt kurz ein.
-      */
-      einklappbar
       interaktionOffen={!geloest}
       buehne={
         <Schnitt
@@ -249,46 +246,21 @@ export function A1() {
           onPruefpunkt={entscheiden || geloest || offeneP <= 0 ? undefined : pruefe}
         />
       }
-      fachtext={
-        /*
-          **Im Takt *entscheiden* steht kein Fachtext mehr — auf keiner
-          Breite.** Schmal war das schon so; quer trug ihn das Fenster, solange
-          nur die fünf Ursachen darunter standen. Nach einem Fehlgriff kommen
-          Folge und Schlüsselprüfung dazu, und dann trägt es ihn nicht mehr:
-          gemessen auf 1180 × 820 lagen 114 px unter der Kante, das
-          Schlüsselfeld war angeschnitten (`tmp/sicht/a3-a1.mjs`). Der Absatz
-          ist an dieser Stelle auch das Entbehrlichste, was im Panel steht — er
-          beschreibt die Ausgangslage, und die steht in jeder der fünf Folgen
-          noch einmal, aus ihrem Blickwinkel. Die beiden Fachwörter sind im
-          Takt *suchen* antippbar, also vorher.
-        */
-        geloest || entscheiden ? undefined : schmal ? (
-          /*
-            Handy hochkant: zwei Zeilen statt fünf.
+      /*
+        Eine Fassung statt zweier. Die lange gab es, weil die sechs Prüfungen
+        auf einem Handy hochkant sonst unter der Scrollkante lagen — dieser
+        Grund ist mit der geschlossenen Warum-Zeile weg.
 
-            Die Vorfassung blendete den Absatz hier ganz aus (`max-sm:hidden`),
-            weil von den sechs Prüfungen nur drei über der Scrollkante standen.
-            Das kostete aber zwei Dinge, die der Screen nirgends sonst hat:
-            die **Ausgangslage** („Heizung warm, Wasser kalt") — auf dem Handy
-            musste man sie sich mit einer der drei freien Prüfungen kaufen —
-            und das Fachwort **Zirkulation**, das in diesem ganzen Tag kein
-            zweites Mal vorkommt, obwohl „Läuft die Zirkulation?" eine der
-            sechs Prüfungen ist. Kürzen ja, ein Fachwort streichen nein.
-
-            „Umwälzpumpe" fällt schmal weg — die steht in A2 noch einmal.
-          */
-          <p>
-            Heizung warm, Wasser kalt — dazwischen Speicher, Regelung,{' '}
-            <Fachwort id="zirkulation">Zirkulation</Fachwort>.
-          </p>
-        ) : (
-          <p>
-            Ein Symptom, viele mögliche Ursachen. Man tauscht nicht, man grenzt ein. Die
-            Heizung wird warm, das warme Wasser nicht — zwischen Kessel und Zapfhahn
-            liegen Speicher, <Fachwort id="umwaelzpumpe">Umwälzpumpe</Fachwort>, Regelung
-            und <Fachwort id="zirkulation">Zirkulation</Fachwort>.
-          </p>
-        )
+        Geblieben ist die Ausgangslage („Heizung warm, Wasser kalt") und
+        **ein** Fachwort: „Zirkulation" kommt in diesem Tag kein zweites Mal
+        vor, obwohl „Läuft die Zirkulation?" eine der sechs Prüfungen ist.
+      */
+      warum={
+        <p>
+          Heizung warm, Wasser kalt. Dazwischen liegen Speicher, Pumpe, Regelung und die{' '}
+          <Fachwort id="zirkulation">Zirkulation</Fachwort> — man tauscht nicht, man
+          grenzt ein.
+        </p>
       }
       interaktion={
         <Wechsel takt={takt}>

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { FRAGEN } from '@/khpl/match/fragen'
-import { merkeFrage, zeigeVorschlag } from '@/khpl/store/fortschritt'
+import { merkeFrage, zeigeBerufe } from '@/khpl/store/fortschritt'
 import { Bildwahl } from './fragen/Bildwahl'
 import { Hoehenwahl } from './fragen/Hoehenwahl'
 import { Radio } from './fragen/Radio'
@@ -21,7 +21,7 @@ import { Radio } from './fragen/Radio'
  *
  * **Überspringen führt vorwärts, nicht heraus.** Wer eine Station überspringt,
  * kommt zur nächsten; wer alle überspringt, landet auf der Berufsliste statt
- * auf einem Vorschlag, den nichts trägt (siehe `Vorschlag`).
+ * auf einem Vorschlag, den nichts trägt.
  */
 
 /** Wie lange die gewählte Bildkachel stehen bleibt, bevor es weitergeht. */
@@ -36,7 +36,7 @@ export function Fragen() {
 
   const weiter = () => {
     setGewaehlt(null)
-    if (letzte) zeigeVorschlag()
+    if (letzte) zeigeBerufe()
     else setIndex((i) => i + 1)
   }
 

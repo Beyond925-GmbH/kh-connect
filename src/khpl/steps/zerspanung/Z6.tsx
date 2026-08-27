@@ -150,9 +150,11 @@ export function Z6() {
   return (
     <StepShell
       id="Z6"
+      auftrag={null}
+      ansage={null}
       interaktionOffen={false}
       buehne={<Werkstueck zustand="kiste" fuellstand={fuellstand} />}
-      fachtext={
+      warum={
         <p>
           Feierabend. Die Kiste steht neben der Maschine, und ganz vorn liegt deins — das
           erste von vierhundert. Die Maschine macht weiter, wenn du gehst.

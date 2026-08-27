@@ -17,9 +17,12 @@ export function Platzhalter({ id }: { id: StepId }) {
   return (
     <StepShell
       id={id}
+      // TODO(vereinfachung): Auftragszeile und Ansage nachtragen — khpl-vereinfachung.md §6.
+      auftrag={null}
+      ansage={null}
       titelZusatz={def.art === 'abstecher' ? 'Abstecher' : undefined}
       buehne={<div className="size-full bg-kh-surface" />}
-      fachtext={<p>Dieser Schritt ist noch nicht gebaut.</p>}
+      warum={<p>Dieser Schritt ist noch nicht gebaut.</p>}
       fuss={<StepFuss id={id} />}
     />
   )

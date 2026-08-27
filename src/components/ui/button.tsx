@@ -16,11 +16,15 @@ import { cn } from '@/lib/utils'
  * zusätzlich einen harten Schatten nach unten — er sieht aus wie eine Taste,
  * die man herunterdrücken kann, und beim Drücken fährt der Schatten ein.
  *
- * **Eine gefüllte orange Fläche pro Screen, und die führt nach vorn.** Die
- * Regel aus `Verzweigung` gilt weiter; die Varianten sind danach benannt:
+ * **Farbregel (R3): Orange = die Welt, Limette = du.** Orange gehört den
+ * Fakten, Maßen und Zeichnungen — Knöpfe sind immer eine Handlung des
+ * Besuchers und damit limette. Und **genau ein gefülltes limettes Element pro
+ * Screen heißt „hier geht's weiter“** (R8); die Varianten sind danach benannt:
  *
- *   `weiter` — die eine Handlung, die den Screen verlässt
- *   `aktion` — die Handlung *innerhalb* einer Übung (prüfen, auflösen)
+ *   `weiter` — die eine Handlung, die den Screen verlässt: die gefüllte Pille
+ *   `aktion` — die Handlung *innerhalb* einer Übung (prüfen, auflösen):
+ *              Limette-Kontur, damit sie neben dem gefüllten Weiter nie
+ *              selbst wie der Weg nach vorn aussieht
  *   `neben`  — Abstecher, Zweitwege, alles Gleichrangige daneben
  *   `leise`  — „Zeig mir wie“, Abbrechen, Rückwege
  */
@@ -37,14 +41,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         weiter: [
-          'bg-kh-orange text-[#0E0D0B] border-2 border-kh-orange',
-          'shadow-[0_4px_0_0_#8A4A00]',
-          'active:translate-y-[4px] active:shadow-[0_0_0_0_#8A4A00]',
-        ].join(' '),
-        aktion: [
           'bg-kh-signal text-[#0E0D0B] border-2 border-kh-signal',
           'shadow-[0_4px_0_0_#5E7300]',
           'active:translate-y-[4px] active:shadow-[0_0_0_0_#5E7300]',
+        ].join(' '),
+        aktion: [
+          'border-2 border-kh-signal text-kh-signal',
+          'active:scale-[0.97] active:bg-kh-signal/15',
         ].join(' '),
         neben: [
           'bg-white/6 text-kh-paper border-2 border-kh-line-strong',

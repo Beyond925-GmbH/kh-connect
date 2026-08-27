@@ -23,9 +23,15 @@ import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 import { useSchmal } from '@/khpl/shell/schmal'
+import { RATEN_HAKEN } from '@/khpl/komponenten/gesten'
 
 /**
- * Z1 — Null Komma null zwei eins.
+ * Z1 — Der Spielraum, den niemand sieht.
+ *
+ * Der Titel nennt das Thema, nie den gesuchten Wert (R6): „Null Komma null
+ * zwei eins“ stand früher als Überschrift über dem laufenden Schätz-Slider
+ * und war die ausgeschriebene Lösung. Die Zeile gehört der Auflösung — dort
+ * steht sie jetzt als Zwischentitel über der Signaturzahl.
  *
  * **Der eine Schätzmoment dieses Tages** (khpl-tag-zerspanung.md §6 Z1). Der
  * Besucher rät an einem logarithmischen Regler, wie viel bei `Ø 20 h7`
@@ -109,6 +115,18 @@ export function Z1() {
   return (
     <StepShell
       id="Z1"
+      auftrag={aufgeloest ? null : 'Schätz, wie weit dieses Maß danebengehen darf.'}
+      /*
+        Der Haarvergleich stand bisher in der Auflösung. Er gehört **hierher**:
+        er setzt die Größenordnung, ohne die Zahl zu verraten — ohne ihn ist
+        die Frage „wie viel darf danebengehen" für jemanden, der noch nie eine
+        Zeichnung gesehen hat, nicht einmal schätzbar.
+      */
+      ansage={{
+        geste: 'ziehen-regler',
+        text: 'Ein Blatt Papier ist ein Zehntelmillimeter dick. So grob ist das hier nicht.',
+        haken: RATEN_HAKEN,
+      }}
       interaktionOffen={!aufgeloest}
       // Erst nach der Auflösung: die Schätzphase bleibt schmal, die Auflösung
       // braucht die Breite für Zahl und Maßtabelle nebeneinander.
@@ -116,27 +134,16 @@ export function Z1() {
       // „Hinter jedem Maß steht eine Toleranz“ meint die Zeichnung — sie muss
       // lesbar sein, bevor jemand über sie liest. Hochkant deckelt das den
       // Panelwuchs auf 62 %, und wer die Bemaßung ganz sehen will, klappt ein.
-      buehnePlatz
       buehne={
         <Werkstueck zustand="zeichnung" massHervorgehoben toleranzfeld={aufgeloest} />
       }
-      fachtext={
-        // Auf dem Handy hochkant trägt das Panel nur den Kern des Satzes:
-        // mit der vollen Fassung lag der Slider — die Übung — unter der
-        // Scrollkante, und geschätzt hätte nur, wer scrollt (s. `schmal.ts`).
-        schmal ? (
-          <p>
-            Eine Zeichnung sagt nicht, <em>wie groß</em> — sie sagt, <em>wie genau</em>:
-            Hinter jedem Maß steht eine <Begriff id="toleranz">Toleranz</Begriff>.
-          </p>
-        ) : (
-          <p>
-            Eine technische Zeichnung sagt nicht, <em>wie groß</em> — sie sagt,{' '}
-            <em>wie genau</em>. Hinter jedem Maß steht eine{' '}
-            <Begriff id="toleranz">Toleranz</Begriff>, und die entscheidet über Preis,
-            Aufwand und Maschine.
-          </p>
-        )
+      // Eine Fassung statt zweier: die kurze war ohnehin die bessere, und
+      // der Grund für die lange (Platz im Panel) ist mit der Warum-Zeile weg.
+      warum={
+        <p>
+          Eine Zeichnung sagt nicht, <em>wie groß</em> — sie sagt, <em>wie genau</em>.
+          Hinter jedem Maß steht eine <Begriff id="toleranz">Toleranz</Begriff>.
+        </p>
       }
       interaktion={
         <Wechsel takt={aufgeloest ? 'aufgeloest' : 'schaetzen'}>
@@ -154,7 +161,9 @@ export function Z1() {
             genau das Teil hinterher <em>passen muss</em>. Enger heißt nicht besser —
             enger heißt teurer.
           </AhaKarte>
-          <AhaKarte sichtbar={aufgeloest} eyebrow="Gilt das für jedes Teil?">
+          {/* Ab dem zweiten Einwurf zugeklappt (R5): zwei zugleich offene
+              Karten sprengen das Wortbudget der Klappzeile. */}
+          <AhaKarte sichtbar={aufgeloest} zugeklappt eyebrow="Gilt das für jedes Teil?">
             Nein, der Spielraum hängt am Maß. Die 0,021 Millimeter gehören zu Ø 20; bei Ø
             50 wären es 0,025. Maß und Toleranz gehören immer zusammen — eins ohne das
             andere sagt nichts.
@@ -242,9 +251,12 @@ function Schaetzung({
           aria-valuetext={mm(wert)}
           className="kh-regler w-full"
         />
+        {/* R7: rechts = feiner ist die Ausnahme von „rechts = mehr“ — sie
+            braucht Wort-Endpunkte, damit niemand nachdenken muss, warum
+            rechts die kleinere Zahl steht. */}
         <div className="flex justify-between text-[0.9375rem] text-kh-mute/70 tabular-nums">
-          <span>{mm(MAX_MM)}</span>
-          <span>{mm(MIN_MM)}</span>
+          <span>grob · {mm(MAX_MM)}</span>
+          <span>fein · {mm(MIN_MM)}</span>
         </div>
       </div>
     </div>
@@ -259,6 +271,16 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
   return (
     <div className="flex flex-col gap-4 landscape:grid landscape:grid-cols-[1fr_1.05fr] landscape:items-start landscape:gap-x-7">
       <div className="flex flex-col gap-2.5">
+        {/* Die ausgeschriebene Zahl — als Titel der Auflösung ist sie stark
+            (R6); über dem Slider war sie der Spoiler. */}
+        <motion.span
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.35 }}
+          className="kh-etikett text-kh-orange"
+        >
+          Null Komma null zwei eins
+        </motion.span>
         {/* Die Signaturzahl rastet ein — hart, ohne Überschwingen (§7). */}
         <motion.span
           initial={{ opacity: 0, transform: 'translateY(18px) scale(0.9)' }}
@@ -397,9 +419,8 @@ function Papier() {
       <DialogContent>
         <DialogTitle>Ein Blatt Papier</DialogTitle>
         <DialogDescription>
-          Ein Blatt Kopierpapier ist rund ein Zehntelmillimeter dick. Die ganze
-          Toleranzzone dieses Teils ist etwa ein Fünftel davon. Wenn du ein Blatt Papier
-          in fünf Schichten spalten könntest, wäre eine davon dein gesamter Spielraum.
+          Ein Blatt Papier ist rund ein Zehntelmillimeter dick. Spalte es in fünf
+          Schichten — eine davon ist dein ganzer Spielraum.
         </DialogDescription>
       </DialogContent>
     </Dialog>

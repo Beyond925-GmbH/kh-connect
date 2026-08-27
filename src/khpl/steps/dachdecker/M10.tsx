@@ -60,6 +60,10 @@ export function M10() {
   return (
     <StepShell
       id="M10"
+      // Der Schlussscreen. Was zu tun ist, steht im Fuß und heißt nicht
+      // „Aufgabe", sondern „komm an den Stand".
+      auftrag={null}
+      ansage={null}
       interaktionOffen={false}
       buehne={<Abschlussfeld />}
       interaktion={

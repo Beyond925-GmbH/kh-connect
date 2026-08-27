@@ -56,6 +56,8 @@ export function C8x({ id }: { id: StepId }) {
   return (
     <StepShell
       id={id}
+      auftrag={null}
+      ansage={null}
       titelZusatz="Karriere-Weg"
       // Quer 52 statt 44 rem: die fünf Abschnitte sind die längsten Karten
       // des Tages, und die schmale Spalte ließ auf C8.1 zwei von ihnen unter

@@ -74,6 +74,15 @@ export function M5() {
   return (
     <StepShell
       id="M5"
+      /*
+        Das Worked Example zu M7: hier wird vorgeführt, dort abgefragt. Der
+        Auftrag sagt deshalb „setz", nicht „such dir aus" — es gibt nichts
+        falsch zu machen, und genau das ist der Punkt.
+      */
+      auftrag={steht ? null : 'Tipp das Teil an, das als Nächstes drankommt.'}
+      // Antippen und Umschauen. Das Drehen erklärt `DrehHinweis` auf der
+      // Bühne selbst, wo es gilt.
+      ansage={null}
       buehneInteraktiv
       interaktionOffen={!steht}
       buehne={
@@ -92,13 +101,11 @@ export function M5() {
           />
         </Suspense>
       }
-      fachtext={
+      warum={
         <p>
-          Baustelle einrichten, Sicherheitsbesprechung,{' '}
-          <Begriff id="absturzsicherung">Absturzsicherung</Begriff> und{' '}
-          <Begriff id="psa">PSA</Begriff> prüfen. Dann wächst der Unterbau — von unten
-          nach oben, ein Holz nach dem anderen. Setz ihn selbst; was drankommt, steht auf
-          der Karte.
+          Erst wird gesichert — Gurt, Helm, Geländer. Das nennt sich{' '}
+          <Begriff id="absturzsicherung">Absturzsicherung</Begriff>. Dann wächst der
+          Unterbau, von unten nach oben, ein Holz nach dem anderen.
         </p>
       }
       interaktion={

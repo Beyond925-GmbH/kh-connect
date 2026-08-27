@@ -121,6 +121,14 @@ export interface Bauschritt {
   label: string
   /** Was auf der Zieh-Karte steht. */
   name: string
+  /**
+   * Der eine Satz, der den Begriff erklärt — wie `Lehrschritt.was` in M5.
+   * Erscheint in der Vorführung und unter dem Kartennamen (Design-Review,
+   * R10: M7 fragte fünf Fachbegriffe ab, von denen drei in M5 nie vorkamen —
+   * „Windrispenbänder“ als nacktes Wort auf einer Zieh-Karte ist eine
+   * Vokabelfrage, kein Bau-Verständnis).
+   */
+  was: string
   /** Warum es genau jetzt dran ist — erscheint nach dem richtigen Ablegen. */
   richtig: string
   /** Warum es noch nicht dran ist — erscheint, wenn zu früh abgelegt. */
@@ -132,7 +140,8 @@ export interface Bauschritt {
 /**
  * Die Reihenfolge, die M7 abfragt. Texte für „richtig“ und „zu früh“ folgen
  * flow 11 (M7), wo die Spec sie vorgibt; die übrigen sind im selben Ton
- * ergänzt (`ENTWURF – UNGEPRÜFT`).
+ * ergänzt (`ENTWURF – UNGEPRÜFT`). Die `was`-Sätze sind wie in M5 aus
+ * `dachstuhl/bauteil-texte.ts` auf eine Zeile gekürzt.
  */
 export const M7_SCHRITTE: Bauschritt[] = [
   {
@@ -145,6 +154,7 @@ export const M7_SCHRITTE: Bauschritt[] = [
     // (Korrektur aus `dachstuhl/bauteil-texte.ts`; der Board-Fachtext in M5
     // spricht weiterhin vom Kran, der die Sparrenpaare einhebt — das gehört
     // beim Gegenlesen durch die Innung mit auf den Tisch.)
+    was: 'Die schrägen Hölzer, die die Dachfläche tragen. Zwei gegenüberliegende bilden ein Paar.',
     richtig: 'Sitzt. Jeder Sparren liegt jetzt auf drei Pfetten auf: Fuß, Mitte, First.',
     zufrueh:
       'Die Sparren brauchen etwas zum Aufliegen. Die Pfetten stehen — die kommen zuerst.',
@@ -153,6 +163,7 @@ export const M7_SCHRITTE: Bauschritt[] = [
   {
     label: 'Kehlbalken',
     name: 'Kehlbalken',
+    was: 'Der waagerechte Balken, der ein Sparrenpaar im oberen Drittel verbindet.',
     richtig: 'Sitzt. Jetzt können sich die Sparren nicht mehr durchbiegen.',
     zufrueh:
       'Der Kehlbalken hängt in der Luft. Erst die Sparren, dann das, was sie verbindet.',
@@ -161,6 +172,7 @@ export const M7_SCHRITTE: Bauschritt[] = [
   {
     label: 'Windrispenbänder',
     name: 'Windrispenbänder',
+    was: 'Das gelochte Stahlband, das diagonal über die Sparren läuft.',
     richtig: 'Sitzt. Jetzt kann der Wind das Dach nicht mehr der Länge nach verschieben.',
     zufrueh: 'Noch nicht. Ein Band diagonal über die Sparren braucht erst mal Sparren.',
     zielT: phase('Windrispenbänder').bis - HAARBREIT,
@@ -168,6 +180,7 @@ export const M7_SCHRITTE: Bauschritt[] = [
   {
     label: 'Konterlattung',
     name: 'Konterlattung',
+    was: 'Die Latte längs auf dem Sparren. Sie hebt die Dachlatten an, damit Luft durchzieht.',
     richtig: 'Sitzt. Der Spalt darunter ist Absicht — da zieht Luft durch.',
     zufrueh:
       'Noch nicht. Die Konterlatte liegt längs auf dem Sparren, und der ist noch nicht da.',
@@ -176,6 +189,7 @@ export const M7_SCHRITTE: Bauschritt[] = [
   {
     label: 'Dachlattung',
     name: 'Dachlatten',
+    was: 'Die waagerechten Latten, in die später die Ziegel eingehängt werden.',
     // Nicht „da hängt der Dachdecker morgen die Ziegel ein“: seit der gebaute
     // Tag dem Dachdecker gehört, ist der Besucher selbst gemeint, und der Satz
     // schickte ihn zu sich selbst (dieselbe Korrektur wie bei den Dachziegeln

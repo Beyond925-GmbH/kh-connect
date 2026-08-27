@@ -69,9 +69,11 @@ const FRAGEN = [
     id: 'gewicht',
     frage: 'Wie viel wiegt so ein Element?',
     // `BELEGT` **als Spanne** (belege/zimmerer.md 4): 70–125 kg je m²
-    // Wandfläche. Nie ein Punktwert — das Gewicht hängt am Aufbau.
+    // Wandfläche. Nie ein Punktwert — das Gewicht hängt am Aufbau. Der
+    // Kleinwagen ist der Körper-Anker (Designregel R12): Tonnen fühlt niemand,
+    // Autos hat jeder gesehen.
     antwort:
-      'Zwischen 70 und 125 Kilo je Quadratmeter Wandfläche, je nachdem, was alles drinsteckt. Deine Wand ist acht Meter breit und drei hoch — das sind grob eineinhalb bis drei Tonnen, die gleich am Haken hängen.',
+      '70 bis 125 Kilo je Quadratmeter. Deine Wand ist acht Meter breit und drei hoch — grob eineinhalb bis drei Tonnen am Haken. So viel wie ein bis zwei Kleinwagen.',
   },
   {
     id: 'hochkant',
@@ -79,7 +81,7 @@ const FRAGEN = [
     // `BELEGT` (belege/zimmerer.md 4): zulässige Transportmaße, und der Kran
     // hebt direkt vom Anhänger.
     antwort:
-      'Flach liegend wäre die Ladung breiter als erlaubt. Hochkant bleibt sie innerhalb der zulässigen Transportmaße — und der Kran hebt das Element direkt vom Anhänger an seinen Platz, ohne es unterwegs aufzurichten.',
+      'Flach liegend wäre die Ladung zu breit für die Straße. Hochkant passt sie — und der Kran hebt sie direkt vom Anhänger an ihren Platz.',
   },
   {
     id: 'regen',
@@ -89,7 +91,7 @@ const FRAGEN = [
     // ohne Zuschreibung wäre der Satz eine Behauptung über den Beruf, mit ihr
     // ist er die Auskunft eines Menschen.
     antwort:
-      'Ein Zimmerer, den wir gefragt haben, sagt dazu: „Der Kran steht da. Da kann man ja nicht einfach sagen, wir fahren jetzt nach Hause, weil’s regnet. Und dann muss man eben auch mal einen Tag durchziehen. Aber wenn man dann abends wieder sieht, was man geschafft hat, trotz des Wetters, ist dann auch wieder die Zufriedenheit da.“',
+      'Ein Zimmerer, den wir gefragt haben: „Der Kran steht da. Man kann nicht sagen, wir fahren heim, weil’s regnet. Aber abends sieht man, was man geschafft hat.“',
   },
 ] as const
 
@@ -119,6 +121,8 @@ export function C5() {
   return (
     <StepShell
       id="C5"
+      auftrag={null}
+      ansage={null}
       interaktionOffen={false}
       buehne={
         <Suspense fallback={<Dachstuhl3DFallback text="Der Innenlader wird beladen" />}>
@@ -139,7 +143,7 @@ export function C5() {
           />
         </Suspense>
       }
-      fachtext={
+      warum={
         <>
           <p>
             Das Element wird aufgestellt, auf den{' '}

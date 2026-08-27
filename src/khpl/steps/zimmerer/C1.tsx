@@ -64,9 +64,13 @@ const TREFFER_TEXT = 'Nr. 47. Genau die.'
  * Fall, den die Spec ausformuliert. Für alles andere trägt der Satz die
  * angetippte Nummer — er soll erklären, nicht tadeln.
  */
+// „Die braucht die Schwelle" war grammatisch zweideutig (wer braucht was?)
+// und ließ beide Fachwörter unerklärt stehen. Der Satz sagt es jetzt in einer
+// Richtung; die Chips für „Ausklinkung" und „Schwelle" trägt die Stückliste
+// bzw. das Warum — `Rueckmeldung` nimmt nur Klartext, keine Glossar-Chips.
 const GRUENDE: Record<number, string> = {
   [VERWECHSLER]:
-    'Nr. 44 — gleiche Länge, aber ohne Ausklinkung. Die braucht die Schwelle.',
+    'Nr. 44 — gleiche Länge, aber ohne Ausklinkung. Die Schwelle braucht die Kerbe, damit das Holz sauber sitzt.',
 }
 
 function grund(nummer: number) {
@@ -102,6 +106,8 @@ export function C1() {
   return (
     <StepShell
       id="C1"
+      auftrag={gefunden ? null : 'Such dein Holz im Stapel und tipp es an.'}
+      ansage={null}
       buehneInteraktiv
       interaktionOffen={!gefunden}
       buehne={
@@ -119,11 +125,12 @@ export function C1() {
           />
         </Suspense>
       }
-      fachtext={
+      warum={
         <p>
           Die <Begriff id="abbundanlage">Abbundanlage</Begriff> hat über Nacht gearbeitet:
-          jedes Holz ist auf Länge, jede Ausklinkung gefräst, jedes Teil nummeriert. Du
-          baust nicht aus dem Kopf, du baust nach Stückliste.
+          jedes Holz ist auf Länge, jede <Begriff id="ausklinkung">Ausklinkung</Begriff>{' '}
+          gefräst, jedes Teil nummeriert. Du baust nicht aus dem Kopf, du baust nach
+          Stückliste.
         </p>
       }
       interaktion={
@@ -214,7 +221,7 @@ function Stueckliste({ hilfe, hinweis }: { hilfe: boolean; hinweis: boolean }) {
           Nr. {GESUCHT}
         </span>
         <span className="text-[1.0625rem] text-kh-paper/85">
-          Ständer, mit Ausklinkung
+          Ständer, mit <Begriff id="ausklinkung">Ausklinkung</Begriff>
         </span>
       </div>
       <p className="text-[1.0625rem] text-kh-mute">

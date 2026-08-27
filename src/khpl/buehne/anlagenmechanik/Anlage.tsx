@@ -4,6 +4,7 @@ import {
   ANLAGENPUNKTE,
   RAHMEN_ANLAGE,
   kamera,
+  sichtbareWelt,
   sichtfeld,
   viewBoxVon,
   type Rahmen,
@@ -45,6 +46,19 @@ export function Anlage({
 }) {
   const ruhig = useReducedMotion() ?? false
   const sicht = sichtfeld(seiten)
+  /*
+    Hochkant — auf der Stele wie im Streifen neben dem Panel — ist die Fläche
+    deutlich höher als dieser Rahmen: `kamera` richtet sich nach der Breite,
+    und ober- wie unterhalb der Anlage blieb bis zu einem Viertel der
+    Sichthöhe nichts als der auslaufende Grundton — die obere Bildhälfte war
+    faktisch leer (Designregel R1). Das Haus hat für diese Zonen seine
+    Umgebung; die Umgebung einer Anlage ist Rohr. Steigstrang und
+    Kaltwasserzulauf laufen deshalb bis kurz vor die tatsächlich sichtbaren
+    Ränder — quer, wo die Sicht dem Rahmen entspricht, ändert sich nichts.
+  */
+  const welt = sichtbareWelt(RAHMEN_ANLAGE, sicht)
+  const obenY = Math.min(22, welt.y + 30)
+  const untenY = Math.max(226, welt.y + welt.h - 30)
 
   return (
     <svg
@@ -58,17 +72,19 @@ export function Anlage({
       <g transform={kamera(RAHMEN_ANLAGE, sicht)}>
         {/*
           Warmwasser nach oben zu den Zapfstellen — die kalte Seite des Falls.
-          Der Steigstrang läuft bis dicht an den oberen Bildrand: hochkant ist
-          die Fläche höher als breit, und ein Schema, das mittig als flaches
-          Band darin liegt, war genau die Ursache des gemeldeten „Lochs".
+          Der Steigstrang läuft bis dicht an den oberen **sichtbaren** Rand
+          (`obenY`): hochkant ist die Fläche höher als breit, und ein Schema,
+          das mittig als flaches Band darin liegt, war genau die Ursache des
+          gemeldeten „Lochs".
         */}
-        <Leitung d="M96 88 L96 58 L258 58 L258 26" warm={geloest} stark />
-        <Pfeilspitze x={258} y={22} warm={geloest} />
+        <Leitung d={`M96 88 L96 58 L258 58 L258 ${obenY + 4}`} warm={geloest} stark />
+        <Pfeilspitze x={258} y={obenY} warm={geloest} />
         {/* Zirkulation: was oben nicht abgenommen wird, läuft zurück. */}
         <Leitung d="M230 58 L230 116 L118 116" warm={geloest} />
-        {/* Kaltwasser von unten. Bleibt kalt, und das ist richtig so. */}
-        <Leitung d="M96 196 L96 226 L46 226" warm={false} />
-        <Pfeilspitze x={68} y={226} warm={false} richtung="rechts" />
+        {/* Kaltwasser von unten — aus derselben Tiefe, in der die Sicht endet
+            (`untenY`). Bleibt kalt, und das ist richtig so. */}
+        <Leitung d={`M96 196 L96 ${untenY} L46 ${untenY}`} warm={false} />
+        <Pfeilspitze x={68} y={untenY} warm={false} richtung="rechts" />
 
         {/* Der Heizkreis. Er ist warm — deshalb wird die Heizung warm. */}
         <Leitung d="M118 132 L196 132 L226 132 L226 178" warm stark />

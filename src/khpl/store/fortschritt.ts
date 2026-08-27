@@ -4,6 +4,7 @@ import { istStepId, railIndex, step } from '@/khpl/flow/steps'
 import { beruf, istBerufId } from '@/khpl/berufe/registry'
 import type { BerufId } from '@/khpl/berufe/typen'
 import type { HelmWahl } from '@/khpl/match/helm'
+import { istGeste, type Geste } from '@/khpl/komponenten/gesten'
 
 /**
  * Sitzungszustand nach khpl-ui-shell.md 7, erweitert um die vier Berufe.
@@ -34,11 +35,14 @@ export const VERFALL_MS = 30 * 60 * 1000
 /**
  * Welcher Screen gerade läuft. Nie persistiert.
  *
- * Die ersten fünf sind der Trichter (S0–S4), danach beginnt die Anwendung, die
+ * Die ersten vier sind der Trichter (S0–S4), danach beginnt die Anwendung, die
  * es vorher schon gab. `bald` ist der Ausgang für einen Beruf ohne Graph.
+ *
+ * `vorschlag` ist entfallen (`khpl-vereinfachung.md` §5): der Vorschlag ist
+ * jetzt die hervorgehobene erste Karte der Berufsliste, kein eigener Screen.
  */
 export type Bildschirm =
-  'splash' | 'helm' | 'fragen' | 'vorschlag' | 'berufe' | 'intro' | 'step' | 'bald'
+  'splash' | 'helm' | 'fragen' | 'berufe' | 'intro' | 'step' | 'bald'
 
 /**
  * Typisierte Sicht auf `answers`. Bleibt zur Laufzeit ein reines JSON-Objekt.
@@ -259,6 +263,15 @@ export interface Sitzung {
   helm: HelmWahl | null
   /** Frage-Id → Antwort-Id. Übersprungene Fragen fehlen schlicht. */
   gefragt: Record<string, string>
+  /**
+   * Welche Gesten der Besucher schon angesagt bekommen hat (`Ansage.tsx`).
+   *
+   * **An der Sitzung, nicht am Beruf.** Wer im Zimmerer-Tag gelernt hat, wie
+   * man eine Linie zieht, soll das beim Wechsel auf Anlagenmechanik nicht noch
+   * einmal erklärt bekommen — die Geste gehört dem Besucher, nicht dem Tag.
+   * Genau wie `helm` und `gefragt`.
+   */
+  gelernteGesten: Geste[]
   updatedAt: number
 }
 
@@ -280,6 +293,7 @@ function leereSitzung(): Sitzung {
     berufe: {},
     helm: null,
     gefragt: {},
+    gelernteGesten: [],
     updatedAt: Date.now(),
   }
 }
@@ -574,6 +588,7 @@ function lade(): Sitzung | null {
       berufe,
       helm: pruefeHelm(s.helm),
       gefragt: pruefeGefragt(s.gefragt),
+      gelernteGesten: pruefeGesten(s.gelernteGesten),
       updatedAt: s.updatedAt,
     }
   } catch {
@@ -586,6 +601,13 @@ function pruefeHelm(roh: unknown): HelmWahl | null {
   const h = roh as Partial<HelmWahl>
   if (typeof h.farbe !== 'string' || typeof h.werkzeug !== 'string') return null
   return { farbe: h.farbe, werkzeug: h.werkzeug }
+}
+
+function pruefeGesten(roh: unknown): Geste[] {
+  // Ein unbekannter Name aus einem alten Stand fliegt still raus. Die Folge
+  // wäre sonst eine Geste, die als „schon erklärt“ gilt, weil sie früher
+  // einmal anders hieß — und damit eine Ansage, die nie erscheint.
+  return Array.isArray(roh) ? roh.filter(istGeste) : []
 }
 
 function pruefeGefragt(roh: unknown): Record<string, string> {
@@ -744,16 +766,28 @@ export function merkeHelm(wahl: HelmWahl) {
   aendere((s) => ({ ...s, helm: wahl }))
 }
 
+/**
+ * Hält fest, dass eine Geste angesagt wurde (`Ansage.tsx`).
+ *
+ * Idempotent: die Ansage ruft das beim Wegtippen, und ein zweiter Aufruf
+ * derselben Geste darf weder speichern noch `updatedAt` auffrischen — sonst
+ * hält ein Besucher, der auf einem Screen herumtippt, den Verfall offen
+ * (`aendere` gibt bei `neu === alt` auf).
+ */
+export function merkeGeste(geste: Geste) {
+  aendere((s) =>
+    s.gelernteGesten.includes(geste)
+      ? s
+      : { ...s, gelernteGesten: [...s.gelernteGesten, geste] },
+  )
+}
+
 export function merkeFrage(frageId: string, antwortId: string) {
   aendere((s) => ({ ...s, gefragt: { ...s.gefragt, [frageId]: antwortId } }))
 }
 
 export function zeigeFragen() {
   setzeBildschirm('fragen')
-}
-
-export function zeigeVorschlag() {
-  setzeBildschirm('vorschlag')
 }
 
 export function zeigeBerufe() {

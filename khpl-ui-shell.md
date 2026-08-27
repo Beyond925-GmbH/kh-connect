@@ -1,5 +1,22 @@
 # KHPL Connect — UI-Shell
 
+> ⚠️ **Von [`khpl-vereinfachung.md`](./khpl-vereinfachung.md) in drei Punkten
+> überholt** (Phase 1, 25.08.2026). Wo sich beide widersprechen, gilt die
+> Vereinfachung:
+>
+> - **§2/§3: S0.3 „Vorschlag" gibt es nicht mehr** als eigenen Screen. Der
+>   Treffer ist die hervorgehobene erste Karte der Berufsliste (S0.4).
+> - **§5: Die Slot-Reihenfolge ist eine andere.** Aus `Bühne · Fachtext ·
+>   Begriffe · Interaktion · Aha · Fuß` wird `Bühne · Titel · **Warum** ·
+>   **Auftrag** · Interaktion · Fuß`. Der Fachtext heißt `warum` und liegt
+>   hinter einer geschlossenen Klappzeile; die Aha-Karte erscheint dort, wenn
+>   die Übung gelöst ist, statt in einer eigenen Bildschirmecke.
+> - **Neu und ohne Vorbild in diesem Dokument: die Ansage.** Vor jeder Geste,
+>   die nicht Antippen ist, steht „Das passiert jetzt". Sie erscheint je Geste,
+>   nicht je Screen.
+>
+> ---
+>
 > Ergänzt [`khpl-flow.md`](./khpl-flow.md). Dort steht **was** erzählt wird (M1–M10,
 > Abstecher, Stickies). Hier steht die **Hülle** darum: Splash, Einstieg, Fortschritt,
 > Navigation, Abbruch & Wiedereinstieg.
@@ -32,8 +49,8 @@ abgelenkt war, wählt *Weitermachen*.
 | **S0** | Splash / Attract | Ruhezustand des Standes. Marke, Plakatzeile über alle vier Berufe, „Tippen zum Starten". Bei vorhandenem Fortschritt oben links eine leise Pille *Weiter bei …*. |
 | **S0.1** | Dein Helm | Personalisierung. Helmfarbe (Ausdruck) und Werkzeug (Merkmalssignal). Überspringbar. |
 | **S0.2** | Vier Fragen | Eine Frage je Screen, Antwort per Tap. Jede überspringbar. |
-| **S0.3** | Vorschlag | Der beste Treffer, mit Begründung und dem Zweitplatzierten. **Entfällt beim Kaltstart** — ohne Aussage kein Vorschlag. |
-| **S0.4** | Berufsliste | Alle vier nebeneinander. Daueradresse: aus dem Vorschlag, aus dem Sheet, vom Ende eines Tages. |
+| ~~S0.3~~ | ~~Vorschlag~~ | **Entfallen.** Ging in S0.4 auf — der Treffer ist dort die erste Karte, mit Begründung; der Zweite trägt „Dicht dahinter". |
+| **S0.4** | Berufsliste | Alle vier nebeneinander, bester Treffer vorn und hervorgehoben. Daueradresse: aus dem Trichter, aus dem Sheet, vom Ende eines Tages. Ohne Antworten (Kaltstart) einfach ohne Hervorhebung. |
 | **S1** | Auftragsannahme | Der Framing-Screen, **je Beruf**. In-fiction, keine Meta-Erklärung, keine Dauer. Endet auf **[Auftrag annehmen]**. Trägt den ersten diskreten Karriere-Link. |
 | **S2** | Step-Screen | Das Arbeitspferd. Rendert jeden gelben Step (Haupt **und** Abstecher) aus den Daten. Anatomie → §5. |
 | **S3** | „Dein Weg" (Sheet) | Overlay über S2. Die ganze Hauptlinie als vertikale Liste mit ✓ / ● / ○, Abstecher eingerückt unter ihrem Elternschritt. Antwort auf „Was habe ich bisher gemacht?". |
@@ -54,10 +71,7 @@ stateDiagram-v2
   [*] --> S0
   S0 --> S0_1: Tippen zum Starten
   S0_1 --> S0_2: Helm gewählt / übersprungen
-  S0_2 --> S0_3: vier Fragen durch
-  S0_2 --> S0_4: alles übersprungen (Kaltstart)
-  S0_3 --> S1: Beruf starten
-  S0_3 --> S0_4: alle vier ansehen
+  S0_2 --> S0_4: vier Fragen durch (auch beim Kaltstart)
   S0_4 --> S1: Beruf gewählt (neu)
   S0_4 --> S2: Beruf gewählt (schon angefangen)
   S0 --> S2: Weitermachen
@@ -129,10 +143,12 @@ Teilmenge; die Reihenfolge steht fest, damit 15 Screens wie ein Produkt wirken:
 | Slot | Quelle im Board | Verhalten |
 | --- | --- | --- |
 | **Bühne** | — | Illustration, Animation oder interaktive Fläche. Trägt den Screen visuell. |
-| **Fachtext** | blau, ohne Präfix | Kurz. Was hier real im Beruf passiert. |
-| **Begriffe** | freie Stickies (`CAD`, `Abbund`) | Inline-Chips im Fachtext, öffnen einen Dialog. |
+| **Ansage** | — | *Neu.* „Das passiert jetzt", vor jeder Geste außer Antippen. Je Geste, nicht je Screen. |
+| **Warum** (früher Fachtext) | blau, ohne Präfix | Höchstens 40 Wörter, **zugeklappt**. Wer wissen will, warum, tippt. |
+| **Begriffe** | freie Stickies (`CAD`, `Abbund`) | Inline-Chips, **höchstens einer je Screen**, und nur nach dem Alltagswort. |
+| **Auftrag** | — | *Neu und erforderlich.* Der eine Satz, der sagt, was zu tun ist. ≤ 12 Wörter, Imperativ. `null` nur für reine Lese-Steps. |
 | **Interaktion** | `Interaction:` / `Abfrage:` | Der Hauptteil, wenn vorhanden. |
-| **Aha-Karte** | grün (`Nicht auf dem Schirm` / `Positive Perspektive`) | Erscheint **nach** der Interaktion, nicht davor. Das Framing ist die Belohnung, nicht die Ansage. |
+| **Aha-Karte** | grün (`Nicht auf dem Schirm` / `Positive Perspektive`) | Erscheint **nach** der Interaktion, in der Warum-Zeile, die dafür einmal von selbst aufgeht. Die Belohnung, nicht die Ansage. |
 | **Fuß** | — | Abstecher-Angebot **oder** *Weiter*. |
 
 `Info only`-Steps (B9.1–B9.3) überspringen Interaktion und Aha-Karte.

@@ -106,6 +106,8 @@ export function C7() {
   return (
     <StepShell
       id="C7"
+      auftrag={null}
+      ansage={null}
       buehneInteraktiv
       interaktionOffen={false}
       buehne={
@@ -122,7 +124,7 @@ export function C7() {
           />
         </Suspense>
       }
-      fachtext={
+      warum={
         <p>
           Vier Uhr. Vorgefertigt wird gebaut, damit ein Haus an einem Tag dicht ist — und
           heute ist es das.

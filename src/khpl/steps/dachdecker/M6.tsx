@@ -91,9 +91,13 @@ export function M6() {
   return (
     <StepShell
       id="M6"
+      // Mittagspause. Der eine Screen des Tages, der ausdrücklich nichts
+      // verlangt — eine Auftragszeile wäre hier der Fehler.
+      auftrag={null}
+      ansage={null}
       interaktionOffen={false}
       buehne={<StepFoto id="M6" />}
-      fachtext={
+      warum={
         <>
           <p>
             Brotzeit auf dem Rohbau. Von hier siehst du, was heute Morgen noch nicht da

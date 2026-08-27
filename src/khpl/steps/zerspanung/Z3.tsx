@@ -16,7 +16,6 @@ import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
-import { useSchmal } from '@/khpl/shell/schmal'
 
 /**
  * Z3 — Zeile für Zeile. **Der Fehler mit Preis.**
@@ -74,7 +73,7 @@ const TREFFER_TEXT =
   'Gefunden. Ohne das Minus fährt das Werkzeug vom Teil weg statt an ihm entlang.'
 
 const LUFTSCHNITT_TEXT =
-  'Ohne das Minus fährt das Werkzeug am Teil vorbei ins Leere. Kein Span, keine Kontur — der Rohling hängt ungedreht im Futter, und der Durchlauf war umsonst. Deshalb geht an einer CNC niemand ohne Simulation auf Start.'
+  'Ohne das Minus fährt das Werkzeug am Teil vorbei ins Leere. Kein Span, keine Form, der Durchlauf umsonst. Deshalb startet niemand ohne Simulation.'
 
 /** Wie die Zeile auf dem Steuerungsbildschirm steht — vor und nach der Korrektur. */
 function codeVon(zeile: Programmzeile, index: number, korrigiert: boolean): string {
@@ -82,7 +81,6 @@ function codeVon(zeile: Programmzeile, index: number, korrigiert: boolean): stri
 }
 
 export function Z3() {
-  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.z3
   const vorbei = !!(gespeichert?.gefunden || gespeichert?.kollision)
 
@@ -158,21 +156,12 @@ export function Z3() {
   return (
     <StepShell
       id="Z3"
+      auftrag={erledigt ? null : 'Geh das Programm durch, Zeile für Zeile.'}
+      ansage={null}
       interaktionOffen={!erledigt}
       // Kein `karteBreit`: der Code ist rund zwanzig Zeichen breit, und jedes
       // Rem mehr Panel ging quer direkt von der Bühne ab — bei 52 rem begann
       // das SVG hinter der Panelkante und der halbe Werkzeugweg war verdeckt.
-      // Dafür der Klappgriff: Die Kontur, die sich Zeile für Zeile zeichnet,
-      // ist der Reiz dieses Screens, und wer sie groß sehen will, klappt das
-      // Panel zusammen.
-      /*
-        `einklappbar` statt `buehnePlatz`: die Übung dieses Steps steht im
-        Panel (eine von vierzehn Zeilen antippen), die Bühne zeigt dazu den
-        Weg. Der 62-%-Deckel, den `buehnePlatz` mitbringt, nähme dem Panel
-        hochkant genau den Platz, den die Liste braucht. Den Weg ganz sehen
-        kann man trotzdem — einmal einklappen.
-      */
-      einklappbar
       buehne={
         <Werkstueck
           zustand="werkzeugweg"
@@ -186,24 +175,18 @@ export function Z3() {
           luftschnitt={luftschnitt}
         />
       }
-      fachtext={
-        // Handy hochkant: nur der Kern — jede Zeile darüber kostet eine
-        // sichtbare Programmzeile in der Liste (s. `schmal.ts`).
-        schmal ? (
-          <p>
-            Das Programm sagt der Maschine, wohin das Werkzeug fährt. Jede Zeile ist ein
-            Weg: ein Maß, ein <Begriff id="vorschub">Vorschub</Begriff>, eine{' '}
-            <Begriff id="drehzahl">Drehzahl</Begriff>.
-          </p>
-        ) : (
-          <p>
-            Das Programm sagt der Maschine, wohin das Werkzeug fährt. Der Zerspaner
-            schreibt es nicht immer selbst — aber er muss es <em>lesen</em> können, bevor
-            er Start drückt. Jede Zeile ist ein Weg: ein Maß, ein{' '}
-            <Begriff id="vorschub">Vorschub</Begriff>, eine{' '}
-            <Begriff id="drehzahl">Drehzahl</Begriff>.
-          </p>
-        )
+      /*
+        R10, wörtlich der Referenzfall der Designregeln: 14 Zeilen G-Code
+        brauchen den ausdrücklichen Freibrief, dass niemand sie können muss —
+        „Lesen können muss man es“ war eine Anforderung, keine Lizenz. Die
+        Lektion (einmal durchgehen, bevor jemand startet) bleibt.
+      */
+      warum={
+        <p>
+          Das Programm sagt der Maschine, wohin das Werkzeug fährt — mit einem Maß und
+          einer <Begriff id="drehzahl">Drehzahl</Begriff> je Zeile. 14 Zeilen, und du
+          musst keine davon können: einmal durchgehen reicht, bevor jemand Start drückt.
+        </p>
       }
       interaktion={
         <div className="flex min-h-0 flex-1 flex-col gap-3" data-wisch="aus">
@@ -265,12 +248,17 @@ export function Z3() {
             nichts bringt. An einer CNC wird erst simuliert und dann gestartet — das ist
             keine Vorsicht, das ist das Verfahren.
           </AhaKarte>
-          <AhaKarte sichtbar={luftschnitt} eyebrow="Passiert das jeden Tag?">
+          {/* Ab dem zweiten Einwurf zugeklappt (R5). */}
+          <AhaKarte sichtbar={luftschnitt} zugeklappt eyebrow="Passiert das jeden Tag?">
             Ein falsches Vorzeichen findet jeder mal. Was im Alltag wirklich anstrengt,
             ist anderes: Toleranzen, die sich nicht halten lassen, Termindruck — und ein
             Späneförderer, der ausfällt.
           </AhaKarte>
-          <AhaKarte sichtbar={versuche > 0} eyebrow="Und wenn du ihn nicht findest?">
+          <AhaKarte
+            sichtbar={versuche > 0}
+            zugeklappt
+            eyebrow="Und wenn du ihn nicht findest?"
+          >
             Dann sucht ihn jemand mit dir. Fehlersuche ist in der Halle nichts, was man
             allein macht — dafür gibt es Kollegen, und danach gefragt wird gern.
           </AhaKarte>
