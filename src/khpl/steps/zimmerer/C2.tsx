@@ -216,8 +216,8 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
   return (
     <div className="flex flex-col gap-3">
       <motion.span
-        initial={{ opacity: 0, y: 18, scale: 0.9 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ opacity: 0, transform: 'translateY(18px) scale(0.9)' }}
+        animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
         transition={{ type: 'spring', stiffness: 380, damping: 26 }}
         data-testid="c2-zahl"
         className="kh-zahl text-kh-orange"
@@ -265,8 +265,8 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, transform: 'translateY(10px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0px)' }}
         transition={{ delay: 0.45, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="kh-feld flex flex-col gap-1.5 px-3.5 py-3"
         data-testid="c2-herleitung"

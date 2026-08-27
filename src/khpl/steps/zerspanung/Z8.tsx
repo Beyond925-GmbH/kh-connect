@@ -63,8 +63,8 @@ export function Z8() {
       interaktion={
         <div className="flex flex-col gap-4">
           <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, transform: 'translateY(12px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             data-testid="z8-aufhaenger"
             className="text-[clamp(1.05rem,0.95rem+0.7vw,1.35rem)] leading-[1.4] text-kh-paper/80"
@@ -73,8 +73,8 @@ export function Z8() {
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, transform: 'translateY(16px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
             data-testid="z8-cta"
             className="flex flex-col gap-1"
@@ -186,8 +186,8 @@ function Abschlussfeld() {
         src="/brand/kh-pb-lippe.png"
         alt=""
         aria-hidden
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 0.18, y: 0 }}
+        initial={{ opacity: 0, transform: 'translateY(24px)' }}
+        animate={{ opacity: 0.18, transform: 'translateY(0px)' }}
         transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
         style={{
           maskImage: 'linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%)',

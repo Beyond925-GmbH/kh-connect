@@ -62,8 +62,8 @@ export function Rail({
         <span className="flex items-baseline gap-0.5 font-display leading-none">
           <motion.span
             key={jetzt}
-            initial={{ y: -8, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            initial={{ opacity: 0, transform: 'translateY(-8px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
             className="text-[1.5rem] text-kh-orange tabular-nums"
           >

@@ -52,9 +52,9 @@ export function Z7() {
             <li key={weg.id} className="flex">
               <motion.button
                 type="button"
-                initial={{ opacity: 0, y: 18 }}
-                animate={{ opacity: 1, y: 0 }}
-                whileTap={{ scale: 0.96 }}
+                initial={{ opacity: 0, transform: 'translateY(18px) scale(1)' }}
+                animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
+                whileTap={{ transform: 'translateY(0px) scale(0.96)' }}
                 transition={{ duration: 0.42, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => zumAbstecher(weg.id)}
                 data-testid={`z7-${weg.id}`}

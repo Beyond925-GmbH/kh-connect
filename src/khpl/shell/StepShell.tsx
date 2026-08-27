@@ -10,6 +10,7 @@ import { motion } from 'motion/react'
 import { step, type StepId } from '@/khpl/flow/steps'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
 import { EinwurfBuehne } from '@/khpl/komponenten/AhaKarte'
+import { auftritt } from '@/khpl/komponenten/auftritt'
 import { DeinWeg } from './DeinWeg'
 import { Rail } from './Rail'
 import { SichtfeldMesser } from './SichtfeldKontext'
@@ -320,9 +321,7 @@ export function StepShell({
       */}
       <motion.header
         key={id}
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        {...auftritt(18)}
         className={`flex w-full shrink-0 flex-col gap-1.5 ${spaltenbreite}`}
       >
         {titelZusatz && (
@@ -355,9 +354,7 @@ export function StepShell({
         key={`panel-${id}`}
         ref={panel}
         data-testid="karte"
-        initial={{ opacity: 0, y: 22 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
+        {...auftritt(22, { verzoegerung: 0.12 })}
         // `min-h-0` ist die Bedingung dafür, dass das Scrollen unten
         // überhaupt greift: ein Flex-Kind hat von Haus aus `min-height: auto`
         // und wächst über den Container hinaus, statt zu scrollen.

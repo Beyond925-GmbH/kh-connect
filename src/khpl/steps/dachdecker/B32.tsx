@@ -119,9 +119,9 @@ export function B32() {
 function Aufforderung({ gefunden }: { gefunden: number }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
+      initial={{ opacity: 0, transform: 'translateY(8px)' }}
+      animate={{ opacity: 1, transform: 'translateY(0px)' }}
+      exit={{ opacity: 0, transform: 'translateY(-8px)' }}
       transition={{ duration: 0.25 }}
       className="flex items-center gap-3 rounded-kh border-2 border-kh-orange/40 bg-kh-orange/12 px-4 py-3.5"
     >
@@ -158,9 +158,9 @@ function BauteilKarte({
   const text = BAUTEIL_TEXTE[auswahl.typ]
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -8 }}
+      initial={{ opacity: 0, transform: 'translateY(12px)' }}
+      animate={{ opacity: 1, transform: 'translateY(0px)' }}
+      exit={{ opacity: 0, transform: 'translateY(-8px)' }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
       data-testid="b32-bauteil"
       className="kh-feld relative p-4"

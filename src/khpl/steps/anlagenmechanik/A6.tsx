@@ -212,8 +212,8 @@ export function A6() {
               {angekommen ? (
                 <motion.p
                   key="oben"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, transform: 'translateY(6px)' }}
+                  animate={{ opacity: 1, transform: 'translateY(0px)' }}
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                   data-testid="a6-angekommen"
                   className="kh-titel-klein text-kh-orange"
@@ -392,8 +392,8 @@ function Manometer({
 function Faustformel() {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, transform: 'translateY(8px)' }}
+      animate={{ opacity: 1, transform: 'translateY(0px)' }}
       transition={{ duration: 0.4, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
       className="kh-feld px-3.5 py-2.5"
       data-testid="a6-faustformel"

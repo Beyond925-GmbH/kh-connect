@@ -156,8 +156,8 @@ function Schaetzung({
           <div className="flex flex-col gap-2.5">
             <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
               <motion.span
-                initial={{ opacity: 0, y: 18, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
+                initial={{ opacity: 0, transform: 'translateY(18px) scale(0.9)' }}
+                animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
                 transition={{ type: 'spring', stiffness: 380, damping: 26 }}
                 data-testid="m2-zahl"
                 className="kh-zahl text-kh-orange"

@@ -137,18 +137,32 @@ function Karte({
   const bald = beruf.graph === null
 
   return (
-    <motion.button
-      type="button"
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
+    /*
+      Der Auftritt sitzt auf dem Rahmen, der Druckpunkt auf der Karte.
+
+      Beides auf einem Element hieß: Motion schreibt je Frame ein neues
+      `transform`, und `transition-transform` (150 ms) blendet auf jeden
+      dieser Werte erst noch über. Die Karte kommt dadurch nicht in 400 ms
+      herauf, sondern kriecht 400 ms lang von 18 auf 11 px und fällt die
+      letzten 11 px danach in gut 100 ms — ein Kriechen mit Ruck am Ende.
+      Ein Element, das gleichzeitig von zwei Seiten transformiert wird, kann
+      nur eines von beidem richtig machen.
+    */
+    <motion.div
+      initial={{ opacity: 0, transform: 'translateY(18px)' }}
+      animate={{ opacity: 1, transform: 'translateY(0px)' }}
       transition={{ duration: 0.4, delay: index * 0.06, ease: [0.22, 1, 0.36, 1] }}
-      onClick={() => betreteBeruf(beruf.id)}
-      data-testid={`beruf-${beruf.id}`}
-      className={`relative flex min-h-[9.5rem] overflow-hidden rounded-kh-lg border-2 text-left transition-transform active:scale-[0.98] ${
-        empfohlen ? 'border-kh-orange' : 'border-kh-line'
-      }`}
+      className="flex min-h-[9.5rem]"
     >
-      {/*
+      <button
+        type="button"
+        onClick={() => betreteBeruf(beruf.id)}
+        data-testid={`beruf-${beruf.id}`}
+        className={`relative flex min-w-0 flex-1 overflow-hidden rounded-kh-lg border-2 text-left transition-transform active:scale-[0.98] ${
+          empfohlen ? 'border-kh-orange' : 'border-kh-line'
+        }`}
+      >
+        {/*
         „Bald“ heißt entsättigt, nicht abgedunkelt.
 
         Vorher lag das Motiv der angekündigten Berufe auf 40 % Deckkraft unter
@@ -157,33 +171,33 @@ function Karte({
         nicht als „kommt noch“. Grau und ruhig sagt dasselbe, ohne nach Defekt
         auszusehen: das Motiv ist da, es ist nur noch nicht dran.
       */}
-      <div aria-hidden className="absolute inset-0">
-        <BerufBild
-          beruf={beruf}
-          className={bald ? 'opacity-55 grayscale-[0.85]' : 'opacity-75'}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0E0D0B] via-[#0E0D0B]/80 to-[#0E0D0B]/35" />
-        {/* Hochkant ist die Karte dreimal so hoch wie vorher; der Text steht
+        <div aria-hidden className="absolute inset-0">
+          <BerufBild
+            beruf={beruf}
+            className={bald ? 'opacity-55 grayscale-[0.85]' : 'opacity-75'}
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0E0D0B] via-[#0E0D0B]/80 to-[#0E0D0B]/35" />
+          {/* Hochkant ist die Karte dreimal so hoch wie vorher; der Text steht
             dann nicht mehr in der abgedunkelten linken Hälfte, sondern über
             dem unteren Bildrand. Der Fuß-Verlauf trägt ihn dort — quer wird
             er nicht gebraucht. */}
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0E0D0B] via-[#0E0D0B]/45 to-transparent landscape:hidden" />
-      </div>
+          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#0E0D0B] via-[#0E0D0B]/45 to-transparent landscape:hidden" />
+        </div>
 
-      <div className="relative flex min-w-0 flex-1 flex-col justify-end gap-2 p-6 max-sm:p-4 landscape:gap-1.5 landscape:p-4">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {empfohlen && (
-            <span className={`${CHIP} bg-kh-orange text-[#0E0D0B]`}>Passt zu dir</span>
-          )}
-          {aktiv && (
-            <span
-              className={`${CHIP} flex items-center gap-1 bg-kh-signal text-[#0E0D0B]`}
-            >
-              <Check className="size-3.5" strokeWidth={3.5} aria-hidden />
-              du bist hier
-            </span>
-          )}
-          {/*
+        <div className="relative flex min-w-0 flex-1 flex-col justify-end gap-2 p-6 max-sm:p-4 landscape:gap-1.5 landscape:p-4">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {empfohlen && (
+              <span className={`${CHIP} bg-kh-orange text-[#0E0D0B]`}>Passt zu dir</span>
+            )}
+            {aktiv && (
+              <span
+                className={`${CHIP} flex items-center gap-1 bg-kh-signal text-[#0E0D0B]`}
+              >
+                <Check className="size-3.5" strokeWidth={3.5} aria-hidden />
+                du bist hier
+              </span>
+            )}
+            {/*
             Der angefangene Beruf — dieselbe Auskunft wie im Sheet „Dein Weg“,
             und wörtlich dieselbe Formulierung.
 
@@ -192,65 +206,70 @@ function Karte({
             was das Sheet sagt — und Gelbgrün bleibt dem einen Beruf, in dem
             der Besucher gerade steckt.
           */}
-          {/*
+            {/*
             Ein zu Ende gespielter Tag heißt nicht mehr „da weitermachen“ —
             er ist geschafft, und genau dafür ist Gelbgrün reserviert
             (index.css). Das ist neben „du bist hier“ das zweite legitime
             Gelbgrün dieses Screens; beide markieren ein Ist, keine Wahl.
           */}
-          {fertig && !aktiv && (
-            <span
-              className={`${CHIP} flex items-center gap-1 bg-kh-signal text-[#0E0D0B]`}
-            >
-              <Check className="size-3.5" strokeWidth={3.5} aria-hidden />
-              geschafft
-            </span>
-          )}
-          {angefangen && !fertig && !aktiv && (
-            <span
-              className={`${CHIP} flex items-center gap-1.5 border border-kh-line-strong bg-white/12 text-kh-paper`}
-            >
-              {/* Orange wie das Häkchen desselben Zustands im Sheet. Gelbgrün
+            {fertig && !aktiv && (
+              <span
+                className={`${CHIP} flex items-center gap-1 bg-kh-signal text-[#0E0D0B]`}
+              >
+                <Check className="size-3.5" strokeWidth={3.5} aria-hidden />
+                geschafft
+              </span>
+            )}
+            {angefangen && !fertig && !aktiv && (
+              <span
+                className={`${CHIP} flex items-center gap-1.5 border border-kh-line-strong bg-white/12 text-kh-paper`}
+              >
+                {/* Orange wie das Häkchen desselben Zustands im Sheet. Gelbgrün
                   hieße „geschafft“ — angefangen ist es gerade nicht. */}
-              <Check className="size-3.5 text-kh-orange" strokeWidth={3.5} aria-hidden />
-              Angefangen — da weitermachen
-            </span>
-          )}
-          {bald && (
-            <span
-              className={`${CHIP} flex items-center gap-1 bg-white/12 text-kh-paper/70`}
-            >
-              <Clock className="size-3.5" strokeWidth={2.5} aria-hidden />
-              bald
-            </span>
-          )}
-        </div>
+                <Check
+                  className="size-3.5 text-kh-orange"
+                  strokeWidth={3.5}
+                  aria-hidden
+                />
+                Angefangen — da weitermachen
+              </span>
+            )}
+            {bald && (
+              <span
+                className={`${CHIP} flex items-center gap-1 bg-white/12 text-kh-paper/70`}
+              >
+                <Clock className="size-3.5" strokeWidth={2.5} aria-hidden />
+                bald
+              </span>
+            )}
+          </div>
 
-        {/*
+          {/*
           Der Pfeil stand in einer eigenen 56-px-Spalte rechts, senkrecht
           mittig — einen halben Screen von der Überschrift entfernt, zu der er
           gehört, und auf einer „Bald“-Karte ein Versprechen, das sie nicht
           einlösen kann. Jetzt steht er in der Titelzeile, und wo es noch
           nichts zu betreten gibt, steht dort gar nichts.
         */}
-        <h2 className="flex items-center gap-2.5">
-          {/* Hochkant `kh-titel`, quer die kleine Stufe: dort steht dieselbe
+          <h2 className="flex items-center gap-2.5">
+            {/* Hochkant `kh-titel`, quer die kleine Stufe: dort steht dieselbe
               Karte in halber Breite neben einer zweiten. */}
-          <span className="kh-titel landscape:text-[1.85rem] landscape:leading-none">
-            {beruf.kurz}
-          </span>
-          {!bald && (
-            <ArrowRight
-              aria-hidden
-              className={`size-8 shrink-0 landscape:size-6 ${empfohlen ? 'text-kh-orange' : 'text-kh-paper/50'}`}
-              strokeWidth={2.5}
-            />
-          )}
-        </h2>
-        <p className="max-w-[42ch] text-[1.125rem] leading-snug text-kh-paper/75 landscape:text-[0.9375rem] landscape:text-kh-paper/70">
-          {beruf.zeile}
-        </p>
-      </div>
-    </motion.button>
+            <span className="kh-titel landscape:text-[1.85rem] landscape:leading-none">
+              {beruf.kurz}
+            </span>
+            {!bald && (
+              <ArrowRight
+                aria-hidden
+                className={`size-8 shrink-0 landscape:size-6 ${empfohlen ? 'text-kh-orange' : 'text-kh-paper/50'}`}
+                strokeWidth={2.5}
+              />
+            )}
+          </h2>
+          <p className="max-w-[42ch] text-[1.125rem] leading-snug text-kh-paper/75 landscape:text-[0.9375rem] landscape:text-kh-paper/70">
+            {beruf.zeile}
+          </p>
+        </div>
+      </button>
+    </motion.div>
   )
 }

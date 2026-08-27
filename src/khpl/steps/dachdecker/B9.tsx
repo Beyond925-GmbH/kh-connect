@@ -49,8 +49,8 @@ export function B9({ id }: { id: StepId }) {
           {weg.abschnitte.map((a, i) => (
             <motion.div
               key={a.frage}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, transform: 'translateY(10px)' }}
+              animate={{ opacity: 1, transform: 'translateY(0px)' }}
               transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
               // Je Frage ein eigenes Feld statt vier Absätze an einer
               // gemeinsamen Linie: „Was ist das · Wie lange · Was es kostet ·

@@ -337,7 +337,10 @@ function Auswertung({
       className="flex flex-col gap-2.5"
     >
       <motion.p
-        variants={{ aus: { opacity: 0, y: 10 }, an: { opacity: 1, y: 0 } }}
+        variants={{
+          aus: { opacity: 0, transform: 'translateY(10px)' },
+          an: { opacity: 1, transform: 'translateY(0px)' },
+        }}
         className="text-[1.125rem] leading-snug font-semibold text-kh-paper sm:text-[1.25rem]"
       >
         {alleGefunden
@@ -359,7 +362,10 @@ function Auswertung({
           return (
             <motion.li
               key={p.id}
-              variants={{ aus: { opacity: 0, y: 10 }, an: { opacity: 1, y: 0 } }}
+              variants={{
+                aus: { opacity: 0, transform: 'translateY(10px)' },
+                an: { opacity: 1, transform: 'translateY(0px)' },
+              }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               className={`rounded-kh border-2 px-3.5 py-2.5 ${
                 gefehlt
@@ -405,7 +411,10 @@ function Auswertung({
           zehn Begründungen gleichzeitig auf dem Screen stehen. */}
       {treffer.length > 0 && (
         <motion.div
-          variants={{ aus: { opacity: 0, y: 10 }, an: { opacity: 1, y: 0 } }}
+          variants={{
+            aus: { opacity: 0, transform: 'translateY(10px)' },
+            an: { opacity: 1, transform: 'translateY(0px)' },
+          }}
           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
           className="flex flex-col gap-1.5"
         >

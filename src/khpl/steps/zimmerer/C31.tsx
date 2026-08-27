@@ -123,7 +123,10 @@ export function C31() {
               {NACHWACHSEND.map((b) => (
                 <motion.li
                   key={b}
-                  variants={{ aus: { opacity: 0, y: 8 }, an: { opacity: 1, y: 0 } }}
+                  variants={{
+                    aus: { opacity: 0, transform: 'translateY(8px)' },
+                    an: { opacity: 1, transform: 'translateY(0px)' },
+                  }}
                   className="rounded-kh-pill border-2 border-kh-line-strong bg-white/5 px-3 py-1.5 text-[1rem] text-kh-paper/80"
                 >
                   {b}

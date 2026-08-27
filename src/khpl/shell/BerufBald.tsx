@@ -48,8 +48,8 @@ export function BerufBald({ id }: { id: BerufId }) {
       </header>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, transform: 'translateY(20px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0px)' }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         className="relative flex min-h-0 flex-1 flex-col justify-end gap-4 p-5 landscape:p-8"
       >

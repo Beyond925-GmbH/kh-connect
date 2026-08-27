@@ -272,7 +272,10 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
 function Takt({ children }: { children: React.ReactNode }) {
   return (
     <motion.div
-      variants={{ aus: { opacity: 0, y: 14 }, an: { opacity: 1, y: 0 } }}
+      variants={{
+        aus: { opacity: 0, transform: 'translateY(14px)' },
+        an: { opacity: 1, transform: 'translateY(0px)' },
+      }}
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}

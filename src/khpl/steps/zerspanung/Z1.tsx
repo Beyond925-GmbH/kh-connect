@@ -261,8 +261,8 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
       <div className="flex flex-col gap-2.5">
         {/* Die Signaturzahl rastet ein — hart, ohne Überschwingen (§7). */}
         <motion.span
-          initial={{ opacity: 0, y: 18, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          initial={{ opacity: 0, transform: 'translateY(18px) scale(0.9)' }}
+          animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
           transition={{ duration: 0.4, ease: RASTER }}
           data-testid="z1-zahl"
           className="kh-zahl text-kh-orange"

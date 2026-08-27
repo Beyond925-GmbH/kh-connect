@@ -311,8 +311,8 @@ export function C4() {
               {/* Die Vorbereitung auf C6 — der eine Satz, der diesen Screen mit
                   dem Kran verbindet. Deshalb Anton und nicht Fließtext. */}
               <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, transform: 'translateY(10px)' }}
+                animate={{ opacity: 1, transform: 'translateY(0px)' }}
                 transition={{ delay: 0.5, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                 data-testid="c4-aufrichten-zeile"
                 className="kh-titel-klein text-kh-orange"

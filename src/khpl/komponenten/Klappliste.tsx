@@ -103,8 +103,8 @@ export function Klappliste({
         {abschnitte.map((a, i) => (
           <motion.div
             key={a.frage}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, transform: 'translateY(10px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
             // Je Eintrag ein eigenes Feld statt einer durchlaufenden
             // Definitionsliste: das sind Antworten auf Fragen und lesen sich
@@ -132,8 +132,8 @@ export function Klappliste({
         return (
           <motion.div
             key={a.frage}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, transform: 'translateY(10px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ duration: 0.35, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
             ref={(el) => {
               felder.current[i] = el

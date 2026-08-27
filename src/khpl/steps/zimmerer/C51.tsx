@@ -96,8 +96,8 @@ export function C51() {
             sondern die Bedingung, unter der der Satz überhaupt stehen darf.
           */}
           <motion.blockquote
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, transform: 'translateY(12px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
             data-testid="c51-zitat"
             className="kh-feld px-4 py-4"

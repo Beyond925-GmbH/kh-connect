@@ -385,8 +385,8 @@ function Reaktion({ wahl, besser }: { wahl: Antwort | null; besser?: Antwort | n
       </div>
 
       <motion.p
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, transform: 'translateY(8px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0px)' }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
         data-testid="a7-reaktion"
         className="kh-titel-klein text-kh-orange"
@@ -396,8 +396,8 @@ function Reaktion({ wahl, besser }: { wahl: Antwort | null; besser?: Antwort | n
 
       {besser && (
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, transform: 'translateY(8px)' }}
+          animate={{ opacity: 1, transform: 'translateY(0px)' }}
           transition={{ duration: 0.35, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
           className="kh-feld px-4 py-3"
           data-testid="a7-besser"

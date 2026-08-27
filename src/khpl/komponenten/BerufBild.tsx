@@ -40,7 +40,12 @@ export function BerufBild({ beruf, className }: { beruf: BerufDef; className?: s
       src={beruf.medien.karte}
       alt=""
       aria-hidden
-      loading="lazy"
+      // `eager`, nicht `lazy`: dieses Motiv steht an jeder seiner drei
+      // Stellen (Berufsliste, Vorschlag, „bald“) von Anfang an im Bild, und
+      // die Fläche darum fährt beim Auftritt herauf. Ein Bild, das erst
+      // während dieser Bewegung eintrifft, blitzt mitten hinein — der Screen
+      // sieht dann unruhig aus, obwohl die Animation selbst sauber läuft.
+      loading="eager"
       decoding="async"
       onError={() => setGefallen(true)}
       // Wie in `Foto`: die Pexels-Motive sind neutral abgestimmt und sehen

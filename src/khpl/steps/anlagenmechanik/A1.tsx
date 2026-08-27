@@ -637,8 +637,8 @@ function Geloest() {
       </p>
 
       <motion.p
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, transform: 'translateY(10px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0px)' }}
         transition={{ duration: 0.7, delay: 0.5 }}
         data-testid="a1-satz"
         className="kh-titel-klein text-kh-orange"
