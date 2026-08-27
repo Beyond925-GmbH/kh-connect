@@ -94,11 +94,6 @@ export function Ansage({
             transition={{ duration: 0.42, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
             className="kh-panel flex w-full max-w-[34rem] flex-col gap-4 p-5 sm:p-6"
           >
-            <span className="kh-etikett flex items-center gap-2">
-              <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
-              Das passiert jetzt
-            </span>
-
             <GestenDemo geste={geste} />
 
             <p className="text-[clamp(1.25rem,1.05rem+0.8vw,1.6rem)] leading-[1.3] font-semibold text-kh-paper text-balance">

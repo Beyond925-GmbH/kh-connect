@@ -38,10 +38,6 @@ export function Auftragsband({ children }: { children: React.ReactNode }) {
       data-testid="auftrag"
       className="flex shrink-0 flex-col gap-1.5"
     >
-      <span className="kh-etikett flex items-center gap-2">
-        <span aria-hidden className="h-[3px] w-5 rounded-full bg-kh-orange" />
-        Das machst du jetzt
-      </span>
       {/*
         Größer als der Fachtext je war, und in `font-semibold`.
 

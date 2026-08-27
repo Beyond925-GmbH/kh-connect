@@ -78,7 +78,7 @@ const STEPS = [
   },
   {
     id: 'M2',
-    titel: 'Was kostet dieses Dach?',
+    titel: 'Preis schätzen',
     kurz: 'Angebots-Kalkulation, Vertrag',
     art: 'haupt',
     weiter: 'M3',
@@ -87,7 +87,7 @@ const STEPS = [
   },
   {
     id: 'M3',
-    titel: 'Aus dem Angebot wird ein Auftrag',
+    titel: 'Jetzt wird gezeichnet',
     kurz: 'Auftrag & Planung',
     art: 'haupt',
     weiter: 'M4',
@@ -96,7 +96,7 @@ const STEPS = [
   },
   {
     id: 'B3.1',
-    titel: 'Bestellt wird nach Plan',
+    titel: 'Holz bestellen',
     kurz: 'Material bestellen',
     art: 'abstecher',
     weiter: 'M4',
@@ -114,7 +114,7 @@ const STEPS = [
   },
   {
     id: 'M4',
-    titel: 'Ein Balken, ein Maß',
+    titel: 'Balken zuschneiden',
     kurz: 'Material vorbereiten',
     art: 'haupt',
     weiter: 'M5',
@@ -132,7 +132,7 @@ const STEPS = [
   },
   {
     id: 'M5',
-    titel: 'Aufrichten',
+    titel: 'Dach bauen',
     kurz: 'Dach aufrichten I',
     art: 'haupt',
     weiter: 'M6',
@@ -260,7 +260,11 @@ export const DACHDECKER: BerufDef = {
     // Chef, der das Telefon weglegt, und das ist eine Werkstattszene.
     intro: { src: '/medien/media/zimmerer/hero-poster.webp', pos: '50% 40%' },
     M1: { src: '/medien/schritte/m1-ortstermin.webp', pos: '50% 40%' },
-    M2: { src: '/medien/schritte/m2-kalkulation.webp', pos: '50% 55%' },
+    // Auf M2 wird geschätzt, was *dieses Dach* kostet — also muss dort auch
+    // eins liegen. Der Dachstuhl selbst (dasselbe Motiv wie M10) trägt die
+    // Frage besser als der Schreibtisch mit Taschenrechner, der hier vorher
+    // lag. TODO: eigenes Motiv, damit sich M2 und M10 nicht spiegeln.
+    M2: { src: '/medien/schritte/intro-aufrichten.webp', pos: '50% 45%' },
     M3: { src: '/medien/schritte/m3-cad.webp', pos: '60% 50%' },
     'B3.1': { src: '/medien/schritte/b31-lager.webp', pos: '50% 45%' },
     M4: { src: '/medien/schritte/m4-zuschnitt.webp', pos: '55% 45%' },

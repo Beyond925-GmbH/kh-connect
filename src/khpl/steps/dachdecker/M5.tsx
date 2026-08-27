@@ -116,8 +116,7 @@ export function M5() {
             <div className="flex flex-col items-start gap-2">
               <p className="kh-titel-klein text-kh-signal">Der Unterbau steht.</p>
               <p className="text-[1.0625rem] text-kh-mute">
-                Was jetzt fehlt, sind die Sparren. Die legst du gleich selbst — ohne
-                Ansage.
+                Was jetzt fehlt, sind die Sparren — die legst du gleich selbst.
               </p>
               <DrehHinweis />
             </div>

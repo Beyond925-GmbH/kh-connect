@@ -188,7 +188,6 @@ export function B41() {
         text: 'Du belädst den Anhänger für morgen früh — allein aus dem Kopf.',
         haken: 'Was du vergisst, fehlt um sieben auf der Baustelle.',
       }}
-      titelZusatz="Abstecher"
       buehneInteraktiv
       interaktionOffen={!fertig}
       buehne={

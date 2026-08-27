@@ -36,7 +36,6 @@ export function B51() {
       id="B5.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       // Zwei, die zusammen an einem Sparrenwerk arbeiten — inhaltlich genau
       // dieser Step. ⚠️ Auch dieses Motiv zeigt Arbeit **ohne Helm** und steht
       // damit weiter auf der Austauschliste (flow 13). Für M5 und M7 ist es

@@ -53,14 +53,15 @@ import { kannVerlaufZurueck, verlaufZurueck } from '@/khpl/store/verlauf'
  *     Bühne, oder gar nicht. `auftrag` ist deshalb eine **erforderliche**
  *     Angabe: `null` ist eine Entscheidung („dieser Screen wird gelesen“),
  *     Weglassen ist keine mehr.
- *  2. **Der Fachtext ist nicht mehr der Standardinhalt des Panels**, sondern
- *     liegt hinter einer geschlossenen Klappzeile (`WarumBereich`). Damit ist
- *     das Panel im Ruhezustand rund drei Zeilen hoch statt 62–84 % des
- *     Screens, und die Bühne bekommt den Rest — ohne dass jemand einen Griff
- *     finden muss.
- *  3. **Der Einwurf zieht in dieselbe Klappzeile.** Er meldet sich nicht mehr
- *     auf einer Uhr in einer eigenen Bildschirmecke, während gearbeitet wird,
- *     sondern klappt einmal auf, wenn die Übung gelöst ist.
+ *  2. **Der Fachtext ist nicht mehr der Standardinhalt des Panels.** Auf
+ *     Übungs-Steps trägt der Auftrag den Screen; auf Lese-Steps steht der
+ *     Fachtext offen da (`WarumBereich`). So ist das Panel im Ruhezustand rund
+ *     drei Zeilen hoch statt 62–84 % des Screens, und die Bühne bekommt den
+ *     Rest — ohne dass jemand einen Griff finden muss.
+ *  3. **Der Einwurf steht als eigene Klappzeile unter dem Fachtext.** Er meldet
+ *     sich nicht mehr auf einer Uhr in einer eigenen Bildschirmecke, während
+ *     gearbeitet wird — jede Aha-Karte ist eine eigenständige, gleich
+ *     aussehende Zeile, die auf Tipp aufgeht (`Warum.tsx`).
  *
  * **Was ersatzlos entfallen ist:** der Klappgriff samt `buehnePlatz`,
  * `einklappbar` und den Höhendeckeln 62 % / 84 %, sowie `EinwurfBuehne` mit
@@ -331,11 +332,7 @@ export function StepShell({
           womit. Der Auftrag steht **außerhalb** der Scrollfläche — er ist das
           Einzige, das auf keinem Screen unter der Kante liegen darf.
         */}
-        {leseStep && (
-          <WarumBereich warum={warum} offenAnfangs>
-            {aha}
-          </WarumBereich>
-        )}
+        {leseStep && <WarumBereich warum={warum}>{aha}</WarumBereich>}
 
         {auftrag !== null && <Auftragsband>{auftrag}</Auftragsband>}
 

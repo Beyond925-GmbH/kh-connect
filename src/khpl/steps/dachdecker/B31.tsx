@@ -55,13 +55,12 @@ export function B31() {
       id="B3.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       buehne={<StepFoto id="B3.1" />}
       warum={
         <p>
-          Aus der Zeichnung wird eine Einkaufsliste. Du bestellst, planst die
-          Liefertermine und prüfst jeden Balken, wenn er ankommt: Holz wächst, keiner ist
-          wie der andere.
+          Aus dem Plan wird eine Bestellliste. Holz kauft der Betrieb meist einmal die
+          Woche — du bestellst, planst die Liefertermine und prüfst jeden Balken, wenn er
+          ankommt.
         </p>
       }
       aha={

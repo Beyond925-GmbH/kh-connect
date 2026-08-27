@@ -89,7 +89,7 @@ export function M2() {
   return (
     <StepShell
       id="M2"
-      auftrag={aufgeloest ? null : 'Schätz, was dieses Dach kostet.'}
+      auftrag={aufgeloest ? null : 'Was würdest du schätzen — was kostet dieses Dach?'}
       /*
         Einer der vier Rate-Regler. Der Haken kommt aus `gesten.ts` und ist auf
         allen vier Tagen wörtlich derselbe: ohne ihn ist das eine verdeckte
@@ -105,10 +105,10 @@ export function M2() {
       // konzentriert, die Aufloesung braucht die Breite fuer den Zweispalter
       // (Zahl und Regler links, Kostenaufstellung rechts).
       karteBreit={aufgeloest}
-      // Statt der Skizze jetzt der Schreibtisch, an dem so ein Angebot
-      // entsteht: Grundriss, Maßstab, Taschenrechner. Die drei Zahlen, die
-      // die Skizze getragen hat — 45 Grad, 120 m², Satteldach —, stehen ohnehin
-      // wörtlich im Fachtext daneben; die Zeichnung hat sie nur wiederholt.
+      // Wer schätzen soll, was dieses Dach kostet, muss das Dach sehen: auf
+      // der Bühne liegt der Dachstuhl selbst, nicht der Schreibtisch mit dem
+      // Taschenrechner. Die drei Kennzahlen — 45 Grad, 120 m², Satteldach —
+      // stehen wörtlich im Fachtext daneben.
       buehne={<StepFoto id="M2" />}
       warum={
         <p>

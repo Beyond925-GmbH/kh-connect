@@ -53,7 +53,6 @@ export function B32() {
       auftrag={genug ? null : 'Tipp die Teile an, die du im Plan wiedererkennst.'}
       ansage={null}
       buehneInteraktiv
-      titelZusatz="Abstecher"
       // Das Modell will jede Geste selbst: Drehen darf nie den Step wechseln
       // (flow 6.1 — Drag-Gesten haben Vorrang vor Swipe-Navigation).
       interaktionOffen={!genug}
