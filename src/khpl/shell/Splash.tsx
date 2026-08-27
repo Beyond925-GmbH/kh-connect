@@ -201,12 +201,12 @@ export function Splash() {
 
         <div className="flex flex-col items-start gap-6">
           <motion.h1
-            initial={{ opacity: 0, y: 22 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, transform: 'translateY(22px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
             className="kh-plakat"
           >
-            Vier Berufe.
+            Vier Berufe
             <br />
             {/* Die zweite Zeile in Markenorange: der Titel bekommt damit einen
                 Akzent, ohne dass irgendwo ein zweites Element nötig wäre.
@@ -214,12 +214,14 @@ export function Splash() {
                 „Ein Tag“ und nicht „vier Tage“: versprochen wird, was ein
                 Besucher am Stand tatsächlich tut — einer davon, ganz. Der
                 Rest steht daneben und wartet. */}
-            <span className="text-kh-orange">Ein Tag. Deiner.</span>
+            <span className="text-kh-orange">auf ganz neue Weise</span>
+            <br />
+            entdecken
           </motion.h1>
 
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, transform: 'translateY(14px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
             data-testid="tippen-zum-starten"
             className="flex items-center gap-3.5"

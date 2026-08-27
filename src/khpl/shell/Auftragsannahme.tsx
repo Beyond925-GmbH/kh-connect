@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowRight, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, ChevronRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
@@ -7,6 +7,7 @@ import {
   nimmAuftragAn,
   starteKarriereSkip,
   useAktiverBeruf,
+  zeigeBerufe,
 } from '@/khpl/store/fortschritt'
 
 /**
@@ -108,7 +109,19 @@ export function Auftragsannahme() {
           dunklen Video heißt Grau gedämpftes Weiß auf einer flachen Pille —
           er darf hier auf keinen Fall mit „Auftrag annehmen“ konkurrieren, muss
           aber trotzdem als antippbar zu erkennen sein. */}
-      <div className="relative flex justify-end p-3 landscape:p-4">
+      <div className="relative flex justify-between gap-2 p-3 landscape:p-4">
+        {/* Der Rückweg zur Liste, im selben leisen Ton wie der Karriere-Link:
+            wer hier landet, hat den Beruf noch nicht angefangen — die Tür
+            zurück zu den anderen dreien darf kein Umweg über den Splash sein. */}
+        <button
+          type="button"
+          data-testid="zurueck-zur-liste"
+          onClick={zeigeBerufe}
+          className="flex h-[52px] items-center gap-1.5 rounded-kh-pill bg-black/35 px-4 text-[1rem] font-medium text-kh-paper/60 backdrop-blur-md transition-transform active:scale-95"
+        >
+          <ArrowLeft className="size-4" strokeWidth={2} />
+          Alle Berufe
+        </button>
         <button
           type="button"
           data-testid="karriere-skip"
@@ -124,8 +137,8 @@ export function Auftragsannahme() {
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 22 }}
-        animate={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, transform: 'translateY(22px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0px)' }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         className="relative flex min-h-0 flex-1 flex-col justify-end gap-6 p-6 landscape:p-10"
       >
