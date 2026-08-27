@@ -1,26 +1,31 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
-import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { FRAGEN } from '@/khpl/match/fragen'
 import { merkeFrage, zeigeVorschlag } from '@/khpl/store/fortschritt'
+import { Bildwahl } from './fragen/Bildwahl'
+import { Hoehenwahl } from './fragen/Hoehenwahl'
+import { Radio } from './fragen/Radio'
 
 /**
- * S2 — die vier Fragen. Eine pro Screen, Antwort per Tap, dann weiter.
+ * S2 — die vier Stationen. Eine pro Screen; dieser Rahmen trägt nur noch
+ * Kerben und „Überspringen“ und reicht den Rest an die Bauform der Station
+ * weiter (`fragen.ts`: `bilder`, `hoehe`, `radio`).
  *
- * **Kein Weiter-Knopf unter den Antworten.** Ein Tap auf eine Antwort ist die
- * Entscheidung; ein zweiter Tap, um sie zu bestätigen, verdoppelt die Kosten
- * des Trichters und trägt nichts. Stattdessen bleibt die gewählte Antwort
- * einen Moment stehen — lange genug, dass der Tap sichtbar angekommen ist,
- * kurz genug, dass niemand wartet.
+ * **Zwei Quittungsarten, ein Grundsatz.** Bei der Bildfrage ist der Tap die
+ * Entscheidung — kein zweiter Tap zum Bestätigen, die gewählte Kachel bleibt
+ * einen Moment stehen (wie vorher bei den Textantworten). Bei Griff-Stationen
+ * (Höhe, Radio) ist es umgekehrt: dort ist das Anfassen das Spiel und der
+ * Knopf die Entscheidung — ein Auto-Weiter beim Loslassen würde das Drehen
+ * über das Band bestrafen, das die Station gerade einladen will.
  *
- * **Überspringen führt vorwärts, nicht heraus.** Wer eine Frage überspringt,
+ * **Überspringen führt vorwärts, nicht heraus.** Wer eine Station überspringt,
  * kommt zur nächsten; wer alle überspringt, landet auf der Berufsliste statt
  * auf einem Vorschlag, den nichts trägt (siehe `Vorschlag`).
  */
 
-/** Wie lange die gewählte Antwort stehen bleibt, bevor die nächste Frage kommt. */
-const QUITTUNG_MS = 260
+/** Wie lange die gewählte Bildkachel stehen bleibt, bevor es weitergeht. */
+const QUITTUNG_MS = 420
 
 export function Fragen() {
   const [index, setIndex] = useState(0)
@@ -35,11 +40,20 @@ export function Fragen() {
     else setIndex((i) => i + 1)
   }
 
+  /** Bildfrage: Tap = Antwort, kurze Quittung, dann weiter. */
   const antworte = (antwortId: string) => {
     if (gewaehlt) return
     setGewaehlt(antwortId)
     merkeFrage(frage.id, antwortId)
     window.setTimeout(weiter, QUITTUNG_MS)
+  }
+
+  /** Griff-Station: der Weiter-Knopf der Station liefert die Antwort. */
+  const bestaetige = (antwortId: string) => {
+    if (gewaehlt) return
+    setGewaehlt(antwortId)
+    merkeFrage(frage.id, antwortId)
+    weiter()
   }
 
   return (
@@ -52,11 +66,11 @@ export function Fragen() {
         className="absolute inset-0 bg-[radial-gradient(90%_70%_at_85%_0%,rgba(255,122,26,0.18),transparent_62%)]"
       />
 
-      <div className="relative flex min-h-0 flex-1 flex-col gap-5 p-5 landscape:p-8">
+      <div className="relative flex min-h-0 flex-1 flex-col gap-3 p-4 landscape:gap-4 landscape:p-6">
         <header className="flex shrink-0 items-center gap-3">
           {/* Vier Kerben statt „Frage 2 von 4“. Der Zählstand hat auf diesem
               Screen keine Aufgabe — niemand muss wissen, wie weit er ist,
-              wenn ohnehin nach vier Taps Schluss ist. Er muss nur sehen,
+              wenn ohnehin nach vier Stationen Schluss ist. Er muss nur sehen,
               dass es kurz bleibt. */}
           <span className="flex items-center gap-1.5" aria-hidden>
             {FRAGEN.map((f, i) => (
@@ -89,45 +103,17 @@ export function Fragen() {
         <AnimatePresence mode="wait">
           <motion.div
             key={frage.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -14 }}
+            initial={{ opacity: 0, transform: 'translateY(20px)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px)' }}
+            exit={{ opacity: 0, transform: 'translateY(-14px)' }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="flex min-h-0 flex-1 flex-col justify-center gap-6 landscape:mx-auto landscape:w-full landscape:max-w-[52rem]"
+            className="min-h-0 flex-1"
           >
-            <h1 className="kh-plakat shrink-0">{frage.frage}</h1>
-
-            {/*
-              Die Antworten sind schmaler als die Frage. Über die volle
-              Plakatbreite gesetzt, stand „Mal so, mal so.“ links in einem
-              830 px breiten Kasten und sah aus wie ein Layoutfehler — der
-              Punkt daneben liegt bei einer kurzen Antwort einen halben
-              Bildschirm entfernt. Der Marker rechts schließt die Zeile ab und
-              sagt zugleich, dass sie antippbar ist.
-            */}
-            <div className="flex shrink-0 flex-col gap-2.5 landscape:max-w-[40rem]">
-              {frage.antworten.map((a) => {
-                const ist = gewaehlt === a.id
-                return (
-                  <Wahlflaeche
-                    key={a.id}
-                    data-testid={`antwort-${a.id}`}
-                    onClick={() => antworte(a.id)}
-                    gewaehlt={ist}
-                    gedaempft={Boolean(gewaehlt) && !ist}
-                    className="min-h-[68px] px-5 py-3 text-[1.125rem] font-semibold"
-                  >
-                    <span className="min-w-0 flex-1">{a.text}</span>
-                    <span
-                      aria-hidden
-                      className={`size-2.5 shrink-0 rounded-full transition-colors ${
-                        ist ? 'bg-[#0E0D0B]' : 'bg-kh-orange'
-                      }`}
-                    />
-                  </Wahlflaeche>
-                )
-              })}
-            </div>
+            {frage.art === 'bilder' && (
+              <Bildwahl frage={frage} gewaehlt={gewaehlt} onWahl={antworte} />
+            )}
+            {frage.art === 'hoehe' && <Hoehenwahl frage={frage} onFertig={bestaetige} />}
+            {frage.art === 'radio' && <Radio frage={frage} onFertig={bestaetige} />}
           </motion.div>
         </AnimatePresence>
       </div>

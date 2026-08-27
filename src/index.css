@@ -78,6 +78,9 @@
   --animate-pop: pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   /* Der Ring, der unter einem wartenden Ziel nach aussen laeuft. */
   --animate-puls: puls-ring 2s ease-out infinite;
+  /* Ein Pegelbalken des Baustellenradios (S2). Dauer und Versatz setzt die
+     Stelle je Balken, sonst pumpen fuenf Balken im Gleichtakt. */
+  --animate-eq: eq-balken 0.8s ease-in-out infinite;
 
   @keyframes fade-up {
     from {
@@ -98,6 +101,16 @@
     100% {
       opacity: 1;
       transform: scale(1);
+    }
+  }
+
+  @keyframes eq-balken {
+    0%,
+    100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
     }
   }
 

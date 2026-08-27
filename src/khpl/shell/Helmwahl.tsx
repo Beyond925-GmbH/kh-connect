@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
 import {
   ArrowRight,
@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Helm } from '@/khpl/komponenten/Helm'
 import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
+import { FRAGEN_BILDER } from '@/khpl/match/fragen'
 import { HELM_FARBEN, WERKZEUGE, type WerkzeugIcon } from '@/khpl/match/helm'
 import { merkeHelm, useSitzung, zeigeFragen } from '@/khpl/store/fortschritt'
 
@@ -49,8 +50,21 @@ export function Helmwahl() {
   const [farbe, setFarbe] = useState(sitzung.helm?.farbe ?? HELM_FARBEN[0].id)
   const [werkzeug, setWerkzeug] = useState(sitzung.helm?.werkzeug ?? '')
 
+  // Während hier gewählt wird, laufen die Motive der Stationen in den Cache —
+  // die erste Bildfrage darf nicht mit drei nachladenden Kacheln aufmachen.
+  useEffect(() => {
+    for (const src of FRAGEN_BILDER) {
+      const bild = new Image()
+      bild.src = src
+    }
+  }, [])
+
+  // Auch ohne Werkzeug speichern: die Farbe ist reiner Ausdruck, aber sie
+  // reist mit — die Höhenstation zieht **diesen** Helm am Maßband hoch, und
+  // ein weißer Ersatzhelm dort würde die Wahl von eben dementieren.
+  // `werkzeug: ''` ist im Matching wirkungslos (`werkzeug('')` → null).
   const weiter = () => {
-    if (werkzeug) merkeHelm({ farbe, werkzeug })
+    merkeHelm({ farbe, werkzeug })
     zeigeFragen()
   }
 
@@ -59,8 +73,22 @@ export function Helmwahl() {
       data-testid="helmwahl"
       className="kh-screen flex flex-col overflow-hidden bg-kh-ink"
     >
-      {/* Ein warmer Schein aus der unteren linken Ecke, wie auf dem Splash —
-          er bindet den einzigen Screen ohne Foto an die übrigen. */}
+      {/* Werkzeug auf Eiche, tief abgedunkelt — dasselbe Motiv wie unter dem
+          Splash-Loop. Der Screen war der einzige ohne Foto; als reine Textur
+          hinter dem Helm bindet das Bild ihn an die übrigen, ohne der Wahl
+          Kontrast zu stehlen. */}
+      <img
+        src="/medien/media/shared/start-poster.webp"
+        alt=""
+        aria-hidden
+        draggable={false}
+        className="absolute inset-0 size-full object-cover opacity-25"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-gradient-to-t from-[#0E0D0B] via-[#0E0D0B]/80 to-[#0E0D0B]/55"
+      />
+      {/* Ein warmer Schein aus der unteren linken Ecke, wie auf dem Splash. */}
       <div
         aria-hidden
         className="absolute inset-0 bg-[radial-gradient(90%_70%_at_15%_100%,rgba(255,122,26,0.22),transparent_60%)]"
@@ -137,7 +165,7 @@ export function Helmwahl() {
                   <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
                   Bevor du anfängst
                 </span>
-                <h1 className="kh-titel">Dein Helm</h1>
+                <h1 className="kh-titel">Dein Equipment</h1>
               </header>
 
               <section>
@@ -146,7 +174,7 @@ export function Helmwahl() {
                 Screen und standen in `kh-mute` — dem leisesten Ton des
                 Systems. Als Etikett tragen sie so weit wie der Rest.
               */}
-                <h2 className="kh-etikett">Welche Farbe?</h2>
+                <h2 className="kh-etikett">Helmfarbe</h2>
                 {/* 4 × 88 px plus drei 16-px-Lücken sind 400 px — auf einem
                     390-px-Handy bricht das auf zwei Zeilen um und schiebt das
                     Werkzeugraster unter die Kante. 4 × 72 plus 3 × 12 sind
@@ -177,7 +205,7 @@ export function Helmwahl() {
               </section>
 
               <section>
-                <h2 className="kh-etikett">Wonach greifst du zuerst?</h2>
+                <h2 className="kh-etikett">Startwerkzeug</h2>
                 {/* Hochkant tragen die Kacheln 9 rem statt 104 px: dieselbe
                     Zahl von Kacheln, mehr Fläche je Finger — und die Höhe, die
                     dem Screen unten sonst fehlt. */}
