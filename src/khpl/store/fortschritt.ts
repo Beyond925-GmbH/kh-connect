@@ -33,16 +33,36 @@ const SPEICHER_SCHLUESSEL = 'khpl-progress'
 export const VERFALL_MS = 30 * 60 * 1000
 
 /**
- * Welcher Screen gerade läuft. Nie persistiert.
+ * Welcher Screen gerade läuft — **und der wird mitgespeichert**.
  *
  * Die ersten vier sind der Trichter (S0–S4), danach beginnt die Anwendung, die
  * es vorher schon gab. `bald` ist der Ausgang für einen Beruf ohne Graph.
  *
  * `vorschlag` ist entfallen (`khpl-vereinfachung.md` §5): der Vorschlag ist
  * jetzt die hervorgehobene erste Karte der Berufsliste, kein eigener Screen.
+ *
+ * **Warum das jetzt in der Sitzung liegt.** Bis hierher war der Screen bewusst
+ * flüchtig — mit der Folge, dass ein versehentlicher Reload jeden Besucher auf
+ * den Splash warf, obwohl sein Fortschritt unversehrt im localStorage lag. Er
+ * kam dort nur nicht mehr hin, ohne den ganzen Tag noch einmal zu tippen. Ein
+ * Reload ist kein Sitzungsende, und ein iPad, das jemand aus Versehen mit zwei
+ * Fingern wischt, auch nicht.
+ *
+ * Die Liste steht als Wert da, nicht nur als Typ: gelesen wird sie aus fremdem
+ * JSON (localStorage, `history.state`), und dafür braucht es eine Prüfung zur
+ * Laufzeit.
  */
-export type Bildschirm =
-  'splash' | 'helm' | 'fragen' | 'berufe' | 'intro' | 'step' | 'bald'
+const BILDSCHIRME = [
+  'splash',
+  'helm',
+  'fragen',
+  'berufe',
+  'intro',
+  'step',
+  'bald',
+] as const
+
+export type Bildschirm = (typeof BILDSCHIRME)[number]
 
 /**
  * Typisierte Sicht auf `answers`. Bleibt zur Laufzeit ein reines JSON-Objekt.
@@ -256,6 +276,18 @@ export interface Fortschritt {
 
 export interface Sitzung {
   version: 2
+  /**
+   * Welcher Screen zuletzt lief. Damit überlebt die **Stelle** einen Reload,
+   * nicht nur der Fortschritt (siehe `Bildschirm`).
+   */
+  bildschirm: Bildschirm
+  /**
+   * Welcher angekündigte Beruf auf dem `bald`-Screen liegt.
+   *
+   * Gehört mit gespeichert, weil `bald` ein Screen ist, den ein Reload treffen
+   * kann — ohne den Beruf dazu wäre er leer.
+   */
+  angesehenerBeruf: BerufId | null
   /** Der Beruf, in dem der Besucher gerade steckt. `null` = noch im Trichter. */
   aktiverBeruf: BerufId | null
   /** Angelegt wird ein Eintrag erst, wenn ein Beruf betreten wird. */
@@ -289,6 +321,8 @@ function leererFortschritt(graph: StepGraph): Fortschritt {
 function leereSitzung(): Sitzung {
   return {
     version: 2,
+    bildschirm: 'splash',
+    angesehenerBeruf: null,
     aktiverBeruf: null,
     berufe: {},
     helm: null,
@@ -577,14 +611,18 @@ function lade(): Sitzung | null {
       if (f) berufe[id] = f
     }
 
-    const aktiv = istBerufId(s.aktiverBeruf) ? s.aktiverBeruf : null
+    const roher = istBerufId(s.aktiverBeruf) ? s.aktiverBeruf : null
+    // Ein aktiver Beruf ohne Stand ist kein Wiedereinstieg, sondern ein
+    // Zeiger ins Leere — er käme als „Weitermachen bei …“ auf den Splash und
+    // landete auf dem ersten Step eines Tages, den nie jemand angefangen hat.
+    const aktiv = roher && berufe[roher] ? roher : null
+    const angesehen = istBerufId(s.angesehenerBeruf) ? s.angesehenerBeruf : null
 
     return {
       version: 2,
-      // Ein aktiver Beruf ohne Stand ist kein Wiedereinstieg, sondern ein
-      // Zeiger ins Leere — er käme als „Weitermachen bei …“ auf den Splash und
-      // landete auf dem ersten Step eines Tages, den nie jemand angefangen hat.
-      aktiverBeruf: aktiv && berufe[aktiv] ? aktiv : null,
+      bildschirm: stimmigerBildschirm(pruefeBildschirm(s.bildschirm), aktiv, angesehen),
+      angesehenerBeruf: angesehen,
+      aktiverBeruf: aktiv,
       berufe,
       helm: pruefeHelm(s.helm),
       gefragt: pruefeGefragt(s.gefragt),
@@ -594,6 +632,29 @@ function lade(): Sitzung | null {
   } catch {
     return null
   }
+}
+
+function pruefeBildschirm(roh: unknown): Bildschirm {
+  return BILDSCHIRME.includes(roh as Bildschirm) ? (roh as Bildschirm) : 'splash'
+}
+
+/**
+ * Ein Screen, der ins Leere zeigt, fällt auf den Splash zurück.
+ *
+ * Der Fall ist real: zwischen dem Speichern und dem Wiederherstellen kann ein
+ * Deploy liegen, der einen Beruf umbenannt oder seinen Graphen entfernt hat.
+ * Dann steht in der Sitzung „step“, aber es gibt keinen Beruf mehr, dessen
+ * Step das wäre — und `KhplApp` rendert einen leeren Screen. Der Splash ist
+ * hier immer die richtige Antwort: von dort kommt jeder weiter.
+ */
+function stimmigerBildschirm(
+  bildschirm: Bildschirm,
+  aktiv: BerufId | null,
+  angesehen: BerufId | null,
+): Bildschirm {
+  if ((bildschirm === 'step' || bildschirm === 'intro') && !aktiv) return 'splash'
+  if (bildschirm === 'bald' && !angesehen) return 'splash'
+  return bildschirm
 }
 
 function pruefeHelm(roh: unknown): HelmWahl | null {
@@ -620,9 +681,16 @@ function pruefeGefragt(roh: unknown): Record<string, string> {
 }
 
 let sitzung: Sitzung = lade() ?? leereSitzung()
+
+// Der Verfall wird **beim Laden** geprüft und nicht erst auf dem Splash: seit
+// der Screen mitgespeichert wird, landet ein Reload wieder mitten im Tag, und
+// der Splash — der einzige Ort, an dem `pruefeVerfall` sonst läuft — käme nie
+// mehr vorbei. Ein iPad, das über Nacht steht, böte morgens den Stand von
+// gestern an, samt fremder Antworten im Rückblick.
+if (Date.now() - sitzung.updatedAt > VERFALL_MS) sitzung = leereSitzung()
+
 /** Ob ein Stand zum Weitermachen bereitliegt. */
 let hatWiedereinstieg = wiedereinstiegMoeglich(sitzung)
-let bildschirm: Bildschirm = 'splash'
 
 function wiedereinstiegMoeglich(s: Sitzung): boolean {
   const aktiv = s.aktiverBeruf
@@ -636,31 +704,40 @@ function melde() {
   hoerer.forEach((h) => h())
 }
 
-function vergiss() {
-  sitzung = leereSitzung()
+/**
+ * Wirft alles weg und setzt den Screen neu.
+ *
+ * Speichert **sofort** statt nur zu löschen: der leere Stand trägt jetzt den
+ * Screen mit sich, und der soll einen Reload direkt danach überleben — wer
+ * gerade „Neu starten“ getippt hat und das iPad neu lädt, will nicht zurück
+ * auf den Splash, sondern bei der Helmwahl stehen.
+ */
+function vergiss(neuerBildschirm: Bildschirm) {
+  sitzung = { ...leereSitzung(), bildschirm: neuerBildschirm }
   hatWiedereinstieg = false
-  try {
-    localStorage.removeItem(SPEICHER_SCHLUESSEL)
-  } catch {
-    // s. u.
-  }
+  sichere()
+  melde()
 }
 
 /**
  * Verwirft einen abgelaufenen Stand. Gibt zurück, ob etwas verworfen wurde.
  *
- * Muss **zur Lesezeit** laufen, nicht beim Laden des Moduls: das Kiosk-iPad
- * lädt die Seite genau einmal am Messemorgen und läuft dann stundenlang. Ein
+ * Läuft **zur Lesezeit**, nicht nur beim Laden des Moduls: das Kiosk-iPad lädt
+ * die Seite genau einmal am Messemorgen und läuft dann stundenlang. Ein
  * Verfallstest, der nur beim Modulstart stattfindet, ist in genau dem einzigen
  * Betriebsmodus tot, für den er geschrieben wurde — der Splash böte um halb
  * zwölf noch an, die Sitzung von neun Uhr fortzusetzen, samt fremder Antworten
  * im Rückblick von M8.
+ *
+ * Den Test beim Modulstart gibt es trotzdem (oben, direkt nach `lade`), und
+ * zwar seit der Screen mitgespeichert wird: ein Reload landet jetzt wieder
+ * mitten im Tag und käme am Splash — dem einzigen Ort, an dem diese Funktion
+ * sonst läuft — nie mehr vorbei.
  */
 export function pruefeVerfall(): boolean {
   if (!hatWiedereinstieg) return false
   if (Date.now() - sitzung.updatedAt <= VERFALL_MS) return false
-  vergiss()
-  melde()
+  vergiss('splash')
   return true
 }
 
@@ -722,8 +799,7 @@ function aendereFortschritt(f: (alt: Fortschritt, graph: StepGraph) => Fortschri
 }
 
 function setzeBildschirm(neu: Bildschirm) {
-  bildschirm = neu
-  melde()
+  aendere((s) => (s.bildschirm === neu ? s : { ...s, bildschirm: neu }))
 }
 
 /** Hochwassermarke fortschreiben — nur auf der Hauptlinie, nie im Skip. */
@@ -751,9 +827,7 @@ function skipStand(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId | n
 
 /** S0 → S1. Verwirft einen alten Stand vollständig. */
 export function starteNeu() {
-  vergiss()
-  sichere()
-  setzeBildschirm('helm')
+  vergiss('helm')
 }
 
 /** S0 → dorthin, wo der letzte Besucher aufgehört hat. */
@@ -826,17 +900,8 @@ export function betreteBeruf(id: BerufId) {
   setzeBildschirm(schonDa ? 'step' : 'intro')
 }
 
-/**
- * Welcher angekündigte Beruf gerade auf dem „bald“-Screen liegt.
- *
- * Bewusst **kein** Teil der gespeicherten Sitzung: das ist die Adresse eines
- * Screens, kein Stand. Nach einem Reload wieder dort zu landen wäre falsch.
- */
-let angesehenerBeruf: BerufId | null = null
-
 function merkeAngesehen(id: BerufId) {
-  angesehenerBeruf = id
-  melde()
+  aendere((s) => (s.angesehenerBeruf === id ? s : { ...s, angesehenerBeruf: id }))
 }
 
 /** S5 → S6. „Auftrag annehmen“ ist der erste Besuch des ersten Steps. */
@@ -871,8 +936,109 @@ export function zumSplash() {
 
 /** Harter Reset für das Standpersonal. */
 export function setzeZurueck() {
-  vergiss()
-  setzeBildschirm('splash')
+  vergiss('splash')
+}
+
+// ---------------------------------------------------------------------------
+// Browser-Verlauf
+//
+// Die Mechanik selbst steht in `store/verlauf.ts`; hier liegt nur, was sie vom
+// Stand braucht: eine Momentaufnahme der **Stelle** und der Weg zurück.
+// ---------------------------------------------------------------------------
+
+/**
+ * Wo der Besucher steht — genug, um exakt hierher zurückzukommen.
+ *
+ * Was **nicht** darin steht, ist so wichtig wie das, was darin steht:
+ *
+ *  - `answers` und `branchesTaken` bleiben draußen. Sie sind Gelerntes, keine
+ *    Stelle. Wer zurückgeht, soll seine Schätzung aus M2 nicht vergessen.
+ *  - `hoechsterStep` bleibt draußen. Die Hochwassermarke fällt nie — sonst
+ *    entwerten sich beim Zurückgehen alle Häkchen im Sheet, und der Weg nach
+ *    vorn wäre zu.
+ *
+ * `tiefe` zählt nur **unsere eigenen** Einträge, damit der ←-Knopf der App weiß,
+ * ob hinter ihm überhaupt einer von uns liegt oder schon die Seite davor.
+ */
+export interface Verlaufsmarke {
+  tiefe: number
+  bildschirm: Bildschirm
+  beruf: BerufId | null
+  angesehen: BerufId | null
+  nav: { aktuell: StepId; besucht: StepId[]; abstecherZurueck: StepId | null } | null
+}
+
+/** Die aktuelle Stelle als Marke — das, was in einen Verlaufseintrag geht. */
+export function verlaufsmarke(tiefe: number): Verlaufsmarke {
+  const id = sitzung.aktiverBeruf
+  const f = id ? sitzung.berufe[id] : undefined
+  return {
+    tiefe,
+    bildschirm: sitzung.bildschirm,
+    beruf: id,
+    angesehen: sitzung.angesehenerBeruf,
+    nav: f
+      ? {
+          aktuell: f.currentStepId,
+          besucht: [...f.visited],
+          abstecherZurueck: f.detourReturnTo,
+        }
+      : null,
+  }
+}
+
+/**
+ * Setzt den Stand auf eine Marke zurück — die Zurück- **und** die
+ * Vorwärts-Taste des Browsers laufen beide hier durch.
+ *
+ * Deshalb wird `visited` gesetzt und nicht abgeschnitten: die Marke trägt die
+ * Historie, wie sie an dieser Stelle war, und das gilt in beide Richtungen.
+ *
+ * Alles wird noch einmal geprüft. Der Verlauf des Browsers überlebt einen
+ * Deploy, ein gelöschter Stand (Personal-Reset) liegt danach hinter uns, und in
+ * beiden Fällen zeigt eine Marke auf etwas, das es nicht mehr gibt.
+ */
+export function stelleVerlaufHer(m: Verlaufsmarke) {
+  aendere((s) => {
+    const id = istBerufId(m.beruf) && s.berufe[m.beruf] ? m.beruf : null
+    const angesehen = istBerufId(m.angesehen) ? m.angesehen : null
+    let berufe = s.berufe
+
+    if (id && m.nav) {
+      const graph = beruf(id).graph
+      const alt = s.berufe[id]
+      if (graph && alt && istStepId(graph, m.nav.aktuell)) {
+        berufe = {
+          ...s.berufe,
+          [id]: {
+            ...alt,
+            currentStepId: m.nav.aktuell,
+            visited: Array.isArray(m.nav.besucht)
+              ? m.nav.besucht.filter((x) => istStepId(graph, x))
+              : alt.visited,
+            detourReturnTo: istStepId(graph, m.nav.abstecherZurueck)
+              ? m.nav.abstecherZurueck
+              : null,
+          },
+        }
+      }
+    }
+
+    // Trägt die Marke keinen Beruf (Splash, Helm, Fragen, Berufsliste), bleibt
+    // der bisherige stehen, statt gelöscht zu werden. Sonst verlöre ein
+    // Besucher, der bis auf den Splash zurückgeht, dort sein „Weitermachen bei
+    // Dachdecker“ — obwohl sein Tag unversehrt daneben liegt. Genauso hält es
+    // `zeigeBerufe`: ein Screen ohne Beruf ist kein Verlassen des Berufs.
+    const aktiv = id ?? s.aktiverBeruf
+
+    return {
+      ...s,
+      bildschirm: stimmigerBildschirm(pruefeBildschirm(m.bildschirm), aktiv, angesehen),
+      angesehenerBeruf: angesehen,
+      aktiverBeruf: aktiv,
+      berufe,
+    }
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -1008,7 +1174,7 @@ export function merkeAntwort<K extends keyof Antworten>(
 // Lesen
 // ---------------------------------------------------------------------------
 
-function abonniere(hoerer_: () => void) {
+export function abonniere(hoerer_: () => void) {
   hoerer.add(hoerer_)
   return () => {
     hoerer.delete(hoerer_)
@@ -1020,7 +1186,7 @@ export function useSitzung(): Sitzung {
 }
 
 export function useBildschirm(): Bildschirm {
-  return useSyncExternalStore(abonniere, () => bildschirm)
+  return useSyncExternalStore(abonniere, () => sitzung.bildschirm)
 }
 
 /** Der Beruf, in dem der Besucher steckt — oder der zuletzt angesehene. */
@@ -1029,7 +1195,7 @@ export function useAktiverBeruf(): BerufId | null {
 }
 
 export function useAngesehenerBeruf(): BerufId | null {
-  return useSyncExternalStore(abonniere, () => angesehenerBeruf)
+  return useSyncExternalStore(abonniere, () => sitzung.angesehenerBeruf)
 }
 
 /**

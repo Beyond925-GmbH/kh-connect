@@ -13,12 +13,22 @@ import { useStaffDialogAnmeldung } from './staffAusgang'
 /**
  * Kiosk-Verhalten nach khpl-flow.md 5 und khpl-ui-shell.md 7 + 8.
  *
- * **Idle.** 60 s ohne Berührung → „Bist du noch da?“, weitere 15 s → zurück auf
- * den Attract-Loop. Die Zahlen stehen so in flow 5 *und* flow 11; ui-shell 7
- * nennt 90/60, bezeichnet sie aber selbst als gesetzte Annahme (ui-shell 9.3).
- * Für einen Stand mit Laufkundschaft zählt, wie schnell der Attract-Loop wieder
- * jemanden anzieht — zweieinhalb Minuten totes Bild sind zweieinhalb Minuten
- * ohne Gespräch.
+ * **Idle.** 2 min ohne Berührung → „Bist du noch da?“, weitere 2 min → zurück
+ * auf den Attract-Loop.
+ *
+ * Die Spec nennt 60 s / 15 s (flow 5 und flow 11; ui-shell 7 nennt 90/60 und
+ * bezeichnet es selbst als gesetzte Annahme, ui-shell 9.3). Beides ist zu kurz,
+ * und zwar aus einem Grund, der erst in der Benutzung sichtbar wurde: Eine
+ * Minute ohne Tap heißt an diesem Stand meistens nicht „weg“, sondern
+ * „redet gerade mit jemandem über das, was auf dem Screen steht“ — genau das
+ * Gespräch, für das der Stand da ist. Wer dabei aus seinem Tag geworfen wird,
+ * merkt es erst, wenn er wieder hinschaut.
+ *
+ * Zwei Minuten Vorlauf und zwei Minuten Haltezeit sind die Antwort darauf. Der
+ * Attract-Loop läuft dadurch später an; das kostet weniger als ein
+ * abgebrochenes Gespräch, und für den Fall, dass ein Schüler einfach fertig
+ * ist, gibt es jetzt den ausdrücklichen Reset — hier im Dialog und unten im
+ * Sheet „Dein Weg“.
  *
  * **Was der Reset tut, kommt dagegen aus ui-shell 7: er löscht nichts.** Er
  * bringt die App nur auf S0; der nächste Besucher wählt dort „Neu starten“, wer
@@ -29,12 +39,13 @@ import { useStaffDialogAnmeldung } from './staffAusgang'
  * Sonderfall `?web=1` gleich mit.
  */
 
-const IDLE_HINWEIS_MS = 60_000
-const IDLE_RESET_MS = 15_000
+const IDLE_HINWEIS_MS = 120_000
+const IDLE_RESET_MS = 120_000
 
 /**
- * Screens, auf denen eine Minute Stillstand normal ist — dort wäre die Frage
- * „Bist du noch da?“ eine Unterbrechung, keine Hilfe.
+ * Screens, auf denen auch zwei Minuten Stillstand normal sind — dort wäre die
+ * Frage „Bist du noch da?“ eine Unterbrechung, keine Hilfe. Der Faktor
+ * multipliziert den Vorlauf, ein `3` sind also sechs Minuten.
  *
  * M6 ist die Mittagspause: der Regiehinweis vom Board lautet „Schau einmal vom
  * iPad hoch“, und die Umsetzung verlangt ausdrücklich kein Drängen (flow 7 M6).
@@ -146,17 +157,43 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
               lügen.
             */}
             <p className="kh-fachtext">
-              Tipp irgendwo hin, dann geht es weiter.
+              Dein Tag läuft weiter, wo du aufgehört hast.
               <br />
               <span className="text-kh-paper/55">
-                Sonst fängt der Stand in{' '}
-                <span className="tabular-nums text-kh-orange">{rest}</span> Sekunden von
-                vorn an.
+                Ohne Antwort fängt der Stand in{' '}
+                <span className="tabular-nums text-kh-orange">
+                  {minutenSekunden(rest)}
+                </span>{' '}
+                von vorn an.
               </span>
             </p>
-            <Button onClick={zuruecksetzen} variant="weiter" size="lg">
-              Ja, weiter
-            </Button>
+            {/*
+              Zwei Ausgänge, benannt statt geraten. „Ja, weiter“ allein ließ den
+              zweiten Fall offen: Wer fertig ist, hat kein Wort dafür und tippt
+              entweder daneben oder wartet zwei Minuten. „Neu starten“ ist
+              dasselbe wie der Reset im Sheet — es löscht.
+            */}
+            <div className="flex flex-col items-stretch gap-2 sm:flex-row">
+              <Button
+                onClick={zuruecksetzen}
+                data-testid="idle-weiter"
+                variant="weiter"
+                size="lg"
+              >
+                Ich bin noch da
+              </Button>
+              <Button
+                onClick={() => {
+                  setHinweis(false)
+                  setzeZurueck()
+                }}
+                data-testid="idle-neu"
+                variant="neben"
+                size="lg"
+              >
+                Neu starten
+              </Button>
+            </div>
           </div>
         </div>
       )}
@@ -164,6 +201,16 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
       <StaffDialog offen={staff} onSchliessen={() => setStaff(false)} />
     </MotionConfig>
   )
+}
+
+/**
+ * `2:00` statt `120 Sekunden`. Bei zwei Minuten Haltezeit liest sich eine
+ * dreistellige Sekundenzahl wie eine Fehlermeldung; eine Uhr liest jeder.
+ */
+function minutenSekunden(sekunden: number): string {
+  const m = Math.floor(sekunden / 60)
+  const s = sekunden % 60
+  return `${m}:${String(s).padStart(2, '0')}`
 }
 
 /** Das Menü hinter dem Staff-Ausgang. Zwei Ausgänge, mehr braucht es nicht. */

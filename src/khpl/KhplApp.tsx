@@ -19,9 +19,15 @@ import {
 /**
  * KHPL Connect — die Hülle um den Flow (khpl-ui-shell.md 3).
  *
- * Es gibt bewusst keinen Router: die App hat keine URLs, keine Tiefenlinks und
- * keine Zurück-Taste des Browsers, die etwas Sinnvolles täte. Der Zustand ist
- * `bildschirm` plus der aktive Beruf mit seinem Schritt, mehr nicht.
+ * Es gibt weiterhin keinen Router: die App hat keine URLs und keine
+ * Tiefenlinks. Der Zustand ist `bildschirm` plus der aktive Beruf mit seinem
+ * Schritt, mehr nicht.
+ *
+ * **Die Zurück-Taste des Browsers tut trotzdem etwas Sinnvolles.** Sie hängt
+ * nicht an einer Adresse, sondern an Verlaufseinträgen, die die Stelle in ihrem
+ * `state` tragen (`store/verlauf.ts`). Damit überleben Reload, Zurück und
+ * Vorwärts — ohne dass jemand eine URL abschreiben und mitten im Tag einsteigen
+ * könnte.
  *
  * Die Reihenfolge unten **ist** der Ablauf:
  *

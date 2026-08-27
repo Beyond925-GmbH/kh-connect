@@ -16,6 +16,7 @@ import {
   beendeKarriereSkip,
   betreteBeruf,
   geheZurueck,
+  setzeZurueck,
   springeZuBesuchtem,
   starteKarriereSkip,
   useAktiverBeruf,
@@ -24,6 +25,7 @@ import {
   useGraph,
   zeigeBerufe,
 } from '@/khpl/store/fortschritt'
+import { kannVerlaufZurueck, verlaufZurueck } from '@/khpl/store/verlauf'
 
 /**
  * S2 — das Arbeitspferd (khpl-ui-shell.md 2 + 5). Rendert jeden Step, Haupt
@@ -245,10 +247,15 @@ export function StepShell({
   const skipSichtbar = !imSkip && !offen && graph.karriereSkipAuf.includes(id)
 
   const zurueck = useCallback(() => {
+    // Der ←-Knopf geht über den **Browser-Verlauf** zurück, nicht selbst durch
+    // die Historie: es gibt nur einen Rückweg, und den kennt der Verlauf. Ginge
+    // die App hier eigenmächtig zurück, bliebe der Verlaufseintrag stehen, und
+    // die Zurück-Taste des Browsers spränge danach eine Stelle zu weit.
+    if (kannVerlaufZurueck()) verlaufZurueck()
     // Im Skip führt jeder Rückweg aus dem Abstecher heraus, nicht durch die
     // Historie: „ein Tap rein, ein Tap raus, exakt an dieselbe Stelle“
     // (ui-shell 6).
-    if (imSkip) beendeKarriereSkip()
+    else if (imSkip) beendeKarriereSkip()
     else if (kannZurueck) geheZurueck()
   }, [imSkip, kannZurueck])
 
@@ -492,6 +499,10 @@ export function StepShell({
           onAlleBerufe={() => {
             setWegOffen(false)
             zeigeBerufe()
+          }}
+          onZuruecksetzen={() => {
+            setWegOffen(false)
+            setzeZurueck()
           }}
         />
       </div>

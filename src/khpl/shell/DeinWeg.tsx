@@ -1,5 +1,6 @@
+import { useEffect, useState } from 'react'
 import { Dialog as BaseDialog } from '@base-ui/react/dialog'
-import { ArrowRight, Check, X } from 'lucide-react'
+import { ArrowRight, Check, RotateCcw, X } from 'lucide-react'
 import { railIndex, step, type StepGraph, type StepId } from '@/khpl/flow/steps'
 import { wegzustand, type Wegzustand } from '@/khpl/flow/uebergaenge'
 import { BERUFE } from '@/khpl/berufe/registry'
@@ -75,6 +76,7 @@ export function DeinWeg({
   onSpringe,
   onBeruf,
   onAlleBerufe,
+  onZuruecksetzen,
 }: {
   offen: boolean
   graph: StepGraph
@@ -85,9 +87,20 @@ export function DeinWeg({
   onSpringe: (ziel: StepId) => void
   onBeruf: (ziel: BerufId) => void
   onAlleBerufe: () => void
+  /** Alles löschen und zurück auf den Splash — für das Standpersonal. */
+  onZuruecksetzen: () => void
 }) {
   const aktiv = BERUFE.find((b) => b.id === aktiverBeruf) ?? null
   const andere = BERUFE.filter((b) => b.id !== aktiverBeruf)
+
+  /**
+   * Der Reset fragt einmal nach. Nicht aus Formalismus: er löscht den ganzen
+   * Besucher, und er sitzt in einem Sheet, in dem sonst nichts weh tut.
+   */
+  const [fragtReset, setFragtReset] = useState(false)
+  useEffect(() => {
+    if (!offen) setFragtReset(false)
+  }, [offen])
 
   const zeilen: Achsenzeile[] = []
   for (const [i, haupt] of graph.haupt.entries()) {
@@ -224,6 +237,61 @@ export function DeinWeg({
                   strokeWidth={2.5}
                 />
               </button>
+            </section>
+
+            {/*
+              Der Reset fürs Standpersonal.
+
+              Er steht **ganz unten und leise** — kleiner Text, keine Fläche,
+              keine Farbe. Das ist die Absicht: Solange nichts automatisch
+              löscht, muss es jemanden geben, der es tut, wenn ein Schüler
+              fertig ist. Aber ein roter Knopf neben „Alle vier nebeneinander“
+              wäre eine Einladung an genau den, der gerade mitten in seinem Tag
+              steckt.
+
+              Die Fünf-Tap-Geste in der Leiste bleibt daneben bestehen: sie ist
+              der Ausgang für die Screens ohne dieses Sheet — Splash, Helmwahl,
+              Fragen, Berufsliste.
+            */}
+            <section className="border-t border-kh-line px-4 pt-4 pb-6">
+              <h3 className="kh-etikett px-1">Standpersonal</h3>
+              {fragtReset ? (
+                <div className="mt-2 rounded-kh border border-kh-line-strong p-3">
+                  <p className="text-[0.9375rem] text-kh-mute">
+                    Löscht Helm, Antworten und den Fortschritt in{' '}
+                    <strong className="font-semibold text-kh-paper">allen vier</strong>{' '}
+                    Berufen. Das lässt sich nicht rückgängig machen.
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      data-testid="weg-reset-ja"
+                      onClick={onZuruecksetzen}
+                      className="min-h-[48px] flex-1 rounded-kh bg-kh-orange px-4 text-[1rem] font-semibold text-[#0E0D0B] transition-transform active:scale-[0.98]"
+                    >
+                      Ja, löschen
+                    </button>
+                    <button
+                      type="button"
+                      data-testid="weg-reset-nein"
+                      onClick={() => setFragtReset(false)}
+                      className="min-h-[48px] flex-1 rounded-kh border-2 border-kh-line-strong px-4 text-[1rem] font-semibold text-kh-paper transition-transform active:scale-[0.98]"
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  data-testid="weg-reset"
+                  onClick={() => setFragtReset(true)}
+                  className="mt-1 flex min-h-[48px] items-center gap-2 rounded-kh px-3 text-[0.9375rem] font-medium text-kh-mute transition-transform active:scale-[0.98] active:bg-white/8 active:text-kh-paper"
+                >
+                  <RotateCcw className="size-4 shrink-0" strokeWidth={2.25} />
+                  Stand zurücksetzen
+                </button>
+              )}
             </section>
           </div>
         </BaseDialog.Popup>

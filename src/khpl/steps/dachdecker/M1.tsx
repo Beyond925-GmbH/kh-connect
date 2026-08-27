@@ -148,7 +148,7 @@ export function M1() {
   return (
     <StepShell
       id="M1"
-      auftrag={ausgewertet ? null : 'Tipp an, was du sonst noch mitnimmst.'}
+      auftrag={ausgewertet ? null : 'Welche Gegenstände nimmst du mit auf Baustelle? (Zwei hat der Chef schon eingepackt)'}
       // Antippen erklärt sich selbst (`komponenten/gesten.ts`).
       ansage={null}
       // Das breite Panel: zehn Chips plus Auswertung brauchen die Fläche in
@@ -228,7 +228,7 @@ function Liste({
           beides ist jetzt das Auftragsband, auf jedem Screen an derselben
           Stelle. Geblieben ist der Hinweis auf die zwei gesetzten Haken: ohne
           ihn sähen sie aus, als hätte der Screen sich etwas gemerkt. */}
-      <p className="text-[1rem] text-kh-mute">Zwei hat dein Chef dir schon gesagt.</p>
+      <p className="text-[1rem] text-kh-mute">Wähle aus, was du mitnehmen möchtest.</p>
 
       {/* Zwei Spalten in **allen drei** Formaten — auch auf dem Handy. Zehn
           Punkte untereinander sind dort ~950 px Liste in einem 635-px-Panel:
