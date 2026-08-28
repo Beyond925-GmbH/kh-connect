@@ -342,9 +342,9 @@ export function Z5() {
           ) : takt === 'urteilen' ? (
             <div className="flex flex-col gap-3">
               <Anzeige wert={angezeigt} ton="steht" />
-              <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-                Und, passt es?
-              </p>
+              {/* Die Frage „Und, passt es?“ stand hier noch einmal — sie ist
+                  aber wörtlich die Headline des Steps, und die Anweisung
+                  trägt das Auftragsband. Einmal reicht. */}
               {/*
                 Drei gleich große Flächen. Keine ist hervorgehoben und keine
                 versteckt: die Antwort ergibt sich aus dem Toleranzfeld, das in

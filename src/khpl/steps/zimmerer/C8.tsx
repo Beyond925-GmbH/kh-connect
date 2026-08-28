@@ -47,10 +47,7 @@ export function C8() {
       interaktionOffen={false}
       buehne={<StepFoto id="C8" />}
       warum={
-        <p>
-          Drei Jahre Ausbildung, dann Geselle. Danach hört es nicht auf — es fängt an.
-          Drei Wege, alle drei offen.
-        </p>
+        <p>Drei Jahre Ausbildung, dann Geselle. Danach drei Wege — alle drei offen.</p>
       }
       interaktion={
         <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">

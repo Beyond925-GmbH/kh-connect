@@ -144,9 +144,11 @@ export function Z4() {
           transition={{ duration: 0.5, delay: 0.85 }}
           className="flex flex-col gap-2.5"
         >
+          {/* Das „Tipp an“ steht schon im Auftragsband — hier nur, was die
+              drei Knöpfe sind. */}
           {!antwort && (
             <p className="px-1 text-[1rem] text-kh-paper/55">
-              Drei Sachen, die man in diesem Raum lernt. Tipp an, was dich interessiert.
+              Drei Sachen, die man in diesem Raum lernt.
             </p>
           )}
 

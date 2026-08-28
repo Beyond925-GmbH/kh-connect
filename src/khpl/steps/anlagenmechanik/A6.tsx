@@ -193,10 +193,15 @@ export function A6() {
       }
       warum={
         laeuft ? undefined : (
+          /*
+            Ohne den Schlusssatz „Dreh auf, bis der Druck stimmt": er stand
+            wortgleich schon im Auftragsband — genau ein Anweisungssatz pro
+            Screen (R4). Und „einstellen" statt „parametrieren": das Werkstatt-
+            wort fiele hier unerklärt (R10).
+          */
           <p>
-            Anlage füllen, entlüften, Druck aufbauen, Regelung parametrieren, starten —
-            die <Fachwort id="inbetriebnahme">Inbetriebnahme</Fachwort>. Dreh auf, bis der
-            Druck stimmt.
+            Anlage füllen, entlüften, Druck aufbauen, Regelung einstellen, starten — die{' '}
+            <Fachwort id="inbetriebnahme">Inbetriebnahme</Fachwort>.
           </p>
         )
       }

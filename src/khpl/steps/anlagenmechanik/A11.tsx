@@ -49,7 +49,6 @@ export function A11() {
       id="A1.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       buehne={<Schnitt zustand={{ szene: 'transporter', licht: 'nacht' }} />}
       warum={
         <>

@@ -74,7 +74,6 @@ export function C51() {
       id="C5.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       // Quer 52 statt 44 rem: die Zeile „Wer am Kran wo steht“ trägt quer ihre
       // Überschrift mit, und die 22 px, die das kostet, holt die breitere
       // Spalte im Zitat wieder herein.

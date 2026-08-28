@@ -51,7 +51,6 @@ export function A31() {
       id="A3.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       buehne={<StepFoto id="A3.1" />}
       warum={
         <>

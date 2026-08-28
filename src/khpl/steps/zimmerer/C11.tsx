@@ -69,7 +69,6 @@ export function C11() {
       id="C1.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       // Quer 52 statt 44 rem: in der schmalen Spalte begann das Zitat unter
       // der Scrollkante, während rechts eine halbe Fotowand leer stand
       // (Sichtbefund C1.1 quer, 69 px Rest).

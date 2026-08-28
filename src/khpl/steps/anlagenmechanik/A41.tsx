@@ -71,7 +71,6 @@ export function A41() {
       id="A4.1"
       auftrag={'Tipp an, was dich interessiert.'}
       ansage={null}
-      titelZusatz="Abstecher"
       interaktionOffen={false}
       buehne={<StepFoto id="A4.1" />}
       warum={

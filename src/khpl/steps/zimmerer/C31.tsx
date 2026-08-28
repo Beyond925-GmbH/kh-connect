@@ -87,7 +87,6 @@ export function C31() {
       id="C3.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       // Quer 52 statt 44 rem: die zwei Belegfelder stehen dort nebeneinander,
       // und in der schmalen Spalte brach schon ihre Überschrift zweizeilig um.
       karteBreit

@@ -255,13 +255,17 @@ export function C6() {
         Zwei Beats, zwei Aufträge. Beat 1 fragt nach der Lage, Beat 2 setzt
         das Element ab — dieselbe Zeile für beides wäre auf einem der beiden
         falsch.
+
+        Beat 1 sagt nicht „Dreh das Element": gedreht wird per Wahl (Kacheln
+        bzw. Tap, der die Bühne anhält), nicht mit einer Zieh-Geste — der
+        Auftrag muss die tatsächliche Interaktion beschreiben.
       */
       auftrag={
         takt === 'fertig'
           ? null
           : takt === 'einweisen'
             ? 'Führ das Element über die Schwelle und lass es ab.'
-            : 'Dreh das Element so, wie es stehen muss.'
+            : 'Wähl aus, wie herum das Element stehen muss.'
       }
       /*
         Zwei Beats, zwei Gesten, zwei Ansagen. `StepShell` verschlüsselt sie an
@@ -272,12 +276,17 @@ export function C6() {
           ? {
               geste: 'drehen' as const,
               text: 'Das Element hängt am Kran. Du sagst, wie herum es abgesetzt wird.',
-              haken: 'Den ganzen Vormittag lag es flach. Jetzt steht es.',
+              // Nicht „Den ganzen Vormittag lag es flach": derselbe Satz steht
+              // schon im Warum darunter. Der Haken nennt den Einsatz — die
+              // Folge aus dem Fehlertext (Dämmung nass, Holz faul).
+              haken: 'Die falsche Seite fällt erst in fünf Jahren auf.',
             }
           : takt === 'einweisen'
             ? {
                 geste: 'ziehen-frei' as const,
-                text: 'Jetzt führst du die Last über die Schwelle und lässt sie ab.',
+                // Nicht die Wiederholung des Auftrags („Führ das Element über
+                // die Schwelle …"): die Ansage sagt, was gerade passiert.
+                text: 'Das Element schwebt über der Schwelle — die letzten Meter führst du selbst.',
                 haken: 'Eine hängende Last pendelt. Zieh langsam.',
               }
             : null
@@ -354,13 +363,10 @@ export function C6() {
                   aria-hidden
                   className="size-3 shrink-0 animate-puls rounded-full bg-kh-orange"
                 />
-                <span className="min-w-0">
-                  <span className="kh-etikett block text-kh-paper/50">
-                    Einweisen — die Kolonne unten wartet
-                  </span>
-                  <p className="text-[1.0625rem] text-kh-paper/80">
-                    Zieh das Element über die Schwelle und lass es ab.
-                  </p>
+                {/* Die Anweisung steht einmal, im Auftragsband (vgl. M7) —
+                    hier bleibt der Status, der sagt, warum es zügig weitergeht. */}
+                <span className="kh-etikett min-w-0 text-kh-paper/50">
+                  Einweisen — die Kolonne unten wartet
                 </span>
               </div>
             </div>

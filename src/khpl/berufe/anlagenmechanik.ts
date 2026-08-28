@@ -60,7 +60,8 @@ type AnlagenmechanikStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher
 /**
  * Die Hauptlinie mit ihren Abstechern, Reihenfolge = Board-Reihenfolge.
  * Titel sind die Pointen aus Spec 3 und 4, `kurz` die Board-Namen aus
- * derselben Tabelle und aus dem Gesamtdiagramm (Spec 5).
+ * derselben Tabelle und aus dem Gesamtdiagramm (Spec 5). Zwei Titel weichen
+ * von der Spec ab (A3, A4) — Begründung am Eintrag.
  */
 const STEPS = [
   {
@@ -92,7 +93,10 @@ const STEPS = [
   },
   {
     id: 'A3',
-    titel: 'Wie viel Wärme braucht ein Haus?',
+    // Die Spec-Pointe („Wie viel Wärme braucht ein Haus?") stand fast
+    // wortgleich noch einmal im Auftragsband darunter — dieselbe Dopplung wie
+    // beim Dachdecker M2. Die Headline nennt jetzt die Tätigkeit.
+    titel: 'Wärmebedarf schätzen',
     kurz: 'Heizlast',
     art: 'haupt',
     weiter: 'A4',
@@ -110,7 +114,10 @@ const STEPS = [
   },
   {
     id: 'A4',
-    titel: 'Der kürzeste Weg ist nicht der richtige',
+    // Die Spec-Pointe („Der kürzeste Weg ist nicht der richtige") nahm dem
+    // Haken der Ansage das Wort vorweg — er sagt denselben Satz. Die Headline
+    // nennt jetzt die Tätigkeit; die Pointe bleibt der Übung.
+    titel: 'Leitung verlegen',
     kurz: 'Leitungsführung',
     art: 'haupt',
     weiter: 'A5',

@@ -51,7 +51,6 @@ export function Z11() {
       id="Z1.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       interaktionOffen={false}
       buehne={<StepFoto id="Z1.1" />}
       warum={

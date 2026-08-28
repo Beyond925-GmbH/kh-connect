@@ -224,9 +224,9 @@ function Stueckliste({ hilfe, hinweis }: { hilfe: boolean; hinweis: boolean }) {
           Ständer, mit <Begriff id="ausklinkung">Ausklinkung</Begriff>
         </span>
       </div>
-      <p className="text-[1.0625rem] text-kh-mute">
-        Such es vom Tisch. Tipp das Holz an.
-      </p>
+      {/* Keine Aufforderung mehr an dieser Stelle: „Such dein Holz … tipp es
+          an" steht im Auftragsband, und zweimal dieselbe Anweisung war genau
+          die Dopplung, die die Screens dicht gemacht hat (vgl. C4, M7). */}
       {hilfe && (
         <p
           data-testid="c1-hilfe"

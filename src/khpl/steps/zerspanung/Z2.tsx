@@ -170,10 +170,12 @@ export function Z2() {
       }
       aha={
         <>
+          {/* Ohne die Coda „das, worüber in der Halle geredet wird“ — die
+              stand einen Screen weiter (Z2.1) fast wortgleich noch einmal.
+              Die zwei Sätze davor beantworten die Frage vollständig. */}
           <AhaKarte sichtbar={fertig} eyebrow="Warum ist das erste Teil das teuerste?">
             Beim Rüsten entsteht kein einziges Teil — und bei kleinen Stückzahlen ist es
-            trotzdem der größte Zeitblock des ganzen Auftrags. Deshalb ist Rüstzeit das,
-            worüber in der Halle geredet wird.
+            trotzdem der größte Zeitblock des ganzen Auftrags.
           </AhaKarte>
           {/* Ab dem zweiten Einwurf zugeklappt (R5) — während der Übung steht
               so nur die Frage da, nicht der ganze Absatz. */}

@@ -38,7 +38,6 @@ export function Z21() {
       id="Z2.1"
       auftrag={null}
       ansage={null}
-      titelZusatz="Abstecher"
       buehne={<StepFoto id="Z2.1" />}
       warum={
         <p>

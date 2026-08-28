@@ -156,7 +156,18 @@ export function Z3() {
   return (
     <StepShell
       id="Z3"
-      auftrag={erledigt ? null : 'Geh das Programm durch, Zeile für Zeile.'}
+      /*
+        R4/R6: je Takt der eine Satz, der zur Aktion passt — und keiner davon
+        wiederholt die Headline „Zeile für Zeile". In der Suchphase trug der
+        alte Lese-Auftrag eine Aufgabe, die längst vorbei war.
+      */
+      auftrag={
+        takt === 'lesen'
+          ? 'Geh das Programm einmal ganz durch.'
+          : takt === 'suchen'
+            ? 'Tipp die falsche Zeile an.'
+            : null
+      }
       ansage={null}
       interaktionOffen={!erledigt}
       // Kein `karteBreit`: der Code ist rund zwanzig Zeichen breit, und jedes
@@ -203,8 +214,10 @@ export function Z3() {
               <Klammer zeile={PROGRAMM[gelesen]} nummer={gelesen + 1} />
             ) : takt === 'suchen' ? (
               <div className="flex flex-col gap-3">
+                {/* Die Anweisung selbst steht im Auftragsband — hier steht
+                    nur, was sich geändert hat und wo gesucht wird. */}
                 <p className="text-[1.0625rem] font-semibold text-kh-paper">
-                  Die Kontur steht. Aber eine der Fahrzeilen ist falsch — tipp sie an.
+                  Die Kontur steht — aber eine der Fahrzeilen stimmt nicht.
                 </p>
                 <Rueckmeldung
                   ok={ergebnis ? ergebnis.treffer : null}

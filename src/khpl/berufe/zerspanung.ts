@@ -250,6 +250,11 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       einzige Ausschnitt dieses Bildes, der auch hochkant nach Maschine
       aussieht. Der zweite Wert wirkt nicht — bei 16 : 9 in einem 9 : 16-Rahmen
       deckt `cover` die volle Höhe ab, beschnitten wird ausschließlich seitlich.
+
+      TODO: Der Screen fragt „Wer zeichnet das?“ und erklärt die Kette vom
+      CAD-Arbeitsplatz zur Maschine — das Motiv zeigt nur ihr Ende. Ein
+      CAD-Bildschirm mit Metallteil fehlt im Bestand (`m3-cad.webp` zeigt ein
+      Holzhaus und damit ein fremdes Gewerk); bis dahin trägt die Maschine.
     */
     'Z1.1': { src: '/medien/media/zerspanungsmechaniker/gallery-2.webp', pos: '22% 45%' },
     // Kühlmittel spritzt über das Werkstück. Genau das Motiv, das der

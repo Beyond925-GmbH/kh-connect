@@ -275,7 +275,7 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
           </p>
           <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
             Dieselbe Wärme, ein Bruchteil der Energie. Die alte Ölheizung war kein Fehler
-            — sie war jahrzehntelang Standard. Sie zu ersetzen ist der Job.
+            — sie war jahrzehntelang Standard.
           </p>
           {/* Der Stand gehört auf den Screen und nicht in eine Fußnote: die
               beiden Faktoren dahinter kommen jedes Jahr neu (Spec 11). */}

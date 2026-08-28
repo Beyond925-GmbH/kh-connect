@@ -44,8 +44,8 @@ export function Z7() {
       buehne={<StepFoto id="Z7" />}
       warum={
         <p>
-          Dreieinhalb Jahre Ausbildung, dann Facharbeiter:in. Danach hört es nicht auf —
-          es fängt an. Drei Wege, alle offen. Schau dir an, was dich interessiert.
+          Dreieinhalb Jahre Ausbildung, dann Facharbeiter:in. Danach drei Wege — alle drei
+          offen.
         </p>
       }
       interaktion={

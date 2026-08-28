@@ -59,9 +59,11 @@ export function A8() {
       warum={
         // Dreieinhalb Jahre, `BELEGT` (`belege/ausbildung-karriere.md` 2:
         // SHKAMAusbV, 42 Monate). Nicht drei wie beim Dachdecker.
+        // Ohne „Schau dir an, was dich interessiert": der Satz stand fast
+        // wortgleich schon im Auftragsband — und M9 (das abgenommene Vorbild)
+        // endet ebenfalls bei „alle offen".
         <p>
-          Dreieinhalb Jahre Ausbildung, dann Geselle. Danach hört es nicht auf — es fängt
-          an. Drei Wege, alle offen. Schau dir an, was dich interessiert.
+          Dreieinhalb Jahre Ausbildung, dann Geselle. Danach drei Wege — alle drei offen.
         </p>
       }
       interaktion={
