@@ -21,7 +21,7 @@ export type Geste =
   | 'tippen'
   /** Mit dem Finger eine Strecke über die Bühne ziehen — A4, M4, C6. */
   | 'ziehen-frei'
-  /** Einen Regler schieben — M2, C2, Z5, A6. */
+  /** Einen Regler schieben — M2, C2, A6. */
   | 'ziehen-regler'
   /** Eine Karte an ihren Platz ziehen — M7, B4.1. */
   | 'ziehen-karte'
@@ -60,13 +60,11 @@ export function brauchtAnsage(geste: Geste): boolean {
 /**
  * Der feste Wortlaut für die Rate-Regler (M2, C2).
  *
- * ⚠️ **Es waren einmal vier.** Z1 und A3 haben ihren Regler beim Umbau
- * verloren: Z1 lässt jetzt drei Wellen in ihre Sitze schieben, A3 die
- * Verlustflächen des Hauses suchen. Der Grund steht in beiden Steps und ist
- * derselbe — ein Schätzmoment lebt davon, dass eine Vorstellung widerlegt
- * wird, und weder „0,02 Millimeter“ noch „14 Kilowatt“ ist für
- * Sechzehnjährige eine Vorstellung. Der Mechanismus bleibt der Anwendung
- * erhalten, aber nur noch dort, wo er trägt.
+ * ⚠️ **Es waren einmal mehr.** A3 hat seinen Regler beim Umbau verloren und
+ * lässt jetzt die Verlustflächen des Hauses suchen. Der Grund steht im Step —
+ * ein Schätzmoment lebt davon, dass eine Vorstellung widerlegt wird, und „14
+ * Kilowatt“ ist für Sechzehnjährige keine Vorstellung. Der Mechanismus bleibt
+ * der Anwendung erhalten, aber nur noch dort, wo er trägt.
  *
  * Diese Screens fragen nach einer Zahl, die niemand wissen kann — und
  * genau das ist ihre Pointe. Ohne Ansage ist das eine verdeckte Prüfung, die

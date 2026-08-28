@@ -57,8 +57,8 @@ import { Fachwort } from './Fachwort'
  * dieses Haus braucht." Zwei Dinge sprachen dagegen.
  *
  *  1. **Kilowatt ist für die Zielgruppe kein Anker.** Ein Schätzmoment lebt
- *     davon, dass eine Vorstellung widerlegt wird (M2: der Dachpreis; Z1: die
- *     Passung). Wer nie mit Kilowatt umgegangen ist, hat keine Vorstellung,
+ *     davon, dass eine Vorstellung widerlegt wird (M2: der Dachpreis). Wer
+ *     nie mit Kilowatt umgegangen ist, hat keine Vorstellung,
  *     die widerlegt werden könnte — er zieht irgendwohin, und die Auflösung
  *     korrigiert nichts.
  *  2. **Es war der dritte Rate-Regler der Anwendung** (M2, C2, A3) und der

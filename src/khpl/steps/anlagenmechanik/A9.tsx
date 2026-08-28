@@ -153,10 +153,9 @@ export function A9() {
  * die Farbfläche mit der Paderborner Silhouette allein, und hochkant stand
  * darunter rund ein Drittel Bildhöhe reines Orange (Abnahme, A9) — eine leere
  * Farbfläche fordert niemanden auf, mit einem Menschen zu sprechen. Die
- * Motivliste dieses Berufs führt deshalb für A9 das Kartenmotiv, wie es die
- * Zerspanung für Z8 tut; die Begründung steht dort
- * (`berufe/anlagenmechanik.ts`, `bilder`). Kommt ein eigenes Motiv, tritt es an
- * dieselbe Stelle.
+ * Motivliste dieses Berufs führt deshalb für A9 das Kartenmotiv; die
+ * Begründung steht dort (`berufe/anlagenmechanik.ts`, `bilder`). Kommt ein
+ * eigenes Motiv, tritt es an dieselbe Stelle.
  */
 function Abschlussfeld() {
   const bild = useStepBild('A9')

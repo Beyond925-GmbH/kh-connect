@@ -17,7 +17,7 @@ import { KARRIEREWEGE } from './karrierewege'
  *
  * ℹ️ Die Abnahme meldete „A8 zeigt drei Kacheln, die anderen drei Tage eine
  * Liste — vier Tage, zwei Layouts". Nachgeprüft: das Raster unten ist
- * `grid-cols-1 sm:grid-cols-3` und steht in M9, C8, Z7 und hier **zeichengleich**;
+ * `grid-cols-1 sm:grid-cols-3` und steht in M9, C8 und hier **zeichengleich**;
  * es gibt keine Container-Query und keine abweichende Panelbreite (A8 setzt
  * kein `karteBreit`). Bei jeder Fensterbreite über 640 px stehen an allen vier
  * Tagen drei Kacheln, darunter an allen vier eine Liste. Hier ist deshalb

@@ -202,8 +202,7 @@ const QUER_MINDEST_BREITE = 0.3
  * gemessene Rahmen der falsche Handel: er schrumpfte die Zeichnung quer von
  * 791 auf 399 px und stellte sie als hart berandete Platte neben 63 % leere
  * schwarze Fläche. Ein Foto steht in dieser Hülle hinter dem Panel und nicht
- * daneben (so hält es auch `Bild.useFreieFlaeche` in der Zerspanung), und
- * genau so darf eine Kulisse es halten: sie beginnt bei
+ * daneben, und genau so darf eine Kulisse es halten: sie beginnt bei
  * `QUER_MINDEST_BREITE` und läuft unter dem Panel hindurch.
  *
  * Der Unterschied zu A1/A3/A6/A7/A8 ist nicht die Zeichenart, sondern die

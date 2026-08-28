@@ -9,7 +9,7 @@ import { motion } from 'motion/react'
  * auf jedem Screen woanders: im letzten Halbsatz des Fachtexts (A6 „… die
  * Inbetriebnahme. Dreh auf, bis der Druck stimmt.“), in einer eigenen
  * Komponente, die genau einmal existierte (C4), auf der Bühne (M5) — oder gar
- * nicht (C2, C3, Z2, A1, A2), sodass man die Aufgabe aus dem Steuerelement
+ * nicht (C2, C3, A1, A2), sodass man die Aufgabe aus dem Steuerelement
  * erschließen musste. Fünfzehn Screens, und auf jedem muss neu gesucht werden,
  * wo die Aufgabe steht.
  *

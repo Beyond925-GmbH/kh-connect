@@ -457,8 +457,8 @@ function Uhr({ geprueft }: { geprueft: number }) {
  * dieser Stelle **schon gelesen ist** — vor dem Fehlgriff stand sie
  * vollständig im Fenster (Rest 0, 5 von 5 Flächen ganz sichtbar), und der
  * Fehlgriff war der Tap auf eine davon. Beim zweiten Versuch stehen wieder
- * alle fünf da, diesmal mit der Folge im Rücken. Dieselbe Antwort wie in Z7
- * der Zerspanung: nichts streichen, nur nicht alles gleichzeitig zeigen.
+ * alle fünf da, diesmal mit der Folge im Rücken: nichts streichen, nur nicht
+ * alles gleichzeitig zeigen.
  *
  * Quer bleibt die Liste offen — dort trägt das Fenster beides, seit der
  * Fachtext im Takt *entscheiden* nicht mehr mitläuft.

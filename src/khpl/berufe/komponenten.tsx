@@ -41,17 +41,6 @@ import { C7 } from '@/khpl/steps/zimmerer/C7'
 import { C8 } from '@/khpl/steps/zimmerer/C8'
 import { C8x } from '@/khpl/steps/zimmerer/C8x'
 import { C9 } from '@/khpl/steps/zimmerer/C9'
-import { Z1 } from '@/khpl/steps/zerspanung/Z1'
-import { Z11 } from '@/khpl/steps/zerspanung/Z11'
-import { Z2 } from '@/khpl/steps/zerspanung/Z2'
-import { Z21 } from '@/khpl/steps/zerspanung/Z21'
-import { Z3 } from '@/khpl/steps/zerspanung/Z3'
-import { Z4 } from '@/khpl/steps/zerspanung/Z4'
-import { Z5 } from '@/khpl/steps/zerspanung/Z5'
-import { Z6 } from '@/khpl/steps/zerspanung/Z6'
-import { Z7 } from '@/khpl/steps/zerspanung/Z7'
-import { Z7Weg } from '@/khpl/steps/zerspanung/Z7Weg'
-import { Z8 } from '@/khpl/steps/zerspanung/Z8'
 
 /**
  * Welcher Step welches Modul rendert — je Beruf.
@@ -66,11 +55,11 @@ import { Z8 } from '@/khpl/steps/zerspanung/Z8'
  * Ein Beruf, dessen Stationen aus wiederverwendbaren Übungen bestehen, taucht
  * hier gar nicht auf: was fehlt, rendert der `Platzhalter`.
  *
- * **Geteilte Datei, vier Blöcke** (khpl-tage.md §6.1 V6 und §6.2). Alle vier
- * Schlüssel stehen schon da, die drei ungebauten als leeres Objekt. Jeder
- * Agent trägt **nur in seinem Block** ein und rührt die anderen drei nicht an;
- * die Step-Ids kollidieren dank der Präfixe aus V4 nicht (`M`/`B`, `C`, `Z`,
- * `A`). Die Import-Zeilen oben gehören zum jeweiligen Block.
+ * **Geteilte Datei, ein Block je gebautem Beruf** (khpl-tage.md §6.1 V6 und
+ * §6.2). Jeder Agent trägt **nur in seinem Block** ein und rührt die anderen
+ * nicht an; die Step-Ids kollidieren dank der Präfixe aus V4 nicht (`M`/`B`,
+ * `C`, `A`). Die Import-Zeilen oben gehören zum jeweiligen Block. Die
+ * Zerspanung ist angekündigt und hat keine Steps — sie steht hier nicht.
  */
 export const BERUF_KOMPONENTEN: Partial<
   Record<BerufId, Readonly<Record<StepId, () => React.ReactNode>>>
@@ -117,25 +106,6 @@ export const BERUF_KOMPONENTEN: Partial<
     'C8.2': () => <C8x id="C8.2" />,
     'C8.3': () => <C8x id="C8.3" />,
     C9: () => <C9 />,
-  },
-
-  // ---------------------------------------------------------------------
-  // Zerspanung — Ids `Z*` · Steps in `steps/zerspanung/`
-  // ---------------------------------------------------------------------
-  zerspanungsmechaniker: {
-    Z1: () => <Z1 />,
-    'Z1.1': () => <Z11 />,
-    Z2: () => <Z2 />,
-    'Z2.1': () => <Z21 />,
-    Z3: () => <Z3 />,
-    Z4: () => <Z4 />,
-    Z5: () => <Z5 />,
-    Z6: () => <Z6 />,
-    Z7: () => <Z7 />,
-    'Z7.1': () => <Z7Weg id="Z7.1" />,
-    'Z7.2': () => <Z7Weg id="Z7.2" />,
-    'Z7.3': () => <Z7Weg id="Z7.3" />,
-    Z8: () => <Z8 />,
   },
 
   // ---------------------------------------------------------------------

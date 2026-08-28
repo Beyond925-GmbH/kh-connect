@@ -67,7 +67,7 @@ export type Bildschirm = (typeof BILDSCHIRME)[number]
 /**
  * Typisierte Sicht auf `answers`. Bleibt zur Laufzeit ein reines JSON-Objekt.
  *
- * **Vier Abschnitte, einer je Beruf** (khpl-tage.md §6.1 V5). Der Fortschritt
+ * **Ein Abschnitt je gebautem Beruf** (khpl-tage.md §6.1 V5). Der Fortschritt
  * liegt zwar schon je Beruf (`berufe: Partial<Record<BerufId, Fortschritt>>`),
  * zur Laufzeit kollidiert also nichts — das *Interface* ist aber gemeinsam,
  * und drei Tage entstehen gleichzeitig. Die Abschnitte sind die Naht, an der
@@ -75,8 +75,9 @@ export type Bildschirm = (typeof BILDSCHIRME)[number]
  * **jeder trägt nur in seinem Abschnitt ein.**
  *
  * Die Schlüssel selbst sind dank der Id-Präfixe aus V4 disjunkt — `m*` gehört
- * dem Dachdecker, `c*` dem Zimmerer, `z*` der Zerspanung, `a*` der
- * Anlagenmechanik (siehe `berufe/typen.ts`).
+ * dem Dachdecker, `c*` dem Zimmerer, `a*` der Anlagenmechanik (siehe
+ * `berufe/typen.ts`). Die Zerspanung ist angekündigt und hat keinen Tag —
+ * ihre `z*`-Schlüssel sind mit den Steps ausgebaut.
  */
 export interface Antworten {
   // -------------------------------------------------------------------------
@@ -150,81 +151,6 @@ export interface Antworten {
    * gemeldet, nicht umgebaut. Die Zimmerer-Steps schreiben über `merkeAntwort`.
    */
   c8?: { angesehen: StepId[] }
-
-  // -------------------------------------------------------------------------
-  // Zerspanung — Schlüssel `z*`
-  // -------------------------------------------------------------------------
-
-  /**
-   * Z1 — welche Wellen schon im Sitz waren, und ob die echten Maße schon
-   * standen.
-   *
-   * ⚠️ **Die Form hat sich mit dem Umbau geändert** (vorher
-   * `{ schaetzung, aufgeloest }`, ein Schätzwert in mm). Ein alter Stand fällt
-   * in `pruefeAntworten` von selbst auf den Boden: `probiert` fehlt, der
-   * Eintrag wird verworfen, Z1 startet neu. Das ist der vorgesehene Weg —
-   * genau dafür prüft die Funktion die Form und nicht nur die `version`.
-   */
-  z1?: { probiert: string[]; aufgeloest: boolean }
-  /**
-   * Z2 — wie viele der drei Handgriffe erledigt sind, welcher Nullpunkt-Ort
-   * zuletzt gewählt war und ob der Nullpunkt sitzt.
-   *
-   * ⚠️ **Die Form hat sich mit dem Umbau geändert** (vorher
-   * `{ geruestet, fertig, versatz? }` aus der Foto-Fassung — deren `versatz`
-   * wurde geschrieben und nie gelesen; der Wiederbesuch zeigte jeden Treffer
-   * als perfekt). Ein alter Stand fällt in `pruefeAntworten` von selbst auf
-   * den Boden: `griffe` fehlt, der Eintrag wird verworfen, Z2 startet neu.
-   */
-  z2?: { griffe: number; wahl: 'futter' | 'werkzeug' | 'stirn' | null; fertig: boolean }
-  /**
-   * Z3 — wie weit der Besucher sich durch das Programm getippt hat, ob er die
-   * falsche Zeile gefunden hat und ob er blind gestartet ist.
-   *
-   * `kollision` heißt so, weil die Spec die Signatur so festlegt (§6 Z3). Was
-   * der Screen daraus macht, ist der **Luftschnitt**: der eingebaute Fehler ist
-   * das fehlende Minuszeichen, und damit fährt das Werkzeug am Teil vorbei ins
-   * Leere statt in die Spannbacke (§11, `belege/zerspanung.md` 7).
-   */
-  z3?: { zeilen: number; gefunden: boolean; kollision: boolean }
-  /** Z4 — welche der drei Entdeckungen im Messraum aufgedeckt wurden. */
-  z4?: { gelesen: string[] }
-  /**
-   * Z5 — das Urteil über den Messwert, ob es stimmte, und ob korrigiert wurde.
-   *
-   * `endwert` ist der Messwert, den der Besucher am Ende von Beat 2 wirklich
-   * erreicht hat, in mm. Er steht **zusätzlich** zur Signatur der Spec (§6 Z5)
-   * und ist deshalb optional: Der Wert hängt daran, wie weit korrigiert wurde,
-   * und Z5 ist das Fadenobjekt-Feld dieses Tages — „deine Zahl“ (§2). Ohne ihn
-   * zeigte der Screen nach einem Rücksprung über „Dein Weg“ eine andere Zahl
-   * als die, die dort eben noch stand.
-   */
-  z5?: {
-    urteil: 'gut' | 'nacharbeit' | 'ausschuss'
-    richtig: boolean
-    korrigiert: boolean
-    endwert?: number
-  }
-  /**
-   * Z6 — wo der Besucher in den Haufen getippt hat, in Prozent der Bildfläche.
-   *
-   * Die Punkte werden gespeichert und nicht nur gezählt, weil sie beim
-   * Wiederbesuch **wieder an derselben Stelle** liegen müssen: Der Screen
-   * behauptet „egal wohin du tippst, es könnte deins sein“ — und eine Marke,
-   * die nach einem Rücksprung woanders sitzt, macht aus der Pointe einen
-   * Zufallsgenerator.
-   */
-  z6?: { tipps: { x: number; y: number }[] }
-  /**
-   * Z7 — angesehene Karrierewege, in Reihenfolge des Öffnens.
-   *
-   * Das Gegenstück zu `m9`. Es gibt dafür bewusst **keinen** gemeinsamen
-   * Schlüssel: `merkeKarriereweg` schreibt fest nach `m9` und ist damit trotz
-   * V5 ein Dachdecker-Stück in gemeinsamem Code — dieser Tag schreibt über
-   * `merkeAntwort` in seinen eigenen. Gemeldet, nicht gelöst
-   * (khpl-tage.md §6.2).
-   */
-  z7?: { angesehen: StepId[] }
 
   // -------------------------------------------------------------------------
   // Anlagenmechanik — Schlüssel `a*`
@@ -492,65 +418,6 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
     // Fällt eine StepId aus dem Graphen, darf sie nicht als `titel` wieder
     // auftauchen.
     a.c8 = { angesehen: c8.angesehen.filter((x) => istStepId(graph, x)) }
-  }
-
-  // ---------------------------------------------------------------------
-  // Zerspanung — Schlüssel `z*`
-  // ---------------------------------------------------------------------
-
-  const z1 = q.z1 as Antworten['z1']
-  if (z1 && stringListe(z1.probiert)) {
-    a.z1 = { probiert: stringListe(z1.probiert) as string[], aufgeloest: !!z1.aufgeloest }
-  }
-  const NULL_ORTE: readonly string[] = ['futter', 'werkzeug', 'stirn']
-  const z2 = q.z2 as Antworten['z2']
-  if (z2 && typeof z2.griffe === 'number' && Number.isFinite(z2.griffe)) {
-    a.z2 = {
-      griffe: z2.griffe,
-      // Ein Ort, den es nicht mehr gibt, fällt auf `null` — Z2 zeigt dann
-      // wieder die Wahl statt einer Vorschau ins Leere.
-      wahl: z2.wahl !== null && NULL_ORTE.includes(z2.wahl) ? z2.wahl : null,
-      fertig: !!z2.fertig,
-    }
-  }
-  const z3 = q.z3 as Antworten['z3']
-  if (z3 && typeof z3.zeilen === 'number' && Number.isFinite(z3.zeilen)) {
-    a.z3 = { zeilen: z3.zeilen, gefunden: !!z3.gefunden, kollision: !!z3.kollision }
-  }
-  const z4 = q.z4 as Antworten['z4']
-  if (z4 && stringListe(z4.gelesen)) {
-    a.z4 = { gelesen: stringListe(z4.gelesen) as string[] }
-  }
-  const URTEILE: readonly string[] = ['gut', 'nacharbeit', 'ausschuss']
-  const z5 = q.z5 as Antworten['z5']
-  // Ein Urteil, das es nicht mehr gibt, darf nicht als „falsch beantwortet“
-  // wieder auftauchen — der ganze Eintrag fliegt dann raus.
-  if (z5 && URTEILE.includes(z5.urteil)) {
-    a.z5 = {
-      urteil: z5.urteil,
-      richtig: !!z5.richtig,
-      korrigiert: !!z5.korrigiert,
-    }
-    // Nur eine echte Zahl übernehmen; alles andere fällt weg, und Z5 rechnet
-    // dann wieder mit seinem Ersatzwert.
-    if (typeof z5.endwert === 'number' && Number.isFinite(z5.endwert)) {
-      a.z5.endwert = z5.endwert
-    }
-  }
-  const z6 = q.z6 as Antworten['z6']
-  if (z6 && Array.isArray(z6.tipps)) {
-    // Ein Punkt ohne Zahlen zeichnet eine Marke auf `NaN%` — die landet in der
-    // linken oberen Ecke und sieht aus wie ein Rendering-Fehler.
-    const tipps = z6.tipps.filter(
-      (p) => p && Number.isFinite(p.x) && Number.isFinite(p.y),
-    )
-    if (tipps.length) a.z6 = { tipps }
-  }
-  const z7 = q.z7 as Antworten['z7']
-  if (z7 && Array.isArray(z7.angesehen)) {
-    // Fällt eine StepId aus dem Graphen, darf sie in Z8 nicht als Aufhänger
-    // wieder auftauchen.
-    a.z7 = { angesehen: z7.angesehen.filter((x) => istStepId(graph, x)) }
   }
 
   // ---------------------------------------------------------------------
