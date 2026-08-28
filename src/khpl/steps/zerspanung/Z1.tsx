@@ -1,6 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'motion/react'
-import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -9,149 +8,178 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import {
-  GROESSTMASS,
-  KLEINSTMASS,
+  HAAR,
   NENNMASS,
   RASTER_KURVE,
   TOLERANZ,
+  WELLEN,
+  WELLEN_ABSTAND,
+  type Sitz,
 } from '@/khpl/buehne/zerspanung/kanon'
-import { Werkstueck } from '@/khpl/buehne/zerspanung/Werkstueck'
+import { Passung } from '@/khpl/buehne/zerspanung/Passung'
+import { Zeichnung } from '@/khpl/buehne/zerspanung/Zeichnung'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
+import { Lage } from '@/khpl/komponenten/Lage'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
-import { useSchmal } from '@/khpl/shell/schmal'
-import { RATEN_HAKEN } from '@/khpl/komponenten/gesten'
 
 /**
  * Z1 — Der Spielraum, den niemand sieht.
  *
- * Der Titel nennt das Thema, nie den gesuchten Wert (R6): „Null Komma null
- * zwei eins“ stand früher als Überschrift über dem laufenden Schätz-Slider
- * und war die ausgeschriebene Lösung. Die Zeile gehört der Auflösung — dort
- * steht sie jetzt als Zwischentitel über der Signaturzahl.
+ * **Zwei Bühnen, ein Bogen.** Die Übung ist greifbar: drei Wellen, drei
+ * Sitze, probier sie durch (`buehne/zerspanung/Passung`). Auf allen dreien
+ * steht dasselbe Maß, Ø 20 — eine gleitet hinein und sitzt, eine geht gar
+ * nicht rein, eine hat Spiel. **Die Auflösung ist die Zeichnung selbst**
+ * (`buehne/zerspanung/Zeichnung`): dasselbe Teil als Vektor, das Maß
+ * `Ø 20 h7` hervorgehoben, und dann der erste Zoom des Tages — die Einzelheit
+ * mit der Toleranzzone, Größtmaß und Kleinstmaß direkt im Bild.
  *
- * **Der eine Schätzmoment dieses Tages** (khpl-tag-zerspanung.md §6 Z1). Der
- * Besucher rät an einem logarithmischen Regler, wie viel bei `Ø 20 h7`
- * danebengehen darf; aufgelöst wird mit 20,000 / 19,979 mm — 0,021 mm
- * Spielraum, `BELEGT` nach ISO 286.
+ * Damit steht die Antwort auf „was heißt h7?“ dort, wo sie hingehört: auf der
+ * Zeichnung, nicht in einer Tabelle im Panel. Das Panel behält nur, was die
+ * Bühne nicht sagen kann — die drei gemessenen Werte, den Haarvergleich und
+ * den Satz, der die Ökonomie dahinter trägt.
  *
- * Die Mechanik ist die von M2, das Vorzeichen ist das entgegengesetzte: dort
- * ist die echte Zahl **größer** als erwartet, hier absurd **kleiner**. Ein
- * Vierzehnjähriger, der rät, rät Millimeter.
+ * **Warum kein Rate-Regler** (Vorgeschichte): Es war der dritte Rate-Regler
+ * der Anwendung, und der einzige, bei dem die geratene Größe für die
+ * Zielgruppe keine Bedeutung hat. Wer noch nie „0,02 mm“ gedacht hat, zieht
+ * irgendwohin — Danebenliegen ist nur Inhalt (R11), wenn vorher eine
+ * Vorstellung da war, die widerlegt werden kann.
  *
- * **Fehlerfall: keiner.** Geschätzt wird, nicht gewusst — es gibt keine
- * Rückmeldung „falsch“, nur den Abstand zwischen der eigenen Zahl und der
- * echten.
+ * **Fehlerfall: keiner** (R11). Es gibt keine falsche Welle — die zwei, die
+ * nicht passen, sind Ausschuss aus der Fertigung, kein Fehler des Besuchers.
+ *
+ * Zahlen: `BELEGT` nach ISO 286 (`belege/zerspanung.md` 1), Haardicke ebd.
+ * Punkt 2.
+ *
+ * **`answers.z1`** `{ probiert, aufgeloest }`.
  */
 
-// ---------------------------------------------------------------------------
-// Der Regler — Text und Zahlen gebündelt oben (flow 8.4).
-// ---------------------------------------------------------------------------
+/** Millimeter, drei Stellen — `20,000` und `19,979` sind erst so ein Paar. */
+const mm = (n: number) => n.toFixed(3).replace('.', ',')
 
 /**
- * **Der Regler ist logarithmisch, und das ist `ENTSCHIEDEN`** (§6 Z1). Auf
- * einer linearen Skala von 1 mm bis 0,01 mm lägen alle interessanten Antworten
- * in den letzten drei Prozent des Wegs — die Übung wäre nicht schätzbar,
- * sondern eine Zufallsauswahl. Hier kostet jede Raste denselben *Faktor*, nicht
- * denselben Betrag.
+ * Was auf dem Screen steht, wenn eine Welle im Sitz war.
+ *
+ * **Drei Sätze, kein Urteil.** Keiner davon sagt „richtig" oder „falsch" —
+ * sie beschreiben, was passiert ist. Der Satz zu `sitzt` ist bewusst der
+ * kürzeste: In der Werkstatt sagt niemand etwas, wenn etwas passt.
  */
-const MAX_MM = 1
-const MIN_MM = 0.01
-/** Rasten über den ganzen Weg. Jede ist rund vier Prozent kleiner als die vorige. */
-const STUFEN = 120
-/**
- * Der Startwert liegt bei einem halben Millimeter: bewusst dort, wo ein
- * Vierzehnjähriger von selbst anfängt zu raten, und weit genug vom Anschlag
- * entfernt, dass in beide Richtungen Weg bleibt.
- */
-const START = 18
-
-/**
- * Zwei geltende Ziffern statt der krummen Potenz — sonst steht am Anfang
- * „0,501 mm“ da, und der Screen sieht aus, als hätte er sich verrechnet.
- */
-function wertFuer(stufe: number): number {
-  return Number((MAX_MM * (MIN_MM / MAX_MM) ** (stufe / STUFEN)).toPrecision(2))
+const ERGEBNIS: Record<Sitz, { kurz: string; lang: string }> = {
+  sitzt: {
+    kurz: 'Sitzt.',
+    lang: 'Reingeschoben, angekommen, hält. Mehr passiert hier nicht — und genau das ist das Ziel.',
+  },
+  klemmt: {
+    kurz: 'Geht nicht rein.',
+    lang: 'Sie steht am Loch und bleibt stehen. Das Teil ist zu dick — nachdrehen geht, wegwerfen muss man es nicht.',
+  },
+  lose: {
+    kurz: 'Hat Spiel.',
+    lang: 'Sie rutscht durch und liegt unten auf. Zu dünn kann man nicht nachdrehen — das Teil ist Ausschuss.',
+  },
 }
 
-/** Rückweg für den Wiedereinstieg über „Dein Weg“. */
-function stufeFuer(wert: number): number {
-  const roh = (STUFEN * Math.log(wert / MAX_MM)) / Math.log(MIN_MM / MAX_MM)
-  return Math.min(STUFEN, Math.max(0, Math.round(roh)))
-}
-
-/** Anteil auf der logarithmischen Skala, 0 % links (1 mm) bis 100 % rechts. */
-function anteil(wert: number): number {
-  return (stufeFuer(wert) / STUFEN) * 100
-}
-
-const mm = (n: number) => `${n.toFixed(3).replace('.', ',')} mm`
-
 /**
- * Die Rasterkurve dieses Tages: Ziffern rasten, nichts federt (§7 — „keine
- * Springs“). `kanon.ts` hält sie `as const`; `motion` verlangt ein
- * beschreibbares Vierertupel.
+ * Wie lange die Zeichnung unverzoomt stehen bleibt, bevor die Einzelheit
+ * einfährt — lang genug, um `Ø 20 h7` einmal zu sehen. Beim Wiederbesuch
+ * kürzer: Wer zurückspringt, kennt das Blatt schon.
  */
+const ZOOM_NACH_MS = 1300
+const ZOOM_NACH_MS_ERNEUT = 450
+
 const RASTER = [...RASTER_KURVE] as [number, number, number, number]
 
 export function Z1() {
-  const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.z1
-  const [stufe, setStufe] = useState(() =>
-    gespeichert ? stufeFuer(gespeichert.schaetzung) : START,
-  )
+  const [probiert, setProbiert] = useState<string[]>(() => gespeichert?.probiert ?? [])
   const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
+  /**
+   * Welche Welle gerade fährt — nur für die Bühne, nicht für den Fortschritt.
+   * `probiert` allein reichte nicht: Die Rückmeldung im Panel soll die zuletzt
+   * angefasste Welle nennen, und die ist nicht zwingend die letzte in der
+   * Liste (man kann C vor B probieren).
+   */
+  const [zuletzt, setZuletzt] = useState<string | null>(
+    () => gespeichert?.probiert?.at(-1) ?? null,
+  )
+  /**
+   * Der erste Zoom des Tages. Er startet **nicht** mit der Auflösung, sondern
+   * einen Atemzug später: Erst steht die Zeichnung mit dem hervorgehobenen
+   * `Ø 20 h7` da, dann fährt die Einzelheit ein — die Ansage, wie dieser Tag
+   * funktioniert (khpl-tag-zerspanung.md §6 Z1).
+   */
+  const [zoom, setZoom] = useState(false)
 
-  const wert = wertFuer(stufe)
+  useEffect(() => {
+    if (!aufgeloest) return
+    const id = window.setTimeout(
+      () => setZoom(true),
+      gespeichert?.aufgeloest ? ZOOM_NACH_MS_ERNEUT : ZOOM_NACH_MS,
+    )
+    return () => window.clearTimeout(id)
+    // `gespeichert` absichtlich nicht als Abhängigkeit: `merkeAntwort` beim
+    // Auflösen schriebe es neu und startete den Zoom-Timer noch einmal.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [aufgeloest])
+
+  const alle = probiert.length >= WELLEN.length
+
+  const probieren = (id: string) => {
+    if (probiert.includes(id)) return
+    const neu = [...probiert, id]
+    setProbiert(neu)
+    setZuletzt(id)
+    merkeAntwort('z1', { probiert: neu, aufgeloest: false })
+  }
 
   const aufloesen = () => {
     setAufgeloest(true)
-    merkeAntwort('z1', { schaetzung: wert, aufgeloest: true })
+    merkeAntwort('z1', { probiert, aufgeloest: true })
   }
 
   return (
     <StepShell
       id="Z1"
-      auftrag={aufgeloest ? null : 'Schätz, wie weit dieses Maß danebengehen darf.'}
-      /*
-        Der Haarvergleich stand bisher in der Auflösung. Er gehört **hierher**:
-        er setzt die Größenordnung, ohne die Zahl zu verraten — ohne ihn ist
-        die Frage „wie viel darf danebengehen" für jemanden, der noch nie eine
-        Zeichnung gesehen hat, nicht einmal schätzbar.
-      */
-      ansage={{
-        geste: 'ziehen-regler',
-        text: 'Ein Blatt Papier ist ein Zehntelmillimeter dick. So grob ist das hier nicht.',
-        haken: RATEN_HAKEN,
-      }}
-      interaktionOffen={!aufgeloest}
-      // Erst nach der Auflösung: die Schätzphase bleibt schmal, die Auflösung
-      // braucht die Breite für Zahl und Maßtabelle nebeneinander.
-      karteBreit={aufgeloest}
-      // „Hinter jedem Maß steht eine Toleranz“ meint die Zeichnung — sie muss
-      // lesbar sein, bevor jemand über sie liest. Hochkant deckelt das den
-      // Panelwuchs auf 62 %, und wer die Bemaßung ganz sehen will, klappt ein.
-      buehne={
-        <Werkstueck zustand="zeichnung" massHervorgehoben toleranzfeld={aufgeloest} />
+      auftrag={
+        aufgeloest
+          ? null
+          : alle
+            ? 'Hol dir die echten Maße dazu.'
+            : 'Probier alle drei durch.'
       }
-      // Eine Fassung statt zweier: die kurze war ohnehin die bessere, und
-      // der Grund für die lange (Platz im Panel) ist mit der Warum-Zeile weg.
+      // Antippen erklärt sich selbst — die Wellen tragen einen limetten Punkt,
+      // solange sie noch nicht probiert wurden (`komponenten/gesten.ts`).
+      ansage={null}
+      interaktionOffen={!aufgeloest}
+      buehne={
+        // Die Bühne wechselt mit dem Takt: erst die Werkbank, dann das Blatt.
+        // Ein weicher Übergang, kein Schnitt — der Zoom danach übernimmt.
+        <motion.div
+          key={aufgeloest ? 'zeichnung' : 'probe'}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.45, ease: RASTER }}
+          className="size-full"
+        >
+          {aufgeloest ? (
+            <Zeichnung massHervorgehoben toleranzfeld={zoom} />
+          ) : (
+            <Passung aktiv={zuletzt} probiert={probiert} onProbieren={probieren} />
+          )}
+        </motion.div>
+      }
       warum={
         <p>
           Eine Zeichnung sagt nicht, <em>wie groß</em> — sie sagt, <em>wie genau</em>.
-          Hinter jedem Maß steht eine <Begriff id="toleranz">Toleranz</Begriff>.
+          Hinter jedem Maß steht ein Spielraum, und der hat einen Namen.
         </p>
       }
       interaktion={
-        <Wechsel takt={aufgeloest ? 'aufgeloest' : 'schaetzen'}>
-          {aufgeloest ? (
-            <Aufloesung schaetzung={wert} />
-          ) : (
-            <Schaetzung stufe={stufe} wert={wert} onStufe={setStufe} schmal={schmal} />
-          )}
+        <Wechsel takt={aufgeloest ? 'aufgeloest' : 'probieren'}>
+          {aufgeloest ? <Aufloesung /> : <Probe probiert={probiert} zuletzt={zuletzt} />}
         </Wechsel>
       }
       aha={
@@ -164,9 +192,9 @@ export function Z1() {
           {/* Ab dem zweiten Einwurf zugeklappt (R5): zwei zugleich offene
               Karten sprengen das Wortbudget der Klappzeile. */}
           <AhaKarte sichtbar={aufgeloest} zugeklappt eyebrow="Gilt das für jedes Teil?">
-            Nein, der Spielraum hängt am Maß. Die 0,021 Millimeter gehören zu Ø 20; bei Ø
-            50 wären es 0,025. Maß und Toleranz gehören immer zusammen — eins ohne das
-            andere sagt nichts.
+            Nein, der Spielraum hängt am Maß. Die {mm(TOLERANZ)} Millimeter gehören zu Ø{' '}
+            {NENNMASS}; bei Ø 50 wären es 0,025. Maß und Toleranz gehören immer zusammen —
+            eins ohne das andere sagt nichts.
           </AhaKarte>
         </>
       }
@@ -176,9 +204,20 @@ export function Z1() {
           uebungOffen={!aufgeloest}
           aktion={
             aufgeloest ? null : (
-              <Button variant="aktion" onClick={aufloesen} data-testid="z1-aufloesen">
-                Und jetzt das echte Maß
-              </Button>
+              <button
+                type="button"
+                onClick={aufloesen}
+                disabled={!alle}
+                data-testid="z1-aufloesen"
+                /*
+                  `grayscale` zusätzlich zur gedeckelten Deckkraft: Ob der
+                  Knopf gerade „noch nicht" oder „jetzt" sagt, muss man am
+                  Kiosk im Vorbeigehen sehen (R8, wie in A4).
+                */
+                className="min-h-[52px] rounded-kh-pill bg-kh-signal px-5 text-[1.0625rem] font-semibold text-[#0E0D0B] transition-transform active:scale-95 disabled:scale-100 disabled:opacity-40 disabled:grayscale"
+              >
+                Und jetzt die echten Maße
+              </button>
             )
           }
           geschafft={aufgeloest ? 'Toleranz gelesen' : null}
@@ -189,218 +228,204 @@ export function Z1() {
 }
 
 // ---------------------------------------------------------------------------
-// Takt 1 — schätzen
+// Takt 1 — probieren
 // ---------------------------------------------------------------------------
 
-function Schaetzung({
-  stufe,
-  wert,
-  onStufe,
-  schmal = false,
+/**
+ * Die Liste der drei Wellen als Protokoll.
+ *
+ * **Sie zeigt kein Maß.** Solange probiert wird, steht neben jeder Welle nur,
+ * was passiert ist — die Zahlen kommen erst in der Auflösung. Stünde hier
+ * schon 19,962, wäre die Übung vorbei, bevor sie angefangen hat: Man müsste
+ * nur noch die drei Zahlen mit der Toleranz vergleichen, und das kann, wer
+ * gerade erst lernt, was eine Toleranz ist, ohnehin nicht.
+ */
+function Probe({
+  probiert,
+  zuletzt,
 }: {
-  stufe: number
-  wert: number
-  onStufe: (n: number) => void
-  /** Handy hochkant: das Feld wird eine Zeile, die Frage kürzer — sonst
-      läge der Slider unter der Scrollkante (s. `schmal.ts`). */
-  schmal?: boolean
+  probiert: readonly string[]
+  zuletzt: string | null
 }) {
+  const letzte = WELLEN.find((w) => w.id === zuletzt)
+
   return (
     <div className="flex flex-col gap-3">
-      {/* Das Maß, um das es geht. Es steht im Panel und nicht nur auf der
-          Zeichnung: wer schätzt, soll es lesen können, ohne am Bildrand danach
-          zu suchen — und `h7` ist der Begriff, den dieser Screen beibringt.
-          Auf dem Handy entfällt das Feld: dort steht Ø 20 h7 groß und orange
-          direkt über dem Panel auf der Zeichnung, und jede Zeile im Panel
-          kostet den Slider (s. `schmal.ts`). */}
-      {!schmal && (
-        <div className="kh-feld flex flex-col gap-1 px-3.5 py-2.5">
-          <span className="kh-etikett">Auf der Zeichnung</span>
-          <span className="font-display text-[1.75rem] leading-none text-kh-paper tabular-nums">
-            Ø {NENNMASS} h7
-          </span>
-          <span className="text-[0.9375rem] text-kh-mute">
-            Die <Begriff id="passung">Passung</Begriff> hinter dem Maß sagt, wie genau.
-          </span>
-        </div>
-      )}
+      {/*
+        **Der Rahmen steht hier und nicht im `warum`** — das zeigt die Hülle
+        auf Übungs-Steps nicht an (`komponenten/Lage.tsx`). Ohne ihn schiebt
+        man drei gleich aussehende Stäbe in drei gleich aussehende Löcher und
+        weiß nicht, wozu.
+      */}
+      <Lage>
+        Drei Wellen aus der Nachtschicht, alle mit demselben Maß auf der Zeichnung. Eine
+        davon gehört in dieses Lager — welche, findest du nur heraus, indem du sie
+        reinschiebst.
+      </Lage>
 
-      <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-        {schmal
-          ? 'Wie viel darf danebengehen?'
-          : 'Wie viel darf danebengehen? Zieh, bis du glaubst, das reicht.'}
-      </p>
-
-      {/* Die Zahl trägt Anton und gehört solange dem Besucher — deshalb
-          Warnwestengelb. Nach der Auflösung wechselt sie auf Orange: dann ist
-          es die Zahl der Zeichnung, nicht mehr die eigene. */}
-      <span data-testid="z1-zahl" className="kh-zahl">
-        {mm(wert)}
-      </span>
-
-      <div className="relative" data-wisch="aus">
-        <input
-          type="range"
-          min={0}
-          max={STUFEN}
-          step={1}
-          value={stufe}
-          onChange={(e) => onStufe(Number(e.target.value))}
-          data-testid="z1-regler"
-          aria-label="Wie viel darf danebengehen?"
-          aria-valuetext={mm(wert)}
-          className="kh-regler w-full"
-        />
-        {/* R7: rechts = feiner ist die Ausnahme von „rechts = mehr“ — sie
-            braucht Wort-Endpunkte, damit niemand nachdenken muss, warum
-            rechts die kleinere Zahl steht. */}
-        <div className="flex justify-between text-[0.9375rem] text-kh-mute/70 tabular-nums">
-          <span>grob · {mm(MAX_MM)}</span>
-          <span>fein · {mm(MIN_MM)}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Takt 2 — auflösen
-// ---------------------------------------------------------------------------
-
-function Aufloesung({ schaetzung }: { schaetzung: number }) {
-  return (
-    <div className="flex flex-col gap-4 landscape:grid landscape:grid-cols-[1fr_1.05fr] landscape:items-start landscape:gap-x-7">
-      <div className="flex flex-col gap-2.5">
-        {/* Die ausgeschriebene Zahl — als Titel der Auflösung ist sie stark
-            (R6); über dem Slider war sie der Spoiler. */}
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.35 }}
-          className="kh-etikett text-kh-orange"
-        >
-          Null Komma null zwei eins
-        </motion.span>
-        {/* Die Signaturzahl rastet ein — hart, ohne Überschwingen (§7). */}
-        <motion.span
-          initial={{ opacity: 0, transform: 'translateY(18px) scale(0.9)' }}
-          animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
-          transition={{ duration: 0.4, ease: RASTER }}
-          data-testid="z1-zahl"
-          className="kh-zahl text-kh-orange"
-        >
-          {mm(TOLERANZ)}
-        </motion.span>
-        <p className="text-[1.0625rem] text-kh-mute">
-          Nach oben nichts, nach unten {mm(TOLERANZ)}. Das ist der ganze Spielraum.
-        </p>
-
-        <Vergleich schaetzung={schaetzung} />
-      </div>
-
-      <motion.div
-        initial="aus"
-        animate="an"
-        variants={{ an: { transition: { staggerChildren: 0.09, delayChildren: 0.3 } } }}
-        className="flex flex-col gap-3"
-        data-testid="z1-masse"
-      >
-        <dl className="flex flex-col">
-          {[
-            { was: 'Größtes erlaubtes Maß', wert: GROESSTMASS },
-            { was: 'Kleinstes erlaubtes Maß', wert: KLEINSTMASS },
-          ].map((z) => (
-            <motion.div
-              key={z.was}
-              variants={{ aus: { opacity: 0, x: -12 }, an: { opacity: 1, x: 0 } }}
-              className="flex items-baseline justify-between gap-3 border-b border-kh-line py-2 text-[1.0625rem] last:border-0"
+      <ul className="flex flex-col" data-testid="z1-protokoll">
+        {WELLEN.map((w) => {
+          const fertig = probiert.includes(w.id)
+          return (
+            <li
+              key={w.id}
+              className="flex items-baseline gap-3 border-b border-kh-line py-2 text-[1.0625rem] last:border-0"
             >
-              <dt className="min-w-0 text-kh-paper">{z.was}</dt>
-              <dd className="shrink-0 font-display text-[1.5rem] leading-none text-kh-paper tabular-nums">
-                {mm(z.wert)}
-              </dd>
-            </motion.div>
-          ))}
-        </dl>
+              <span className="w-4 shrink-0 font-display text-[1.25rem] leading-none text-kh-mute">
+                {w.id}
+              </span>
+              <span className="shrink-0 text-kh-paper tabular-nums">Ø {NENNMASS}</span>
+              <span
+                className={`ml-auto text-right ${
+                  fertig ? 'font-semibold text-kh-orange' : 'text-kh-mute/70'
+                }`}
+              >
+                {fertig ? ERGEBNIS[w.sitz].kurz : 'noch nicht probiert'}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
 
-        {/*
-          Der Größenvergleich. „So fein wie ein Haar“ wäre falsch — die
-          Toleranz ist deutlich feiner (belege/zerspanung.md 2, Haar 50–70 µm).
-          Deshalb „ungefähr“ und „ein Drittel“, nie „genau dreimal feiner“:
-          Haardicke streut um den Faktor drei.
-        */}
+      {letzte && (
         <motion.p
-          variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
-          className="text-[1.0625rem] leading-snug text-kh-paper/85"
+          key={letzte.id}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: RASTER }}
+          data-testid="z1-ergebnis"
+          className="text-[1.0625rem] leading-[1.45] text-kh-paper/85"
         >
-          Nimm dir ein Haar vom Kopf. Das ist ungefähr 0,06 Millimeter dick. Der ganze
-          Spielraum, den dieses Teil hat, ist ein Drittel davon.
+          {ERGEBNIS[letzte.sitz].lang}
         </motion.p>
-
-        <motion.div variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}>
-          <Papier />
-        </motion.div>
-      </motion.div>
+      )}
     </div>
   )
 }
 
-/**
- * Der Abstand zwischen der geratenen und der echten Zahl — auf derselben
- * logarithmischen Skala, auf der eben noch gezogen wurde.
- *
- * Er ist die Aussage dieses Screens: M2 löst mit einer Zahl auf, die *größer*
- * ist als erwartet, hier ist sie absurd *kleiner*. Dieselbe Mechanik,
- * entgegengesetztes Vorzeichen.
- */
-function Vergleich({ schaetzung }: { schaetzung: number }) {
-  const von = Math.min(anteil(schaetzung), anteil(TOLERANZ))
-  const bis = Math.max(anteil(schaetzung), anteil(TOLERANZ))
-  const verhaeltnis = schaetzung / TOLERANZ
+// ---------------------------------------------------------------------------
+// Takt 2 — auflösen. Größt- und Kleinstmaß stehen jetzt auf der Bühne, in der
+// Einzelheit der Zeichnung — das Panel wiederholt sie nicht.
+// ---------------------------------------------------------------------------
 
+function Aufloesung() {
   return (
-    <div className="flex flex-col gap-2" data-testid="z1-vergleich">
-      <div className="relative h-4 w-full rounded-full border border-kh-line bg-white/10">
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          style={{ left: `${von}%`, width: `${bis - von}%`, transformOrigin: 'left' }}
-          className="absolute inset-y-0 bg-kh-orange/30"
-          aria-hidden
-        />
-        <span
-          style={{ left: `${anteil(schaetzung)}%` }}
-          className="absolute top-[-7px] bottom-[-7px] w-[6px] -translate-x-1/2 rounded-full bg-kh-paper/70"
-          aria-hidden
-        />
-        <motion.span
-          initial={{ opacity: 0, scaleY: 0.3 }}
-          animate={{ opacity: 1, scaleY: 1 }}
-          transition={{ delay: 0.2, duration: 0.4, ease: RASTER }}
-          style={{ left: `${anteil(TOLERANZ)}%` }}
-          className="absolute top-[-10px] bottom-[-10px] w-[7px] -translate-x-1/2 rounded-full bg-kh-orange shadow-[0_0_12px_rgba(255,159,42,0.6)]"
-          aria-hidden
-        />
-      </div>
-      <p className="text-[1rem] tabular-nums">
-        <span className="text-kh-mute">Du hast </span>
-        <span className="font-semibold text-kh-paper/85">{mm(schaetzung)}</span>
-        <span className="text-kh-mute"> geschätzt — </span>
-        <span className="font-semibold text-kh-orange">{abstand(verhaeltnis)}</span>
-      </p>
-    </div>
+    <motion.div
+      initial="aus"
+      animate="an"
+      variants={{ an: { transition: { staggerChildren: 0.4, delayChildren: 0.25 } } }}
+      className="flex flex-col gap-3"
+    >
+      <Takt>
+        {/* Die ausgeschriebene Zahl — als Titel der Auflösung ist sie stark
+            (R6); über einer laufenden Übung wäre sie der Spoiler. */}
+        <span className="kh-etikett text-kh-orange">Null Komma null zwei eins</span>
+        <div className="flex items-baseline gap-2.5">
+          {/* Die Signaturzahl rastet ein — hart, ohne Überschwingen (§7). */}
+          <motion.span
+            initial={{ opacity: 0, transform: 'translateY(18px) scale(0.9)' }}
+            animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
+            transition={{ duration: 0.4, ease: RASTER }}
+            data-testid="z1-zahl"
+            className="kh-zahl text-kh-orange"
+          >
+            {mm(TOLERANZ)}
+          </motion.span>
+          <span className="text-[1.125rem] font-semibold text-kh-mute">mm</span>
+        </div>
+        <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+          Das kleine <span className="font-semibold text-kh-paper">h7</span> hinter dem
+          Maß heißt genau das: ab 20,000 nur nach unten, {mm(TOLERANZ)} tief. Dieser
+          Spielraum heißt <Begriff id="toleranz">Toleranz</Begriff>.
+        </p>
+      </Takt>
+
+      <Takt>
+        <Messprotokoll />
+      </Takt>
+
+      <Takt>
+        {/*
+          Der Größenvergleich, an der Zahl, die der Besucher gerade erlebt
+          hat. „So fein wie ein Haar" wäre falsch — die Toleranz ist deutlich
+          feiner (belege/zerspanung.md 2, Haar 50–70 µm). Deshalb „ungefähr",
+          nie eine Rechnung: Haardicke streut um den Faktor drei.
+        */}
+        <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/85">
+          Zwischen der Welle, die sitzt, und der, die klemmt, liegen{' '}
+          <span className="text-kh-paper">{mm(WELLEN_ABSTAND)} Millimeter</span>. Ein Haar
+          vom Kopf ist ungefähr {HAAR.toFixed(2).replace('.', ',')} dick — der Unterschied
+          hier ist kleiner.
+        </p>
+        <div className="mt-2.5 flex flex-wrap items-center gap-3">
+          <Papier />
+        </div>
+      </Takt>
+
+      <Takt>
+        {/* Der Satz, der die Ökonomie dahinter trägt — sichtbar, nicht in
+            einer Klappzeile (R14 nennt ihn als Messlatte des Tons). */}
+        <p className="kh-titel-klein border-t border-kh-line pt-3 text-kh-orange">
+          Enger heißt nicht besser — enger heißt teurer.
+        </p>
+      </Takt>
+    </motion.div>
+  )
+}
+
+/** Ein Beat der Auflösung — sie kommen nacheinander, nicht auf einmal. */
+function Takt({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      variants={{
+        aus: { opacity: 0, transform: 'translateY(12px)' },
+        an: { opacity: 1, transform: 'translateY(0px)' },
+      }}
+      transition={{ duration: 0.4, ease: RASTER }}
+    >
+      {children}
+    </motion.div>
   )
 }
 
 /**
- * Der Abstand in Worten. Ein Faktor sagt hier mehr als eine Differenz: 0,479 mm
- * daneben klingt nach wenig, „dreiundzwanzigmal so viel“ nicht.
+ * Die drei echten Maße, gegen die Toleranzzone gestellt.
+ *
+ * **Erst hier stehen sie**, und jetzt erklären sie etwas: Man hat gerade
+ * gesehen, dass zwei nicht gehen, und liest nach, um wie viel. Andersherum
+ * wäre es eine Tabelle vor einer Aufgabe.
  */
-function abstand(verhaeltnis: number): string {
-  if (verhaeltnis >= 1.6) return `${Math.round(verhaeltnis)}-mal so viel`
-  if (verhaeltnis <= 0.65) return 'enger, als nötig wäre'
-  return 'ziemlich nah dran'
+function Messprotokoll() {
+  return (
+    <dl className="flex flex-col" data-testid="z1-messwerte">
+      {WELLEN.map((w) => (
+        <div
+          key={w.id}
+          className="flex items-baseline gap-3 border-b border-kh-line py-2 text-[1.0625rem] last:border-0"
+        >
+          <dt className="flex shrink-0 items-baseline gap-2">
+            <span className="w-4 font-display text-[1.25rem] leading-none text-kh-mute">
+              {w.id}
+            </span>
+            <span
+              className={`font-display text-[1.375rem] leading-none tabular-nums ${
+                w.sitz === 'sitzt' ? 'text-kh-signal' : 'text-kh-paper/60'
+              }`}
+            >
+              {mm(w.wert)}
+            </span>
+          </dt>
+          <dd className="ml-auto text-right text-kh-mute">
+            {w.sitz === 'sitzt'
+              ? 'in der Toleranz'
+              : w.sitz === 'klemmt'
+                ? 'über dem Größtmaß'
+                : 'unter dem Kleinstmaß'}
+          </dd>
+        </div>
+      ))}
+    </dl>
+  )
 }
 
 /**

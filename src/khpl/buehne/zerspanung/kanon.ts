@@ -37,6 +37,67 @@ export const TOLERANZ = Number((GROESSTMASS - KLEINSTMASS).toFixed(3))
 /** Länge des gedrehten Abschnitts in mm (aus dem Programm, Zeile `G1 Z-35.`). */
 export const LAENGE = 35
 
+// ---------------------------------------------------------------------------
+// Z1 — die drei Wellen
+// ---------------------------------------------------------------------------
+
+/** Wie sich eine Welle im Lagersitz verhält. */
+export type Sitz = 'lose' | 'sitzt' | 'klemmt'
+
+/**
+ * Die drei Wellen aus Z1 — **auf der Zeichnung stehen bei allen dreien
+ * dieselben zwei Zeichen: Ø 20.**
+ *
+ * Das ist der ganze Screen. Ein Sechzehnjähriger, der zum ersten Mal eine
+ * Zeichnung sieht, liest „Ø 20“ als *die* Angabe und hält drei Teile mit
+ * derselben Angabe für dasselbe Teil. Erst wenn er sie nacheinander in den
+ * Sitz schiebt, merkt er, dass zwei davon nicht gehen — und dann erst wird
+ * `h7` zu einer Information statt zu einem Kürzel.
+ *
+ * Die Werte liegen absichtlich **nicht symmetrisch** um das Nennmaß: Die Zone
+ * `h7` reicht von 19,979 bis 20,000, also ausschließlich nach unten. Ein Teil,
+ * das mit 20,031 zu groß ist, ist nach der Zeichnung schon bei 20,001 zu groß
+ * — und genau diese Schieflage ist der Grund, warum man sich in Serie von oben
+ * an das Maß heranarbeitet (siehe `MESSWERTE` weiter unten).
+ *
+ * ⚠️ **Die Reihenfolge ist die Reihenfolge auf dem Screen** und beginnt
+ * bewusst nicht mit der richtigen: Wer beim ersten Griff Glück hat, lernt
+ * nichts.
+ */
+export const WELLEN: readonly {
+  readonly id: 'A' | 'B' | 'C'
+  /** Der wirklich gemessene Durchmesser in mm. */
+  readonly wert: number
+  readonly sitz: Sitz
+}[] = [
+  { id: 'A', wert: 19.962, sitz: 'lose' },
+  { id: 'B', wert: 19.988, sitz: 'sitzt' },
+  { id: 'C', wert: 20.031, sitz: 'klemmt' },
+]
+
+/**
+ * Der Abstand zwischen der Welle, die sitzt, und der, die nicht mehr reingeht,
+ * in mm — die Zahl, mit der der Screen auflöst.
+ *
+ * Sie wird **gerechnet und nicht geschrieben**: Ändert jemand oben einen Wert,
+ * darf die Auflösung nicht stehen bleiben und etwas Falsches behaupten.
+ */
+export const WELLEN_ABSTAND = Number(
+  (
+    (WELLEN.find((w) => w.sitz === 'klemmt')?.wert ?? 0) -
+    (WELLEN.find((w) => w.sitz === 'sitzt')?.wert ?? 0)
+  ).toFixed(3),
+)
+
+/**
+ * Dicke eines Kopfhaares in mm — der Körper-Anker dieses Tages (R12).
+ *
+ * ⚠️ `belege/zerspanung.md` 2 gibt 50–70 µm an; Haardicke streut um den Faktor
+ * drei. Auf dem Screen steht deshalb immer „ungefähr“ und nie eine Rechnung
+ * mit zwei Nachkommastellen.
+ */
+export const HAAR = 0.06
+
 /** Fase vorn: 2 mm unter 45°. */
 export const FASE = 2
 
@@ -60,6 +121,29 @@ export const PROFIL: readonly { readonly z: number; readonly r: number }[] = [
  * erscheint deshalb auf keinem Screen als Zahl.
  */
 export const ROHLING_DURCHMESSER = 22
+
+// ---------------------------------------------------------------------------
+// Z2 — der Nullpunkt
+// ---------------------------------------------------------------------------
+
+/**
+ * Die drei Stellen, an die der Besucher den Werkstücknullpunkt legen kann.
+ *
+ * **Drei benannte Orte statt einer freien Zieh-Geste.** Die Foto-Fassung ließ
+ * ein Fadenkreuz frei über ein Fräsmaschinen-Motiv ziehen und prüfte gegen
+ * einen Treffer-Radius — mit zwei verschiedenen Schwellen in Bühne und Panel,
+ * einem Motiv aus dem falschen Gewerk (gefräst statt gedreht) und einem
+ * Versatz in „Millimetern“, die ein gefundenes Foto gar nicht hergibt. Drei
+ * antippbare Orte auf der gezeichneten Maschine prüfen stattdessen genau das,
+ * worum es geht: **erkennt jemand, dass Null ans Werkstück gehört** — nicht,
+ * wie ruhig seine Hand ist. Wo die Orte auf der Bühne liegen, ist Bühnenmaß
+ * und steht in `Maschine.tsx`; welcher richtig ist, entscheidet die Fachlogik
+ * hier.
+ */
+export type NullWahl = 'futter' | 'werkzeug' | 'stirn'
+
+/** Die Stelle, ab der das Programm wirklich zählt: vorn am Werkstück. */
+export const NULL_RICHTIG = 'stirn' satisfies NullWahl
 
 // ---------------------------------------------------------------------------
 // Z3 — das Programm

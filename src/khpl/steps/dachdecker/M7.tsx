@@ -1,6 +1,5 @@
-import { Suspense, lazy, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
 import {
   DndContext,
   DragOverlay,
@@ -115,8 +114,6 @@ export function M7() {
   const [fehler, setFehler] = useState(0)
   const [meldung, setMeldung] = useState<{ text: string; ok: boolean } | null>(null)
   const [zieht, setZieht] = useState<string | null>(null)
-  /** Angesehenes Teil — Label, oder `null`, wenn keine Vorschau offen ist. */
-  const [vorschau, setVorschau] = useState<string | null>(null)
 
   // Wer schon einmal hier war, hat die Vorführung gesehen — er steigt direkt
   // in die Abfrage ein. Alle anderen bekommen erst das ganze Dach zu sehen.
@@ -154,11 +151,6 @@ export function M7() {
   const gezogen = useMemo(
     () => (zieht ? M7_SCHRITTE.find((s) => s.label === zieht) : undefined),
     [zieht],
-  )
-
-  const angesehen = useMemo(
-    () => (vorschau ? M7_SCHRITTE.find((s) => s.label === vorschau) : undefined),
-    [vorschau],
   )
 
   /**
@@ -246,10 +238,7 @@ export function M7() {
             Steht. Von der Fußpfette bis zur letzten Dachlatte — in der Reihenfolge, in
             der es geht. Morgen kommen die Ziegel drauf.
           </p>
-        ) : takt ===
-          'bauen' ? // Während gebaut wird, trägt allein das Auftragsband die Anweisung —
-        // ein Fließtext daneben wäre nur Füllung. Also keiner.
-        null : (
+        ) : takt === 'bauen' ? null : ( // ein Fließtext daneben wäre nur Füllung. Also keiner. // Während gebaut wird, trägt allein das Auftragsband die Anweisung —
           <p>
             So sieht die zweite Hälfte fertig aus. Schau dir an, was in welcher
             Reihenfolge kommt — gleich baust du sie selbst.

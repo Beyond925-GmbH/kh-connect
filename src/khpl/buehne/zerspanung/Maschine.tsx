@@ -1,6 +1,8 @@
+import { motion } from 'motion/react'
 import { Bild, Mass, Pfeilspitze } from './Bild'
 import { BAUTEIL, STRICH } from './stil'
-import { LAENGE, NENNMASS, ROHLING_DURCHMESSER } from './kanon'
+import { LAENGE, NENNMASS, ROHLING_DURCHMESSER, type NullWahl } from './kanon'
+import { KONTUR } from './weg'
 
 /**
  * Z2 — halbnah in die Maschine: Futter, Rohling, Revolver.
@@ -11,11 +13,14 @@ import { LAENGE, NENNMASS, ROHLING_DURCHMESSER } from './kanon'
  * Screen mit einer anderen Handschrift — und ausgerechnet der, auf dem man
  * *lesen* soll, was wo sitzt. Linien zeigen das besser als Chrom.
  *
- * **Die Maschine steht von Anfang an da, leer.** Vier Handgriffe füllen sie:
+ * **Die Maschine steht von Anfang an da, leer.** Drei Handgriffe füllen sie —
  * der Rohling wird gespannt, das Werkzeug kommt in den Revolver, seine Länge
- * wird vermessen, der Nullpunkt wird gesetzt. Der erste Screen zeigt deshalb
- * nicht nichts, sondern **eine Maschine, in der noch nichts ist** — genau das
- * ist die Aussage: „wie viel passiert, bevor irgendetwas passiert“ (§6 Z2).
+ * wird vermessen — und jeder zeichnet sich sichtbar ein. Der erste Screen
+ * zeigt deshalb nicht nichts, sondern **eine Maschine, in der noch nichts
+ * ist** — genau das ist die Aussage: „wie viel passiert, bevor irgendetwas
+ * passiert“ (§6 Z2). Der vierte Handgriff ist die Übung: der Nullpunkt, als
+ * Wahl zwischen drei benannten Orten (`kanon.ts`, `NullWahl`) mit einer
+ * gestrichelten Vorschau dessen, was das Programm ab dort täte.
  *
  * **Die Maße hier sind Bühnenmaße.** Futter, Backen und Revolver haben keine
  * Zahl, die irgendwo belegt wäre, und dürfen deshalb auf keinem Screen als
@@ -81,22 +86,52 @@ function ursprung(sicht: string): readonly [number, number] {
   return [x, y]
 }
 
+/**
+ * Wo die drei antippbaren Nullpunkt-Orte auf der Bühne liegen — Bühnenmaße,
+ * keine Fachaussage (`kanon.ts`, `NullWahl`). Der Halter wandert mit der
+ * Blattlage, deshalb ist `werkzeug` eine Funktion der Aufstellung.
+ */
+function nullOrte(lage: Aufstellung): Record<NullWahl, readonly [number, number]> {
+  return {
+    // Auf der Achse, mitten im Spindelkörper: „die Maschine weiß doch, wo ihr
+    // Futter ist“ — der naheliegendste falsche Ort.
+    futter: [-49, 0],
+    werkzeug: lage.halter,
+    stirn: [0, 0],
+  }
+}
+
+/** Wie die drei Orte auf der Bühne heißen. Namen, keine Wertung. */
+const ORT_NAME: Record<NullWahl, string> = {
+  futter: 'Futter',
+  werkzeug: 'Werkzeug',
+  stirn: 'Werkstück',
+}
+
 export function Maschine({
   ruestschritte = 0,
-  nullpunkt = false,
+  wahl = null,
+  onWahl,
+  gefertigt = false,
 }: {
+  /** Wie viele der drei Handgriffe erledigt sind — 0 bis 3. */
   ruestschritte?: number
-  nullpunkt?: boolean
+  /** Der zuletzt angetippte Nullpunkt-Ort. `null` = noch keiner. */
+  wahl?: NullWahl | null
+  /** Solange gesetzt, sind die drei Orte antippbar. */
+  onWahl?: (wahl: NullWahl) => void
+  /** Der Nullpunkt sitzt, das erste Teil ist gedreht. */
+  gefertigt?: boolean
 }) {
   const gespannt = ruestschritte >= 1
   const bestueckt = ruestschritte >= 2
   const vermessen = ruestschritte >= 3
-  const genullt = ruestschritte >= 4 || nullpunkt
 
   return (
     <Bild viewBox={QUER.sicht} viewBoxHoch={HOCH.sicht}>
       {(hoch) => {
         const lage = hoch ? HOCH : QUER
+        const orte = nullOrte(lage)
 
         return (
           <>
@@ -104,7 +139,10 @@ export function Maschine({
 
             <g
               style={{
-                opacity: gespannt ? 1 : 0,
+                // Nach dem Drehen bleibt der Rohling als Schatten stehen —
+                // dieselbe Deckkraft wie in Z3 (`Werkzeugweg`), denn es ist
+                // derselbe Moment: man sieht, was abgetragen wurde.
+                opacity: gespannt ? (gefertigt ? 0.34 : 1) : 0,
                 transition: 'opacity 0.4s cubic-bezier(0.2, 0, 0, 1)',
               }}
             >
@@ -112,12 +150,136 @@ export function Maschine({
             </g>
 
             <Revolver bestueckt={bestueckt} lage={lage} />
-            <Werkzeuglaenge sichtbar={vermessen} lage={lage} />
-            <Nullpunkt sichtbar={genullt} leuchtet={nullpunkt} />
+            <Werkzeuglaenge sichtbar={vermessen && !gefertigt} lage={lage} />
+
+            {/* Das fertige Teil — dieselbe Kontur, die Z1 zeichnet und Z3
+                fährt, und sie steht nur dann da, wenn ab der richtigen Stelle
+                gezählt wurde. */}
+            {gefertigt && (
+              <motion.path
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, ease: [0.2, 0, 0, 1] }}
+                d={KONTUR}
+                className="fill-kh-paper/22 stroke-kh-paper"
+                strokeWidth={STRICH.voll}
+                strokeLinejoin="round"
+                vectorEffect="non-scaling-stroke"
+              />
+            )}
+
+            {/* Wohin das Programm ab dem gewählten Ort zählen würde: die
+                Kontur aus der Zeichnung, gestrichelt an den Ort gelegt. Am
+                Futter verschwindet sie in der Spannung, am Werkzeug hängt sie
+                in der Luft — die Vorschau ist die halbe Lektion. */}
+            {!gefertigt && wahl && (
+              <motion.g
+                key={wahl}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.35, ease: [0.2, 0, 0, 1] }}
+                transform={`translate(${orte[wahl][0]} ${orte[wahl][1]})`}
+                pointerEvents="none"
+              >
+                <path
+                  d={KONTUR}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={STRICH.voll}
+                  strokeDasharray="6 4"
+                  strokeLinejoin="round"
+                  vectorEffect="non-scaling-stroke"
+                  className="text-kh-orange"
+                />
+              </motion.g>
+            )}
+
+            {/* Die drei Orte. Limette heißt „hier kannst du hin“ (R8) — der
+                gewählte trägt das Fadenkreuz, die anderen pulsen leise. */}
+            {vermessen &&
+              !gefertigt &&
+              onWahl &&
+              (Object.keys(orte) as NullWahl[]).map((id) => (
+                <Ort
+                  key={id}
+                  id={id}
+                  punkt={orte[id]}
+                  name={ORT_NAME[id]}
+                  gewaehlt={wahl === id}
+                  onTippen={() => onWahl(id)}
+                />
+              ))}
+
+            <Nullpunkt sichtbar={gefertigt} leuchtet={gefertigt} />
           </>
         )
       }}
     </Bild>
+  )
+}
+
+/**
+ * Ein antippbarer Nullpunkt-Ort. Die Trefferfläche ist deutlich größer als
+ * das Zeichen — am Kiosk wird mit ausgestrecktem Arm getippt, nicht mit der
+ * Maus gezielt.
+ */
+function Ort({
+  id,
+  punkt,
+  name,
+  gewaehlt,
+  onTippen,
+}: {
+  id: NullWahl
+  punkt: readonly [number, number]
+  name: string
+  gewaehlt: boolean
+  onTippen: () => void
+}) {
+  const [x, y] = punkt
+
+  return (
+    <g
+      transform={`translate(${x} ${y})`}
+      onClick={onTippen}
+      role="button"
+      aria-label={`Nullpunkt: ${name}`}
+      aria-pressed={gewaehlt}
+      className="cursor-pointer"
+      data-testid={`z2-ort-${id}`}
+    >
+      <circle r={8} fill="transparent" />
+      {gewaehlt ? (
+        <g className="stroke-kh-signal" strokeWidth={STRICH.voll} pointerEvents="none">
+          <line x1={-6} y1={0} x2={6} y2={0} vectorEffect="non-scaling-stroke" />
+          <line x1={0} y1={-6} x2={0} y2={6} vectorEffect="non-scaling-stroke" />
+          <circle r={3.2} fill="none" vectorEffect="non-scaling-stroke" />
+        </g>
+      ) : (
+        <motion.circle
+          r={3.2}
+          fill="none"
+          className="stroke-kh-signal"
+          strokeWidth={STRICH.voll}
+          vectorEffect="non-scaling-stroke"
+          animate={{ opacity: [1, 0.35, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity }}
+          pointerEvents="none"
+        />
+      )}
+      {/* Das Werkstück-Label steht **unter** seinem Punkt: darüber liegen
+          Werkzeughalter und Längenbemaßung, und ein Label im Maßpfeil ist
+          keins. Die anderen beiden haben nach oben Luft. */}
+      <text
+        y={id === 'stirn' ? 14 : gewaehlt ? -8.5 : -6.5}
+        textAnchor="middle"
+        fontSize={3.4}
+        pointerEvents="none"
+        className={`font-display ${gewaehlt ? 'fill-kh-signal' : 'fill-kh-mute'}`}
+      >
+        {name}
+      </text>
+    </g>
   )
 }
 

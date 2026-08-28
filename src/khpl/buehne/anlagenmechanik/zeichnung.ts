@@ -61,6 +61,43 @@ export const HAUS = {
   kellerBoden: 236,
 } as const
 
+/**
+ * **Wo dieses Haus seine Wärme verliert** — die vier Flächen, die A3 antippen
+ * lässt.
+ *
+ * Der Pfeil zeigt nach außen, weil die Wärme nach außen geht; `staerke` ist
+ * seine Dicke und damit sein **relativer** Anteil am Verlust.
+ *
+ * ⚠️ **Bewusst kein Kilowatt je Fläche.** Wie viel ein Dach wirklich verliert,
+ * hängt an Dämmstärke, Fläche, Ausrichtung und Baujahr; eine Zahl je Fläche
+ * hinzuschreiben wäre erfunden, und was `NICHT BELEGBAR` heißt, erscheint auf
+ * keinem Screen (khpl-tage.md §0b). Gezeigt wird deshalb dieselbe Währung wie
+ * beim Druckverlust in A4: ein Balken, keine Einheit. Die eine belegte Zahl
+ * des Screens — die Heizlast von 10 bis 14 kW nach DIN EN 12831 — steht in der
+ * Auflösung, und zwar als Fenster.
+ *
+ * Die Reihenfolge ist die Reihenfolge der Anteile: Ein ungedämmtes Dach ist
+ * die größte Fläche nach oben, alte Fenster die schwächste Stelle je
+ * Quadratmeter.
+ */
+export const VERLUSTFLAECHEN: readonly {
+  id: string
+  label: string
+  /** Fußpunkt des Pfeils, auf der Fläche. */
+  x: number
+  y: number
+  /** Richtung, in die die Wärme entweicht. */
+  dx: number
+  dy: number
+  /** Anteil am Gesamtverlust, 0–1 — die Dicke des Pfeils. */
+  staerke: number
+}[] = [
+  { id: 'dach', label: 'Dach', x: 160, y: 44, dx: 0, dy: -26, staerke: 1 },
+  { id: 'wand', label: 'Außenwand', x: 62, y: 118, dx: -26, dy: 0, staerke: 0.8 },
+  { id: 'fenster', label: 'Fenster', x: 258, y: 96, dx: 26, dy: 0, staerke: 0.65 },
+  { id: 'keller', label: 'Kellerdecke', x: 160, y: 156, dx: 0, dy: 22, staerke: 0.45 },
+]
+
 /** Die vier Heizkörper des Hauses — zwei Geschosse, zwei Stränge. */
 export const HEIZKOERPER: readonly {
   id: string
@@ -598,13 +635,59 @@ export const ANLAGENPUNKTE: readonly {
   label: string
   x: number
   y: number
+  /**
+   * Wo die Beschriftung sitzt.
+   *
+   * **Von Hand gesetzt, nicht gerechnet.** Seit A1 seine Prüfungen auf der
+   * Zeichnung wählen lässt statt in einer Knopfliste, trägt jeder Punkt seinen
+   * Namen sichtbar — und sechs Namen, die alle mit demselben Versatz unter
+   * ihrem Kreis hängen, schreiben sich gegenseitig zu. „Zirkulation“ lag auf
+   * dem Mischer, „Speicherladepumpe“ lief in „Regelung“, „Wärmeerzeuger“ stand
+   * halb außerhalb des Rahmens. Sechs Punkte lassen sich von Hand setzen; ein
+   * Ausweichverfahren dafür zu bauen, wäre teurer als die sechs Zeilen hier.
+   */
+  lx: number
+  ly: number
+  anker: 'start' | 'middle' | 'end'
 }[] = [
-  { id: 'speicher', label: 'Speicher', x: 96, y: 142 },
-  { id: 'zirkulation', label: 'Zirkulation', x: 176, y: 116 },
-  { id: 'mischer', label: 'Mischer', x: 196, y: 132 },
-  { id: 'ladepumpe', label: 'Speicherladepumpe', x: 176, y: 168 },
-  { id: 'kessel', label: 'Wärmeerzeuger', x: 238, y: 200 },
-  { id: 'regelung', label: 'Regelung', x: 256, y: 146 },
+  { id: 'speicher', label: 'Speicher', x: 96, y: 142, lx: 96, ly: 174, anker: 'middle' },
+  {
+    id: 'zirkulation',
+    label: 'Zirkulation',
+    x: 176,
+    y: 116,
+    lx: 176,
+    ly: 96,
+    anker: 'middle',
+  },
+  { id: 'mischer', label: 'Mischer', x: 196, y: 132, lx: 214, ly: 128, anker: 'start' },
+  {
+    id: 'ladepumpe',
+    label: 'Speicherladepumpe',
+    x: 176,
+    y: 168,
+    lx: 168,
+    ly: 196,
+    anker: 'middle',
+  },
+  {
+    id: 'kessel',
+    label: 'Wärmeerzeuger',
+    x: 238,
+    y: 200,
+    lx: 238,
+    ly: 228,
+    anker: 'middle',
+  },
+  {
+    id: 'regelung',
+    label: 'Regelung',
+    x: 256,
+    y: 146,
+    lx: 256,
+    ly: 122,
+    anker: 'middle',
+  },
 ]
 
 /**

@@ -111,7 +111,16 @@ export function Z4() {
   return (
     <StepShell
       id="Z4"
-      auftrag={'Tipp an, was dich im Messraum wundert.'}
+      /*
+       * `null` ist hier die Entscheidung, kein Versäumnis: Z4 ist die Zäsur —
+       * ein Lese-Step mit drei freiwilligen Entdeckungen, keine Übung. Erst
+       * mit `auftrag={null}` rendert die Hülle den Warum-Absatz und damit
+       * „Neunzig Maschinen. Ein Messraum." — mit einer Auftragszeile war
+       * dieser Step als Übung eingestuft und sein ganzer Rahmen unsichtbar
+       * (`StepShell.tsx`, `leseStep`). Die Einladung zum Tippen steht im
+       * Panel selbst.
+       */
+      auftrag={null}
       ansage={null}
       interaktionOffen={false}
       buehne={<StepFoto id="Z4" />}

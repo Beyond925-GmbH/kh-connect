@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
-import { Werkstueck } from '@/khpl/buehne/zerspanung/Werkstueck'
+import { Messschraube } from '@/khpl/buehne/zerspanung/Messschraube'
+import { Lage } from '@/khpl/komponenten/Lage'
 import {
   GROESSTMASS,
   KLEINSTMASS,
@@ -111,10 +112,6 @@ const URTEILE: readonly { id: Urteil; label: string; grund: string }[] = [
  * Behauptung, sondern eine laufende Zahl.
  */
 const OFFEN_UM = 0.6
-
-/** Die Achse des Toleranzbandes. Ebenfalls Bühne: sie trägt keine Beschriftung. */
-const ACHSE_VON = 19.96
-const ACHSE_BIS = 20.02
 
 /** Weiter als der Korrektor sinnvoll verstellt wird. */
 const KORREKTUR_MAX = 0.05
@@ -276,15 +273,31 @@ export function Z5() {
               ? 'Stell den Korrektor nach und lass noch eins laufen.'
               : null
       }
-      ansage={{
-        geste: 'ziehen-regler',
-        text: 'Du misst dein Teil selbst nach — mit einer Schraube, die Tausendstel anzeigt.',
-        haken: 'Zu fest gedreht misst du deine eigene Kraft mit.',
-      }}
+      /*
+        Die Ansage gehört zum Zudrehen — auf einem Wiedereinstieg mitten in
+        Beat 2 gibt es keinen Regler, und eine Zieh-Ansage über einem
+        Tipp-Screen wäre eine falsche Auskunft.
+      */
+      ansage={
+        takt === 'zudrehen'
+          ? {
+              geste: 'ziehen-regler',
+              text: 'Du misst dein Teil selbst nach — mit einer Schraube, die Tausendstel anzeigt.',
+              haken: 'Zu fest gedreht misst du deine eigene Kraft mit.',
+            }
+          : null
+      }
       interaktionOffen={!fertig}
+      /*
+        **Wieder die gezeichnete Mikrometerschraube** (`buehne/zerspanung/
+        Messschraube`). Eine Zwischenfassung legte ein Foto darunter — dessen
+        Gerät maß einen Stahlträger und zeigte eine fremde Zahl, die eine
+        aufgesetzte Platte überdecken musste. Die Zeichnung dreht stattdessen
+        wirklich mit: Trommel und Spindel fahren zu, und die Toleranzzone legt
+        sich über dieselbe Fläche, die Z1 als Einzelheit gezeigt hat.
+      */
       buehne={
-        <Werkstueck
-          zustand="messung"
+        <Messschraube
           messwert={angezeigt}
           toleranzUeberlagerung={takt === 'gemessen' || takt === 'korrigieren'}
           korrigiert={fertig}
@@ -321,7 +334,16 @@ export function Z5() {
         <Wechsel takt={takt}>
           {takt === 'zudrehen' ? (
             <div className="flex flex-col gap-3">
-              <Anzeige wert={angezeigt} ton="offen" />
+              {/* Der Rahmen — `warum` rendert auf Übungs-Steps nicht
+                  (`Lage.tsx`), also steht er hier. */}
+              <Lage>
+                Das erste Teil ist durch und liegt in der Mikrometerschraube. Jetzt kommt
+                der Teil des Berufs, der nie ausfällt: messen.
+              </Lage>
+              {/* Die laufende Zahl. Die gezeichnete Schraube trägt bewusst
+                  keine Ziffern (`Messschraube.tsx`) — die Anzeige ist hier,
+                  in `kh-zahl`, und rastet in Hundertsteln (§7). */}
+              <Anzeige wert={angezeigt} ton={drehung >= 100 ? 'steht' : 'offen'} />
               <div data-wisch="aus">
                 <input
                   type="range"
@@ -341,10 +363,9 @@ export function Z5() {
             </div>
           ) : takt === 'urteilen' ? (
             <div className="flex flex-col gap-3">
+              {/* Kein „Und, passt es?" darunter: Die Frage stellt schon der
+                  Titel des Steps, die Handlung sagt die Auftragszeile (R4). */}
               <Anzeige wert={angezeigt} ton="steht" />
-              <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-                Und, passt es?
-              </p>
               {/*
                 Drei gleich große Flächen. Keine ist hervorgehoben und keine
                 versteckt: die Antwort ergibt sich aus dem Toleranzfeld, das in
@@ -367,7 +388,9 @@ export function Z5() {
           ) : takt === 'gemessen' ? (
             <div className="flex flex-col gap-3" data-testid="z5-auswertung">
               <Anzeige wert={angezeigt} ton={richtig ? 'gut' : 'steht'} />
-              <Toleranzband wert={angezeigt} />
+              {/* Die Zone selbst liegt auf der Bühne, über der gemessenen
+                  Fläche — hier stehen nur die beiden belegten Grenzen. */}
+              <Erlaubt />
               <div className="kh-feld px-4 py-3">
                 <p className="kh-etikett">
                   {richtig ? 'Richtig gelesen' : 'Sieh es dir an'}
@@ -375,14 +398,14 @@ export function Z5() {
                 <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
                   {richtig
                     ? grundFuer(TEIL_1.urteil)
-                    : `Du hast „${labelFuer(urteil)}“ gesagt. Das Toleranzfeld liegt jetzt über der Zahl — sieh nach, wo sie sitzt. ${grundFuer(TEIL_1.urteil)}`}
+                    : `Du hast „${labelFuer(urteil)}“ gesagt. Das Toleranzfeld liegt jetzt über dem Teil — sieh nach, wo dein Wert sitzt. ${grundFuer(TEIL_1.urteil)}`}
                 </p>
               </div>
             </div>
           ) : takt === 'korrigieren' ? (
             <div className="flex flex-col gap-3">
               <Anzeige wert={angezeigt} ton="steht" />
-              <Toleranzband wert={angezeigt} />
+              <Erlaubt />
               <Korrektor wert={korrektur} onWert={setKorrektur} />
               <Rueckmeldung
                 ok={meldung ? false : null}
@@ -491,51 +514,19 @@ function Anzeige({ wert, ton }: { wert: number; ton: 'offen' | 'steht' | 'gut' }
 }
 
 /**
- * Das Toleranzfeld, das sich über den Messwert legt (§6 Z5).
+ * Die beiden belegten Grenzen als Satz (ISO 286, `belege/zerspanung.md` 1).
  *
- * Es ist die Antwort auf eine falsche Eingabe — statt eines Tadels sieht man,
- * wo die Zahl liegt. Deshalb trägt es keine Wertung und keine rote Fläche: die
- * Zone ist gelbgrün, weil „drin“ im ganzen System diese Farbe hat, und die
- * Marke ist orange, weil sie der eigene Messwert ist.
+ * **Kein zweites Toleranzband im Panel.** Die Zone liegt auf der Bühne, über
+ * genau der Fläche, die gemessen wird (`Messschraube.tsx`, `Toleranzzone`) —
+ * ein Balken im Panel daneben wäre dieselbe Aussage ein zweites Mal, und zwei
+ * Darstellungen eines Maßes lesen sich als zwei Messungen.
  */
-function Toleranzband({ wert }: { wert: number }) {
-  const pos = (n: number) => ((n - ACHSE_VON) / (ACHSE_BIS - ACHSE_VON)) * 100
-  const links = pos(KLEINSTMASS)
-  const breite = pos(GROESSTMASS) - links
-
+function Erlaubt() {
   return (
-    <div className="flex flex-col gap-1.5" data-testid="z5-toleranzband">
-      <div className="relative h-9">
-        <div
-          aria-hidden
-          className="absolute inset-x-0 top-1/2 h-[3px] -translate-y-1/2 rounded-full bg-white/12"
-        />
-        <motion.div
-          aria-hidden
-          initial={{ opacity: 0, scaleX: 0.4 }}
-          animate={{ opacity: 1, scaleX: 1 }}
-          transition={{ duration: 0.5, ease: RASTER }}
-          style={{ left: `${links}%`, width: `${breite}%` }}
-          className="absolute top-1/2 h-3.5 -translate-y-1/2 rounded-[3px] border-y-2 border-kh-signal bg-kh-signal/25"
-        />
-        <motion.div
-          aria-hidden
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, left: `${pos(wert)}%` }}
-          transition={{ duration: 0.55, ease: RASTER }}
-          className="absolute top-1/2 size-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-kh-orange ring-4 ring-[#0E0D0B]"
-        />
-      </div>
-      {/*
-        Die beiden Grenzen als Text und nicht als Achsenbeschriftung: sie sind
-        die belegte Aussage dieses Screens (ISO 286, `belege/zerspanung.md` 1),
-        die Achse selbst ist nur Bühne.
-      */}
-      <p className="text-[0.9375rem] text-kh-mute tabular-nums">
-        Erlaubt: {mass(KLEINSTMASS)} bis {mass(GROESSTMASS)} mm — {mass(TOLERANZ)} mm
-        Spielraum.
-      </p>
-    </div>
+    <p className="text-[0.9375rem] text-kh-mute tabular-nums" data-testid="z5-erlaubt">
+      Erlaubt: {mass(KLEINSTMASS)} bis {mass(GROESSTMASS)} mm — {mass(TOLERANZ)} mm
+      Spielraum.
+    </p>
   )
 }
 

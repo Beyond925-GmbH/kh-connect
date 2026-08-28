@@ -155,10 +155,28 @@ export interface Antworten {
   // Zerspanung — Schlüssel `z*`
   // -------------------------------------------------------------------------
 
-  /** Z1 — geschätzte Toleranz in mm, und ob die echte Zahl schon stand. */
-  z1?: { schaetzung: number; aufgeloest: boolean }
-  /** Z2 — welche der vier Rüst-Handgriffe erledigt sind. */
-  z2?: { geruestet: string[]; fertig: boolean }
+  /**
+   * Z1 — welche Wellen schon im Sitz waren, und ob die echten Maße schon
+   * standen.
+   *
+   * ⚠️ **Die Form hat sich mit dem Umbau geändert** (vorher
+   * `{ schaetzung, aufgeloest }`, ein Schätzwert in mm). Ein alter Stand fällt
+   * in `pruefeAntworten` von selbst auf den Boden: `probiert` fehlt, der
+   * Eintrag wird verworfen, Z1 startet neu. Das ist der vorgesehene Weg —
+   * genau dafür prüft die Funktion die Form und nicht nur die `version`.
+   */
+  z1?: { probiert: string[]; aufgeloest: boolean }
+  /**
+   * Z2 — wie viele der drei Handgriffe erledigt sind, welcher Nullpunkt-Ort
+   * zuletzt gewählt war und ob der Nullpunkt sitzt.
+   *
+   * ⚠️ **Die Form hat sich mit dem Umbau geändert** (vorher
+   * `{ geruestet, fertig, versatz? }` aus der Foto-Fassung — deren `versatz`
+   * wurde geschrieben und nie gelesen; der Wiederbesuch zeigte jeden Treffer
+   * als perfekt). Ein alter Stand fällt in `pruefeAntworten` von selbst auf
+   * den Boden: `griffe` fehlt, der Eintrag wird verworfen, Z2 startet neu.
+   */
+  z2?: { griffe: number; wahl: 'futter' | 'werkzeug' | 'stirn' | null; fertig: boolean }
   /**
    * Z3 — wie weit der Besucher sich durch das Programm getippt hat, ob er die
    * falsche Zeile gefunden hat und ob er blind gestartet ist.
@@ -187,6 +205,16 @@ export interface Antworten {
     korrigiert: boolean
     endwert?: number
   }
+  /**
+   * Z6 — wo der Besucher in den Haufen getippt hat, in Prozent der Bildfläche.
+   *
+   * Die Punkte werden gespeichert und nicht nur gezählt, weil sie beim
+   * Wiederbesuch **wieder an derselben Stelle** liegen müssen: Der Screen
+   * behauptet „egal wohin du tippst, es könnte deins sein“ — und eine Marke,
+   * die nach einem Rücksprung woanders sitzt, macht aus der Pointe einen
+   * Zufallsgenerator.
+   */
+  z6?: { tipps: { x: number; y: number }[] }
   /**
    * Z7 — angesehene Karrierewege, in Reihenfolge des Öffnens.
    *
@@ -217,7 +245,16 @@ export interface Antworten {
   /** A2 — welche der sechs Bauteile im Keller angetippt wurden. */
   a2?: { angetippt: string[] }
   /** A3 — geschätzte Heizlast in kW, und ob die Auflösung schon stand. */
-  a3?: { schaetzung: number; aufgeloest: boolean }
+  /**
+   * A3 — welche Verlustflächen gefunden wurden, und ob die Heizlast schon
+   * stand.
+   *
+   * ⚠️ **Die Form hat sich mit dem Umbau geändert** (vorher
+   * `{ schaetzung, aufgeloest }`, ein Reglerwert in kW). Ein alter Stand fällt
+   * in `pruefeAntworten` von selbst auf den Boden — `verluste` fehlt, der
+   * Eintrag wird verworfen, A3 startet neu.
+   */
+  a3?: { verluste: string[]; aufgeloest: boolean }
   /**
    * A4 — der Weg der Leitung durch das Kellerraster.
    *
@@ -462,12 +499,19 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   // ---------------------------------------------------------------------
 
   const z1 = q.z1 as Antworten['z1']
-  if (z1 && typeof z1.schaetzung === 'number' && Number.isFinite(z1.schaetzung)) {
-    a.z1 = { schaetzung: z1.schaetzung, aufgeloest: !!z1.aufgeloest }
+  if (z1 && stringListe(z1.probiert)) {
+    a.z1 = { probiert: stringListe(z1.probiert) as string[], aufgeloest: !!z1.aufgeloest }
   }
+  const NULL_ORTE: readonly string[] = ['futter', 'werkzeug', 'stirn']
   const z2 = q.z2 as Antworten['z2']
-  if (z2 && stringListe(z2.geruestet)) {
-    a.z2 = { geruestet: stringListe(z2.geruestet) as string[], fertig: !!z2.fertig }
+  if (z2 && typeof z2.griffe === 'number' && Number.isFinite(z2.griffe)) {
+    a.z2 = {
+      griffe: z2.griffe,
+      // Ein Ort, den es nicht mehr gibt, fällt auf `null` — Z2 zeigt dann
+      // wieder die Wahl statt einer Vorschau ins Leere.
+      wahl: z2.wahl !== null && NULL_ORTE.includes(z2.wahl) ? z2.wahl : null,
+      fertig: !!z2.fertig,
+    }
   }
   const z3 = q.z3 as Antworten['z3']
   if (z3 && typeof z3.zeilen === 'number' && Number.isFinite(z3.zeilen)) {
@@ -492,6 +536,15 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
     if (typeof z5.endwert === 'number' && Number.isFinite(z5.endwert)) {
       a.z5.endwert = z5.endwert
     }
+  }
+  const z6 = q.z6 as Antworten['z6']
+  if (z6 && Array.isArray(z6.tipps)) {
+    // Ein Punkt ohne Zahlen zeichnet eine Marke auf `NaN%` — die landet in der
+    // linken oberen Ecke und sieht aus wie ein Rendering-Fehler.
+    const tipps = z6.tipps.filter(
+      (p) => p && Number.isFinite(p.x) && Number.isFinite(p.y),
+    )
+    if (tipps.length) a.z6 = { tipps }
   }
   const z7 = q.z7 as Antworten['z7']
   if (z7 && Array.isArray(z7.angesehen)) {
@@ -519,8 +572,8 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
     a.a2 = { angetippt: stringListe(a2.angetippt) as string[] }
   }
   const a3 = q.a3 as Antworten['a3']
-  if (a3 && typeof a3.schaetzung === 'number' && Number.isFinite(a3.schaetzung)) {
-    a.a3 = { schaetzung: a3.schaetzung, aufgeloest: !!a3.aufgeloest }
+  if (a3 && stringListe(a3.verluste)) {
+    a.a3 = { verluste: stringListe(a3.verluste) as string[], aufgeloest: !!a3.aufgeloest }
   }
   const a4 = q.a4 as Antworten['a4']
   if (a4 && stringListe(a4.pfad)) {

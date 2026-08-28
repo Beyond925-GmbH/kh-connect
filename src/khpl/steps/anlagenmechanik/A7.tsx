@@ -3,6 +3,7 @@ import { Check } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
+import { Lage } from '@/khpl/komponenten/Lage'
 import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
@@ -280,7 +281,13 @@ export function A7() {
         deshalb sagt der Auftrag „so, dass sie es versteht", nicht „wähle eine
         Antwort".
       */
-      auftrag={imGespraech ? 'Erklär es so, dass sie es versteht.' : null}
+      /*
+        **„sie" wird jetzt benannt.** Vorher stand hier „Erklär es so, dass sie
+        es versteht" — und wer *sie* ist, stand ausschließlich im `warum`, das
+        die Hülle auf Übungs-Steps gar nicht anzeigt (`komponenten/Lage.tsx`).
+        Man bekam also eine Person zugeteilt, die nie vorgestellt wurde.
+      */
+      auftrag={imGespraech ? 'Erklär es der Bauherrin so, dass sie es versteht.' : null}
       ansage={null}
       interaktionOffen={imGespraech}
       buehne={
@@ -288,28 +295,31 @@ export function A7() {
           zustand={{ szene: 'uebergabe', pfad: fortschritt.answers.a4?.pfad ?? [] }}
         />
       }
-      warum={
-        imGespraech ? (
-          /*
-            Auf dem Handy hochkant entfällt der Rahmentext: mit ihm lag die
-            dritte Antwort unter der Scrollkante (Sichtprüfung, A7 handy-hoch,
-            `scrollRest` 55 px) — ausgerechnet die ausweichende, an der die
-            Übung hängt. „Sie fragt · 1 von 3" trägt die Situation auch allein.
-          */
-          <p className="max-sm:hidden">
-            Die Bauherrin steht mit dir im Keller und will wissen, was du da gebaut hast.
-            Das gehört zum Auftrag wie das Rohr an der Wand: zeigen, erklären, dann ist
-            Feierabend.
-          </p>
-        ) : undefined
-      }
+      // Der Rahmen steht seit dem Umbau **sichtbar** über der ersten Frage
+      // (`Lage`, unten) statt hier im nie angezeigten Warum-Bereich.
+      warum={undefined}
       interaktion={
         <Wechsel takt={imGespraech ? `${frage.id}-${phase}` : 'rueckblick'}>
           {imGespraech ? (
             <div className="flex flex-col gap-3">
+              {/*
+                **Nur bei der ersten Frage.** Ab der zweiten ist die Situation
+                gesetzt, und der Platz wird gebraucht: Auf dem Handy hochkant
+                lag die dritte Antwort mit dauerhaftem Rahmentext unter der
+                Scrollkante (Sichtprüfung A7 handy-hoch, `scrollRest` 55 px) —
+                ausgerechnet die ausweichende, an der die Übung hängt.
+              */}
+              {index === 0 && (
+                <Lage>
+                  Die Bauherrin steht neben dir im Keller. Sie hat die neue Anlage
+                  bezahlt, gesehen hat sie davon zwei Rohre und einen Kasten — und jetzt
+                  fragt sie dich.
+                </Lage>
+              )}
+
               <div className="kh-feld px-4 py-3" data-testid="a7-frage">
                 <p className="kh-etikett">
-                  Sie fragt · {index + 1} von {FRAGEN.length}
+                  Die Bauherrin fragt · {index + 1} von {FRAGEN.length}
                 </p>
                 <p className="mt-1 text-[1.125rem] leading-snug text-kh-paper">
                   „{frage.frage}“

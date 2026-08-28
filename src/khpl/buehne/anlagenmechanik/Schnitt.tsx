@@ -87,6 +87,8 @@ export interface SchnittProps {
   onPruefpunkt?: (id: PruefungId) => void
   /** A2 — der Besucher tippt ein Bauteil im Keller an. */
   onBauteil?: (id: BauteilId) => void
+  /** A3 — der Besucher tippt eine der vier Verlustflächen am Haus an. */
+  onVerlust?: (id: string) => void
   /**
    * A4 — die Zeichnung führt die Geste, der Step bekommt den Weg.
    *
@@ -110,6 +112,7 @@ export function Schnitt({
   zustand,
   onPruefpunkt,
   onBauteil,
+  onVerlust,
   onPfad,
   onAbgewiesen,
   onWaermeAngekommen,
@@ -145,6 +148,7 @@ export function Schnitt({
             seiten={seiten}
             zustand={zustand}
             onBauteil={onBauteil}
+            onVerlust={onVerlust}
             onPfad={onPfad}
             onAbgewiesen={onAbgewiesen}
             onWaermeAngekommen={onWaermeAngekommen}

@@ -8,12 +8,14 @@ import {
   STEUERUNG,
   type Programmzeile,
 } from '@/khpl/buehne/zerspanung/kanon'
-import { Werkstueck } from '@/khpl/buehne/zerspanung/Werkstueck'
+import { Werkzeugweg } from '@/khpl/buehne/zerspanung/Werkzeugweg'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
+import { Lage } from '@/khpl/komponenten/Lage'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
+import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
@@ -69,6 +71,21 @@ import { Begriff } from './Begriff'
 /** Nach zwei Fehlversuchen bietet die App die Lösung an (flow 6.6). */
 const HILFE_AB = 2
 
+/**
+ * Wie lange eine Programmzeile mindestens dransteht, bevor die nächste
+ * gefahren wird, in Millisekunden.
+ *
+ * **Der Takt ist die Reparatur des Wisch-Problems.** Vorher folgte `gelesen`
+ * dem Finger unmittelbar: Ein Wisch über die volle Breite sprang in einem
+ * Zeigerereignis auf 14/14, und sämtliche Klammer-Kommentare — die gesamte
+ * Erklärebene des Screens — waren übersprungen, ohne dass jemand sie je
+ * gesehen hätte. Jetzt setzt der Finger nur das **Ziel**; abgearbeitet wird
+ * Zeile für Zeile, wie es eine Steuerung täte. Wer weit zieht, sieht das
+ * Programm ablaufen statt es zu überspringen — und der Werkzeugweg zeichnet
+ * sich dazu in seinen gleichmäßigen Schritten (§7).
+ */
+const ZEILEN_TAKT_MS = 800
+
 const TREFFER_TEXT =
   'Gefunden. Ohne das Minus fährt das Werkzeug vom Teil weg statt an ihm entlang.'
 
@@ -87,6 +104,10 @@ export function Z3() {
   const [gelesen, setGelesen] = useState(() =>
     vorbei ? PROGRAMM.length : (gespeichert?.zeilen ?? 0),
   )
+  /** Bis zu welcher Zeile der Finger den Vorschub bestellt hat. */
+  const [ziel, setZiel] = useState(() => (vorbei ? PROGRAMM.length : 0))
+  /** Wann die letzte Zeile gefahren ist — für den Takt (`ZEILEN_TAKT_MS`). */
+  const letzterSchritt = useRef(0)
   const [gefunden, setGefunden] = useState(() => !!gespeichert?.gefunden)
   /**
    * Blind gestartet. Das Antwortfeld heißt nach der Spec-Signatur weiter
@@ -119,11 +140,40 @@ export function Z3() {
         ? 'suchen'
         : 'lesen'
 
-  const naechsteZeile = () => {
-    const n = Math.min(PROGRAMM.length, gelesen + 1)
-    setGelesen(n)
-    merkeAntwort('z3', { zeilen: n, gefunden: false, kollision: false })
+  /**
+   * Wohin der Finger den Vorschub bestellt — **nur das Ziel, nicht der
+   * Stand.** Nur vorwärts: Ein zurückgezogener Finger nimmt keine Zeile
+   * zurück; ein Programm läuft ab, es lässt sich nicht rückwärts fahren.
+   */
+  const fahreBis = (anteil: number) => {
+    const n = Math.min(
+      PROGRAMM.length,
+      Math.max(ziel, Math.round(anteil * PROGRAMM.length)),
+    )
+    if (n !== ziel) setZiel(n)
   }
+
+  /**
+   * Der Vorschub selbst: eine Zeile je Takt, dem Ziel hinterher.
+   *
+   * Geschrieben wird **je Zeile einmal**, nicht je Zeigerereignis — und weil
+   * `letzterSchritt` beim Mount auf null steht, fährt die erste bestellte
+   * Zeile ohne Wartezeit los: Der erste Zug soll sofort etwas tun.
+   */
+  useEffect(() => {
+    if (takt !== 'lesen' || gelesen >= ziel) return
+    const warten = Math.max(
+      0,
+      ZEILEN_TAKT_MS - (performance.now() - letzterSchritt.current),
+    )
+    const id = window.setTimeout(() => {
+      letzterSchritt.current = performance.now()
+      const n = Math.min(PROGRAMM.length, gelesen + 1)
+      setGelesen(n)
+      merkeAntwort('z3', { zeilen: n, gefunden: false, kollision: false })
+    }, warten)
+    return () => window.clearTimeout(id)
+  }, [gelesen, ziel, takt])
 
   const tippeZeile = (index: number) => {
     if (takt !== 'suchen') return
@@ -156,24 +206,47 @@ export function Z3() {
   return (
     <StepShell
       id="Z3"
-      auftrag={erledigt ? null : 'Geh das Programm durch, Zeile für Zeile.'}
-      ansage={null}
+      auftrag={
+        erledigt ? null : takt === 'lesen' ? 'Zieh das Werkzeug am Teil entlang.' : null
+      }
+      /*
+        Die Ansage gehört zu dieser Geste und nicht zu diesem Screen: Wer an
+        diesem Tag in Z2 schon frei gezogen hat, bekommt sie hier nicht noch
+        einmal (`komponenten/gesten.ts`).
+      */
+      ansage={
+        takt === 'lesen'
+          ? {
+              geste: 'ziehen-frei',
+              text: 'Du fährst das Werkzeug selbst — zieh nach rechts, am Teil entlang.',
+              haken:
+                'Die Maschine arbeitet Zeile für Zeile — auch wenn du schneller ziehst.',
+            }
+          : null
+      }
       interaktionOffen={!erledigt}
       // Kein `karteBreit`: der Code ist rund zwanzig Zeichen breit, und jedes
       // Rem mehr Panel ging quer direkt von der Bühne ab — bei 52 rem begann
       // das SVG hinter der Panelkante und der halbe Werkzeugweg war verdeckt.
+      buehneInteraktiv={takt === 'lesen'}
       buehne={
-        <Werkstueck
-          zustand="werkzeugweg"
-          // `gelesen` ist die Zahl der abgearbeiteten Zeilen und damit zugleich
-          // der Index der nächsten. Die Bühne rechnet **bis ausschließlich**
-          // dieser Zeile (`weg.ts`), damit das Stück Kontur in dem Moment
-          // erscheint, in dem der Besucher die Zeile abschickt — und nicht
-          // schon, während die Klammer sie erst ankündigt.
-          zeile={gelesen}
-          markierteZeile={markiert}
-          luftschnitt={luftschnitt}
-        />
+        <Vorschubflaeche
+          aktiv={takt === 'lesen'}
+          anteil={gelesen / PROGRAMM.length}
+          onFahren={fahreBis}
+        >
+          <Werkzeugweg
+            // `gelesen` ist die Zahl der abgearbeiteten Zeilen und damit
+            // zugleich der Index der nächsten. Die Bühne rechnet **bis
+            // ausschließlich** dieser Zeile (`weg.ts`), damit das Stück Kontur
+            // in dem Moment erscheint, in dem der Besucher die Zeile
+            // abschickt — und nicht schon, während die Klammer sie erst
+            // ankündigt.
+            zeile={gelesen}
+            markierteZeile={markiert}
+            luftschnitt={luftschnitt}
+          />
+        </Vorschubflaeche>
       }
       /*
         R10, wörtlich der Referenzfall der Designregeln: 14 Zeilen G-Code
@@ -200,7 +273,18 @@ export function Z3() {
           */}
           <Wechsel takt={takt}>
             {takt === 'lesen' ? (
-              <Klammer zeile={PROGRAMM[gelesen]} nummer={gelesen + 1} />
+              <div className="flex flex-col gap-3">
+                {/*
+                  R10, wörtlich der Referenzfall der Designregeln — und er
+                  steht hier, wo er auf dem ersten Blick sichtbar ist, nicht
+                  im `warum`, das auf Übungs-Steps nie rendert (`Lage.tsx`).
+                */}
+                <Lage>
+                  14 Zeilen sagen der Maschine, wohin das Werkzeug fährt. Du musst keine
+                  davon können — zieh, und sieh zu, was jede tut.
+                </Lage>
+                <Klammer zeile={PROGRAMM[gelesen]} nummer={gelesen + 1} />
+              </div>
             ) : takt === 'suchen' ? (
               <div className="flex flex-col gap-3">
                 <p className="text-[1.0625rem] font-semibold text-kh-paper">
@@ -269,15 +353,7 @@ export function Z3() {
           id="Z3"
           uebungOffen={!erledigt}
           aktion={
-            takt === 'lesen' ? (
-              <Button
-                variant="aktion"
-                onClick={naechsteZeile}
-                data-testid="z3-naechste-zeile"
-              >
-                {gelesen === 0 ? 'Erste Zeile' : 'Nächste Zeile'}
-              </Button>
-            ) : takt === 'suchen' ? (
+            takt === 'lesen' ? null : takt === 'suchen' ? (
               <div className="flex items-center gap-2">
                 {versuche >= HILFE_AB && !vorschlag && (
                   <Button
@@ -305,6 +381,114 @@ export function Z3() {
         />
       }
     />
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Die Ziehfläche über der Bühne
+// ---------------------------------------------------------------------------
+
+/**
+ * Der **Vorschub in der Hand des Besuchers**.
+ *
+ * ---
+ *
+ * **Was hier ersetzt wurde.** Der Screen hatte vierzehn Zeilen G-Code und
+ * darunter einen Knopf „Nächste Zeile". Vierzehnmal derselbe Knopf. Inhaltlich
+ * war der Beat richtig gedacht — mit jeder Fahrzeile zeichnet sich ein Stück
+ * Kontur, aus Text wird eine Form —, aber die Handlung dazu war Blättern, und
+ * Blättern ist keine Handlung.
+ *
+ * Jetzt zieht der Besucher das Werkzeug mit dem Finger am Teil entlang, und
+ * **der Code schreibt sich dabei mit**. Das ist dieselbe Geste wie in A4 und
+ * Z2 (`ziehen-frei`) und dreht die Aussage des Screens vom Lesen aufs Tun:
+ * nicht „hier steht, was die Maschine macht", sondern „was du machst, steht
+ * gleich als Programm da". Für die Frage „Was mache ich in dem Beruf
+ * eigentlich?" ist das der ehrlichste Screen des Tages — Programmieren ist
+ * laut allen Interviews der beliebteste Teil der Arbeit, und ein Blätterknopf
+ * verkauft ihn unter Wert.
+ *
+ * **Waagerecht, weil die Maschine waagerecht fährt.** Die Kontur läuft in
+ * `Z`-Richtung von rechts nach links ins Material; die Ziehrichtung ist
+ * dieselbe, die das Werkzeug nimmt.
+ *
+ * **Der Anteil wird aus der Zeigerposition gelesen, nicht aus der
+ * Bewegungsstrecke.** Wer den Finger absetzt und weiter rechts wieder
+ * aufsetzt, springt dorthin — das ist bei einem Kiosk mit ausgestrecktem Arm
+ * die gnädigere Variante, und rückwärts geht ohnehin nichts (`fahreBis`).
+ */
+function Vorschubflaeche({
+  aktiv,
+  anteil,
+  onFahren,
+  children,
+}: {
+  aktiv: boolean
+  /** Wie weit das Programm schon gefahren ist, 0–1 — für den Griff. */
+  anteil: number
+  onFahren: (anteil: number) => void
+  children: React.ReactNode
+}) {
+  const flaeche = useRef<HTMLDivElement>(null)
+  /*
+    **Die Ziehfläche liegt im gemessenen freien Feld, nicht über dem ganzen
+    Screen.** Quer sitzt das Panel links über der halben Breite; eine
+    Ziehfläche über die volle Breite hieße, dass die erste Hälfte der Geste
+    unter der Karte stattfindet — und der Griff, der sie ankündigt, lag dort
+    als limetter Splitter hinter dem Panel. `useSichtfeld` liefert dieselbe
+    Messung, aus der die 3D-Kamera ihr Fenster nimmt.
+  */
+  const frei = useSichtfeld('roh')
+  const rahmen = {
+    left: `${(frei?.links ?? 0) * 100}%`,
+    right: `${(frei?.rechts ?? 0) * 100}%`,
+    top: `${(frei?.oben ?? 0) * 100}%`,
+    bottom: `${(frei?.unten ?? 0) * 100}%`,
+  }
+
+  const fahre = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = flaeche.current?.getBoundingClientRect()
+    if (!r || r.width === 0) return
+    onFahren((e.clientX - r.left) / r.width)
+  }
+
+  return (
+    <div className="relative size-full">
+      {children}
+      {aktiv && (
+        <div
+          ref={flaeche}
+          className="absolute touch-none"
+          style={rahmen}
+          data-wisch="aus"
+          onPointerDown={(e) => {
+            e.currentTarget.setPointerCapture(e.pointerId)
+            fahre(e)
+          }}
+          onPointerMove={(e) => e.buttons !== 0 && fahre(e)}
+          data-testid="z3-vorschub"
+        >
+          {/*
+            Der Griff. Er zeigt, dass die Fläche etwas kann, und wandert mit
+            dem Fortschritt — ohne ihn sieht die Bühne aus wie ein Bild, und
+            genau daran ist die freie Ziehgeste in der Abnahme von A4 schon
+            einmal gescheitert.
+          */}
+          <motion.span
+            aria-hidden
+            initial={false}
+            animate={{ left: `${Math.min(96, Math.max(4, anteil * 100))}%` }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+            // Innerhalb des freien Felds, knapp unter seiner Mitte: dort
+            // liegt in beiden Lagen die Zeichnung, und der Griff steht
+            // darunter statt hinter der Karte.
+            className="absolute top-[64%] grid size-14 -translate-x-1/2 place-items-center rounded-full bg-kh-signal/15 ring-2 ring-kh-signal"
+          >
+            <span className="size-3 rounded-full bg-kh-signal" />
+          </motion.span>
+        </div>
+      )}
+    </div>
   )
 }
 

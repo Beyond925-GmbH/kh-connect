@@ -27,6 +27,7 @@ import {
   RAHMEN,
   RAHMEN_INBETRIEBNAHME_BAND,
   RICHTIGER_WEG,
+  VERLUSTFLAECHEN,
   START,
   STRANG,
   STRANGVERTEILUNG_Y,
@@ -77,6 +78,7 @@ export function Haus({
   seiten,
   zustand,
   onBauteil,
+  onVerlust,
   onPfad,
   onAbgewiesen,
   onWaermeAngekommen,
@@ -85,6 +87,8 @@ export function Haus({
   seiten: number
   zustand: HausZustand
   onBauteil?: (id: BauteilId) => void
+  /** A3 — eine der vier Verlustflächen wurde angetippt. */
+  onVerlust?: (id: string) => void
   onPfad?: (pfad: readonly KnotenId[]) => void
   onAbgewiesen?: (knoten: KnotenId) => void
   onWaermeAngekommen?: () => void
@@ -240,10 +244,19 @@ export function Haus({
         )}
 
         {szene === 'haus' && (
-          <Waermebedarf
-            gezeigt={zustand.schaetzungKw !== null && !zustand.aufgeloest}
-            ruhig={ruhig}
-          />
+          <>
+            <Waermebedarf gezeigt={!zustand.aufgeloest} ruhig={ruhig} />
+            {VERLUSTFLAECHEN.map((f) => (
+              <Verlustpfeil
+                key={f.id}
+                flaeche={f}
+                gefunden={zustand.verluste.includes(f.id)}
+                offen={zustand.offen === f.id}
+                ruhig={ruhig}
+                onTipp={zustand.aufgeloest ? undefined : onVerlust}
+              />
+            ))}
+          </>
         )}
 
         {zeigtLeitung && <Leitung d={leitungD} warm={waermeLeitung} />}
@@ -1431,6 +1444,125 @@ function Feierabendlicht({ sicht }: { sicht: Rahmen }) {
         d={`M${sicht.x} ${sicht.y} H${sicht.x + sicht.b * 0.62} L${rechts - sicht.b * 0.76} ${unten} H${sicht.x} Z`}
         fill="url(#am-feierabend-band)"
       />
+    </g>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// A3 — wo die Wärme hinausgeht
+// ---------------------------------------------------------------------------
+
+/**
+ * Ein Wärmeverlust als Pfeil nach außen.
+ *
+ * ---
+ *
+ * **Wofür das gebaut ist.** A3 fragte „Schätz, wie viel Wärme dieses Haus
+ * braucht" und gab dafür einen Regler von 2 bis 30 kW. Für die Zielgruppe ist
+ * das keine Schätzung, sondern ein Griff ins Dunkle: Wer nie mit Kilowatt
+ * umgegangen ist, hat keinen Anker, den die Auflösung widerlegen könnte — und
+ * es war der dritte Regler dieser Art in derselben Anwendung.
+ *
+ * Jetzt sucht der Besucher stattdessen, **wo** die Wärme hingeht. Die vier
+ * Flächen sind antippbar, jede meldet ihren Anteil, und erst wenn alle vier
+ * gefunden sind, steht die Heizlast da — als Ergebnis des Hinsehens statt als
+ * Auflösung eines Ratespiels.
+ *
+ * **Ein Balken, keine Zahl je Fläche** (`VERLUSTFLAECHEN`): Der Anteil ist
+ * relativ, wie der Druckverlust in A4. Die eine belegte Zahl des Screens steht
+ * in der Auflösung.
+ */
+function Verlustpfeil({
+  flaeche,
+  gefunden,
+  offen,
+  ruhig,
+  onTipp,
+}: {
+  flaeche: (typeof VERLUSTFLAECHEN)[number]
+  gefunden: boolean
+  offen: boolean
+  ruhig: boolean
+  onTipp?: (id: string) => void
+}) {
+  const { x, y, dx, dy, staerke } = flaeche
+  // Die Dicke trägt den Anteil. Zwei bis sechs Einheiten: dünner verschwindet
+  // auf der Stele, dicker sieht nach Rohr aus statt nach Verlust.
+  const dicke = 2 + staerke * 4
+  const spitze = 3 + staerke * 3
+  const laenge = Math.hypot(dx, dy)
+  const ex = x + dx
+  const ey = y + dy
+  // Einheitsvektor quer zur Richtung — für die Pfeilspitze.
+  const qx = -dy / laenge
+  const qy = dx / laenge
+
+  return (
+    <g>
+      {gefunden && (
+        <g pointerEvents="none">
+          <line
+            x1={x}
+            y1={y}
+            x2={ex}
+            y2={ey}
+            stroke={WARM.linie}
+            strokeWidth={dicke}
+            strokeLinecap="round"
+            opacity={offen ? 1 : 0.7}
+          />
+          <path
+            d={`M ${ex + (dx / laenge) * 5} ${ey + (dy / laenge) * 5} L ${
+              ex + qx * spitze
+            } ${ey + qy * spitze} L ${ex - qx * spitze} ${ey - qy * spitze} Z`}
+            fill={WARM.linie}
+            opacity={offen ? 1 : 0.7}
+          />
+        </g>
+      )}
+
+      {/* Solange nicht gefunden: ein limetter Ring auf der Fläche. R8 — ist
+          die Bühne die Interaktion, trägt das antippbare Objekt die
+          Affordanz. */}
+      {!gefunden && onTipp && (
+        <motion.circle
+          cx={x}
+          cy={y}
+          r={9}
+          fill="none"
+          className="stroke-kh-signal"
+          strokeWidth={2.4}
+          initial={{ opacity: 0.9 }}
+          animate={ruhig ? { opacity: 0.9 } : { opacity: [0.9, 0.3, 0.9] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      )}
+
+      <text
+        x={x + dx * 0.55 + qx * 11}
+        y={y + dy * 0.55 + qy * 11 + 3}
+        textAnchor="middle"
+        fontSize={7}
+        fill={gefunden ? WARM.linie : KALT.linie}
+        stroke="#0E0D0B"
+        strokeWidth={2.4}
+        paintOrder="stroke"
+        strokeLinejoin="round"
+        pointerEvents="none"
+      >
+        {flaeche.label}
+      </text>
+
+      <circle
+        cx={x}
+        cy={y}
+        r={16}
+        fill="transparent"
+        className={onTipp ? 'cursor-pointer' : undefined}
+        onPointerDown={onTipp ? () => onTipp(flaeche.id) : undefined}
+      >
+        <title>{flaeche.label}</title>
+      </circle>
     </g>
   )
 }

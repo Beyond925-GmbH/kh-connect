@@ -228,15 +228,18 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
    * verlangt (khpl-tage.md §6.1 V3). **Nur Dateien, die im Repo liegen**;
    * Herkunft in `MEDIEN.md`, Beschreibungen in `MEDIEN-INVENTAR.md`.
    *
-   * Die Hälfte der Steps steht bewusst nicht darin. Dieser Tag baut seine
-   * Bühne aus Zeichnung, Werkzeugweg und Zahl (§7) — Z1, Z2, Z3, Z5 und Z6
-   * tragen kein Foto, sondern `buehne/zerspanung/`. Für Z6 (Kiste mit Teilen)
-   * gibt es zusätzlich **kein passendes Motiv im Bestand**; es ist neben dem
-   * Szenario-Video die zweite echte Medienlücke des Tages und die wichtigere,
-   * weil sie die Pointe trägt (§10).
+   * **Die Hauptlinie Z1–Z5 zeichnet und fotografiert nicht** — das ist die
+   * Bühnendoktrin dieses Tages (khpl-tag-zerspanung.md §7): seine Werkzeuge
+   * sind die Zeichnung, der Werkzeugweg und die Zahl, und alle drei sind
+   * Vektor (`buehne/zerspanung/`). Eine Zwischenfassung legte Fotos unter Z1,
+   * Z2 und Z5; sie zeigten das falsche Gewerk (gefräst statt gedreht) oder
+   * fremde Messwerte und sind wieder ausgebaut. Fotos trägt der Tag dort, wo
+   * die Welt gemeint ist: Z4 (Messraum), Z6 (der Haufen, in `buehne/
+   * zerspanung/Teilehaufen`), die Abstecher und der Karrierebereich.
    *
-   * `gallery-1.webp` trägt seit dem Ausbau Z7, `schaetzen-spindel.webp` seit
-   * dem Review Z7.1 — der Bestand ist damit ausgeschöpft.
+   * Die beiden Lücken aus `ui-review/medien-luecken-zerspanung.md` sind
+   * geschlossen: Z4 hat einen echten Messraum, Z7.1 einen Menschen (siehe die
+   * Kommentare an den Einträgen).
    */
   bilder: {
     /*
@@ -255,12 +258,18 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
     // Kühlmittel spritzt über das Werkstück. Genau das Motiv, das der
     // Abstecher erklärt.
     'Z2.1': { src: '/medien/media/zerspanungsmechaniker/gallery-3.webp', pos: '50% 50%' },
-    // Werkzeug über einem Stahlmaßstab: das ruhigste, sauberste Motiv des
-    // Bestands und damit der beste Kandidat für den Messraum (§6 Z4).
-    Z4: {
-      src: '/medien/media/zerspanungsmechaniker/quiz-praezision.webp',
-      pos: '50% 50%',
-    },
+    /*
+      Der Messraum — **die Lücke aus `ui-review/medien-luecken-zerspanung.md`
+      ist damit geschlossen.**
+
+      Vorher trug der Slot `quiz-praezision.webp`: eine Nahaufnahme von Bohrer
+      und Werkstück mit fliegenden Spänen. Der Fließtext daneben verspricht
+      „zwei Türen weiter, und die Halle ist weg — hier ist es leise, sauber und
+      immer gleich warm", und das Bild zeigte das laute Gegenteil (Review
+      26.08., Z4/R13). Jetzt liegen Messschieber, Zirkel und ein gedrehtes Teil
+      ruhig auf dunklem Grund: kein Span, keine Bewegung, kein Geräusch.
+    */
+    Z4: { src: '/medien/media/zerspanungsmechaniker/z4-messraum.webp', pos: '50% 50%' },
     // §10 führt für Z7 keinen Slot — ohne Eintrag bliebe die Bühne des
     // Karriere-Screens leer, und das wäre die einzige Stelle des Tages, an der
     // sie das täte: hochkant ein schwarzes oberes Drittel, das sich wie ein
@@ -283,8 +292,18 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       fremdes Gewerk (khpl-tage.md §6.1 V2).
     */
     'Z7.1': {
-      src: '/medien/media/zerspanungsmechaniker/schaetzen-spindel.webp',
-      pos: '50% 50%',
+      /*
+        **Auch diese Lücke ist geschlossen** (medien-luecken-zerspanung.md,
+        Z7.1). Der Slot trug zuletzt `schaetzen-spindel.webp` — eindeutig
+        Metall, aber ohne Menschen; der Review verlangte ausdrücklich eine
+        Person mit Führungsrolle, „jemand, der plant, prüft oder anleitet",
+        weil „nur Menschen und Ergebnisse ‚Will ich das sein?' beantworten"
+        (R13). Das Motiv zeigt genau das: ein Älterer erklärt einem Jüngeren
+        etwas an der Werkbank, Metallteile ringsum. Es ist zugleich die
+        Bildfassung von R14 — Meister zu Azubi, nicht Lehrer zu Kind.
+      */
+      src: '/medien/media/zerspanungsmechaniker/z7-meister.webp',
+      pos: '50% 40%',
     },
     'Z7.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
     'Z7.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },

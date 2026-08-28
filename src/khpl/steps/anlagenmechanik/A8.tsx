@@ -54,7 +54,9 @@ export function A8() {
       ansage={null}
       interaktionOffen={false}
       buehne={
-        <Schnitt zustand={{ szene: 'haus', schaetzungKw: null, aufgeloest: true }} />
+        <Schnitt
+          zustand={{ szene: 'haus', verluste: [], offen: null, aufgeloest: true }}
+        />
       }
       warum={
         // Dreieinhalb Jahre, `BELEGT` (`belege/ausbildung-karriere.md` 2:

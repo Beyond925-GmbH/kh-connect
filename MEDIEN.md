@@ -33,6 +33,52 @@ Datei ist die Herkunftsliste, nicht die Zuordnung.
 | `b93-studium.webp` | B9.3 | [31367507](https://www.pexels.com/photo/31367507/) | Yusuf Çelik | Studierende im Hörsaal |
 | `intro-aufrichten.webp` | M10 | [37499254](https://www.pexels.com/photo/37499254/) | Serhat Tuğ | Zimmerer prüft das Sparrenwerk, Sonne |
 
+## Neu dazugekommen — Zerspanung (2026-08-28)
+
+Aus dem Umbau der Zerspanungs-Level. Alles Pexels, heruntergeladen am
+2026-08-28, WebP, 1400–1600 px breit. Sie liegen unter
+`public/medien/media/zerspanungsmechaniker/` und nicht unter `schritte/`, weil
+sie zu **einem** Beruf gehören.
+
+| Datei | Wo | Pexels | Urheber:in | Motiv |
+| --- | --- | --- | --- | --- |
+| `z4-messraum.webp` | Z4 | [5290119](https://www.pexels.com/photo/5290119/) | Carlos Yanez | Messschieber, Zirkel und ein gedrehtes Teil auf dunklem Grund |
+| `z6-kiste.webp` | Z6 (Bühne `Teilehaufen`) | [12951634](https://www.pexels.com/photo/12951634/) | Instasky | Haufen gleicher gedrehter Hülsen |
+| `z7-meister.webp` | Z7.1 | [3846262](https://www.pexels.com/photo/3846262/) | Olly | Älterer erklärt einem Jüngeren etwas an der Werkbank |
+
+**Zwei davon schließen dokumentierte Lücken** aus
+`ui-review/medien-luecken-zerspanung.md`: der Messraum (Z4 zeigte vorher
+Späne, während der Text „leise, sauber" versprach) und der Mensch bei Z7.1
+(vorher eine Spindel ohne Person, davor eine Holzwerkstatt).
+
+**Drei weitere sind wieder ausgebaut und gelöscht** (`z1-passung.webp`,
+`z2-fraesen.webp`, `z5-messschraube.webp`, samt der Bühne
+`buehne/Fotobuehne.tsx`). Sie sollten die Hauptlinie fotografischer machen und
+haben sie stattdessen falscher gemacht: das Fräs-Motiv zeigte das falsche
+Gewerk in einem Tag über eine gedrehte Welle, die Messschraube maß einen
+fremden Stahlträger mit fremder Anzeige, und die Lagerböcke lagen zu 30 %
+Deckkraft unter einem Schleier — unsichtbar. Die Hauptlinie Z1–Z5 zeichnet
+wieder (khpl-tag-zerspanung.md §7: Zeichnung, Werkzeugweg, Zahl — alle drei
+sind Vektor). Die Pexels-Ids stehen hier, falls jemand die Motive noch einmal
+sucht: 28752153 (Lucock), 10406128 (Smyth), 36003974 (Orshan).
+
+### Anlagenmechanik: bewusst keine neuen Fotos
+
+Für A1, A2 und A3 wurde gesucht und **nichts eingebaut**. Der Bestand an
+SHK-Motiven auf Pexels zeigt Fußbodenheizungs-Verteiler und
+Wärmepumpen-Außeneinheiten; die drei Screens brauchen aber einen Kessel, einen
+Speicher, eine Regelung und vier benannte Verlustflächen an **einem** Haus —
+und zwar an Stellen, die man treffen kann. Ein Foto, das etwas anderes zeigt
+als der Text daneben behauptet, ist genau der Fehler, den der Review bei Z4
+und Z7.1 gefunden hat. Die drei Tage bleiben deshalb gezeichnet; besser
+lesbar sind sie trotzdem geworden (Namen an den Prüfpunkten, Pfeile an den
+Verlustflächen).
+
+Gesucht und für später notiert, falls doch ein Foto gewünscht ist:
+Pexels 7937299, 7937300 und 7937309 (Pavel Danilyuk, Heizkreisverteiler mit
+Pumpe und Manometer), 12644994 (Boom, Hand am Thermostatventil), 5640691
+(Tima Miroshnichenko, Manometer in der Hand).
+
 Aus dem Altbestand (`public/medien/media/`) wird weiterhin benutzt:
 
 | Datei | Wo |
