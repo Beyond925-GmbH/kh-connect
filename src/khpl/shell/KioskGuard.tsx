@@ -53,9 +53,11 @@ const IDLE_RESET_MS = 120_000
  * M8 ist der Rückblick, und B9.1–B9.3 sind vier Faktenblöcke am Stück — genau
  * die Stellen, an denen jemand liest, statt zu tippen.
  *
- * C5 und A5 sind die Zäsuren der beiden anderen Tage (die Fahrt mit dem
- * Element, der Mittag im Transporter) — beide mit demselben Argument wie M6,
- * von den Tagen gemeldet statt gebaut (khpl-tage.md 6.2).
+ * C5, A5 und Z5 sind die Zäsuren der anderen Tage (die Fahrt mit dem
+ * Element, der Mittag im Transporter, die Frühstückspause am Hallenfenster)
+ * — alle mit demselben Argument wie M6, von den Tagen gemeldet statt gebaut
+ * (khpl-tage.md 6.2). Z7 ist der Rückblick der Zerspanung (wie M8), die
+ * Z8.x sind ihre Karriere-Faktenblöcke (wie B9.x).
  */
 const GEDULD: Partial<Record<string, number>> = {
   M6: 3,
@@ -66,6 +68,11 @@ const GEDULD: Partial<Record<string, number>> = {
   'B9.3': 3,
   C5: 3,
   A5: 3,
+  Z5: 3,
+  Z7: 3,
+  'Z8.1': 3,
+  'Z8.2': 3,
+  'Z8.3': 3,
 }
 
 /** Wie oft der Splash prüft, ob der gespeicherte Stand abgelaufen ist. */

@@ -92,7 +92,7 @@ const KEIN_ANFANG = new Set([
 ])
 
 const STEPS = 'src/khpl/steps'
-const BERUFE = ['dachdecker', 'zimmerer', 'anlagenmechanik'] as const
+const BERUFE = ['dachdecker', 'zimmerer', 'anlagenmechanik', 'zerspanung'] as const
 
 interface Befund {
   datei: string

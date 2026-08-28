@@ -75,9 +75,8 @@ export type Bildschirm = (typeof BILDSCHIRME)[number]
  * **jeder trägt nur in seinem Abschnitt ein.**
  *
  * Die Schlüssel selbst sind dank der Id-Präfixe aus V4 disjunkt — `m*` gehört
- * dem Dachdecker, `c*` dem Zimmerer, `a*` der Anlagenmechanik (siehe
- * `berufe/typen.ts`). Die Zerspanung ist angekündigt und hat keinen Tag —
- * ihre `z*`-Schlüssel sind mit den Steps ausgebaut.
+ * dem Dachdecker, `c*` dem Zimmerer, `a*` der Anlagenmechanik, `z*` der
+ * Zerspanung (siehe `berufe/typen.ts`).
  */
 export interface Antworten {
   // -------------------------------------------------------------------------
@@ -213,6 +212,34 @@ export interface Antworten {
    * gehört in die Hülle, nicht in einen einzelnen Tag.
    */
   a8?: { angesehen: StepId[] }
+
+  // -------------------------------------------------------------------------
+  // Zerspanung — Schlüssel `z*`
+  //
+  // Formen je Step am Kopf seiner Datei (`steps/zerspanung/`). Alles, was
+  // der Rückblick in Z7 aufzählt, kommt von hier.
+  // -------------------------------------------------------------------------
+
+  /** Z1 — angetippte Maße der Zeichnung, und ob das entscheidende dabei war. */
+  z1?: { angetippt: string[]; gefunden: boolean }
+  /**
+   * Z2 — Rohteil gespannt (mit Zahl der Fehlgriffe), Drehzahl geschätzt und
+   * aufgelöst. `schaetzung` ist der Reglerwert in U/min.
+   */
+  z2?: { gespannt: boolean; versuche: number; schaetzung: number; aufgeloest: boolean }
+  /** Z3 — angesehene NC-Sätze, und ob der Fasen-Satz gefunden wurde. */
+  z3?: { gesehen: string[]; gefunden: boolean; versuche: number }
+  /**
+   * Z4 — das Probeteil: Serie freigegeben, Zahl der Nachdreh-Versuche und
+   * die Korrektur, mit der das Maß am Ende im Fenster lag (in mm, negativ).
+   */
+  z4?: { freigegeben: boolean; versuche: number; korrektur: number }
+  /** Z5 — welche der drei Pausenfragen gelesen wurden. */
+  z5?: { gelesen: string[] }
+  /** Z6 — Stand des Zählers, und ob die Verschleiß-Korrektur drin ist. */
+  z6?: { stueck: number; nachkorrigiert: boolean; stabil: boolean }
+  /** Z8 — angesehene Karrierewege, in Reihenfolge des Öffnens. */
+  z8?: { angesehen: StepId[] }
 }
 
 /** Der Stand **eines** Berufs. */
@@ -472,6 +499,64 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
     // Fällt eine StepId aus dem Graphen, darf sie nicht als Aufhänger auf A9
     // wieder auftauchen.
     a.a8 = { angesehen: a8.angesehen.filter((x) => istStepId(graph, x)) }
+  }
+
+  // ---------------------------------------------------------------------
+  // Zerspanung — Schlüssel `z*`
+  // ---------------------------------------------------------------------
+
+  const z1 = q.z1 as Antworten['z1']
+  if (z1 && stringListe(z1.angetippt)) {
+    a.z1 = { angetippt: stringListe(z1.angetippt) as string[], gefunden: !!z1.gefunden }
+  }
+  const z2 = q.z2 as Antworten['z2']
+  if (z2 && typeof z2.versuche === 'number' && Number.isFinite(z2.versuche)) {
+    a.z2 = {
+      gespannt: !!z2.gespannt,
+      versuche: z2.versuche,
+      // Ein kaputter Reglerwert darf die Auflösung nicht mitreißen — er wird
+      // nur zum Vergleich angezeigt.
+      schaetzung:
+        typeof z2.schaetzung === 'number' && Number.isFinite(z2.schaetzung)
+          ? z2.schaetzung
+          : 0,
+      aufgeloest: !!z2.aufgeloest,
+    }
+  }
+  const z3 = q.z3 as Antworten['z3']
+  if (z3 && stringListe(z3.gesehen)) {
+    a.z3 = {
+      gesehen: stringListe(z3.gesehen) as string[],
+      gefunden: !!z3.gefunden,
+      versuche:
+        typeof z3.versuche === 'number' && Number.isFinite(z3.versuche) ? z3.versuche : 0,
+    }
+  }
+  const z4 = q.z4 as Antworten['z4']
+  if (z4 && typeof z4.versuche === 'number' && Number.isFinite(z4.versuche)) {
+    a.z4 = {
+      freigegeben: !!z4.freigegeben,
+      versuche: z4.versuche,
+      // Nur eine echte Zahl übernehmen — Z4 rechnet damit das Anzeige-Maß.
+      korrektur:
+        typeof z4.korrektur === 'number' && Number.isFinite(z4.korrektur)
+          ? z4.korrektur
+          : 0,
+    }
+  }
+  const z5 = q.z5 as Antworten['z5']
+  if (z5 && stringListe(z5.gelesen)) {
+    a.z5 = { gelesen: stringListe(z5.gelesen) as string[] }
+  }
+  const z6 = q.z6 as Antworten['z6']
+  if (z6 && typeof z6.stueck === 'number' && Number.isFinite(z6.stueck)) {
+    a.z6 = { stueck: z6.stueck, nachkorrigiert: !!z6.nachkorrigiert, stabil: !!z6.stabil }
+  }
+  const z8 = q.z8 as Antworten['z8']
+  if (z8 && Array.isArray(z8.angesehen)) {
+    // Fällt eine StepId aus dem Graphen, darf sie nicht als Aufhänger auf Z9
+    // wieder auftauchen.
+    a.z8 = { angesehen: z8.angesehen.filter((x) => istStepId(graph, x)) }
   }
 
   return a
