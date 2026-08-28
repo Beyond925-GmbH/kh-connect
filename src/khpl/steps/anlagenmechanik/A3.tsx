@@ -9,10 +9,11 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
+import { VERLUSTFLAECHEN } from '@/khpl/buehne/anlagenmechanik/zeichnung'
+import { Lage } from '@/khpl/komponenten/Lage'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { RATEN_HAKEN } from '@/khpl/komponenten/gesten'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Fachwort } from './Fachwort'
 
@@ -48,18 +49,61 @@ import { Fachwort } from './Fachwort'
  *    CO₂-Zeile zu zeigen — sie ist die stabilere und für diesen Beruf die
  *    wichtigere. Ein Kiosk läuft an vielen Tagen über Monate.
  *
- * **`answers.a3`** `{ schaetzung, aufgeloest }` (Spec 6).
+ * ---
+ *
+ * **Was hier umgebaut wurde und warum.**
+ *
+ * Der Screen war ein Regler von 2 bis 30 Kilowatt: „Schätz, wie viel Wärme
+ * dieses Haus braucht." Zwei Dinge sprachen dagegen.
+ *
+ *  1. **Kilowatt ist für die Zielgruppe kein Anker.** Ein Schätzmoment lebt
+ *     davon, dass eine Vorstellung widerlegt wird (M2: der Dachpreis). Wer
+ *     nie mit Kilowatt umgegangen ist, hat keine Vorstellung,
+ *     die widerlegt werden könnte — er zieht irgendwohin, und die Auflösung
+ *     korrigiert nichts.
+ *  2. **Es war der dritte Rate-Regler der Anwendung** (M2, C2, A3) und der
+ *     zweite in diesem Tag (A6 ist der andere).
+ *
+ * Statt zu raten, **sucht** der Besucher jetzt: Er tippt die vier Flächen an,
+ * über die dieses Haus seine Wärme verliert — Dach, Außenwand, Fenster,
+ * Kellerdecke. Jede meldet ihren Anteil als Pfeil auf der Zeichnung. Erst
+ * wenn alle vier gefunden sind, steht die Heizlast da, und dann steht sie als
+ * **Ergebnis des Hinsehens** und nicht als Auflösung eines Ratespiels.
+ *
+ * ⚠️ **Damit hat dieser Tag keinen Schätzmoment mehr**, und khpl-tage.md 1
+ * führt A3 als „den einen Schätzmoment dieses Tages" (Mechanismus 3). Das ist
+ * **gemeldet und nicht heimlich geändert**: Der Mechanismus bleibt der
+ * Anwendung erhalten (M2 beim Dachdecker, C2 beim Zimmerer), und der Grund für
+ * die Abweichung — Kilowatt taugt nicht als Schätzgröße für Sechzehnjährige —
+ * gehört mit der Copy abgenommen.
+ *
+ * **Ein Balken, keine Zahl je Fläche.** Wie viel ein Dach wirklich verliert,
+ * hängt an Dämmstärke, Fläche und Baujahr; eine Zahl je Fläche wäre erfunden.
+ * Der Anteil ist deshalb relativ, wie der Druckverlust in A4 — die eine
+ * belegte Zahl des Screens ist die Heizlast, und sie steht in der Auflösung.
+ *
+ * **`answers.a3`** `{ verluste, aufgeloest }`.
  */
 
 // ---------------------------------------------------------------------------
 // Text und Zahlen — gebündelt oben (flow 8.4)
 // ---------------------------------------------------------------------------
 
-const MIN = 2
-const MAX = 30
-const SCHRITT = 0.5
-/** Bewusst zu hoch: fast jeder schätzt die Heizlast zu groß — das ist der Punkt. */
-const START = 22
+/**
+ * Was jede Verlustfläche über sich erzählt, wenn man sie antippt.
+ *
+ * **Je ein Satz, kein Fachtext.** Die Fläche ist schon markiert, der Pfeil
+ * zeigt schon die Richtung; der Satz sagt nur, warum ausgerechnet dort so viel
+ * hinausgeht. Reihenfolge und Ids kommen aus `VERLUSTFLAECHEN`.
+ */
+const VERLUST_TEXT: Record<string, string> = {
+  dach: 'Wärme steigt nach oben, und über dem Obergeschoss liegt nichts als alte Dachpfannen. Die größte Fläche und die dünnste Stelle zugleich.',
+  wand: 'Fünfunddreißig Zentimeter Mauerwerk, außen nichts davor. Das war 1972 normal — heute ist es die Fläche, an der am meisten zu holen ist.',
+  fenster:
+    'Zweifach verglast, Rahmen aus Holz. Ein Quadratmeter Fenster verliert ein Vielfaches von einem Quadratmeter gedämmter Wand.',
+  keller:
+    'Der Keller wird nicht beheizt und ist trotzdem nur eine Betondecke vom Wohnzimmer entfernt. Kalte Füße kommen von hier.',
+}
 
 /** Das belegte Zielfenster für das Referenzhaus, in Kilowatt. */
 const ZIEL = { von: 10, bis: 14 } as const
@@ -82,38 +126,50 @@ const BILANZ = [
 const STAND =
   'Angenommen: Jahresarbeitszahl 3,4 aus einer Feldmessung des Fraunhofer ISE an 77 Anlagen im Bestand. CO₂ je Kilowattstunde Strom: 344 Gramm, Umweltbundesamt für 2025, vorläufig. Stand der Rechnung: August 2026.'
 
-const kw = (n: number) => `${n.toLocaleString('de-DE')} kW`
-
 export function A3() {
   const gespeichert = useFortschritt().answers.a3
-  const [wert, setWert] = useState(() => gespeichert?.schaetzung ?? START)
+  const [verluste, setVerluste] = useState<string[]>(() => gespeichert?.verluste ?? [])
   const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
+  /** Welche Fläche gerade erklärt wird — nur Anzeige, nicht Fortschritt. */
+  const [offen, setOffen] = useState<string | null>(() => null)
+
+  const alle = verluste.length >= VERLUSTFLAECHEN.length
+
+  const tippe = (id: string) => {
+    setOffen(id)
+    if (verluste.includes(id)) return
+    const neu = [...verluste, id]
+    setVerluste(neu)
+    merkeAntwort('a3', { verluste: neu, aufgeloest: false })
+  }
 
   const aufloesen = () => {
     setAufgeloest(true)
-    merkeAntwort('a3', { schaetzung: wert, aufgeloest: true })
+    merkeAntwort('a3', { verluste, aufgeloest: true })
   }
 
   return (
     <StepShell
       id="A3"
-      auftrag={aufgeloest ? null : 'Schätz, wie viel Wärme dieses Haus braucht.'}
-      ansage={{
-        geste: 'ziehen-regler',
-        text: 'Du legst die Heizung aus — zu klein friert die Familie, zu groß zahlt sie drauf.',
-        haken: RATEN_HAKEN,
-      }}
+      auftrag={
+        aufgeloest
+          ? null
+          : alle
+            ? 'Rechne die Heizlast nach.'
+            : 'Tipp an, wo dieses Haus seine Wärme verliert.'
+      }
+      // Antippen erklärt sich selbst; die vier Flächen tragen einen limetten
+      // Ring, solange sie nicht gefunden sind (`komponenten/gesten.ts`).
+      ansage={null}
+      buehneInteraktiv={!aufgeloest}
       interaktionOffen={!aufgeloest}
       // Die Schätzphase bleibt schmal und konzentriert; die Auflösung braucht
       // die Breite für den Zweispalter aus Zahl und Jahresbilanz.
       karteBreit={aufgeloest}
       buehne={
         <Schnitt
-          zustand={{
-            szene: 'haus',
-            schaetzungKw: aufgeloest ? null : wert,
-            aufgeloest,
-          }}
+          zustand={{ szene: 'haus', verluste, offen, aufgeloest }}
+          onVerlust={aufgeloest ? undefined : tippe}
         />
       }
       warum={
@@ -127,12 +183,8 @@ export function A3() {
         )
       }
       interaktion={
-        <Wechsel takt={aufgeloest ? 'aufgeloest' : 'schaetzen'}>
-          {aufgeloest ? (
-            <Aufloesung schaetzung={wert} />
-          ) : (
-            <Regler wert={wert} onWert={setWert} />
-          )}
+        <Wechsel takt={aufgeloest ? 'aufgeloest' : (offen ?? 'suchen')}>
+          {aufgeloest ? <Aufloesung /> : <Suche verluste={verluste} offen={offen} />}
         </Wechsel>
       }
       fuss={
@@ -141,7 +193,16 @@ export function A3() {
           uebungOffen={!aufgeloest}
           aktion={
             aufgeloest ? null : (
-              <Button variant="aktion" onClick={aufloesen} data-testid="a3-aufloesen">
+              <Button
+                variant="aktion"
+                onClick={aufloesen}
+                disabled={!alle}
+                data-testid="a3-aufloesen"
+                // `grayscale` zusätzlich zur Deckkraft: Ob der Knopf „noch
+                // nicht" oder „jetzt" sagt, muss man am Kiosk im Vorbeigehen
+                // sehen (R8, wie in A4).
+                className="disabled:grayscale"
+              >
                 Nachrechnen
               </Button>
             )
@@ -154,37 +215,75 @@ export function A3() {
 }
 
 // ---------------------------------------------------------------------------
-// Takt 1 — schätzen
+// Takt 1 — suchen
 // ---------------------------------------------------------------------------
 
-function Regler({ wert, onWert }: { wert: number; onWert: (n: number) => void }) {
+/**
+ * Was im Panel steht, während die vier Flächen gesucht werden.
+ *
+ * **Eine Ergebnisfläche, kein Stapel** — dieselbe Lösung wie in A1: Die zweite
+ * Fläche schreibt ihren Satz dorthin, wo die erste stand. Was schon gefunden
+ * ist, steht als Pfeil auf der Zeichnung und muss im Panel nicht noch einmal
+ * aufgezählt werden.
+ */
+function Suche({ verluste, offen }: { verluste: string[]; offen: string | null }) {
+  const flaeche = VERLUSTFLAECHEN.find((f) => f.id === offen)
+  const fehlen = VERLUSTFLAECHEN.length - verluste.length
+
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-        Zieh, bis du glaubst, es passt.
-      </p>
+      {/*
+        **Der Einsatz, sichtbar.** Auf Übungs-Steps zeigt die Hülle den
+        Warum-Bereich nicht an (`komponenten/Lage.tsx`); ohne diese Zeile tippt
+        man auf ein Haus, ohne zu wissen, wofür. Der Einsatz ist konkret und
+        teuer: Danach wird eine Anlage bestellt.
+      */}
+      <Lage>
+        Bevor eine Wärmepumpe bestellt wird, muss feststehen, wie viel Wärme dieses Haus
+        überhaupt braucht. Zu klein gekauft friert die Familie, zu groß gekauft zahlt sie
+        jahrelang drauf.
+      </Lage>
 
-      <span data-testid="a3-zahl" className="kh-zahl">
-        {kw(wert)}
-      </span>
-
-      <div className="relative" data-wisch="aus">
-        <input
-          type="range"
-          min={MIN}
-          max={MAX}
-          step={SCHRITT}
-          value={wert}
-          onChange={(e) => onWert(Number(e.target.value))}
-          data-testid="a3-regler"
-          aria-label="Wie viel Leistung braucht dieses Haus?"
-          className="kh-regler w-full"
-        />
-        <div className="flex justify-between text-[0.9375rem] text-kh-mute/70 tabular-nums">
-          <span>{kw(MIN)}</span>
-          <span>{kw(MAX)}</span>
+      {flaeche ? (
+        <div className="kh-feld px-4 py-3" data-testid="a3-verlust">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="kh-etikett">{flaeche.label}</p>
+            <span className="text-[0.9375rem] text-kh-mute">
+              {flaeche.staerke >= 0.9
+                ? 'größter Anteil'
+                : flaeche.staerke >= 0.6
+                  ? 'großer Anteil'
+                  : 'kleinerer Anteil'}
+            </span>
+          </div>
+          {/* Ein Balken, keine Zahl — dieselbe Währung wie der Druckverlust in
+              A4, und aus demselben Grund (`VERLUSTFLAECHEN`). */}
+          <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full border border-kh-line bg-white/10">
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: flaeche.staerke }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              style={{ transformOrigin: 'left' }}
+              className="h-full rounded-full bg-kh-orange/45 ring-1 ring-kh-orange ring-inset"
+              aria-hidden
+            />
+          </div>
+          <p className="mt-2 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+            {VERLUST_TEXT[flaeche.id]}
+          </p>
         </div>
-      </div>
+      ) : (
+        <p className="px-1 text-[1rem] text-kh-paper/70">
+          Vier Flächen, über die es warm nach draußen geht. Wie viel jede davon kostet,
+          hängt an Dämmung und Fläche — deshalb steht hier ein Balken und keine Zahl.
+        </p>
+      )}
+
+      <p className="text-[0.9375rem] text-kh-mute" data-testid="a3-fehlen">
+        {fehlen > 0
+          ? `Noch ${fehlen} von ${VERLUSTFLAECHEN.length} Flächen.`
+          : 'Alle vier gefunden. Jetzt lässt sich die Heizlast rechnen.'}
+      </p>
     </div>
   )
 }
@@ -193,9 +292,7 @@ function Regler({ wert, onWert }: { wert: number; onWert: (n: number) => void })
 // Takt 2 — auflösen. Zuerst das warme Haus, dann die Zahl, dann die Bilanz.
 // ---------------------------------------------------------------------------
 
-function Aufloesung({ schaetzung }: { schaetzung: number }) {
-  const drin = schaetzung >= ZIEL.von && schaetzung <= ZIEL.bis
-
+function Aufloesung() {
   return (
     <motion.div
       initial="aus"
@@ -224,7 +321,6 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
               kW
             </span>
           </div>
-          <Vergleich schaetzung={schaetzung} drin={drin} />
           {/* Der Körper-Anker zur Zahl (R12): ein Wasserkocher zieht rund
               zwei Kilowatt — das kennt jeder aus der Küche. */}
           <p className="mt-2 text-[1rem] leading-[1.4] text-kh-mute">
@@ -298,51 +394,6 @@ function Takt({ children }: { children: React.ReactNode }) {
     >
       {children}
     </motion.div>
-  )
-}
-
-/**
- * Der Abstand zwischen der eigenen Zahl und dem belegten Fenster. Kein Regler
- * mehr — eine Skala mit einer Marke und einem Band, und das Band ist die
- * Aussage: die richtige Antwort ist hier ein Bereich, kein Punkt.
- */
-function Vergleich({ schaetzung, drin }: { schaetzung: number; drin: boolean }) {
-  const anteil = (n: number) => ((n - MIN) / (MAX - MIN)) * 100
-  const zuHoch = schaetzung > ZIEL.bis
-
-  return (
-    <div className="mt-2.5 flex flex-col gap-2" data-testid="a3-vergleich">
-      <div className="relative h-4 w-full rounded-full border border-kh-line bg-white/10">
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ delay: 0.25, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          style={{
-            left: `${anteil(ZIEL.von)}%`,
-            width: `${anteil(ZIEL.bis) - anteil(ZIEL.von)}%`,
-            transformOrigin: 'left',
-          }}
-          // Kein gefülltes Orange: die eine gefüllte orange Fläche pro Screen
-          // ist *Weiter* (khpl-tage.md 3). Das Band ist eine Markierung auf
-          // einer Skala, kein Bedienelement.
-          className="absolute inset-y-0 rounded-full bg-kh-orange/35 ring-1 ring-kh-orange"
-          aria-hidden
-        />
-        <span
-          style={{ left: `${anteil(schaetzung)}%` }}
-          className="absolute top-[-7px] bottom-[-7px] w-[6px] -translate-x-1/2 rounded-full bg-kh-paper/70"
-          aria-hidden
-        />
-      </div>
-      <p className="text-[1rem] tabular-nums">
-        <span className="text-kh-mute">Deine Schätzung </span>
-        <span className="font-semibold text-kh-paper/85">{kw(schaetzung)}</span>
-        <span className="text-kh-mute"> — </span>
-        <span className="font-semibold text-kh-orange">
-          {drin ? 'genau im Fenster' : zuHoch ? 'zu groß ausgelegt' : 'knapp bemessen'}
-        </span>
-      </p>
-    </div>
   )
 }
 

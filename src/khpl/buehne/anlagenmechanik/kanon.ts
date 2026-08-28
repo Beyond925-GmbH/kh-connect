@@ -271,8 +271,16 @@ export type BuehnenZustand =
    */
   | {
       szene: 'haus'
-      /** Der Reglerwert in kW, solange geschätzt wird. */
-      schaetzungKw: number | null
+      /**
+       * Welche Verlustflächen schon angetippt wurden.
+       *
+       * ⚠️ **Ersetzt den früheren `schaetzungKw`.** A3 war der dritte
+       * Rate-Regler der Anwendung; der Screen sucht die Heizlast jetzt, statt
+       * sie raten zu lassen (siehe `steps/anlagenmechanik/A3.tsx`).
+       */
+      verluste: readonly string[]
+      /** Die zuletzt angetippte Fläche — sie hebt sich heraus. */
+      offen: string | null
       aufgeloest: boolean
     }
   /**

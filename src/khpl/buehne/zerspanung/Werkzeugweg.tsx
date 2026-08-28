@@ -1,312 +1,275 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Achse, Bild, Pfeilspitze } from './Bild'
-import { STRICH } from './stil'
-import { Futter, Rohteil } from './Maschine'
-import { NENNMASS, PROGRAMM, ZEILEN_DAUER } from './kanon'
-import {
-  ANTEIL_VOR_FEHLER,
-  FEHLWEG,
-  RUECKZUG,
-  SCHNITT,
-  alsPfad,
-  koerperPfad,
-  schnittAnteil,
-  schnittBis,
-} from './weg'
+import { motion } from 'motion/react'
+import { Bild } from './Bild'
+import { STAHL, TEIL, WARM, type SatzId, type WegZustand } from './kanon'
 
 /**
- * Z3 — der Werkzeugweg. **Der Screen, an dem dieser Tag hängt.**
+ * Z3 — **der Werkzeugweg.** Dasselbe Teil wie auf der Zeichnung (Z1), jetzt
+ * in der Maschine: Futter links, Bolzen gespannt, und über der Kontur die
+ * Bahn des Drehmeißels — vier NC-Sätze, vier Stücke Weg.
  *
- * „Mit jeder Zeile zeichnet sich ein Stück Kontur, und das ist der Reiz des
- * Screens — aus Text wird eine Form, und man hat sie selbst entstehen lassen“
- * (khpl-tag-zerspanung.md §6 Z3). Hier ist der Satz gebaut, und er besteht aus
- * drei Dingen, die zusammen laufen müssen:
- *
- *  1. **Der Weg** wächst aus dem Programm heraus — Punkte aus `weg.ts`, nicht
- *     danebengelegt. Fahrbefehle zeichnen, Rüstzeilen nicht.
- *  2. **Das Teil** entsteht unter dem Weg. Beim Längsdrehen ist alles über der
- *     Schneide weg — die Mantellinie *ist* der Schneidweg, und deshalb ist die
- *     Kontur am Ende dieselbe wie die Zeichnung in Z1. Nicht ähnlich: dieselbe.
- *  3. **Der Rohling** bleibt als Schatten stehen. Man sieht, was abgetragen
- *     wurde, nicht nur, was übrig ist.
- *
- * **Gleichmäßige Schritte, keine Zeilenschritte** (§7). Der Weg zeichnet sich
- * mit konstanter Geschwindigkeit; `G1 Z-35.` dauert deshalb länger als die
- * Fase davor, weil die Strecke länger ist. Das ist nicht Zierde, sondern
- * Vorschub: eine Zeile, die weiter fährt, braucht mehr Zeit.
- *
- * **Der Zeichenstand läuft über Refs, nicht über State.** Sechzig Bilder je
- * Sekunde durch React zu schicken, um zwei Pfadattribute zu ändern, wäre der
- * teure Weg zum selben Bild.
+ * Die Bühne führt vor, das Panel bedient: tippt der Besucher einen Satz an,
+ * fährt das Werkzeug hier genau dieses Stück. Eilgang (`G0`) ist gestrichelt
+ * und kalt — er schneidet nichts. Vorschub (`G1`) ist warm: da läuft der
+ * Span. Die Bahn liegt **auf der Kontur**, weil der Schlichtgang genau sie
+ * abfährt — die Zeichnung wird zur Bewegung.
  */
+
+/** Maßstab: Millimeter → Zeicheneinheiten. */
+const S = 3.2
+
+/** Drehachse des Teils. */
+const MITTE = 150
+
+/** Linke Kante des Teils (im Futter). */
+const LINKS = 80
+
+const schaftR = (TEIL.schaftDurchmesser / 2) * S
+const sitzR = (TEIL.sitzDurchmesser / 2) * S
+const schulter = LINKS + TEIL.schaftLaenge * S
+const stirn = schulter + TEIL.sitzLaenge * S
+const fase = TEIL.fase * S
+
+/** Ein Punkt der Bahn: `x` = Z-Achse (Länge), `y` = X-Achse (Durchmesser). */
+interface P {
+  x: number
+  y: number
+}
+
+/** Radius von Durchmesser 23 — der Startdurchmesser der Fase. */
+const fasenAnsatz = 11.5 * S
+
+/** Wo das Werkzeug wartet, bevor der erste Satz läuft. */
+const PARK: P = { x: 252, y: 72 }
 
 /**
- * Der Ausschnitt, quer und hochkant. Dieselbe Millimeterwelt wie Zeichnung und
- * Maschine.
- *
- * **Quer: x ∈ [-52, 22], y ∈ [-30, 30].** Die erste Fassung endete bei y = 22
- * und schnitt damit das Futter (es reicht bis 26) waagerecht an der unteren
- * Bühnenkante ab — ein Bauteil, das an zwei Kanten gleichzeitig endet, liest
- * sich als Fehler, eins, das seitlich aus dem Bild läuft, als Maschine, die
- * weitergeht. Jetzt endet es nur noch links.
- *
- * **Hochkant: x ∈ [-46, 22].** Sechs Millimeter enger — vom Futter bleiben die
- * Backen, und die kosten nichts an Aussage: Der Screen handelt vom Weg, nicht
- * von der Spannung. Dafür steht die Kontur im stehenden Feld eine Stufe größer.
+ * Die vier Sätze als Bahnstücke. Zahlen aus dem Programm in Z3:
+ * X ist ein **Durchmesser** (Drehmaschinen-Konvention), Z die Länge ab
+ * Stirnfläche — deshalb rechnet `y` mit dem halben X.
  */
-const SICHT = '-52 -30 74 60'
-const SICHT_HOCH = '-46 -30 68 60'
+const BAHN: Record<SatzId, { von: P; bis: P; schnitt: boolean; dauer: number }> = {
+  // N10 G0 X23 Z2 — Eilgang vor die Stirn.
+  n10: {
+    von: PARK,
+    bis: { x: stirn + 2 * S, y: MITTE - fasenAnsatz },
+    schnitt: false,
+    dauer: 0.7,
+  },
+  // N20 G1 Z0 — mit Vorschub an die Kante.
+  n20: {
+    von: { x: stirn + 2 * S, y: MITTE - fasenAnsatz },
+    bis: { x: stirn, y: MITTE - fasenAnsatz },
+    schnitt: true,
+    dauer: 0.9,
+  },
+  // N30 G1 X25 Z-1 — die Fase, schräg über die Kante.
+  n30: {
+    von: { x: stirn, y: MITTE - fasenAnsatz },
+    bis: { x: stirn - fase, y: MITTE - sitzR },
+    schnitt: true,
+    dauer: 0.9,
+  },
+  // N40 G1 Z-22 — die Mantellinie entlang, bis zur Schulter.
+  n40: {
+    von: { x: stirn - fase, y: MITTE - sitzR },
+    bis: { x: schulter, y: MITTE - sitzR },
+    schnitt: true,
+    dauer: 2.2,
+  },
+}
 
-/** Wie lange der ganze Schnittweg braucht, wenn er von null an durchläuft. */
-const GESAMT_DAUER = ZEILEN_DAUER * Math.max(1, SCHNITT.length - 1)
-
-/**
- * Wohin das Werkzeug läuft, wenn blind bis ans Ende gefahren wird.
- *
- * **Nicht in die Spannbacke.** Der eingebaute Fehler ist das fehlende
- * Minuszeichen (§11, `belege/zerspanung.md` 7), und `Z+` zeigt an der Drehbank
- * von der Spannung **fort**: das Werkzeug fährt am Teil vorbei ins Leere. Der
- * Endpunkt der falschen Zeile (`Z35.`) liegt weit außerhalb dieser Ansicht —
- * gezeigt wird deshalb der letzte Punkt, an dem die Schneide noch im Bild ist,
- * und die Pfeilspitze am Rand sagt, dass es dort hinausgeht.
- */
-const HALT = [14, -NENNMASS / 2] as const
-
-export function Werkzeugweg({
-  // Ohne Angabe ist das Programm durch: `zeile` ist die Zeile, die als
-  // Nächstes drankäme, und hinter der letzten kommt keine mehr.
-  zeile = PROGRAMM.length,
-  markierteZeile = null,
-  luftschnitt = false,
-}: {
-  zeile?: number
-  markierteZeile?: number | null
-  luftschnitt?: boolean
-}) {
-  const wegRef = useRef<SVGPathElement>(null)
-  const koerperRef = useRef<SVGPathElement>(null)
-  const werkzeugRef = useRef<SVGGElement>(null)
-  const stand = useRef(0)
-
-  const reduziert = useMemo(
-    () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    [],
-  )
-
-  const zeichne = useCallback((anteil: number) => {
-    wegRef.current?.setAttribute('d', alsPfad(schnittBis(anteil)))
-    koerperRef.current?.setAttribute('d', koerperPfad(anteil))
-    werkzeugRef.current?.setAttribute('transform', spitzenVersatz(anteil))
-  }, [])
-
-  useEffect(() => {
-    const ziel = schnittAnteil(zeile)
-
-    // Beim blinden Start friert das Bild: die Kontur steht nur bis zu der
-    // Zeile da, an der es schiefging, der Rest ist nie geschnitten worden —
-    // der Rohling steht noch, wie er eingespannt wurde. Das Werkzeug ist
-    // draußen. Kein Nachzeichnen: wer hier ankommt, hat schon zugesehen.
-    if (luftschnitt) {
-      stand.current = ANTEIL_VOR_FEHLER
-      zeichne(ANTEIL_VOR_FEHLER)
-      werkzeugRef.current?.setAttribute('transform', `translate(${HALT[0]} ${HALT[1]})`)
-      return
-    }
-
-    if (reduziert) {
-      stand.current = ziel
-      zeichne(ziel)
-      return
-    }
-
-    let bild = 0
-    let vorher = performance.now()
-    const takt = (jetzt: number) => {
-      const dt = Math.min((jetzt - vorher) / 1000, 0.1)
-      vorher = jetzt
-      const rest = ziel - stand.current
-      const schritt = Math.sign(rest) * Math.min(Math.abs(rest), dt / GESAMT_DAUER)
-      stand.current += schritt
-      zeichne(stand.current)
-      if (Math.abs(ziel - stand.current) > 1e-4) bild = requestAnimationFrame(takt)
-    }
-    bild = requestAnimationFrame(takt)
-    return () => cancelAnimationFrame(bild)
-  }, [zeile, luftschnitt, reduziert, zeichne])
-
-  // Nach dem blinden Start keine Hervorhebung: Die falsche Zeile hat ihren
-  // eigenen Weg im Bild, und ein zweiter Strich über einem Schnitt, den es
-  // nicht gegeben hat, wäre genau die Behauptung, um die es hier geht.
-  const markiert = useMemo(() => {
-    if (markierteZeile === null || luftschnitt) return null
-    const bis = SCHNITT.findIndex((p, i) => i > 0 && p.zeile === markierteZeile)
-    return bis > 0 ? alsPfad([SCHNITT[bis - 1], SCHNITT[bis]]) : null
-  }, [markierteZeile, luftschnitt])
-
-  // Beides zählt wie `schnittAnteil` **bis ausschließlich** `zeile`: die Zeile
-  // mit diesem Index steht im Panel erst an und ist noch nicht gefahren.
-  const angefahren = zeile > (SCHNITT[0]?.zeile ?? Infinity)
-  const zurueckgezogen =
-    RUECKZUG.length === 2 && zeile > RUECKZUG[1].zeile && !luftschnitt
+export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
+  const { aktiv, gesehen, geloest } = zustand
+  const werkzeugZiel = aktiv
+    ? BAHN[aktiv].bis
+    : gesehen.length > 0
+      ? letzterPunkt(gesehen)
+      : PARK
 
   return (
-    <Bild viewBox={SICHT} viewBoxHoch={SICHT_HOCH}>
-      {(hoch) => (
-        <g
-          style={{
-            opacity: luftschnitt ? 0.75 : 1,
-            transition: 'opacity 0.25s cubic-bezier(0.2, 0, 0, 1)',
-          }}
+    <Bild testid="werkzeugweg-buehne">
+      {() => (
+        <svg
+          viewBox="0 0 320 240"
+          preserveAspectRatio="xMidYMid meet"
+          className="size-full"
         >
-          <Futter />
-
-          {/* Der Rohling als Schatten: was abgetragen wird, bleibt sichtbar. */}
-          <g opacity={0.34}>
-            <Rohteil von={-46} bis={2} />
-          </g>
-
-          <Achse von={hoch ? -44 : -50} bis={18} />
-
-          {/* Das Teil, das unter dem Weg entsteht.
-
-            `d` steht schon beim Rendern und nicht erst im ersten Takt: Der
-            Effekt läuft nach dem Anstrich, und ein Screen, auf den man
-            zurückspringt, hätte sonst ein Bild lang gar keine Kontur. Rendert
-            React später neu, schreibt es genau den Stand hin, der ohnehin
-            schon im Attribut steht — der Takt läuft ungestört weiter. */}
-          <path
-            ref={koerperRef}
-            d={koerperPfad(stand.current)}
-            className="fill-kh-paper/22 stroke-kh-paper"
-            strokeWidth={STRICH.voll}
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
+          {/* Futter: Körper und zwei sichtbare Backen, die den Schaft greifen. */}
+          <rect
+            x="16"
+            y={MITTE - 62}
+            width="52"
+            height="124"
+            rx="6"
+            fill={STAHL.flaeche}
+            stroke={STAHL.linieMatt}
+            strokeWidth="1.5"
+          />
+          <rect
+            x="60"
+            y={MITTE - schaftR - 16}
+            width="34"
+            height="16"
+            rx="2"
+            fill={STAHL.flaeche}
+            stroke={STAHL.linie}
+            strokeWidth="1.5"
+          />
+          <rect
+            x="60"
+            y={MITTE + schaftR}
+            width="34"
+            height="16"
+            rx="2"
+            fill={STAHL.flaeche}
+            stroke={STAHL.linie}
+            strokeWidth="1.5"
           />
 
-          {/* Der Rückzug fährt `G0 X100. Z50.` an und liegt damit weit außerhalb
-            jeder Ansicht dieses Tages — er läuft also aus dem Bild. Das ist
-            richtig so und war trotzdem der Grund, warum die Zeichnung quer
-            „rechts rausläuft“: ohne Rahmen zeichnete sich die Strecke bis an
-            die Kante des SVG-Elements weiter, also mitten in den leeren
-            Streifen neben dem Ausschnitt. `Bild` klammert jetzt auf den
-            `viewBox`; die gestrichelte Linie endet sauber am Rand. */}
-          {zurueckgezogen && (
-            <path
-              d={alsPfad(RUECKZUG)}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={STRICH.fein}
-              strokeDasharray="7 4"
-              vectorEffect="non-scaling-stroke"
-              className="text-kh-mute"
-            />
-          )}
-
-          {/* Der gefahrene Schnittweg — dieselbe Strichstärke wie die Kontur in
-            Z1, weil es dieselbe Kontur ist (§6 Z3). */}
-          <path
-            ref={wegRef}
-            d={alsPfad(schnittBis(stand.current))}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={STRICH.voll}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-            className="text-kh-orange"
+          {/* Drehachse. */}
+          <line
+            x1="20"
+            y1={MITTE}
+            x2={stirn + 28}
+            y2={MITTE}
+            stroke={STAHL.linieMatt}
+            strokeWidth="1"
+            strokeDasharray="10 3 2 3"
           />
 
-          {markiert && (
-            <path
-              d={markiert}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={STRICH.voll * 3}
-              strokeLinecap="round"
-              vectorEffect="non-scaling-stroke"
-              className="text-kh-orange/35"
-            />
-          )}
+          {/* Das Teil — dieselbe Kontur wie auf der Zeichnung. */}
+          <path
+            d={[
+              `M ${LINKS} ${MITTE - schaftR}`,
+              `H ${schulter}`,
+              `V ${MITTE - sitzR}`,
+              `H ${stirn - fase}`,
+              `L ${stirn} ${MITTE - sitzR + fase}`,
+              `V ${MITTE + sitzR - fase}`,
+              `L ${stirn - fase} ${MITTE + sitzR}`,
+              `H ${schulter}`,
+              `V ${MITTE + schaftR}`,
+              `H ${LINKS}`,
+              'Z',
+            ].join(' ')}
+            fill="rgb(198 210 220 / 0.08)"
+            stroke={STAHL.linie}
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
 
-          {/* Der Weg, den die falsche Zeile wirklich fährt — aus `FEHLER_CODE`
-            gerechnet wie jeder andere Weg auch. Er läuft am Teil vorbei und
-            aus dem Bild hinaus, und unter ihm bleibt der Rohling stehen. */}
-          {luftschnitt && FEHLWEG.length === 2 && <Luftschnitt />}
-
+          {/* Achsenkreuz der Drehmaschine: Z längs, X quer. */}
           <g
-            ref={werkzeugRef}
-            transform={
-              luftschnitt
-                ? `translate(${HALT[0]} ${HALT[1]})`
-                : spitzenVersatz(stand.current)
-            }
-            style={{ opacity: angefahren ? 1 : 0, transition: 'opacity 0.3s' }}
+            stroke={STAHL.linieMatt}
+            strokeWidth="1.5"
+            fill={STAHL.linieMatt}
+            fontSize="9"
           >
-            <Schneide />
+            <line x1="262" y1="212" x2="294" y2="212" />
+            <path d="M 294 212 l -6 -2.4 v 4.8 Z" />
+            <line x1="262" y1="212" x2="262" y2="184" />
+            <path d="M 262 184 l -2.4 6 h 4.8 Z" />
+            <text x="298" y="215" stroke="none">
+              Z
+            </text>
+            <text x="258" y="178" stroke="none" textAnchor="middle">
+              X
+            </text>
           </g>
-        </g>
+
+          {/* Schon gefahrene Bahnstücke bleiben stehen. */}
+          {gesehen.map((id) => (
+            <Bahnstueck key={id} id={id} betont={geloest && id === 'n30'} />
+          ))}
+
+          {/* Das gerade angetippte Stück fährt sichtbar. */}
+          {aktiv && (
+            <Bahnstueck id={aktiv} animiert betont={geloest && aktiv === 'n30'} />
+          )}
+
+          {/* Das Werkzeug: Halter von oben, Schneidplatte als Spitze. Es
+              springt an den Anfang seines Satzes und fährt dann — deshalb
+              der `key`: jeder Satz ist eine eigene Fahrt. */}
+          <motion.g
+            key={aktiv ?? 'park'}
+            initial={aktiv ? { x: BAHN[aktiv].von.x, y: BAHN[aktiv].von.y } : false}
+            animate={{ x: werkzeugZiel.x, y: werkzeugZiel.y }}
+            transition={{
+              duration: aktiv ? BAHN[aktiv].dauer : 0.4,
+              ease: aktiv && BAHN[aktiv].schnitt ? 'linear' : [0.22, 1, 0.36, 1],
+            }}
+          >
+            {/* Koordinatenursprung der Gruppe ist die Werkzeugspitze. */}
+            <g>
+              <rect
+                x="1"
+                y="-58"
+                width="14"
+                height="46"
+                rx="2"
+                fill={STAHL.flaeche}
+                stroke={STAHL.linieMatt}
+                strokeWidth="1.5"
+              />
+              <path
+                d="M 0 0 L 12 -14 L 3 -16 Z"
+                fill={STAHL.blank}
+                stroke={STAHL.linie}
+                strokeWidth="1"
+              />
+              {/* Der Span: nur, solange wirklich geschnitten wird. */}
+              {aktiv && BAHN[aktiv].schnitt && (
+                <motion.circle
+                  r="4"
+                  fill={WARM.heiss}
+                  animate={{ opacity: [0.9, 0.35, 0.9], scale: [1, 1.5, 1] }}
+                  transition={{ duration: 0.5, repeat: Infinity }}
+                />
+              )}
+            </g>
+          </motion.g>
+        </svg>
       )}
     </Bild>
   )
 }
 
-/** Wo die Schneide steht, wenn der Weg zu `anteil` gefahren ist. */
-function spitzenVersatz(anteil: number): string {
-  const punkte = schnittBis(anteil)
-  const spitze = punkte[punkte.length - 1] ?? { z: 0, r: 0 }
-  return `translate(${spitze.z} ${-spitze.r})`
+/** Wo das Werkzeug nach den bisher gefahrenen Sätzen steht. */
+function letzterPunkt(gesehen: readonly SatzId[]): P {
+  const reihenfolge: SatzId[] = ['n10', 'n20', 'n30', 'n40']
+  const letzter = [...reihenfolge].reverse().find((id) => gesehen.includes(id))
+  return letzter ? BAHN[letzter].bis : PARK
 }
 
-/**
- * Die Schneide am Ende des Wegs — die Spitze sitzt genau auf dem Punkt, den
- * das Programm gerade anfährt. Sie zeigt nach rechts oben aus dem Material
- * heraus, weil dort der Revolver steht (siehe `Maschine`).
- */
-function Schneide() {
-  return (
-    <g>
-      <polygon points="0,0 5,-2.4 3,-5.6" className="fill-kh-paper" />
-      <path
-        d="M 3.4 -4.4 L 13 -14"
-        stroke="currentColor"
-        strokeWidth={4}
-        strokeLinecap="round"
-        className="text-kh-raised"
-      />
-      <path
-        d="M 3.4 -4.4 L 13 -14"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={STRICH.fein}
-        vectorEffect="non-scaling-stroke"
-        className="text-kh-mute"
-      />
-    </g>
-  )
-}
+function Bahnstueck({
+  id,
+  animiert = false,
+  betont = false,
+}: {
+  id: SatzId
+  animiert?: boolean
+  betont?: boolean
+}) {
+  const b = BAHN[id]
+  const farbe = b.schnitt ? (betont ? WARM.heiss : WARM.linie) : STAHL.linie
 
-/**
- * Der Luftschnitt. **Kein Knall und kein Rot** — Rot kommt in diesem Produkt
- * nicht vor (khpl-tage.md §3), und der Preis dieses Fehlers ist ohnehin kein
- * Alarm, sondern ein stehendes Bild: der Rohling hängt ungedreht im Futter,
- * und das Werkzeug ist auf der falschen Seite unterwegs.
- *
- * Dieselbe Strichstärke wie der Schnittweg, denn es ist dieselbe Bewegung —
- * nur eine, die nichts abträgt. Die Pfeilspitze am Rand sagt, dass es dort
- * weitergeht: `Z35.` liegt weit außerhalb dieser Ansicht.
- */
-function Luftschnitt() {
   return (
-    <g className="text-kh-orange">
-      <path
-        d={alsPfad(FEHLWEG)}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={STRICH.voll}
-        strokeLinecap="round"
-        vectorEffect="non-scaling-stroke"
-      />
-      <Pfeilspitze x={19} y={-NENNMASS / 2} winkel={0} />
-    </g>
+    <motion.line
+      x1={b.von.x}
+      y1={b.von.y}
+      x2={b.bis.x}
+      y2={b.bis.y}
+      stroke={farbe}
+      strokeWidth={betont ? 4 : b.schnitt ? 3 : 2}
+      strokeLinecap="round"
+      strokeDasharray={b.schnitt ? undefined : '6 5'}
+      initial={animiert ? { pathLength: 0 } : false}
+      animate={{ pathLength: 1 }}
+      transition={{
+        duration: animiert ? b.dauer : 0,
+        ease: b.schnitt ? 'linear' : [0.22, 1, 0.36, 1],
+      }}
+      opacity={b.schnitt ? 0.95 : 0.7}
+      data-testid={`weg-${id}`}
+    />
   )
 }

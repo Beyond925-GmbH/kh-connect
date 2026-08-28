@@ -295,8 +295,8 @@ export const ANLAGENMECHANIKER: BerufDef = {
       Bildhöhe reines Orange (Abnahme, A9). Eine leere Farbfläche fordert
       niemanden auf, mit einem Menschen zu sprechen.
 
-      Deshalb dasselbe Vorgehen wie in der Zerspanung (Z8): **das Kartenmotiv
-      dieses Berufs**, das einzige verbliebene SHK-Foto ohne lesbares
+      Deshalb **das Kartenmotiv dieses Berufs** auf dem letzten Screen: das
+      einzige verbliebene SHK-Foto ohne lesbares
       Firmenlogo — gallery-3 und quiz-waermepumpe scheiden dafür aus
       (MEDIEN-INVENTAR, Spec 10), gallery-1 und gallery-2 tragen bereits A3.1
       und A4.1. Es zeigt einen Menschen bei der Arbeit an einer Anlage; genau

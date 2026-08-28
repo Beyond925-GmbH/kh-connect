@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { BAUTEILE, type BauteilId } from '@/khpl/buehne/anlagenmechanik/kanon'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
+import { Lage } from '@/khpl/komponenten/Lage'
 import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
@@ -24,10 +25,30 @@ import { Fachwort } from './Fachwort'
  *     mehr braucht es nicht: **du arbeitest in der Wohnung von jemandem.** Ein
  *     Dachdecker ist auf dem Dach, ein Zimmerer in der Halle, ein Zerspaner an
  *     der Maschine.
- *  2. **Sechs Bauteile lesen** — jedes mit einem Satz: was es tut und ob es
- *     bleibt. **Kein Falsch, kein Richtig** (Vorbild B3.2 und M5). Wer hier
- *     nichts antippt, kann in A7 trotzdem weiter — er hat nur weniger zu
- *     erzählen, und genau das macht A7 sichtbar, ohne zu bewerten.
+ *  2. **Sechs Bauteile sortieren** — bei jedem entscheidet der Besucher
+ *     zuerst selbst: fliegt raus oder bleibt? Danach erst steht da, was es tut
+ *     und was wirklich damit passiert.
+ *
+ * ---
+ *
+ * **Was an Takt 2 umgebaut wurde und warum.**
+ *
+ * Der Screen war bis hierher „Tipp an, was in diesem Keller steht" — sechs
+ * Flächen, sechs Texte, aufdecken. Das war für sich in Ordnung, nur ist es
+ * inzwischen die **dritte** Aufdeck-Übung dieses Tages: A1 tippt Prüfpunkte an,
+ * A3 tippt Verlustflächen an. Drei Screens hintereinander mit demselben Verb
+ * lesen sich als ein Screen, den man dreimal sieht.
+ *
+ * Die Sortierung war ohnehin schon da — jedes Bauteil trug seit jeher ein
+ * `los` („fliegt raus", „bleibt", „wird getauscht"). Sie stand nur als
+ * Etikett neben dem Text, statt eine Frage zu sein. Jetzt ist sie die Frage,
+ * und der Text ist die Antwort.
+ *
+ * **Kein Falsch, kein Richtig** (R11, Vorbild B3.2 und M5): Auf eine Wahl
+ * folgt keine Note, sondern die Sache selbst. Wer beim Verteiler „fliegt raus"
+ * tippt, liest danach, warum die neue Anlage sich genau dort einhängt — das
+ * korrigiert wirksamer als ein rotes Kreuz. Wer hier nichts entscheidet, kann
+ * in A7 trotzdem weiter; er hat nur weniger zu erzählen.
  *
  * Die sechs Bauteile stehen als `BAUTEILE` in `buehne/anlagenmechanik/kanon.ts`
  * (Spec 6 nennt sie dort namentlich); **die Sätze dazu stehen hier und nicht in
@@ -135,6 +156,15 @@ export function A2() {
   const [vlies, setVlies] = useState(gemerkt.includes(VLIES_MARKE) || vorher.length > 0)
   const [angetippt, setAngetippt] = useState<BauteilId[]>(vorher)
   const [offen, setOffen] = useState<BauteilId | null>(null)
+  /**
+   * Was der Besucher je Bauteil entschieden hat.
+   *
+   * **Nur für diesen Besuch**, bewusst nicht im Store: Gespeichert wird, *dass*
+   * ein Bauteil bearbeitet wurde (`answers.a2.angetippt`, Spec 6) — die Wahl
+   * selbst braucht kein späterer Screen, und eine Formänderung am Antwortfeld
+   * nur für eine Anzeige wäre der teurere Weg.
+   */
+  const [wahl, setWahl] = useState<Partial<Record<BauteilId, 'raus' | 'bleibt'>>>({})
 
   const merke = (bauteile: BauteilId[]) =>
     merkeAntwort('a2', { angetippt: [VLIES_MARKE, ...bauteile] })
@@ -144,8 +174,21 @@ export function A2() {
     merke(angetippt)
   }
 
+  /**
+   * Ein Bauteil anfassen. **Es wird erst mit der Entscheidung als gelesen
+   * gezählt**, nicht schon beim Antippen — sonst zählte ein Fehlgriff auf dem
+   * Weg zur eigentlichen Frage mit.
+   */
   const tippen = (id: BauteilId) => {
     setOffen((alt) => (alt === id ? null : id))
+  }
+
+  /**
+   * Die Entscheidung. Sie wird gespeichert, aber **nicht bewertet**: Was
+   * danach im Panel steht, ist die Sache — nicht das Urteil über die Wahl.
+   */
+  const entscheide = (id: BauteilId, wahl: 'raus' | 'bleibt') => {
+    setWahl((alt) => ({ ...alt, [id]: wahl }))
     if (angetippt.includes(id)) return
     const neu = [...angetippt, id]
     setAngetippt(neu)
@@ -159,7 +202,15 @@ export function A2() {
   return (
     <StepShell
       id="A2"
-      auftrag={genug ? null : 'Tipp an, was in diesem Keller steht.'}
+      auftrag={
+        genug
+          ? null
+          : !vlies
+            ? 'Roll die Vliesbahn aus.'
+            : offen
+              ? 'Entscheide: fliegt raus oder bleibt?'
+              : 'Geh den Keller durch — Teil für Teil.'
+      }
       ansage={null}
       karteBreit
       interaktionOffen={!genug}
@@ -188,13 +239,27 @@ export function A2() {
         <Wechsel takt={vlies ? 'lesen' : 'vlies'}>
           {vlies ? (
             <div className="flex flex-col gap-3">
+              {/*
+                **Der Rahmen steht hier und nicht im `warum`.** Auf einem
+                Übungs-Step zeigt die Hülle den Warum-Bereich nicht an
+                (`komponenten/Lage.tsx`) — der Screen fragte deshalb „fliegt
+                raus oder bleibt?", ohne je gesagt zu haben, dass hier eine
+                neue Anlage geplant wird und die Antwort ins Angebot geht.
+                Ohne diesen Einsatz ist die Frage ein Ratespiel über fremde
+                Gegenstände.
+              */}
+              <Lage>
+                Der Ölkessel muss raus, die Wärmepumpe kommt rein. Alles andere hier unten
+                kann bleiben — oder nicht. Was du sagst, steht nachher im Angebot.
+              </Lage>
+
               {!offen && (
                 <p className="px-1 text-[1rem] text-kh-paper/55">
-                  Sechs Sachen stehen in diesem Keller. Tipp an, was du wissen willst.
+                  Sechs Sachen stehen in diesem Keller.
                   {angetippt.length > 0 && (
-                    <span className="text-kh-paper/40">
+                    <span>
                       {' '}
-                      — {angetippt.length} von {BAUTEILE.length} hast du schon.
+                      {angetippt.length} von {BAUTEILE.length} sortiert.
                     </span>
                   )}
                 </p>
@@ -227,23 +292,68 @@ export function A2() {
                 Bauteil schreibt dorthin, wo das erste stand. Das Panel bleibt
                 so hoch, wie es war.
               */}
-              <Wechsel takt={offen ?? 'nichts'}>
-                {karte && label ? (
+              {/*
+                Eine Fläche für beides: erst die Frage, dann die Sache. Sie
+                wächst nicht mit jedem Bauteil — das zweite schreibt dorthin,
+                wo das erste stand.
+              */}
+              <Wechsel
+                takt={`${offen ?? 'nichts'}-${offen ? (wahl[offen] ?? 'offen') : ''}`}
+              >
+                {karte && label && offen ? (
                   <div className="kh-feld px-4 py-3" data-testid="a2-erklaerung">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h2 className="kh-titel-klein text-kh-paper">{label}</h2>
-                      <span className="kh-etikett">{karte.los}</span>
-                    </div>
-                    <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-                      {karte.tut}
-                    </p>
+                    <h2 className="kh-titel-klein text-kh-paper">{label}</h2>
+
+                    {wahl[offen] ? (
+                      <>
+                        {/*
+                          **Erst die Sache, dann das Etikett.** Kein „richtig"
+                          und kein „falsch" (R11): Was hier steht, ist, was mit
+                          dem Teil passiert — und das gilt unabhängig davon,
+                          worauf getippt wurde. Wer danebenlag, liest den
+                          Grund und nicht sein Ergebnis.
+                        */}
+                        <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+                          {karte.tut}
+                        </p>
+                        <p className="mt-2.5 border-t border-kh-line pt-2.5">
+                          <span className="kh-etikett">Im Angebot steht</span>{' '}
+                          <span className="text-[1.0625rem] font-semibold text-kh-orange">
+                            {karte.los}
+                          </span>
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="mt-1 text-[1rem] text-kh-mute">
+                          Kann das Teil bei der neuen Anlage weiterlaufen?
+                        </p>
+                        <div className="mt-2.5 flex gap-2">
+                          <Wahlflaeche
+                            onClick={() => entscheide(offen, 'raus')}
+                            className="flex-1 justify-center"
+                            data-testid={`a2-raus-${offen}`}
+                          >
+                            Fliegt raus
+                          </Wahlflaeche>
+                          <Wahlflaeche
+                            onClick={() => entscheide(offen, 'bleibt')}
+                            className="flex-1 justify-center"
+                            data-testid={`a2-bleibt-${offen}`}
+                          >
+                            Bleibt
+                          </Wahlflaeche>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ) : null}
               </Wechsel>
             </div>
           ) : (
-            <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-              Erst die Bahn ausrollen. Dann der Keller.
+            <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/85">
+              Erst die Bahn, dann der Keller. Wer hier Öl auf den Teppich trägt, hat den
+              Auftrag verloren, bevor er angefangen hat.
             </p>
           )}
         </Wechsel>

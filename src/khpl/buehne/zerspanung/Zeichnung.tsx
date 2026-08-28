@@ -1,393 +1,281 @@
-import { Achse, Bild, Hilfslinie, Mass } from './Bild'
-import { BEMASSUNG, KOMMA, STRICH } from './stil'
-import { FASE, GROESSTMASS, KLEINSTMASS, LAENGE, NENNMASS, TOLERANZ } from './kanon'
-import { KONTUR } from './weg'
+import { motion } from 'motion/react'
+import { Bild } from './Bild'
+import { STAHL, TEIL, WARM, type MassId, type ZeichnungZustand } from './kanon'
 
 /**
- * Z1 — die technische Zeichnung, und der erste Zoom des Tages.
+ * Z1 — **die technische Zeichnung.** Die eigene Bildsprache dieses Berufs
+ * ist kein Foto und kein Schema, sondern das Blatt: Konturen, Mittellinie,
+ * Maßpfeile, Schriftfeld. Hier fängt jeder Auftrag an.
  *
- * **Vektor, nicht Foto einer Zeichnung** (khpl-tag-zerspanung.md §6 Z1). Der
- * Unterschied ist nicht Ästhetik: Eine Zeichnung, die aus denselben Werten
- * kommt wie der Werkzeugweg in Z3 und das Teil in Z5, *ist* dasselbe Teil. Ein
- * abfotografiertes Blatt wäre nur ein Bild davon.
+ * Die Zeichnung ist die Bedienung: die vier Maße sind antippbar, un-getippte
+ * tragen den wartenden Ring (dieselbe Einladung wie die Verlustflächen in
+ * A3). Das gefundene entscheidende Maß bleibt warm markiert — Orange gehört
+ * der Welt, und das Maß ist die Welt dieses Tages.
  *
- * **Der Toleranzzoom braucht eine Detailansicht, keinen stärkeren Zoom.** Das
- * ist die eine Stelle, an der eine naheliegende Umsetzung falsch gewesen wäre:
- * 0,021 mm auf einem Ø-20-Teil sind ein Zehntausendstel der Bildbreite. Wer
- * einfach weiterzoomt, sieht am Ende eine gerade Linie und hat nichts erklärt.
- * Zeichnungen lösen das seit jeher mit einer herausgezogenen **Einzelheit** —
- * ein Kreis auf der Kontur, daneben dieselbe Stelle stark überhöht. Deshalb
- * fährt die Zeichnung auf den Kreis zu *und* die Einzelheit fährt ein.
- *
- * ⚠️ Die Überhöhung steht als Wort im Bild („stark überhöht“). Ein Maßstab
- * („M 1000:1“) stünde da als Zahl, die niemand nachgerechnet hat — und dieser
- * Tag erfindet keine Zahlen (§11).
+ * Gezeichnet wird aus `TEIL` in `kanon.ts` — dieselben Zahlen, die auch der
+ * Werkzeugweg (Z3) und die Messschraube (Z4) benutzen. Eine Welt, viele
+ * Zustände.
  */
 
-/**
- * Wo die Bemaßung liegt — **je Blattlage einmal.**
- *
- * Quer steht das Blatt so, wie eine Welle gezeichnet wird: Durchmesser links
- * neben dem Teil, Länge darunter, Fasenhinweis rechts. Hochkant ist genau das
- * der Grund, warum die Zeichnung im Feld schwimmt — sie ist breit, weil ihre
- * Bemaßung breit ist. Also rückt hochkant die Bemaßung nach **oben und unten**:
- * dieselben Maße, dieselben Zahlen, dieselbe Norm, nur auf die Achse verteilt,
- * die im stehenden Feld Platz hat. Der Ausschnitt wird dadurch schmaler und die
- * Zeichnung größer statt kleiner.
- */
-interface Blattlage {
-  /** `min-x min-y breite hoehe` in Millimetern. */
-  sicht: string
-  achse: readonly [number, number]
-  /** Ø 20 h7: bis wohin die Maßlinie hochläuft, wo die Zahl steht, wie groß. */
-  durchmesser: { leiter: number; zahl: number; grad: number }
-  /** Die Länge: Maßlinie, Ende der Hilfslinien, Zahl, Schriftgrad. */
-  laenge: { linie: number; hilfe: number; zahl: number; grad: number }
-  /** Der Fasenhinweis: Knick, Ende der Fahne, Fuß der Zahl, Schriftgrad. */
-  fase: { knick: readonly [number, number]; ende: number; zahl: number; grad: number }
-}
+/** Maßstab der Zeichnung: Millimeter → Zeicheneinheiten. */
+const S = 3.4
 
-const QUER: Blattlage = {
-  sicht: '-44 -27 63 49',
-  achse: [-42, 8],
-  durchmesser: { leiter: -18.5, zahl: -20, grad: 4.4 },
-  laenge: { linie: 18, hilfe: 20, zahl: 16.2, grad: 3.6 },
-  fase: { knick: [7, 15.5], ende: 13.5, zahl: 14.1, grad: 3 },
-}
+/** Mittellinie des Teils. */
+const MITTE = 96
 
-/**
- * Hochkant: x ∈ [-40, 22], y ∈ [-37, 33]. Gegenüber `QUER` sechs Millimeter
- * schmaler und einundzwanzig höher — in einem Feld von rund 3 : 4 füllt das die
- * Höhe bis auf einen Rand, statt oben wie unten ein Drittel frei zu lassen.
- */
-const HOCH: Blattlage = {
-  sicht: '-40 -37 62 70',
-  achse: [-38, 10],
-  durchmesser: { leiter: -28, zahl: -30, grad: 6 },
-  laenge: { linie: 27, hilfe: 29, zahl: 24.8, grad: 5 },
-  fase: { knick: [6, 20], ende: 10, zahl: 18.6, grad: 3.6 },
-}
+/** Linke Kante des Teils (Schaftende). */
+const LINKS = 86
 
-/** Wo die Einzelheit auf der Kontur sitzt: mitten auf der Ø-20-Mantellinie. */
-const EINZELHEIT = [-14, -NENNMASS / 2] as const
-const EINZELHEIT_R = 4.2
+const schaftR = (TEIL.schaftDurchmesser / 2) * S
+const sitzR = (TEIL.sitzDurchmesser / 2) * S
+const schulter = LINKS + TEIL.schaftLaenge * S
+const stirn = schulter + TEIL.sitzLaenge * S
+const fase = TEIL.fase * S
 
-/** Wie weit die Zeichnung auf die Einzelheit zufährt, während sie einfährt. */
-const ZOOM = 4.2
-
-/** Die Mitte einer Blattlage — dorthin legt sich die Einzelheit. */
-function mitteVon(lage: Blattlage): readonly [number, number] {
-  const [minX, minY, breite, hoehe] = lage.sicht.split(/\s+/).map(Number)
-  return [minX + breite / 2, minY + hoehe / 2]
+/** Wo jedes Maß beschriftet ist und wo sein Tap-Ziel liegt. */
+const ORTE: Record<MassId, { x: number; y: number; label: string }> = {
+  laenge: { x: (LINKS + stirn) / 2, y: 178, label: `${TEIL.gesamt}` },
+  schaft: { x: 58, y: MITTE, label: `⌀${TEIL.schaftDurchmesser}` },
+  sitz: { x: 262, y: MITTE, label: `⌀${TEIL.sitzDurchmesser} h7` },
+  fase: { x: 168, y: 26, label: '1 × 45°' },
 }
 
 export function Zeichnung({
-  massHervorgehoben = false,
-  toleranzfeld = false,
+  zustand,
+  onMass,
 }: {
-  massHervorgehoben?: boolean
-  toleranzfeld?: boolean
+  zustand: ZeichnungZustand
+  /** Ohne Handler ist das Blatt nur noch Bild — nach dem Lösen. */
+  onMass?: (id: MassId) => void
 }) {
   return (
-    <Bild
-      viewBox={QUER.sicht}
-      viewBoxHoch={HOCH.sicht}
-      massstab={toleranzfeld ? ZOOM : 1}
-      mitte={EINZELHEIT}
-      ueber={(hoch) => (
-        <Einzelheit sichtbar={toleranzfeld} mitte={mitteVon(hoch ? HOCH : QUER)} />
+    <Bild testid="zeichnung-buehne">
+      {() => (
+        <svg
+          viewBox="0 0 320 240"
+          preserveAspectRatio="xMidYMid meet"
+          className="size-full"
+        >
+          {/* Das Blatt: ein Rahmen, kein Papier — die Zeichnung steht auf dem
+              Bühnenschwarz wie auf einem dunklen CAD-Schirm. */}
+          <rect
+            x="8"
+            y="6"
+            width="304"
+            height="228"
+            rx="3"
+            fill={STAHL.tiefe}
+            stroke={STAHL.linieMatt}
+            strokeWidth="1.5"
+          />
+
+          {/* Mittellinie, strichpunktiert über beide Enden hinaus. */}
+          <line
+            x1={LINKS - 14}
+            y1={MITTE}
+            x2={stirn + 16}
+            y2={MITTE}
+            stroke={STAHL.linieMatt}
+            strokeWidth="1"
+            strokeDasharray="10 3 2 3"
+          />
+
+          {/* Die Kontur des Bolzens: hinten der Schaft Ø20, vorn der
+              Lagersitz Ø25 mit Fase an der Stirn. */}
+          <path
+            d={[
+              `M ${LINKS} ${MITTE - schaftR}`,
+              `H ${schulter}`,
+              `V ${MITTE - sitzR}`,
+              `H ${stirn - fase}`,
+              `L ${stirn} ${MITTE - sitzR + fase}`,
+              `V ${MITTE + sitzR - fase}`,
+              `L ${stirn - fase} ${MITTE + sitzR}`,
+              `H ${schulter}`,
+              `V ${MITTE + schaftR}`,
+              `H ${LINKS}`,
+              'Z',
+            ].join(' ')}
+            fill="rgb(198 210 220 / 0.06)"
+            stroke={STAHL.linie}
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+          {/* Kante der Fase, als Linie über die Stirn. */}
+          <line
+            x1={stirn - fase}
+            y1={MITTE - sitzR + fase}
+            x2={stirn - fase}
+            y2={MITTE + sitzR - fase}
+            stroke={STAHL.linie}
+            strokeWidth="1"
+            opacity="0.6"
+          />
+
+          {/* --- Bemaßung ------------------------------------------------- */}
+
+          {/* Gesamtlänge 38, unter dem Teil. */}
+          <g stroke={STAHL.linieMatt} strokeWidth="1">
+            <line x1={LINKS} y1={MITTE + sitzR + 6} x2={LINKS} y2={ORTE.laenge.y + 5} />
+            <line x1={stirn} y1={MITTE + sitzR + 6} x2={stirn} y2={ORTE.laenge.y + 5} />
+            <line x1={LINKS} y1={ORTE.laenge.y} x2={stirn} y2={ORTE.laenge.y} />
+          </g>
+          <Pfeil x={LINKS} y={ORTE.laenge.y} nach="links" />
+          <Pfeil x={stirn} y={ORTE.laenge.y} nach="rechts" />
+
+          {/* Ø20, links neben dem Schaftende. */}
+          <g stroke={STAHL.linieMatt} strokeWidth="1">
+            <line x1={LINKS - 4} y1={MITTE - schaftR} x2={70} y2={MITTE - schaftR} />
+            <line x1={LINKS - 4} y1={MITTE + schaftR} x2={70} y2={MITTE + schaftR} />
+            <line x1={74} y1={MITTE - schaftR} x2={74} y2={MITTE + schaftR} />
+          </g>
+          <Pfeil x={74} y={MITTE - schaftR} nach="oben" />
+          <Pfeil x={74} y={MITTE + schaftR} nach="unten" />
+
+          {/* Ø25 h7, rechts neben der Stirn — das Maß, um das es geht. */}
+          <g stroke={STAHL.linieMatt} strokeWidth="1">
+            <line x1={stirn + 4} y1={MITTE - sitzR} x2={246} y2={MITTE - sitzR} />
+            <line x1={stirn + 4} y1={MITTE + sitzR} x2={246} y2={MITTE + sitzR} />
+            <line x1={242} y1={MITTE - sitzR} x2={242} y2={MITTE + sitzR} />
+          </g>
+          <Pfeil x={242} y={MITTE - sitzR} nach="oben" />
+          <Pfeil x={242} y={MITTE + sitzR} nach="unten" />
+
+          {/* Fase, mit Hinweislinie zur oberen Stirnkante. */}
+          <line
+            x1={stirn - fase / 2}
+            y1={MITTE - sitzR + fase / 2}
+            x2={ORTE.fase.x + 18}
+            y2={ORTE.fase.y + 7}
+            stroke={STAHL.linieMatt}
+            strokeWidth="1"
+          />
+
+          {/* Schriftfeld unten rechts — das Blatt sagt, was es ist. */}
+          <g fontSize="7.5" fill={STAHL.linie}>
+            <rect
+              x="196"
+              y="196"
+              width="112"
+              height="34"
+              fill="none"
+              stroke={STAHL.linieMatt}
+              strokeWidth="1"
+            />
+            <line x1="196" y1="207" x2="308" y2="207" stroke={STAHL.linieMatt} />
+            <text x="201" y="204" fontWeight="600" fill={STAHL.blank}>
+              Bolzen · C45
+            </text>
+            <text x="201" y="216">
+              Stückzahl: 200
+            </text>
+            <text x="201" y="226">
+              Maße in mm · ISO 2768-m
+            </text>
+          </g>
+
+          {/* --- Die vier Maße als Ziele ---------------------------------- */}
+          {(Object.keys(ORTE) as MassId[]).map((id) => (
+            <Mass key={id} id={id} zustand={zustand} onMass={onMass} />
+          ))}
+        </svg>
       )}
-    >
-      {(hoch) => {
-        const lage = hoch ? HOCH : QUER
-
-        return (
-          <>
-            {/*
-              Zwei Ebenen, zwei Geschwindigkeiten im Zoom — und beide enden bei
-              null.
-
-              Die erste Fassung ließ die Zeichnung bei 0,22 stehen, damit unter
-              der Einzelheit noch ein Zusammenhang zu ahnen war. Bei 4,2-fachem
-              Zoom bleibt davon aber kein Zusammenhang übrig, sondern **Reste**:
-              Die Einzelheit deckt die Mitte ab, und was seitlich neben ihr
-              herausragt, sind zwei Stummel Mantellinie am Bildrand und, bevor
-              der Rahmen kam, ein halber Riesenbuchstabe aus der Bemaßung.
-              Genau das stand nach der Auflösung von Z1 dauerhaft links im Bild.
-
-              Also verschwindet beides — die **Bemaßung zuerst** (0,3 s: sie
-              wird als Erstes unlesbar groß), die **Kontur langsamer** (0,55 s
-              gegen 0,7 s Fahrt: man sieht sie noch auf den Kreis zulaufen und
-              in ihm aufgehen). Zwei Bewegungen, eine Aussage — nur ohne Rest.
-            */}
-            <g
-              style={{
-                opacity: toleranzfeld ? 0 : 1,
-                transition: 'opacity 0.55s cubic-bezier(0.2, 0, 0, 1)',
-              }}
-            >
-              <Achse von={lage.achse[0]} bis={lage.achse[1]} />
-
-              {/* Das Teil im Schnitt. Keine Füllung: eine Zeichnung ist Linie. */}
-              <path
-                d={KONTUR}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={STRICH.voll}
-                strokeLinejoin="round"
-                vectorEffect="non-scaling-stroke"
-                className="text-kh-paper"
-              />
-
-              {/* Die Kante, an der die Fase endet — sichtbar, weil das Teil
-                  rund ist: aus der Fase wird im Bild ein Kreis und damit eine
-                  Linie. */}
-              <line
-                x1={-FASE}
-                y1={-NENNMASS / 2}
-                x2={-FASE}
-                y2={NENNMASS / 2}
-                stroke="currentColor"
-                strokeWidth={STRICH.fein}
-                vectorEffect="non-scaling-stroke"
-                className={BEMASSUNG}
-              />
-
-              {/* Der Kreis, aus dem die Einzelheit gezogen wird. Er bleibt im
-                  Zoom stehen: er ist die Stelle, auf die gefahren wird. */}
-              <circle
-                cx={EINZELHEIT[0]}
-                cy={EINZELHEIT[1]}
-                r={EINZELHEIT_R}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={STRICH.fein}
-                vectorEffect="non-scaling-stroke"
-                className={toleranzfeld ? 'text-kh-orange' : BEMASSUNG}
-              />
-            </g>
-
-            <g
-              style={{
-                opacity: toleranzfeld ? 0 : 1,
-                transition: 'opacity 0.3s cubic-bezier(0.2, 0, 0, 1)',
-              }}
-            >
-              {/* -- Ø 20 h7: das Maß, um das der ganze Tag geht ------------ */}
-              <Mass
-                von={[-26, -NENNMASS / 2]}
-                bis={[-26, NENNMASS / 2]}
-                hervor={massHervorgehoben}
-              />
-              <line
-                x1={-26}
-                y1={-NENNMASS / 2}
-                x2={-26}
-                y2={lage.durchmesser.leiter}
-                stroke="currentColor"
-                strokeWidth={STRICH.fein}
-                vectorEffect="non-scaling-stroke"
-                className={massHervorgehoben ? 'text-kh-orange' : BEMASSUNG}
-              />
-              <text
-                x={-26}
-                y={lage.durchmesser.zahl}
-                textAnchor="middle"
-                fontSize={lage.durchmesser.grad}
-                className={`font-display ${massHervorgehoben ? 'fill-kh-orange' : 'fill-kh-paper'}`}
-                style={{ fontVariantNumeric: 'tabular-nums' }}
-              >
-                Ø {NENNMASS} h7
-              </text>
-
-              {/* -- Länge -------------------------------------------------- */}
-              <Hilfslinie
-                von={[-LAENGE, NENNMASS / 2]}
-                bis={[-LAENGE, lage.laenge.hilfe]}
-              />
-              <Hilfslinie von={[0, NENNMASS / 2]} bis={[0, lage.laenge.hilfe]} />
-              <Mass von={[-LAENGE, lage.laenge.linie]} bis={[0, lage.laenge.linie]} />
-              <text
-                x={-LAENGE / 2}
-                y={lage.laenge.zahl}
-                textAnchor="middle"
-                fontSize={lage.laenge.grad}
-                className="fill-kh-paper/90 font-display"
-                style={{ fontVariantNumeric: 'tabular-nums' }}
-              >
-                {LAENGE}
-              </text>
-
-              {/* -- Fase: Hinweislinie an die Kante, wie in der Zeichnung -- */}
-              <path
-                d={`M ${-FASE / 2} ${NENNMASS / 2 - FASE / 2} L ${lage.fase.knick[0]} ${lage.fase.knick[1]} L ${lage.fase.ende} ${lage.fase.knick[1]}`}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={STRICH.fein}
-                vectorEffect="non-scaling-stroke"
-                className={BEMASSUNG}
-              />
-              <circle
-                cx={-FASE / 2}
-                cy={NENNMASS / 2 - FASE / 2}
-                r={0.55}
-                className="fill-kh-mute"
-              />
-              <text
-                x={lage.fase.knick[0]}
-                y={lage.fase.zahl}
-                fontSize={lage.fase.grad}
-                className="fill-kh-paper/90 font-display"
-                style={{ fontVariantNumeric: 'tabular-nums' }}
-              >
-                {FASE} × 45°
-              </text>
-
-              <text
-                x={EINZELHEIT[0]}
-                y={EINZELHEIT[1] - EINZELHEIT_R - 1.6}
-                textAnchor="middle"
-                fontSize={3.4}
-                className="fill-kh-mute font-display"
-              >
-                X
-              </text>
-            </g>
-          </>
-        )
-      }}
     </Bild>
   )
 }
 
-/**
- * Einzelheit X — die Mantellinie, stark überhöht.
- *
- * Oben das **Größtmaß**, unten das **Kleinstmaß**, dazwischen der ganze
- * Spielraum, den dieses Teil hat. Die Zone ist gelbgrün, weil „liegt drin“ im
- * ganzen System diese Farbe hat (Z5 setzt sie im Panel genauso ein) — und weil
- * Rot in diesem Produkt nicht vorkommt.
- *
- * Sie liegt **außerhalb** der zoomenden Gruppe: die Zeichnung fährt auf den
- * Kreis zu, die Einzelheit steht still und wird eingeblendet. Zwei Bewegungen,
- * eine Aussage.
- */
-function Einzelheit({
-  sichtbar,
-  mitte,
+/** Ein kleiner Maßpfeil. */
+function Pfeil({
+  x,
+  y,
+  nach,
 }: {
-  sichtbar: boolean
-  /** Die Mitte der geltenden Blattlage — hochkant eine andere als quer. */
-  mitte: readonly [number, number]
+  x: number
+  y: number
+  nach: 'links' | 'rechts' | 'oben' | 'unten'
 }) {
-  const [mx, my] = mitte
-  const radius = 22
-  /** Wo im Bild das Größtmaß liegt, und wie hoch die Zone gezeichnet wird. */
-  const oben = my - 3
-  const hoch = 7.5
-  const unten = oben + hoch
+  const d = {
+    links: `M ${x} ${y} l 7 -2.4 v 4.8 Z`,
+    rechts: `M ${x} ${y} l -7 -2.4 v 4.8 Z`,
+    oben: `M ${x} ${y} l -2.4 7 h 4.8 Z`,
+    unten: `M ${x} ${y} l -2.4 -7 h 4.8 Z`,
+  }[nach]
+  return <path d={d} fill={STAHL.linieMatt} />
+}
+
+/**
+ * Ein Maß: Beschriftung, Tap-Ziel und die drei Zustände — wartend (Ring),
+ * gelesen (still), gefunden (warm).
+ */
+function Mass({
+  id,
+  zustand,
+  onMass,
+}: {
+  id: MassId
+  zustand: ZeichnungZustand
+  onMass?: (id: MassId) => void
+}) {
+  const ort = ORTE[id]
+  const gelesen = zustand.angetippt.includes(id)
+  const offen = zustand.offen === id
+  const kritisch = id === 'sitz' && zustand.gefunden
 
   return (
     <g
-      style={{
-        opacity: sichtbar ? 1 : 0,
-        transition: `opacity 0.45s ${sichtbar ? '0.25s' : '0s'} cubic-bezier(0.2, 0, 0, 1)`,
-      }}
+      onClick={onMass ? () => onMass(id) : undefined}
+      style={{ cursor: onMass ? 'pointer' : undefined }}
+      data-testid={`zeichnung-mass-${id}`}
     >
-      <defs>
-        <clipPath id="zerspanung-einzelheit">
-          <circle cx={mx} cy={my} r={radius} />
-        </clipPath>
-      </defs>
+      {/* Trefferfläche — großzügig, unsichtbar. */}
+      <circle cx={ort.x} cy={ort.y} r="24" fill="transparent" />
 
-      <circle cx={mx} cy={my} r={radius} className="fill-kh-ink/95" />
-
-      <g clipPath="url(#zerspanung-einzelheit)">
-        {/* Das Material unter der Mantellinie. */}
-        <rect
-          x={mx - radius}
-          y={unten}
-          width={radius * 2}
-          height={radius * 2}
-          className="fill-kh-raised"
+      {/* Der wartende Ring auf allem, was noch nicht gelesen ist. */}
+      {onMass && !gelesen && (
+        <motion.circle
+          cx={ort.x}
+          cy={ort.y}
+          r={13}
+          fill="none"
+          stroke="#d8f63c"
+          strokeWidth="1.6"
+          // `initial` nennt den ersten Frame ausdrücklich: ohne ihn schreibt
+          // motion beim Mounten einmal `r="undefined"` in das Attribut, und
+          // die Konsole meldet auf jedem Ring einen Rendering-Fehler.
+          initial={{ r: 13, opacity: 0.75 }}
+          animate={{ r: [13, 18, 13], opacity: [0.75, 0.2, 0.75] }}
+          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
         />
-        {/* Die Zone, in der die Oberfläche liegen darf. */}
-        <rect
-          x={mx - radius}
-          y={oben}
-          width={radius * 2}
-          height={hoch}
-          className="fill-kh-signal/12"
+      )}
+
+      {/* Das gefundene Maß bleibt warm eingefasst. */}
+      {kritisch && (
+        <motion.circle
+          cx={ort.x}
+          cy={ort.y}
+          r="19"
+          fill="rgb(255 159 42 / 0.10)"
+          stroke={WARM.linie}
+          strokeWidth="2"
+          initial={{ scale: 0.6, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+          style={{ transformOrigin: `${ort.x}px ${ort.y}px` }}
         />
+      )}
 
-        {[oben, unten].map((y, i) => (
-          <line
-            key={y}
-            x1={mx - radius}
-            y1={y}
-            x2={mx + radius}
-            y2={y}
-            stroke="currentColor"
-            strokeWidth={STRICH.voll}
-            strokeDasharray={i === 0 ? undefined : '7 4'}
-            vectorEffect="non-scaling-stroke"
-            className="text-kh-signal"
-          />
-        ))}
-
-        <g className="text-kh-signal">
-          <Mass von={[mx + 3, oben]} bis={[mx + 3, unten]} />
-        </g>
-        <text
-          x={mx + 6}
-          y={my + 1.4}
-          fontSize={5.4}
-          className="fill-kh-signal font-display"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
-        >
-          {TOLERANZ.toLocaleString('de-DE', { minimumFractionDigits: 3 })}
-        </text>
-
-        <text
-          x={mx - radius + 3}
-          y={oben - 1.8}
-          fontSize={3.6}
-          className="fill-kh-paper/90 font-display"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
-        >
-          {KOMMA.format(GROESSTMASS)}
-        </text>
-        <text
-          x={mx - radius + 3}
-          y={unten + 4.6}
-          fontSize={3.6}
-          className="fill-kh-paper/90 font-display"
-          style={{ fontVariantNumeric: 'tabular-nums' }}
-        >
-          {KOMMA.format(KLEINSTMASS)}
-        </text>
-      </g>
-
-      <circle
-        cx={mx}
-        cy={my}
-        r={radius}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={STRICH.voll}
-        vectorEffect="non-scaling-stroke"
-        className="text-kh-mute"
-      />
-      {/* Die Fahne steht **innen**: Sie gehört zur Einzelheit, nicht zur
-          Zeichnung, und am oberen Bildrand wäre sie das Erste, was ein
-          knapperer Bildausschnitt abschneidet. */}
       <text
-        x={mx - radius + 4}
-        y={my - radius + 7}
-        fontSize={3.4}
-        className="fill-kh-mute font-display"
+        x={ort.x}
+        y={ort.y + 4}
+        textAnchor="middle"
+        fontSize="12"
+        fontWeight="700"
+        fill={kritisch ? WARM.linie : offen ? STAHL.glanz : STAHL.blank}
+        stroke={STAHL.tiefe}
+        strokeWidth="4"
+        paintOrder="stroke"
       >
-        X — stark überhöht
+        {ort.label}
       </text>
     </g>
   )

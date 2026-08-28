@@ -224,11 +224,20 @@ export function A1() {
   return (
     <StepShell
       id="A1"
-      auftrag={geloest ? null : 'Wähl drei Prüfungen und finde die Ursache.'}
+      auftrag={
+        geloest
+          ? null
+          : entscheiden
+            ? 'Sag, woran es liegt.'
+            : 'Tipp in der Anlage an, was du prüfen willst.'
+      }
       ansage={null}
-      // Die sechs Prüfungen im Panel sind der Kern des Screens, die Anlage
-      // daneben erklärt sie — quer darf die Spalte deshalb breiter werden.
-      karteBreit
+      // Die Zeichnung ist jetzt die Bedienung und nicht mehr die Begleitung.
+      buehneInteraktiv={!entscheiden && !geloest}
+      // Nur die Entscheidung braucht quer die breite Spalte: Dort stehen fünf
+      // ausformulierte Ursachen. Während der Suche gehört die Fläche der
+      // Anlage — sie *ist* die Bedienung.
+      karteBreit={entscheiden || geloest}
       interaktionOffen={!geloest}
       buehne={
         <Schnitt
@@ -274,12 +283,7 @@ export function A1() {
               schmal={schmal}
             />
           ) : (
-            <Suchen
-              geprueft={geprueft}
-              offen={offeneP}
-              onPruefe={pruefe}
-              schmal={schmal}
-            />
+            <Suchen geprueft={geprueft} offen={offeneP} schmal={schmal} />
           )}
         </Wechsel>
       }
@@ -318,69 +322,49 @@ export function A1() {
 // Takt 1 — suchen
 // ---------------------------------------------------------------------------
 
+/**
+ * Takt 1 — **die Suche findet auf der Anlage statt, nicht in einer Liste.**
+ *
+ * ---
+ *
+ * **Was hier ersetzt wurde.** Der Screen zeigte sechs Knöpfe mit sechs Sätzen:
+ * „Läuft der Kessel?", „Läuft die Speicherladepumpe?", „Steht der Mischer
+ * richtig?". Für jemanden, der vom Beruf nichts weiß — also für die
+ * Zielgruppe —, war das eine Liste aus sechs deutschen Komposita, von denen
+ * vier nichts bedeuten. Man wählt dann nicht, man tippt das kürzeste Wort an.
+ *
+ * Dabei stand die bessere Fassung schon da: **die Anlage daneben war längst
+ * antippbar** (`Anlage.tsx`, `onPruefpunkt`), und jeder der sechs Prüfpunkte
+ * sitzt dort an dem Ding, um das es geht. Die Liste war eine zweite Bedienung
+ * für dieselbe Handlung — und ausgerechnet die schlechtere: Sie fragt nach
+ * Wörtern, die Zeichnung zeigt Sachen.
+ *
+ * Geblieben ist alles, was den Screen inhaltlich trägt: dieselben sechs
+ * Prüfungen, dieselben Ergebnisse, dieselbe Uhr, dieselbe Entscheidung
+ * danach. Das Panel führt jetzt **Protokoll**, statt zu bedienen — dieselbe
+ * Rolle wie der Verlustbalken in A4.
+ */
 function Suchen({
   geprueft,
   offen,
-  onPruefe,
   schmal = false,
 }: {
   geprueft: string[]
   offen: number
-  onPruefe: (id: string) => void
   /** Handy hochkant: kürzere Zeilen, damit das Ergebnis ins Fenster passt. */
   schmal?: boolean
 }) {
   const zuletzt = geprueft.at(-1)
   const letzte = PRUEFUNGEN.find((p) => p.id === zuletzt)
 
-  /*
-    Eine Ergebnisfläche, kein Stapel: die zweite Prüfung schreibt ihr Ergebnis
-    dorthin, wo die erste stand. Was man schon geprüft hat, steht als markierte
-    Fläche daneben — man verliert nichts, aber das Panel wächst auch nicht mit
-    jedem Tap.
-
-    **Schmal steht sie über der Liste, sonst darunter.** Auf 390 × 844 passen
-    Kopf, sechs Kacheln und Ergebnis zusammen nicht ins Fenster; irgendetwas
-    liegt unter der Kante. Stand das Ergebnis unten, war es das Ergebnis —
-    „Kalt. Nicht lauwarm — kalt. Hier ist seit …" brach mitten im Satz ab,
-    und das ist der ganze Ertrag eines Taps. Über der Liste rutscht dafür die
-    unterste Kachelreihe unter den Verlauf: sichtbar angeschnitten, erreichbar
-    durch Scrollen, und nach der dritten Prüfung ohnehin gesperrt. Dieselbe
-    Abwägung wie in A6 mit der `Rueckmeldung`.
-  */
-  const ergebnisfeld = (
-    <Wechsel takt={zuletzt ?? 'nichts'}>
-      {letzte ? (
-        <div className="kh-feld px-4 py-3" data-testid="a1-ergebnis">
-          <p className="kh-etikett">{letzte.frage}</p>
-          <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-            {letzte.ergebnis}
-          </p>
-        </div>
-      ) : (
-        <p className="px-1 text-[1rem] text-kh-paper/55">
-          {schmal
-            ? 'Jede Prüfung schließt etwas aus — und kostet Zeit.'
-            : 'Jede Prüfung schließt etwas aus oder bestätigt etwas. Und jede kostet Zeit — danach wartet die nächste Adresse.'}
-        </p>
-      )}
-    </Wechsel>
-  )
-
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        {/*
-          Schmal die kurze Fassung: die lange lief über zwei Zeilen und schob
-          die Uhr auf eine dritte — 122 px Kopfzeile über einer Liste, die
-          selbst nur 229 px braucht. Was sie sagt, sagen die Kacheln darunter
-          ohnehin: sechs Fragen, von denen drei gehen.
-        */}
         <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
           {offen > 0
             ? schmal
-              ? 'Drei Prüfungen hast du.'
-              : 'Drei Prüfungen hast du. Such dir aus, welche.'
+              ? `Noch ${offen} von drei.`
+              : `Noch ${offen} von drei Prüfungen.`
             : schmal
               ? 'Jetzt entscheidest du.'
               : 'Das waren deine drei Prüfungen. Jetzt entscheidest du.'}
@@ -388,58 +372,48 @@ function Suchen({
         <Uhr geprueft={geprueft.length} />
       </div>
 
-      {schmal && ergebnisfeld}
+      {/*
+        Eine Ergebnisfläche, kein Stapel: die zweite Prüfung schreibt ihr
+        Ergebnis dorthin, wo die erste stand. Was schon geprüft ist, trägt auf
+        der Zeichnung einen Haken — das Panel wächst nicht mit jedem Tap.
+      */}
+      <Wechsel takt={zuletzt ?? 'nichts'}>
+        {letzte ? (
+          <div className="kh-feld px-4 py-3" data-testid="a1-ergebnis">
+            <p className="kh-etikett">{letzte.frage}</p>
+            <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+              {letzte.ergebnis}
+            </p>
+          </div>
+        ) : (
+          // R4: Der Imperativ steht einmal, im Auftragsband. Hier steht nur,
+          // was er kostet.
+          <p className="px-1 text-[1rem] text-kh-paper/70">
+            {schmal
+              ? 'Jede Prüfung schließt etwas aus — und kostet Zeit.'
+              : 'Jede Prüfung schließt etwas aus oder bestätigt etwas. Und jede kostet Zeit — danach wartet die nächste Adresse.'}
+          </p>
+        )}
+      </Wechsel>
 
       {/*
-        **Gelbgrün markiert höchstens eine Fläche, und nur die offene.**
-
-        Die Vorfassung setzte `gewaehlt` auf jede erledigte Prüfung: nach drei
-        Taps standen drei vollflächig gelbgrüne Balken über die ganze
-        Panelbreite, dazu der ebenfalls gelbgrüne Aktionsknopf — vier
-        Signalflächen auf einem Screen (Abnahme, A1). `index.css` reserviert das
-        Warnwesten-Gelbgrün für „das hast du geschafft"; „schon angetippt" ist
-        etwas anderes.
-
-        Jetzt dieselbe Geste wie in A2 und A4.1 an diesem Tag: markiert ist die
-        Prüfung, deren Ergebnis gerade im Feld steht, alle anderen erledigten
-        tragen einen Haken. Erledigtes bleibt sichtbar, ohne zu leuchten.
+        Das Protokoll. Es bedient nichts — es zeigt, was schon angefasst wurde,
+        damit nach drei Prüfungen die Entscheidung auf etwas Sichtbarem fußt
+        und nicht auf Erinnerung.
       */}
-      {/*
-        Zwei Spalten auch auf dem Handy (`max-sm`): sechs einzeilige Flächen
-        untereinander schoben drei davon unter die Scrollkante — und wer nicht
-        scrollt, wählt aus der halben Auswahl (Sichtprüfung, A1 handy-hoch).
-        Die Fragen sind kurz genug für die halbe Breite; nur
-        „Speicherladepumpe" braucht die Trennhilfe (`hyphens-auto`).
-      */}
-      <div className="grid gap-2 max-sm:grid-cols-2 landscape:grid-cols-2">
-        {PRUEFUNGEN.map((p) => {
-          const fertig = geprueft.includes(p.id)
-          return (
-            <Wahlflaeche
-              key={p.id}
-              onClick={() => onPruefe(p.id)}
-              // Die schon gemachten Prüfungen bleiben stehen und bleiben
-              // lesbar — gesperrt sind nur die, für die keine Zeit mehr ist.
-              disabled={!fertig && offen <= 0}
-              gewaehlt={fertig && p.id === zuletzt}
-              className="max-sm:px-3 max-sm:py-2.5 max-sm:leading-snug max-sm:break-words max-sm:hyphens-auto"
-              lang="de"
-              data-testid={`a1-pruefung-${p.id}`}
+      {geprueft.length > 0 && (
+        <ul className="flex flex-wrap gap-x-4 gap-y-1" data-testid="a1-protokoll">
+          {geprueft.map((id) => (
+            <li
+              key={id}
+              className="flex items-center gap-1.5 text-[0.9375rem] text-kh-mute"
             >
-              {fertig && p.id !== zuletzt && (
-                <Check
-                  className="size-4 shrink-0 text-kh-signal"
-                  strokeWidth={3}
-                  aria-hidden
-                />
-              )}
-              {p.frage}
-            </Wahlflaeche>
-          )
-        })}
-      </div>
-
-      {!schmal && ergebnisfeld}
+              <Check className="size-4 shrink-0 text-kh-signal" strokeWidth={3} />
+              {PRUEFUNGEN.find((p) => p.id === id)?.frage}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
@@ -483,8 +457,8 @@ function Uhr({ geprueft }: { geprueft: number }) {
  * dieser Stelle **schon gelesen ist** — vor dem Fehlgriff stand sie
  * vollständig im Fenster (Rest 0, 5 von 5 Flächen ganz sichtbar), und der
  * Fehlgriff war der Tap auf eine davon. Beim zweiten Versuch stehen wieder
- * alle fünf da, diesmal mit der Folge im Rücken. Dieselbe Antwort wie in Z7
- * der Zerspanung: nichts streichen, nur nicht alles gleichzeitig zeigen.
+ * alle fünf da, diesmal mit der Folge im Rücken: nichts streichen, nur nicht
+ * alles gleichzeitig zeigen.
  *
  * Quer bleibt die Liste offen — dort trägt das Fenster beides, seit der
  * Fachtext im Takt *entscheiden* nicht mehr mitläuft.

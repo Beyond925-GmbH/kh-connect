@@ -1,210 +1,319 @@
 import { useEffect, useState } from 'react'
-import { Check } from 'lucide-react'
-import { motion } from 'motion/react'
-import { Werkstueck } from '@/khpl/buehne/zerspanung/Werkstueck'
-import { StepFuss, useStepNavigation } from '@/khpl/shell/StepFuss'
+import { motion, useReducedMotion } from 'motion/react'
+import { Button } from '@/components/ui/button'
+import { StepFoto } from '@/khpl/buehne/Foto'
+import { mm } from '@/khpl/buehne/zerspanung/kanon'
+import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
+import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
+import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
+import { Wechsel } from '@/khpl/komponenten/Wechsel'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import type { StepId } from '@/khpl/flow/steps'
-import type { Fortschritt } from '@/khpl/store/fortschritt'
+import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
- * Z6 — Deins ist das erste. **Rückblick statt Punkte.**
+ * Z6 — Jetzt macht sie es 200-mal. **Die Belohnung und die Abfrage in
+ * einem:** der Zähler läuft, die Kiste füllt sich — und mittendrin wandert
+ * das Maß, weil die Schneide sich abnutzt.
  *
- * Keine Note, kein Score, keine Prozentangabe, sondern eine Aufzählung dessen,
- * was der Besucher tatsächlich getan hat. Jeder Eintrag hat **zwei Fassungen**
- * — gelöst und nur gesehen. Beides ist wahr, keines ist ein Tadel: am
- * Messestand steht vielleicht jemand daneben, und sich vor Publikum dumm zu
- * fühlen ist das Gegenteil vom Ziel (flow 6.6).
+ * Das ist die zweite Hälfte des Lernpaars zu Z4 (Teach → Abfrage, wie
+ * M5 → M7 beim Dachdecker): dort hat der Besucher gelernt, in Hundertsteln
+ * zu korrigieren — hier wendet er es an, ohne dass es ihm noch einmal
+ * erklärt wird. Die Stichprobe bei Stück 40 sagt „passt“, die bei Stück 120
+ * zeigt den Trend; wer nicht reagiert, bekommt bei Stück 140 die Folge
+ * (zwanzig Teile nachdrehen — Zeit, kein Schrott) und darf dann handeln.
  *
- * Die vier Einträge stehen `VALIDIERT` in khpl-tag-zerspanung.md §6 Z6 und
- * werden hier wörtlich übernommen.
+ * **Beide Korrekturen sind richtig, auf zwei Arten:** −0,01 stellt die
+ * Fenstermitte her, −0,02 legt das Maß mit Absicht ans untere Ende — so
+ * hält die Korrektur am längsten, weil der Verschleiß nach oben wandert.
+ * Es gibt hier kein Falsch, nur zwei Temperamente.
  *
- * **Die Pointe steht gegen die des Dachdeckers.** Dort schneidet der Besucher
- * einen von rund 110 Sparren, und die Auflösung heißt *niemand macht das
- * allein*. Hier macht er das erste von 400, und den Rest macht die Maschine.
+ * **Fachlich:** Werkzeugverschleiß beim Außendrehen macht das Teil
+ * **größer** (die Schneide trägt weniger ab), deshalb wandert das Maß nach
+ * oben — und deshalb prüft eine Fertigung Stichproben statt jedes Teil.
  *
- * ⚠️ **„Nachts ohne dich“ ist entschärft** (`belege/zerspanung.md` 8):
- * mannlose Fertigung ist belegt, aber nicht der Regelfall in jedem Betrieb.
- * Tragfähig — und immer noch stark — ist: **die Maschine macht weiter, wenn du
- * gehst.** Genau deshalb füllt sich die Kiste, während man hinsieht, statt
- * dass ein Satz es behauptet.
- *
- * ⚠️ **Ein Firmenname geht nicht ohne Freigabe an den Stand** (§11). Auf dem
- * Screen steht deshalb nur die Gattung — Mähdrescher, Getriebe, Pumpe —, und
- * genau dort endet er: nicht bei „Nr. 1 von 400“, sondern bei *wo dein Teil
- * hinfährt*. Für ein Publikum in Paderborn-Lippe ist ein Mähdrescher nichts
- * Abstraktes, sondern etwas, das auf dem Feld neben der Schule fährt.
- *
- * **Hallenlicht, kein Abendlicht.** M8 legt über sein fertiges Dach einen
- * warmen Verlauf; hier liegt bewusst keiner. Draußen ist es hell oder dunkel,
- * und in der Halle merkt man es nicht — vier Feierabende, vier verschiedene
- * Lichter (khpl-tage.md §2).
- *
- * ⚠️ **Medienlücke.** Für die Sichtkiste gibt es **kein Motiv im Bestand**
- * (§10). Sie ist die wichtigere der beiden Lücken dieses Tages, weil sie die
- * Pointe trägt; bis dahin zeichnet `buehne/zerspanung/` sie.
+ * **`answers.z6`** `{ stueck, nachkorrigiert, stabil }`.
  */
 
-// ---------------------------------------------------------------------------
-// Text und Takt — gebündelt oben (flow 8.4).
-// ---------------------------------------------------------------------------
+/** Wo der Zähler steht, wenn der Screen anfängt — die Pause ist vorbei. */
+const START = 21
 
-interface Tat {
-  /** Wenn die Übung dieses Steps gelöst wurde. */
-  erledigt: string
-  /** Wenn der Step gesehen, aber nicht gelöst wurde. */
-  gesehen: string
-  geloest: (f: Fortschritt) => boolean
-}
+/** Erste Stichprobe: alles gut. */
+const PROBE_1 = 40
 
-/**
- * Reihenfolge = Tagesablauf. Vier Einträge, nicht sechs: die Abstecher Z1.1
- * und Z2.1 stehen bewusst nicht darin — die Tabelle in §6 Z6 ist abgenommen,
- * und eine Liste, die jeden Screen quittiert, ist eine Quittung und kein
- * Rückblick.
- */
-const TATEN: { id: StepId; tat: Tat }[] = [
-  {
-    id: 'Z1',
-    tat: {
-      erledigt: 'eine Toleranz gelesen',
-      gesehen: 'gesehen, wie genau ein Teil sein muss',
-      geloest: (f) => !!f.answers.z1?.aufgeloest,
-    },
-  },
-  {
-    id: 'Z2',
-    tat: {
-      erledigt: 'eine Maschine gerüstet',
-      gesehen: 'gesehen, was vor dem ersten Span passiert',
-      geloest: (f) => !!f.answers.z2?.fertig,
-    },
-  },
-  {
-    id: 'Z3',
-    tat: {
-      erledigt: 'einen Programmfehler gefunden',
-      gesehen: 'ein CNC-Programm gelesen',
-      geloest: (f) => !!f.answers.z3?.gefunden,
-    },
-  },
-  {
-    id: 'Z5',
-    tat: {
-      erledigt: 'ein Teil gemessen und beurteilt',
-      gesehen: 'gesehen, wie ein Teil gemessen wird',
-      // „Beurteilt“ heißt beurteilt — ob das Urteil stimmte, steht hier
-      // ausdrücklich nicht zur Debatte. Der Rückblick bewertet nicht.
-      geloest: (f) => !!f.answers.z5?.urteil,
-    },
-  },
-]
+/** Zweite Stichprobe: der Trend. */
+const PROBE_2 = 120
 
-function rueckblick(f: Fortschritt): string[] {
-  const gesehen = new Set(f.visited)
-  return TATEN.filter((t) => gesehen.has(t.id)).map((t) =>
-    t.tat.geloest(f) ? t.tat.erledigt : t.tat.gesehen,
-  )
-}
+/** Wer den Trend laufen lässt, sieht hier die Folge. */
+const KIPPT = 140
 
-/**
- * Wie voll die Kiste steht, wenn der Screen aufgeht.
- *
- * **Knapp halb voll, nicht fast leer.** Die erste Fassung fing mit zwei Teilen
- * an und legte alle paar Sekunden eines nach; auf dem Screen stand damit eine
- * fast leere Kiste, und die Pointe des Tages — *das erste von vierhundert, die
- * Maschine macht weiter, wenn du gehst* — hatte kein Bild. Der Zählstand ist
- * hier ohnehin nicht die Aussage: eine Schicht liegt hinter dem Besucher, und
- * was zählt, ist, dass es **weitergeht**, während er hinsieht.
- */
-const KISTE_START = 0.45
-/** Sekunden je weiterem Teil. Schnell genug, dass man es beim Lesen merkt. */
-const TAKT = 1.6
-/** Weiter füllt sie sich auf diesem Screen nicht. */
-const KISTE_MAX = 0.95
-/**
- * Ein Platz je Takt. Die Kiste hat drei mal vier davon (`buehne/Kiste.tsx`) —
- * ein kleinerer Schritt ließe zwei von drei Takten ohne sichtbares Teil
- * verstreichen, und das Füllen wäre wieder ein Zählstand.
- */
-const SCHRITT = 1 / 12
+/** Bis hierhin läuft der Zähler nach der Korrektur — dann ist Feierabend nah. */
+const SCHICHT_ENDE = 154
+
+const SERIE = 200
+
+type Phase =
+  'laufen1' | 'probe1' | 'weiter1' | 'laufen2' | 'probe2' | 'trend' | 'kippt' | 'stabil'
 
 export function Z6() {
-  const { fortschritt } = useStepNavigation('Z6')
-  const liste = rueckblick(fortschritt)
+  const gespeichert = useFortschritt().answers.z6
+  const fertig = !!gespeichert?.stabil
+  const reduziert = useReducedMotion() ?? false
 
-  /**
-   * Die Kiste füllt sich, während man hinsieht. Das ist die entschärfte und
-   * immer noch starke Fassung der Pointe: **die Maschine macht weiter, wenn du
-   * gehst** — gezeigt statt behauptet.
-   */
-  const [fuellstand, setFuellstand] = useState(KISTE_START)
+  const [phase, setPhase] = useState<Phase>(() => (fertig ? 'stabil' : 'laufen1'))
+  const [stueck, setStueck] = useState(() =>
+    fertig ? Math.max(gespeichert?.stueck ?? SCHICHT_ENDE, PROBE_2) : START,
+  )
+  /** Die letzte Korrektur-Entscheidung — sie färbt den Text im Stabil-Takt. */
+  const [wahl, setWahl] = useState<'mitte' | 'unten' | null>(null)
+
+  /** Wohin der Zähler in der aktuellen Phase läuft. */
+  const ziel =
+    phase === 'laufen1'
+      ? PROBE_1
+      : phase === 'laufen2'
+        ? PROBE_2
+        : phase === 'kippt'
+          ? KIPPT
+          : phase === 'stabil'
+            ? SCHICHT_ENDE
+            : stueck
+
   useEffect(() => {
-    const uhr = setInterval(
-      () => setFuellstand((f) => Math.min(KISTE_MAX, f + SCHRITT)),
-      TAKT * 1000,
-    )
-    return () => clearInterval(uhr)
-  }, [])
+    if (stueck >= ziel) return
+    if (reduziert) {
+      setStueck(ziel)
+      return
+    }
+    const takt = window.setInterval(() => setStueck((s) => Math.min(ziel, s + 1)), 110)
+    return () => window.clearInterval(takt)
+  }, [stueck, ziel, reduziert])
+
+  // Erreicht der Zähler sein Ziel, wechselt die Phase — aber nur dort, wo
+  // das Laufen selbst die Handlung war. Die Proben wechselt ein Tap.
+  useEffect(() => {
+    if (stueck < ziel) return
+    if (phase === 'laufen1') setPhase('probe1')
+    if (phase === 'laufen2') setPhase('probe2')
+  }, [stueck, ziel, phase])
+
+  const misstProbe1 = () => {
+    setPhase('weiter1')
+    merkeAntwort('z6', { stueck: PROBE_1, nachkorrigiert: false, stabil: false })
+  }
+
+  const korrigiere = (art: 'mitte' | 'unten') => {
+    setWahl(art)
+    setPhase('stabil')
+    merkeAntwort('z6', { stueck, nachkorrigiert: true, stabil: true })
+  }
+
+  const laesstLaufen = () => setPhase('kippt')
+
+  const stabil = phase === 'stabil'
 
   return (
     <StepShell
       id="Z6"
-      auftrag={null}
+      auftrag={
+        stabil
+          ? null
+          : phase === 'probe1' || phase === 'probe2'
+            ? 'Miss die Stichprobe.'
+            : phase === 'trend'
+              ? 'Entscheide, wie viel du nachkorrigierst.'
+              : phase === 'kippt'
+                ? 'Korrigier jetzt nach.'
+                : 'Wart auf die nächste Stichprobe.'
+      }
       ansage={null}
-      interaktionOffen={false}
-      buehne={<Werkstueck zustand="kiste" fuellstand={fuellstand} />}
+      interaktionOffen={!stabil}
+      buehne={<StepFoto id="Z6" />}
       warum={
         <p>
-          Feierabend. Die Kiste steht neben der Maschine, und ganz vorn liegt deins — das
-          erste von vierhundert. Die Maschine macht weiter, wenn du gehst.
+          Serienfertigung heißt: die Maschine macht die Wiederholung, du machst die
+          Kontrolle. Alle vierzig Teile eine Stichprobe — weil das Maß nicht springt,
+          sondern wandert.
         </p>
       }
       interaktion={
-        <motion.div
-          initial="aus"
-          animate="an"
-          variants={{ an: { transition: { staggerChildren: 0.12, delayChildren: 0.4 } } }}
-          data-testid="z6-rueckblick"
-          className="kh-feld p-4 landscape:p-5"
-        >
-          <p className="kh-etikett">Du hast heute</p>
-          <ul className="mt-3 flex flex-col gap-2">
-            {liste.map((zeile) => (
-              <motion.li
-                key={zeile}
-                variants={{ aus: { opacity: 0, x: -8 }, an: { opacity: 1, x: 0 } }}
-                className="flex items-start gap-2.5 text-[1.125rem] leading-snug text-kh-paper"
-              >
-                <span
-                  aria-hidden
-                  className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-kh-signal text-[#0E0D0B]"
-                >
-                  <Check className="size-3.5" strokeWidth={3.5} />
-                </span>
-                {zeile}
-              </motion.li>
-            ))}
-          </ul>
-          {/*
-            Der Screen endet nicht bei „Nr. 1 von 400“, sondern bei dem, was
-            die Befragten selbst antworten, wenn man sie fragt, wofür ihre
-            Arbeit gut ist: „Zum Beispiel für verschiedene Getriebe oder
-            Mähdrescher, alle verschiedenen Pumpen. Das macht schon Sinn.“
-            INTERVIEW — Zerspanungsmechaniker Ausbildung, 30.06.2026. Ohne
-            Firmennamen; die Gattung geht immer.
-          */}
-          <motion.p
-            variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
-            transition={{ duration: 0.8 }}
-            data-testid="z6-schluss"
-            className="kh-titel-klein mt-4 border-t border-kh-line pt-4 text-kh-orange"
-          >
-            Getriebe, Pumpen, Mähdrescher. Irgendwo fährt deins mit.
-          </motion.p>
-        </motion.div>
+        <div className="flex flex-col gap-3">
+          <Zaehler stueck={stueck} laeuft={stueck < ziel} />
+
+          <Wechsel takt={phase}>
+            {phase === 'probe1' || phase === 'laufen1' ? (
+              phase === 'probe1' ? (
+                <p className="px-1 text-[1rem] text-kh-paper/70">
+                  Stück {PROBE_1} liegt in der Rutsche. Alle vierzig Teile wird eines
+                  gemessen — das ist deine Aufgabe an dieser Maschine.
+                </p>
+              ) : (
+                <p className="px-1 text-[1rem] text-kh-paper/70">
+                  Jeder Zyklus dasselbe Spiel: Tür zu, Späne, Tür auf — und ein Bolzen
+                  mehr in der Kiste. Jeder exakt wie dein erstes Teil.
+                </p>
+              )
+            ) : phase === 'weiter1' ? (
+              <Rueckmeldung
+                ok
+                text={`Stück ${PROBE_1}: ${mm(24.99)} — mitten im Fenster. Weiterlaufen.`}
+                testid="z6-probe1"
+              />
+            ) : phase === 'laufen2' ? (
+              <p className="px-1 text-[1rem] text-kh-paper/70">
+                Zwei Stunden im Zeitraffer. Nebenbei entgratest du Teile, prüfst die
+                Späne, füllst Kühlschmierstoff nach.
+              </p>
+            ) : phase === 'probe2' || phase === 'trend' || phase === 'kippt' ? (
+              <div className="flex flex-col gap-3">
+                {phase === 'probe2' && (
+                  <p className="px-1 text-[1rem] text-kh-paper/70">
+                    Stück {PROBE_2} liegt in der Rutsche — Zeit für die nächste
+                    Stichprobe.
+                  </p>
+                )}
+                {phase !== 'probe2' && (
+                  <div className="kh-feld px-4 py-3" data-testid="z6-trend">
+                    <p className="kh-etikett">
+                      Stück {phase === 'kippt' && stueck >= KIPPT ? KIPPT : PROBE_2}
+                    </p>
+                    <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+                      {phase === 'kippt' && stueck >= KIPPT
+                        ? `${mm(25.01)} — drüber. Die letzten Teile müssen nachgedreht werden: Zeit, kein Schrott, zu dick lässt sich retten. Aber jetzt muss die Korrektur rein.`
+                        : `${mm(25.0)} — gerade noch drin. Bei Stück 40 waren es ${mm(24.99)}: die Schneide nutzt sich ab, das Maß wandert nach oben.`}
+                    </p>
+                  </div>
+                )}
+
+                {phase !== 'probe2' && (
+                  <div className="grid gap-2 landscape:grid-cols-3">
+                    <Wahlflaeche
+                      onClick={() => korrigiere('mitte')}
+                      data-testid="z6-korrektur-mitte"
+                      className="justify-center font-semibold"
+                    >
+                      −0,01 — zurück zur Mitte
+                    </Wahlflaeche>
+                    <Wahlflaeche
+                      onClick={() => korrigiere('unten')}
+                      data-testid="z6-korrektur-unten"
+                      className="justify-center font-semibold"
+                    >
+                      −0,02 — ganz nach unten
+                    </Wahlflaeche>
+                    {phase === 'trend' && (
+                      <Wahlflaeche
+                        onClick={laesstLaufen}
+                        data-testid="z6-laufen-lassen"
+                        className="justify-center font-semibold"
+                      >
+                        Nichts — läuft doch
+                      </Wahlflaeche>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Stabil wahl={wahl} restauriert={fertig && wahl === null} />
+            )}
+          </Wechsel>
+        </div>
       }
-      fuss={<StepFuss id="Z6" />}
+      aha={
+        <AhaKarte sichtbar={stabil} eyebrow="Warum nicht einfach jedes Teil messen?">
+          Weil das Maß nicht springt, sondern wandert. Eine Stichprobe alle vierzig Teile
+          zeigt den Trend früh genug — und die Zeit dazwischen gehört dem Entgraten, dem
+          Rüsten der nächsten Maschine, dem nächsten Auftrag.
+        </AhaKarte>
+      }
+      fuss={
+        <StepFuss
+          id="Z6"
+          uebungOffen={!stabil}
+          aktion={
+            phase === 'probe1' || phase === 'probe2' ? (
+              <Button
+                variant="aktion"
+                onClick={phase === 'probe1' ? misstProbe1 : () => setPhase('trend')}
+                data-testid="z6-stichprobe"
+              >
+                Stichprobe messen
+              </Button>
+            ) : phase === 'weiter1' ? (
+              <Button
+                variant="aktion"
+                onClick={() => setPhase('laufen2')}
+                data-testid="z6-weiterlaufen"
+              >
+                Weiterlaufen lassen
+              </Button>
+            ) : null
+          }
+          geschafft={stabil ? 'Serie läuft' : null}
+        />
+      }
     />
+  )
+}
+
+/** Der Zähler — die Belohnung dieses Screens ist eine wachsende Zahl. */
+function Zaehler({ stueck, laeuft }: { stueck: number; laeuft: boolean }) {
+  return (
+    <div className="flex flex-col gap-1.5" data-testid="z6-zaehler">
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <span className="kh-zahl">{stueck}</span>
+        <span className="text-[1.0625rem] text-kh-mute">von {SERIE} Teilen</span>
+        {laeuft && (
+          <motion.span
+            aria-hidden
+            animate={{ opacity: [1, 0.3, 1] }}
+            transition={{ duration: 1.2, repeat: Infinity }}
+            className="kh-etikett"
+          >
+            läuft
+          </motion.span>
+        )}
+      </div>
+      <div className="h-2.5 w-full overflow-hidden rounded-full border border-kh-line bg-white/10">
+        <div
+          className="h-full rounded-full bg-kh-orange/45 ring-1 ring-kh-orange ring-inset transition-[width] duration-300"
+          style={{ width: `${(stueck / SERIE) * 100}%` }}
+          aria-hidden
+        />
+      </div>
+    </div>
+  )
+}
+
+function Stabil({
+  wahl,
+  restauriert,
+}: {
+  wahl: 'mitte' | 'unten' | null
+  restauriert: boolean
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <Rueckmeldung
+        ok
+        text={
+          wahl === 'unten'
+            ? `Nächste Stichprobe: ${mm(24.98)} — ganz unten im Fenster, mit Absicht: der Verschleiß wandert nach oben, so hält deine Korrektur am längsten.`
+            : wahl === 'mitte'
+              ? `Nächste Stichprobe: ${mm(24.99)} — zurück in der Mitte. Sauber.`
+              : 'Die Korrektur ist drin, die Stichproben sitzen wieder im Fenster.'
+        }
+        testid="z6-stabil"
+      />
+      <motion.p
+        initial={{ opacity: 0, transform: 'translateY(8px)' }}
+        animate={{ opacity: 1, transform: 'translateY(0px)' }}
+        transition={{ duration: 0.5, delay: restauriert ? 0 : 0.4 }}
+        data-testid="z6-pointe"
+        className="kh-titel-klein text-kh-orange"
+      >
+        Die Maschine wiederholt. Du hältst das Maß.
+      </motion.p>
+    </div>
   )
 }

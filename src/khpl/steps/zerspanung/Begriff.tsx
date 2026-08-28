@@ -1,4 +1,4 @@
-import { BEGRIFFE_ZERSPANUNG, type BegriffZerspanungId } from '@/khpl/glossar/zerspanung'
+import { BEGRIFFE_ZERSPANUNG, type ZerspanungBegriffId } from '@/khpl/glossar/zerspanung'
 import {
   Popover,
   PopoverContent,
@@ -8,28 +8,23 @@ import {
 } from '@/components/ui/popover'
 
 /**
- * Fachbegriff im Fließtext — dieselbe Gestalt wie `komponenten/Begriff.tsx`,
+ * Fachbegriff im Fließtext — dieselbe Sache wie `komponenten/Begriff.tsx`,
  * nur aus dem Glossar **dieses** Berufs.
  *
- * ⚠️ **Das ist eine gemeldete Naht, keine gewählte Doppelung**
- * (khpl-tage.md §3, „wer beim Bauen auf einen Widerspruch stößt, meldet ihn“).
- * V6 trennt die Glossare je Beruf (`glossar/<beruf>.ts`), aber
- * `komponenten/Begriff.tsx` ist weiterhin fest an `glossar/begriffe.ts`
- * gebunden: `BegriffId` ist `keyof typeof BEGRIFFE`, und ein Zerspanungs-Wort
- * ist dort kein gültiger Schlüssel. Die Hülle so umzubauen, dass sie das
- * Glossar über den aktiven Beruf auflöst, wäre eine Änderung für alle vier
- * Tage — und würde parallel dreimal gleichzeitig passieren.
- *
- * Deshalb steht hier eine Kopie von zwölf Zeilen im eigenen Verzeichnis, und
- * die Zusammenführung gehört an die Stelle, die alle vier Berufe im Blick hat.
- * Trigger-Stil, Trefferfläche und Popover sind bewusst **identisch** zur
- * Bestandsfassung: ein Begriff darf sich in diesem Tag nicht anders anfühlen.
+ * ⚠️ **Dieselbe gemeldete Doppelung wie bei Zimmerer (`steps/zimmerer/
+ * Begriff.tsx`) und Anlagenmechanik (`Fachwort.tsx`):** die geteilte
+ * `Begriff`-Komponente ist fest an `glossar/begriffe.ts` verdrahtet und
+ * kennt die Glossare der Tage nicht. Die richtige Lösung ist eine
+ * Hüllenänderung (ein `eintrag`-Prop oder die Auflösung über den aktiven
+ * Beruf) und gehört nicht in einen einzelnen Tag. Markup und Klassen sind
+ * absichtlich zeichengleich mit dem Original — eine zweite Optik für
+ * dieselbe Geste wäre schlimmer als die Doppelung.
  */
 export function Begriff({
   id,
   children,
 }: {
-  id: BegriffZerspanungId
+  id: ZerspanungBegriffId
   children?: React.ReactNode
 }) {
   const eintrag = BEGRIFFE_ZERSPANUNG[id]

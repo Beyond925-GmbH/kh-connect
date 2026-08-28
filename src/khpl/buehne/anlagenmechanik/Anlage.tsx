@@ -352,7 +352,7 @@ function Pruefpunkt({
   ruhig,
   onTipp,
 }: {
-  punkt: { id: string; label: string; x: number; y: number }
+  punkt: (typeof ANLAGENPUNKTE)[number]
   geprueft: boolean
   laeuft: boolean
   ursache: boolean
@@ -360,6 +360,17 @@ function Pruefpunkt({
   onTipp?: (id: PruefungId) => void
 }) {
   const farbe = ursache || laeuft ? WARM.linie : geprueft ? KALT.linie : KALT.linieMatt
+  /**
+   * **Offen und antippbar** — der Zustand, der eine Affordanz braucht.
+   *
+   * Seit A1 seine sechs Prüfungen nicht mehr als Knopfliste im Panel führt,
+   * ist dieser Punkt die Bedienung des Screens. R8 sieht dafür ausdrücklich
+   * den Fall vor, dass „die Bühne selbst die Interaktion ist" — dann trägt das
+   * antippbare Objekt die Limette-Affordanz. Vorher war der Punkt ein
+   * gestrichelter grauer Ring ohne Beschriftung; man konnte ihn antippen, aber
+   * nichts an ihm sagte das.
+   */
+  const offen = !!onTipp && !geprueft && !ursache
 
   return (
     <g>
@@ -390,6 +401,49 @@ function Pruefpunkt({
       {geprueft && !ursache && (
         <circle cx={punkt.x + 10} cy={punkt.y - 10} r={3.2} fill={KALT.linie} />
       )}
+      {/* Der Puls sagt „hier kannst du hinfassen". Nur solange offen — ein
+          Screen, auf dem sechs Ringe dauerpulsen, sagt gar nichts mehr. */}
+      {offen && !ruhig && (
+        <motion.circle
+          cx={punkt.x}
+          cy={punkt.y}
+          r={14}
+          fill="none"
+          className="stroke-kh-signal"
+          strokeWidth={2.4}
+          initial={{ opacity: 0.9 }}
+          animate={{ opacity: [0.9, 0.25, 0.9] }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      )}
+
+      {/*
+        **Der Name steht am Punkt und nicht in einem `title`.**
+
+        Ein Tooltip ist auf einem festgeschraubten iPad kein Bedienelement — es
+        gibt keinen Zeiger, der darüber schwebt. Solange die Namen nur dort
+        standen, war die Zeichnung eine Reihe namenloser Kreise, und die
+        einzige Stelle, an der „Speicher" und „Regelung" lesbar waren, war die
+        Knopfliste, die jetzt weg ist.
+      */}
+      <text
+        x={punkt.lx}
+        y={punkt.ly}
+        textAnchor={punkt.anker}
+        fontSize={7}
+        fill={geprueft || ursache ? farbe : KALT.linie}
+        // Dunkler Saum statt einer Plakette: Die Namen liegen zwangsläufig über
+        // Leitungen, und ein Kasten je Name zerschnitte die Zeichnung in sechs
+        // Stücke. `paint-order` legt den Saum unter die Schrift, nicht darüber.
+        stroke="#0E0D0B"
+        strokeWidth={2.4}
+        paintOrder="stroke"
+        strokeLinejoin="round"
+        pointerEvents="none"
+      >
+        {punkt.label}
+      </text>
+
       <circle
         cx={punkt.x}
         cy={punkt.y}

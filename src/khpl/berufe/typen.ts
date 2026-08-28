@@ -21,7 +21,7 @@ import type { MerkmalVektor } from '@/khpl/match/merkmale'
  * | --- | --- | --- |
  * | Dachdecker | `M` / `B` | `M5`, `B5.1` |
  * | Zimmerer | `C` | `C5`, `C5.1` |
- * | Zerspanung | `Z` | `Z5`, `Z5.1` |
+ * | Zerspanung | `Z` | `Z5`, `Z3.1` |
  * | Anlagenmechanik | `A` | `A5`, `A5.1` |
  *
  * Der Grund ist nicht Ordnungsliebe. Vier Berufe mit vier verschiedenen `M5`

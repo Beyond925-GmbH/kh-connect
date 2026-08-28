@@ -318,7 +318,7 @@ export function StepShell({
           Der Deckel ist jetzt eine Reißleine, kein Gestaltungsmittel: das
           Panel bemisst sich am Inhalt, und der ist im Regelfall Klappzeile,
           Auftrag und Fuß — rund drei Zeilen. Er greift nur noch dort, wo eine
-          Übung wirklich im Panel sitzt (M1, A1, Z3), und verhindert, dass sie
+          Übung wirklich im Panel sitzt (M1, A1), und verhindert, dass sie
           die Bühne ganz verdrängt.
 
           `min-h-0` ist die Bedingung dafür, dass das Scrollen darin überhaupt

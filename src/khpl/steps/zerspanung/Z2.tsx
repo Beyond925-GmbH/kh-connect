@@ -1,7 +1,12 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Werkstueck } from '@/khpl/buehne/zerspanung/Werkstueck'
+import { Button } from '@/components/ui/button'
+import { StepFoto } from '@/khpl/buehne/Foto'
+import { DREHZAHL, WASCHMASCHINE } from '@/khpl/buehne/zerspanung/kanon'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
+import { RATEN_HAKEN } from '@/khpl/komponenten/gesten'
+import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
+import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -9,249 +14,238 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
 /**
- * Z2 — Alles muss sitzen, bevor irgendwas läuft.
+ * Z2 — Fest, sonst fliegt es. **Rüsten**, in zwei Beats:
  *
- * **Die geführte Hälfte des Lernpaars** (Vorbild M5): vier Handgriffe in
- * fester Reihenfolge, je eine Karte, ein Satz, ein Tap. Man kann nichts falsch
- * machen — der Punkt ist nicht die Reihenfolge, sondern **wie viel passiert,
- * bevor irgendetwas passiert** (khpl-tag-zerspanung.md §6 Z2).
+ *  1. *Spannen* — drei Spannmittel, eines passt zu rundem Stangenmaterial.
+ *     Ein Fehlgriff kostet keinen Punkt, sondern zeigt seine Folge in der
+ *     Welt: ein Teil, das sich durchdreht, oder eines, das gar nicht
+ *     stillhalten soll.
+ *  2. *Drehzahl schätzen* — **der eine Schätzmoment dieses Tages**
+ *     (Mechanismus 3, wie M2 und C2). Der Anker ist ein Gerät, das jeder
+ *     kennt: der Schleudergang der Waschmaschine.
  *
- * Der Höhepunkt ist der Werkstücknullpunkt. Verschiebt er sich um einen
- * Zehntel, sind alle 400 Teile um einen Zehntel falsch — der Moment, in dem
- * ein Besucher versteht, warum jemand dafür dreieinhalb Jahre lernt. Deshalb
- * ist die vierte Karte die einzige, die kräftiger aus der Reihe tanzt.
+ * **Fachlich:** die Auflösung „rund 2.500 U/min“ ist abgeleitet, nicht
+ * gesetzt — Hartmetall auf Baustahl schneidet mit rund 200 m/min, bei Ø 25
+ * sind das n = 200.000 / (π · 25) ≈ 2.546 (Herleitung in
+ * `buehne/zerspanung/kanon.ts`). 200 m/min sind 12 km/h: Radfahrtempo.
  *
- * Und der Morgen hat einen Auftakt, den niemand rät: die Maschine läuft erst
- * einmal warm. `INTERVIEW` — „Warmlaufen macht man jeden Morgen.“
- *
- * ⚠️ **Die Rüstzeit erscheint ohne Zahlen.** Die Spec rechnet „zwei Stunden
- * fürs erste Teil, keine drei für die nächsten 399“ vor und kennzeichnet es
- * selbst als Rechenbeispiel: `belege/zerspanung.md` 3 belegt das **Prinzip**
- * nach REFA (Auftragszeit = Rüstzeit + Stückzahl × Stückzeit, in der
- * Kleinserie dominiert die Rüstzeit), nicht das Verhältnis. Der Einwurf sagt
- * deshalb, *dass* die erste Stunde die teuerste ist, und nennt keine Zahl —
- * „was `NICHT BELEGBAR` heißt, erscheint auf keinem Screen“ (§0b).
- *
- * **Die Bühne läuft flach** (`Werkstueck`). Ein Drehkörper in 3D ist erlaubt,
- * aber nicht Bedingung: „die Beweislast liegt bei 3D, nicht bei 2D“ (§7).
+ * **`answers.z2`** `{ gespannt, versuche, schaetzung, aufgeloest }`.
  */
 
-// ---------------------------------------------------------------------------
-// Die vier Handgriffe. Reihenfolge fest, Reihenfolge ist nicht die Aufgabe.
-// ---------------------------------------------------------------------------
+const SPANNMITTEL = [
+  {
+    id: 'schraubstock',
+    label: 'Maschinenschraubstock',
+    zeile: 'Zwei gerade Backen pressen zu.',
+    folge:
+      'Zwei gerade Backen auf einem runden Teil: Kontakt auf zwei schmalen Linien. Beim ersten Span dreht sich die Stange durch — Riefen im Material, gespannt ist nichts.',
+  },
+  {
+    id: 'futter',
+    label: 'Dreibackenfutter',
+    zeile: 'Drei Backen greifen von außen rund.',
+    folge: '',
+  },
+  {
+    id: 'pratzen',
+    label: 'Spannpratzen',
+    zeile: 'Klammern drücken aufs Maschinenbett.',
+    folge:
+      'Spannpratzen halten Platten auf einem Frästisch fest. Hier soll nichts stillstehen: das Teil selbst muss sich drehen — mitsamt seiner Spannung.',
+  },
+] as const
 
-interface Handgriff {
-  id: string
-  name: string
-  was: string
-  /** Der Nullpunkt trägt den Screen — er darf aussehen wie der Höhepunkt. */
-  hoehepunkt?: boolean
-}
+const RICHTIG = 'futter'
 
-const HANDGRIFFE: readonly Handgriff[] = [
-  {
-    id: 'spannen',
-    name: 'Rohling spannen',
-    was: 'Das Stück Metall kommt ins Futter und wird fest gespannt. Es muss rund laufen — sonst stimmt hinterher kein einziges Maß.',
-  },
-  {
-    id: 'bestuecken',
-    name: 'Werkzeuge bestücken',
-    was: 'Jedes Werkzeug bekommt seinen Platz im Revolver. Die Steuerung ruft es später nur noch über seine Nummer auf.',
-  },
-  {
-    id: 'vermessen',
-    name: 'Werkzeuglängen vermessen',
-    was: 'Die Maschine muss wissen, wie weit jede Schneide vorsteht. Was sie nicht weiß, rechnet sie falsch.',
-  },
-  {
-    id: 'nullpunkt',
-    name: 'Werkstücknullpunkt setzen',
-    // INTERVIEW (Einblicke Zerspanungsmechanikerin): „Man muss dann den
-    // Nullpunkt holen vom Werkstück, damit die Maschine weiß, wo sich das
-    // Werkstück grade befindet.“ Ein Nebensatz, der einen Fachbegriff
-    // vollständig auflöst — der Screen versucht nicht, das zu verbessern.
-    was: 'Den Nullpunkt holen — vom Werkstück, nicht von der Maschine. Damit sie weiß, wo sich das Werkstück gerade befindet.',
-    hoehepunkt: true,
-  },
-]
+/** Spanne des Reglers. Weit genug, dass die echte Zahl überraschen kann. */
+const MIN = 200
+const MAX = 6000
+const SCHRITT = 100
+
+const uMin = (n: number) => n.toLocaleString('de-DE')
 
 export function Z2() {
   const gespeichert = useFortschritt().answers.z2
-  const [gesetzt, setGesetzt] = useState(() =>
-    gespeichert?.fertig ? HANDGRIFFE.length : (gespeichert?.geruestet.length ?? 0),
-  )
+  const [gespannt, setGespannt] = useState(() => !!gespeichert?.gespannt)
+  const [versuche, setVersuche] = useState(() => gespeichert?.versuche ?? 0)
+  const [daneben, setDaneben] = useState<string | null>(null)
+  const [schaetzung, setSchaetzung] = useState(() => gespeichert?.schaetzung ?? MIN)
+  const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
 
-  const dran: Handgriff | undefined = HANDGRIFFE[gesetzt]
-  const fertig = dran === undefined
-  const danach: Handgriff | undefined = HANDGRIFFE[gesetzt + 1]
-
-  const erledige = () => {
-    const n = gesetzt + 1
-    setGesetzt(n)
-    merkeAntwort('z2', {
-      geruestet: HANDGRIFFE.slice(0, n).map((h) => h.id),
-      fertig: n === HANDGRIFFE.length,
-    })
+  const spanne = (id: string) => {
+    if (id === RICHTIG) {
+      setDaneben(null)
+      setGespannt(true)
+      merkeAntwort('z2', { gespannt: true, versuche, schaetzung, aufgeloest })
+      return
+    }
+    const n = versuche + 1
+    setVersuche(n)
+    setDaneben(id)
+    merkeAntwort('z2', { gespannt: false, versuche: n, schaetzung, aufgeloest })
   }
+
+  const aufloesen = () => {
+    setAufgeloest(true)
+    merkeAntwort('z2', { gespannt: true, versuche, schaetzung, aufgeloest: true })
+  }
+
+  const takt = aufgeloest ? 'aufgeloest' : gespannt ? 'drehzahl' : 'spannen'
+  const fehlgriff = SPANNMITTEL.find((s) => s.id === daneben)
 
   return (
     <StepShell
       id="Z2"
-      auftrag={fertig ? null : 'Tipp dich durch die vier Handgriffe.'}
-      // Antippen, in fester Reihenfolge. Man kann nichts falsch machen — das
-      // ist das Worked Example zu Z3.
-      ansage={null}
-      interaktionOffen={!fertig}
-      // Die Rückmeldung auf jeden Handgriff — Backen fahren zu, der Nullpunkt
-      // leuchtet — passiert auf der Bühne. Hochkant blieb ihr sonst ein
-      // Streifen, in dem vom Höhepunkt des Screens nichts zu sehen war.
-      buehne={
-        <Werkstueck
-          zustand="rohling"
-          ruestschritte={gesetzt}
-          nullpunkt={gesetzt >= HANDGRIFFE.length}
-        />
+      auftrag={
+        aufgeloest
+          ? null
+          : gespannt
+            ? 'Schätz, wie schnell sich das Futter gleich dreht.'
+            : 'Wähl aus, womit du das Rohteil spannst.'
       }
-      /*
-        Eine Fassung statt zweier, ein Fachwort statt dreier.
-
-        Vorher standen hier „Rüsten", „Rohling" und „Werkstücknullpunkt" in
-        zwei Sätzen — drei Chips, bevor irgendetwas passiert ist. Die vier
-        Handgriffe darunter erklären dieselben Dinge einzeln und im Moment
-        ihres Gebrauchs; hier steht nur noch, worum es geht.
-      */
+      // Die Ansage kommt erst mit dem Regler — im Spann-Beat gäbe es noch
+      // nichts zu ziehen, und eine Ansage vor der falschen Übung wäre eine
+      // Irreführung.
+      ansage={
+        gespannt && !aufgeloest
+          ? {
+              geste: 'ziehen-regler',
+              text: 'Du legst fest, wie schnell sich das Futter mit dem Rohteil dreht.',
+              haken: RATEN_HAKEN,
+            }
+          : null
+      }
+      interaktionOffen={!aufgeloest}
+      buehne={<StepFoto id="Z2" />}
       warum={
-        <p>
-          Bevor das erste Teil läuft, wird die Maschine eingerichtet: Werkstück spannen,
-          Werkzeuge einsetzen, Nullpunkt setzen. Das heißt{' '}
-          <Begriff id="ruesten">Rüsten</Begriff>.
-        </p>
+        <>
+          <p>
+            <Begriff id="ruesten">Rüsten</Begriff> heißt: alles, was vor dem ersten Span
+            passiert. Spannen, Werkzeuge messen, Programm laden.
+          </p>
+          <p>
+            Zuletzt wird der <Begriff id="nullpunkt">Nullpunkt</Begriff> angetastet — der
+            Punkt, von dem aus die Maschine jedes Maß rechnet.
+          </p>
+        </>
       }
       interaktion={
-        <Wechsel takt={fertig ? 'fertig' : dran.id}>
-          {fertig ? (
-            <div className="flex flex-col items-start gap-2">
-              {/*
-                `pt-1.5` ist kein Abstand, sondern Platz für die Pünktchen.
-                `kh-titel-klein` setzt `line-height: 1`, Anton ragt damit über
-                seine Zeilenbox hinaus — und die aufklappende Hülle von
-                `Wechsel` fährt auf eine gemessene Höhe und hat `overflow:
-                clip`. Ohne die Zeile Luft stand hier „GERUSTET“.
-              */}
-              <p className="kh-titel-klein pt-1.5 text-kh-signal">
-                Die Maschine ist gerüstet.
-              </p>
-              <p className="text-[1.0625rem] leading-snug text-kh-paper/80">
-                Und noch ist kein einziges Teil entstanden. Verschiebt sich der Nullpunkt
-                jetzt um einen Zehntelmillimeter, sind alle 400 Teile um einen Zehntel
-                falsch.
+        <Wechsel takt={takt}>
+          {takt === 'spannen' ? (
+            <div className="flex flex-col gap-3">
+              <div className="grid gap-2 landscape:grid-cols-3">
+                {SPANNMITTEL.map((s) => (
+                  <Wahlflaeche
+                    key={s.id}
+                    onClick={() => spanne(s.id)}
+                    data-testid={`z2-spannmittel-${s.id}`}
+                    className="flex-col items-start gap-0.5 py-2.5"
+                  >
+                    <span className="font-semibold">{s.label}</span>
+                    <span className="text-[0.9375rem] text-kh-mute">{s.zeile}</span>
+                  </Wahlflaeche>
+                ))}
+              </div>
+              <Rueckmeldung
+                ok={fehlgriff ? false : null}
+                text={fehlgriff ? fehlgriff.folge : null}
+                testid="z2-rueckmeldung"
+              />
+            </div>
+          ) : takt === 'drehzahl' ? (
+            <div className="flex flex-col gap-3">
+              <Rueckmeldung
+                ok
+                text="Drei Backen, ein Griff, alles mittig — das Futter zentriert rundes Material von selbst."
+                testid="z2-gespannt"
+              />
+              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+                <span data-testid="z2-schaetzung" className="kh-zahl">
+                  {uMin(schaetzung)}
+                </span>
+                <span className="text-[1.0625rem] text-kh-mute">
+                  Umdrehungen je Minute
+                </span>
+              </div>
+              <input
+                type="range"
+                min={MIN}
+                max={MAX}
+                step={SCHRITT}
+                value={schaetzung}
+                onChange={(e) => setSchaetzung(Number(e.target.value))}
+                data-testid="z2-regler"
+                aria-label="Geschätzte Drehzahl"
+                className="kh-regler w-full"
+              />
+              <p className="text-[0.9375rem] text-kh-mute">
+                Zum Vergleich: der Schleudergang deiner Waschmaschine schafft{' '}
+                {uMin(WASCHMASCHINE)}.
               </p>
             </div>
           ) : (
-            <div className="flex flex-col items-start gap-2">
-              <Handgriffkarte
-                griff={dran}
-                nummer={gesetzt + 1}
-                gesamt={HANDGRIFFE.length}
-                onErledigen={erledige}
-              />
-              {danach && (
-                <p
-                  data-testid="z2-danach"
-                  className="pl-1 text-[0.9375rem] text-kh-paper/45"
-                >
-                  Danach: {danach.name}
-                </p>
-              )}
-            </div>
+            <Aufloesung schaetzung={schaetzung} />
           )}
         </Wechsel>
       }
       aha={
-        <>
-          {/* Ohne die Coda „das, worüber in der Halle geredet wird“ — die
-              stand einen Screen weiter (Z2.1) fast wortgleich noch einmal.
-              Die zwei Sätze davor beantworten die Frage vollständig. */}
-          <AhaKarte sichtbar={fertig} eyebrow="Warum ist das erste Teil das teuerste?">
-            Beim Rüsten entsteht kein einziges Teil — und bei kleinen Stückzahlen ist es
-            trotzdem der größte Zeitblock des ganzen Auftrags.
-          </AhaKarte>
-          {/* Ab dem zweiten Einwurf zugeklappt (R5) — während der Übung steht
-              so nur die Frage da, nicht der ganze Absatz. */}
-          <AhaKarte
-            sichtbar={gesetzt > 0}
-            zugeklappt
-            eyebrow="Und wenn du nicht weiterweißt?"
-          >
-            Dann fragst du. Am Anfang steht beim Einrichten ohnehin jemand daneben, und
-            Fragen sind hier ausdrücklich erwünscht — allein an der Maschine steht in
-            diesem Beruf niemand.
-          </AhaKarte>
-        </>
+        <AhaKarte sichtbar={aufgeloest} eyebrow="Warum ist die Tür aus Panzerglas?">
+          Bei dieser Drehzahl wird ein schlecht gespanntes Teil zum Geschoss. Deshalb ist
+          die Tür verriegelt, solange sich etwas dreht — und deshalb ist Spannen der
+          wichtigste Handgriff des Rüstens.
+        </AhaKarte>
       }
       fuss={
-        <StepFuss id="Z2" uebungOffen={!fertig} geschafft={fertig ? 'Gerüstet' : null} />
+        <StepFuss
+          id="Z2"
+          uebungOffen={!aufgeloest}
+          aktion={
+            takt === 'drehzahl' ? (
+              <Button variant="aktion" onClick={aufloesen} data-testid="z2-aufloesen">
+                Und jetzt die echte Zahl
+              </Button>
+            ) : null
+          }
+          geschafft={aufgeloest ? 'Gerüstet' : null}
+        />
       }
     />
   )
 }
 
-/**
- * Die Karte für den nächsten Handgriff — die ganze Übung von Z2.
- *
- * Sie ist **selbst der Knopf** (Muster: `Bauteilkarte` in M5). Links die
- * Nummer statt einer Zeichnung: dieser Screen erklärt keine Bauteile, er zählt
- * Handgriffe — und die Zahl ist genau die Aussage, um die es geht. Vier Stück,
- * bevor irgendetwas läuft.
- */
-function Handgriffkarte({
-  griff,
-  nummer,
-  gesamt,
-  onErledigen,
-}: {
-  griff: Handgriff
-  nummer: number
-  gesamt: number
-  onErledigen: () => void
-}) {
+function Aufloesung({ schaetzung }: { schaetzung: number }) {
   return (
-    <motion.button
-      type="button"
-      onClick={onErledigen}
-      data-testid="z2-erledigen"
-      whileTap={{ scale: 0.975 }}
-      /*
-        Die Karte ist der einzige Knopf des Screens — sie trägt deshalb die
-        Limette-Affordanz der Primärhandlung (R8, R3: Limette = du), nicht
-        das Orange der Welt. Der Fachbegriff darin bleibt orange. Der
-        Höhepunkt (Nullpunkt) hebt sich über Randstärke und Glow ab, nicht
-        über eine andere Farbe.
-      */
-      className={`flex w-full items-center gap-3.5 rounded-kh border-2 p-3 text-left ${
-        griff.hoehepunkt
-          ? 'border-kh-signal bg-kh-signal/14 shadow-[0_0_18px_rgba(216,246,60,0.35)]'
-          : 'border-kh-signal/55 bg-kh-signal/8'
-      }`}
+    <motion.div
+      initial="aus"
+      animate="an"
+      variants={{ an: { transition: { staggerChildren: 0.45 } } }}
+      className="flex flex-col gap-3"
     >
-      <span
-        aria-hidden
-        className="grid size-[76px] shrink-0 place-items-center rounded-kh bg-black/35 font-display text-[2.25rem] leading-none text-kh-paper/80 tabular-nums sm:size-[86px]"
+      <motion.div variants={TAKT}>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span data-testid="z2-echt" className="kh-zahl text-kh-orange">
+            rund {uMin(DREHZAHL)}
+          </span>
+          <span className="text-[1.0625rem] text-kh-mute">Umdrehungen je Minute</span>
+        </div>
+        <p className="mt-1.5 text-[1rem] text-kh-mute">
+          Du hast {uMin(schaetzung)} gesagt — die Waschmaschine schafft beim Schleudern{' '}
+          {uMin(WASCHMASCHINE)}.
+        </p>
+      </motion.div>
+      <motion.p
+        variants={TAKT}
+        className="text-[1.0625rem] leading-[1.45] text-kh-paper/90"
       >
-        {nummer}
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="kh-etikett block text-kh-paper/45">
-          {griff.hoehepunkt
-            ? `Handgriff ${nummer} von ${gesamt} · der wichtigste`
-            : `Handgriff ${nummer} von ${gesamt} · Tippen`}
-        </span>
-        <span className="kh-titel-klein mt-0.5 block text-kh-orange">{griff.name}</span>
-        <span className="mt-1 block text-[1rem] leading-snug text-kh-paper/80">
-          {griff.was}
-        </span>
-      </span>
-    </motion.button>
+        Die Zahl ist keine Einstellung nach Gefühl: am Rand läuft der Stahl mit
+        Radfahrtempo an der Schneide vorbei — daraus rechnet sich die Drehzahl, für jeden
+        Durchmesser neu.
+      </motion.p>
+    </motion.div>
   )
+}
+
+const TAKT = {
+  aus: { opacity: 0, transform: 'translateY(12px)' },
+  an: { opacity: 1, transform: 'translateY(0px)' },
 }

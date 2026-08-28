@@ -1,184 +1,156 @@
 /**
- * Die Maße dieses Tages — an einer Stelle, three-frei.
+ * Der Kanon der Zerspanungs-Bühne: **Farben, das Maß des Tages und die
+ * Zustandsformen**, die Steps und Zeichnungen gemeinsam brauchen.
  *
- * **Ein Profil, alle Ansichten.** Die Zeichnung in Z1, der Werkzeugweg in Z3,
- * das Teil in der Messschraube in Z5 und ein möglicher Drehkörper in Z2 zeigen
- * dasselbe Stück (khpl-tag-zerspanung.md §7). Läge das Profil in der Bühne,
- * hätte es jeder Screen einmal — und beim zweiten Screen wäre es ein anderes.
+ * Dieselbe Trennung wie bei `buehne/anlagenmechanik/kanon.ts`: Steps
+ * importieren Laufzeitwerte der Bühne ausschließlich von hier, aus den
+ * Bühnenmodulen selbst nur `import type`. **Dieser Tag hat kein `three`** —
+ * seine Bühnen sind Zeichnungen (technische Zeichnung, Werkzeugweg,
+ * Messschraube) und dürfen statisch importiert werden.
  *
- * **Warum eine eigene Datei.** Wird der Drehkörper in Z2 wirklich in 3D
- * gebaut, liegt daneben eine `lazy()`-Komponente, die `three` nachzieht. Ein
- * Wert-Export neben so einer Komponente wird von den Steps statisch importiert
- * und zieht `three` in den Erststart (README, `INEFFECTIVE_DYNAMIC_IMPORT`) —
- * dieselbe Regel und derselbe Grund wie bei `buehne/kanon.ts`. Steps und Bühne
- * holen Laufzeitwerte ausschließlich hier.
+ * **Die Farbregel:** Stahl lebt ausschließlich auf der Bühne, nie in der
+ * Bedienung. Orange erscheint als Linie und Glanz — der laufende Span, das
+ * gefundene Maß —, nie als Fläche unter einem Knopf. Es bleibt bei genau
+ * einer gefüllten Signalfläche pro Screen, und das ist *Weiter*.
  */
 
 // ---------------------------------------------------------------------------
-// Das Teil — Ø 20 h7, 35 mm lang, vorn eine Fase 2 × 45°
-// ---------------------------------------------------------------------------
-
-/** Nennmaß des Durchmessers in mm. */
-export const NENNMASS = 20
-
-/**
- * Die Toleranzzone von `Ø 20 h7` in mm. `BELEGT` nach ISO 286
- * (`belege/zerspanung.md` 1): IT7 ist im Nennmaßbereich 18–30 mm 21 µm, und
- * die Lage „h“ setzt das obere Abmaß auf null.
- *
- * ⚠️ **Die Werte hängen am Nennmaß.** Bei Ø 50 wären es 25 µm. Maß und
- * Toleranz gehören deshalb auf jedem Screen zusammen.
- */
-export const GROESSTMASS = 20.0
-export const KLEINSTMASS = 19.979
-/** 0,021 mm — die Zahl, die dem Tag seinen Titel gibt. */
-export const TOLERANZ = Number((GROESSTMASS - KLEINSTMASS).toFixed(3))
-
-/** Länge des gedrehten Abschnitts in mm (aus dem Programm, Zeile `G1 Z-35.`). */
-export const LAENGE = 35
-
-/** Fase vorn: 2 mm unter 45°. */
-export const FASE = 2
-
-/**
- * Die Kontur als Halbschnitt, von der Stirnfläche nach hinten: `z` läuft ins
- * Material (negativ, wie im Programm), `r` ist der Radius.
- *
- * Für die Zeichnung (Z1) wird das Profil an der Achse gespiegelt, für den
- * Werkzeugweg (Z3) genau so abgefahren, für einen Drehkörper (Z2) rotiert.
- */
-export const PROFIL: readonly { readonly z: number; readonly r: number }[] = [
-  { z: 0, r: NENNMASS / 2 - FASE },
-  { z: -FASE, r: NENNMASS / 2 },
-  { z: -LAENGE, r: NENNMASS / 2 },
-]
-
-/**
- * Durchmesser des Rohlings in mm — **ein Bühnenmaß, keine Fachaussage.** Es
- * sagt nur, wie viel dicker das Rohteil in Z2 aussieht als das fertige Teil;
- * eine Zugabe hängt in Wahrheit an Werkstoff, Verfahren und Betrieb und
- * erscheint deshalb auf keinem Screen als Zahl.
- */
-export const ROHLING_DURCHMESSER = 22
-
-// ---------------------------------------------------------------------------
-// Z3 — das Programm
+// Farben — Bühnen-Konstanten, keine Tokens
 // ---------------------------------------------------------------------------
 
 /**
- * Welche Steuerung der Screen annimmt. **Muss sichtbar dabeistehen**
- * (`khpl-tag-zerspanung.md` §6 Z3): Heidenhain schreibt Klartext, Siemens
- * ShopTurn ist grafisch — „so sieht jedes CNC-Programm aus“ wäre falsch.
+ * Stahl: eine kühle, entsättigte Graufamilie mit einem blanken Glanzton.
+ * Bewusst **kein** neuer Token in `src/index.css` — das Metall ist die
+ * Geschichte dieses einen Berufs, keine Aussage des Designsystems.
  */
-export const STEUERUNG = 'ISO-Code nach DIN 66025, wie ihn eine Fanuc-Steuerung liest'
-
-export interface Programmzeile {
-  /** Der Code, so wie er auf dem Bildschirm der Maschine stünde. */
-  code: string
-  /** Die Klammer dahinter — im echten Programm ein Kommentar. */
-  kommentar: string
-  /**
-   * Zeichnet diese Zeile ein Stück Kontur? Rüstzeilen (Werkzeug, Drehzahl,
-   * Kühlung) tun das nicht — der Werkzeugweg wächst nur bei Fahrbefehlen.
-   */
-  faehrt?: boolean
-}
+export const STAHL = {
+  /** Konturlinien der Zeichnungen. */
+  linie: '#93a1ad',
+  /** Nebenlinien: Mittellinien, Raster, Maßhilfslinien. */
+  linieMatt: '#525d68',
+  /** Gefüllte Flächen: Futter, Bügel, Schlitten. */
+  flaeche: '#242b32',
+  /** Dunklere Fläche dahinter — Tiefe, kein Schwarz. */
+  tiefe: '#171c21',
+  /** Blankes, frisch gedrehtes Metall. */
+  blank: '#c6d2dc',
+  /** Das Glanzlicht darauf — die Kante, an der es rund wird. */
+  glanz: '#eef4f9',
+} as const
 
 /**
- * Das Schlichtprogramm für die Welle Ø 20 h7 mit Fase — vierzehn Zeilen,
- * `belege/zerspanung.md` 7. Dieselbe Kontur, die Z1 als Zeichnung zeigt.
- *
- * ⚠️ **Von der Recherche selbst verfasst und syntaktisch geprüft, aber nicht
- * von einem Zerspaner gegengelesen** (§11). Vor dem Messetag fachlich
- * abnehmen lassen.
+ * Warm: dieselbe Orangefamilie wie überall (`--color-kh-orange`), hier als
+ * Zeichnungswerte gespiegelt — der Span, der Schnitt, das entscheidende Maß.
  */
-export const PROGRAMM: readonly Programmzeile[] = [
-  // `D20` statt des `OE20` aus dem Beleg: In einem ISO-Kommentar ist kein „Ø“
-  // tippbar, und in der Werkstatt schreibt man dafür `D` oder `DM` — eine
-  // ae/oe/ue-Ersatzschreibung fällt ausgerechnet auf dem Screen auf, der
-  // dieselbe Kontur wie die Zeichnung („Ø 20 h7“) zeigt. Sachlich gleich; das
-  // Programm ist ohnehin von der Recherche selbst verfasst.
-  { code: '(SCHLICHTEN WELLE D20 H7)', kommentar: 'Programmkopf' },
-  {
-    code: 'G21 G40 G90',
-    // „Schneidenradiuskorrektur“ flog raus (R10): ein hochspezifischer
-    // Fachbegriff ohne Glossar-Chip, in einer Rüstzeile, die für die Lektion
-    // des Screens keine Rolle spielt. Sachlich bleibt es dieselbe Zeile.
-    kommentar: 'Grundeinstellung der Steuerung',
-  },
-  { code: 'T0101', kommentar: 'Schlichtdrehmeißel' },
-  { code: 'G50 S4000', kommentar: 'Drehzahl begrenzen' },
-  { code: 'G96 S200 M4', kommentar: 'konstante Schnittgeschwindigkeit 200 m/min' },
-  { code: 'M8', kommentar: 'Kühlung ein' },
-  { code: 'G0 X16. Z2.', kommentar: 'anfahren, vor der Stirnfläche', faehrt: true },
-  { code: 'G1 Z0 F0.15', kommentar: 'an die Kontur', faehrt: true },
-  { code: 'G1 X20. Z-2.', kommentar: 'Fase 2 × 45 Grad', faehrt: true },
-  { code: 'G1 Z-35.', kommentar: 'längs drehen auf Ø 20', faehrt: true },
-  { code: 'G1 X24.', kommentar: 'radial freifahren', faehrt: true },
-  { code: 'G0 X100. Z50. M9', kommentar: 'Rückzug, Kühlung aus', faehrt: true },
-  { code: 'M5', kommentar: 'Spindel stopp' },
-  { code: 'M30', kommentar: 'Programmende' },
-]
-
-/**
- * Index der Zeile, in der der eingebaute Fehler sitzt — `G1 Z-35.`.
- *
- * **Der Fehler ist das fehlende Minuszeichen** (`belege/zerspanung.md` 7,
- * §11): `G1 Z35.` fährt das Werkzeug vom Werkstück weg statt an ihm entlang.
- * Er ist sichtbar (ein Zeichen), findbar (man vergleicht zwei Zeilen) und die
- * Sorte Fehler, über die in der Halle wirklich geredet wird.
- *
- * ⚠️ **Nicht „eine Zustellung zu tief“.** Das stand in der ersten Fassung der
- * Spec und wird von §11 ausdrücklich ersetzt; §6 Z3 trägt den alten Satz noch
- * an einer Stelle mit. Gemeldet, nicht gelöst.
- */
-export const FEHLERZEILE = 9
-
-/** Die falsche Fassung dieser Zeile — mit ihr fährt das Werkzeug ins Leere. */
-export const FEHLER_CODE = 'G1 Z35.'
+export const WARM = {
+  linie: '#ff9f2a',
+  heiss: '#ff7a1a',
+  schimmer: '#8a4a00',
+} as const
 
 // ---------------------------------------------------------------------------
-// Z5 — die drei Messwerte
+// Das Maß des Tages
 // ---------------------------------------------------------------------------
 
-export type Urteil = 'gut' | 'nacharbeit' | 'ausschuss'
+/**
+ * Der Lagersitz des Bolzens: **Ø 25 h7**.
+ *
+ * Nach ISO 286 heißt h7 bei Nennmaß 18–30 mm: höchstes Maß = Nennmaß,
+ * kleinstes Maß = Nennmaß − 0,021 mm. Die digitale Messschraube des Tages
+ * zeigt zwei Nachkommastellen, deshalb rechnet das Spiel mit dem auf
+ * Hundertstel gerundeten Fenster **24,98 bis 25,00** — die Erklärtexte
+ * nennen die echten 21 Tausendstel.
+ */
+export const SOLL = { unten: 24.98, oben: 25.0 } as const
 
 /**
- * Die drei Werte und ihre Asymmetrie — die eigentliche Lektion des Tages
- * (§6 Z5, abgeleitet aus der Toleranz oben).
+ * Was das erste Teil misst: **absichtlich vier Hundertstel zu groß.**
  *
- * Zu groß ist ein Problem, zu klein ist ein Verlust. Deshalb fährt man sich in
- * Serie **von oben** an das Maß heran.
- *
- * **Der erste Durchgang ist `19.987`**: wer beim ersten Mal ein gutes Teil
- * richtig als gut erkennt, hat verstanden, dass Messen nicht Fehlersuche ist,
- * sondern Prüfen.
+ * Das ist das Aufmaß — die Sicherheitsreserve beim Einrichten. Zu groß kann
+ * man nachdrehen, zu klein ist Ausschuss; deshalb lässt niemand das erste
+ * Teil „auf Anschlag“ laufen.
  */
-export const MESSWERTE: readonly { readonly wert: number; readonly urteil: Urteil }[] = [
-  { wert: 19.987, urteil: 'gut' },
-  { wert: 20.015, urteil: 'nacharbeit' },
-  { wert: 19.97, urteil: 'ausschuss' },
-]
+export const ERSTES_MASS = 25.04
 
-/** Um wie viel der Werkzeugkorrektor in Beat 2 verstellt wird, in mm. */
+/** Eine Korrektur wird in Hundertsteln eingegeben — das Raster des Tages. */
 export const KORREKTUR_SCHRITT = 0.01
 
-/** Das Urteil, das ein Messwert nach der Toleranz oben verdient. */
-export function urteilFuer(wert: number): Urteil {
-  if (wert > GROESSTMASS) return 'nacharbeit'
-  if (wert < KLEINSTMASS) return 'ausschuss'
-  return 'gut'
+/**
+ * Die Drehzahl der Auflösung in Z2, in Umdrehungen je Minute.
+ *
+ * Abgeleitet, nicht gesetzt: Hartmetall auf Baustahl schneidet mit rund
+ * 200 m/min Schnittgeschwindigkeit; bei Ø 25 mm ist das
+ * n = 200.000 / (π · 25) ≈ 2.546 — auf dem Screen steht „rund 2.500“.
+ * Die Anker daneben: der Schleudergang einer Waschmaschine (1.400) und das
+ * Radfahrtempo, mit dem die Oberfläche an der Schneide vorbeiläuft
+ * (200 m/min = 12 km/h).
+ */
+export const DREHZAHL = 2500
+export const WASCHMASCHINE = 1400
+
+/** Ein Maß als deutsche Zahl mit zwei Nachkommastellen: `25,04`. */
+export function mm(wert: number): string {
+  return wert.toFixed(2).replace('.', ',')
 }
 
 // ---------------------------------------------------------------------------
-// Bewegung
+// Das Teil — eine Geometrie, drei Zeichnungen
 // ---------------------------------------------------------------------------
 
 /**
- * Raster, keine Springs (§7). Kurze, harte Kurve — die bewusste Gegenbewegung
- * zur pendelnden Masse des Zimmerer-Tages.
+ * Der Bolzen des Tages, in Millimetern. **Eine Welt, viele Zustände:**
+ * die technische Zeichnung (Z1), der Werkzeugweg (Z3) und die Messschraube
+ * (Z4) zeigen dasselbe Teil aus denselben Zahlen — nicht drei Teile, die
+ * einander ähneln.
+ *
+ * Vorn (an der Planseite) der Lagersitz Ø 25 h7, 22 lang, mit Fase 1 × 45°;
+ * dahinter der Absatz Ø 20, 16 lang. Gesamt 38.
  */
-export const RASTER_KURVE = [0.2, 0, 0, 1] as const
+export const TEIL = {
+  sitzDurchmesser: 25,
+  sitzLaenge: 22,
+  schaftDurchmesser: 20,
+  schaftLaenge: 16,
+  gesamt: 38,
+  fase: 1,
+} as const
 
-/** Sekunden je Programmzeile, wenn sich der Werkzeugweg zeichnet. */
-export const ZEILEN_DAUER = 0.35
+// ---------------------------------------------------------------------------
+// Zustände der Zeichnungen
+// ---------------------------------------------------------------------------
+
+/** Ein antippbares Maß auf der Zeichnung (Z1). */
+export type MassId = 'laenge' | 'schaft' | 'sitz' | 'fase'
+
+/** Ein NC-Satz des Schlichtgangs (Z3). */
+export type SatzId = 'n10' | 'n20' | 'n30' | 'n40'
+
+/** Reihenfolge der Sätze — die Bühne fährt sie in dieser Ordnung. */
+export const SAETZE: readonly SatzId[] = ['n10', 'n20', 'n30', 'n40']
+
+/** Z1 — die technische Zeichnung. */
+export interface ZeichnungZustand {
+  angetippt: readonly MassId[]
+  /** Das zuletzt angetippte Maß — es hebt sich heraus. */
+  offen: MassId | null
+  /** Das entscheidende Maß ist gefunden — es bleibt warm markiert. */
+  gefunden: boolean
+}
+
+/** Z3 — der Werkzeugweg über dem Teil. */
+export interface WegZustand {
+  /** Der Satz, den die Zeichnung gerade abfährt. `null` = Werkzeug wartet. */
+  aktiv: SatzId | null
+  /** Schon abgefahrene Sätze — ihre Bahn bleibt stehen. */
+  gesehen: readonly SatzId[]
+  /** Die Fase ist gefunden — ihr Stück der Bahn bleibt warm. */
+  geloest: boolean
+}
+
+/** Z4 — die Messschraube. */
+export interface MessungZustand {
+  /** Was die Anzeige zeigt. `null` = noch nichts gemessen. */
+  wert: number | null
+  /** Die Spindel fährt gerade zu — die Anzeige zählt hoch. */
+  misst: boolean
+}

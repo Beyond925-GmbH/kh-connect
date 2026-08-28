@@ -2,55 +2,47 @@ import { baueGraph, type Angebot, type StepDef } from '@/khpl/flow/steps'
 import type { BerufDef, StepBild } from './typen'
 
 /**
- * Zerspanungsmechaniker/-mechanikerin — der Tag als Zoom.
+ * Zerspanungsmechaniker/-mechanikerin — der Tag als Route.
  *
- * Dreizehn Steps: acht auf der Hauptlinie (Z1–Z8), fünf Abstecher. Damit ist er
- * der kürzeste der vier Tage, und das ist eine Aussage über den Beruf, keine
- * Kürzung (`khpl-tag-zerspanung.md` §1): dieser Beruf hat keine Anfrage, kein
- * Angebot, keinen Ortstermin, keinen Kunden. Der Tag fängt an, wo eine
- * Zeichnung auf dem Tisch liegt — die beiden Dachdecker-Schritte „Auftrag
- * gewinnen“ fallen ersatzlos weg.
+ * Neun Hauptschritte, sechs Abstecher. **Sein Id-Präfix ist `Z`**
+ * (khpl-tage.md §6.1 V4): `Z1`–`Z9` auf der Hauptlinie, Abstecher mit
+ * `.`-Suffix (`Z3.1`).
  *
- * **Der Tag bewegt sich durch den Maßstab statt durch Orte.** Die Zeichnung in
- * Millimetern (Z1), das Rüsten in Zehnteln (Z2), das Messen in Hundertsteln
- * (Z5), das Werkzeug in Tausendsteln (Z4). Der Satz, um den er gebaut ist:
- * *Du machst eins. Die Maschine macht vierhundert.*
+ * **Was diesen Tag von den anderen drei unterscheidet:** er hat keinen
+ * Kunden und keinen Ortswechsel — er hat eine Maschine und ein Maß. Die
+ * Dramaturgie ist die einer Serie: ein Auftrag (200 Teile), und alles läuft
+ * auf die Freigabe des ersten Teils zu (Z4), denn ab da wird jeder Fehler
+ * zweihundertmal gebaut. Der Feierabend ist eine Übergabe: die Maschine
+ * läuft weiter, wenn man geht — kein anderer Tag endet so.
  *
- * **Sein Id-Präfix ist `Z`** (khpl-tage.md §6.1 V4). Abstecher tragen wie
- * überall ein `.`-Suffix (`Z1.1`).
+ * **Dieser Tag hat kein `three`.** Seine Bühnen sind Zeichnungen —
+ * technische Zeichnung, Werkzeugweg, Messschraube — und liegen unter
+ * `buehne/zerspanung/`.
  *
- * ⚠️ **Zahlen.** Struktur, Schrittfolge und Texte sind am 24.08.2026
- * abgenommen (`VALIDIERT`); die Zahlen des Tages tragen ihren Status je
- * Einzelwert und stehen in `belege/zerspanung.md` und
- * `belege/ausbildung-karriere.md`. Was dort `NICHT BELEGBAR` heißt, erscheint
- * auf keinem Screen.
+ * **Er ist ein Industrieberuf (IHK), kein Handwerk.** Das trägt bis in die
+ * Karrieretexte: Industriemeister:in Metall statt Handwerksmeister, keine
+ * NRW-Meisterprämie (`steps/zerspanung/karrierewege.ts`).
  */
 
-/**
- * Das Id-Vokabular dieses Berufs. Es gehört hierher und nicht in die Hülle:
- * jeder der vier Berufe hat ein M5, und eine gemeinsame Union darüber wäre
- * keine Prüfung, sondern eine Kollision (siehe `dachdecker.ts`).
- */
+/** Das Id-Vokabular dieses Berufs — dieselbe Konstruktion wie überall. */
 type Id =
   | 'Z1'
   | 'Z1.1'
   | 'Z2'
-  | 'Z2.1'
   | 'Z3'
+  | 'Z3.1'
   | 'Z4'
   | 'Z5'
   | 'Z6'
+  | 'Z6.1'
   | 'Z7'
-  | 'Z7.1'
-  | 'Z7.2'
-  | 'Z7.3'
   | 'Z8'
+  | 'Z8.1'
+  | 'Z8.2'
+  | 'Z8.3'
+  | 'Z9'
 
-/**
- * Damit auch `weiter`, `eltern` und `abstecher` an die Ids gebunden sind und
- * nicht bloß `string` bleiben — sonst fängt `satisfies` nur Schreibfehler in
- * der eigenen `id` und ausgerechnet nicht die in den Verweisen.
- */
+/** Bindet auch `weiter`, `eltern` und `abstecher` an die Ids. */
 type ZerspanungStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher'> & {
   id: Id
   weiter: Id | null
@@ -58,15 +50,12 @@ type ZerspanungStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher'> & 
   abstecher: readonly Id[]
 }
 
+/** Die Hauptlinie mit ihren Abstechern, Reihenfolge = Board-Reihenfolge. */
 const STEPS = [
   {
     id: 'Z1',
-    // R6: Der alte Titel „Null Komma null zwei eins“ sprach die Zahl aus, die
-    // der Slider gerade erraten soll — wer lesen kann, kannte die Antwort vor
-    // dem ersten Zug. Die ausgeschriebene Zahl steht jetzt dort, wo sie stark
-    // ist: als Zwischentitel der Auflösung (`Z1.tsx`, `Aufloesung`).
-    titel: 'Der Spielraum, den niemand sieht',
-    kurz: 'Zeichnung und Toleranz',
+    titel: 'Das Teil gibt es noch nicht',
+    kurz: 'Zeichnung',
     art: 'haupt',
     weiter: 'Z2',
     abstecher: ['Z1.1'],
@@ -74,8 +63,8 @@ const STEPS = [
   },
   {
     id: 'Z1.1',
-    titel: 'Wer zeichnet das?',
-    kurz: 'Konstruktion',
+    titel: 'Warum so genau?',
+    kurz: 'Passungen',
     art: 'abstecher',
     weiter: 'Z2',
     abstecher: [],
@@ -83,35 +72,35 @@ const STEPS = [
   },
   {
     id: 'Z2',
-    titel: 'Alles muss sitzen, bevor irgendwas läuft',
-    kurz: 'Rüsten und Nullpunkt',
+    titel: 'Fest, sonst fliegt es',
+    kurz: 'Rüsten',
     art: 'haupt',
     weiter: 'Z3',
-    abstecher: ['Z2.1'],
-    eltern: null,
-  },
-  {
-    id: 'Z2.1',
-    titel: 'Warum es überall spritzt',
-    kurz: 'Kühlschmierstoff',
-    art: 'abstecher',
-    weiter: 'Z3',
     abstecher: [],
-    eltern: 'Z2',
+    eltern: null,
   },
   {
     id: 'Z3',
-    titel: 'Zeile für Zeile',
-    kurz: 'Das Programm',
+    titel: 'Vier Sätze, ein Weg',
+    kurz: 'Programm',
     art: 'haupt',
     weiter: 'Z4',
-    abstecher: [],
+    abstecher: ['Z3.1'],
     eltern: null,
   },
   {
+    id: 'Z3.1',
+    titel: 'Ein Tippfehler in Stahl',
+    kurz: 'Einfahren',
+    art: 'abstecher',
+    weiter: 'Z4',
+    abstecher: [],
+    eltern: 'Z3',
+  },
+  {
     id: 'Z4',
-    titel: 'Der stillste Raum der Firma',
-    kurz: 'Der Messraum',
+    titel: 'Das erste Teil entscheidet',
+    kurz: 'Probeteil',
     art: 'haupt',
     weiter: 'Z5',
     abstecher: [],
@@ -119,8 +108,8 @@ const STEPS = [
   },
   {
     id: 'Z5',
-    titel: 'Und, passt es?',
-    kurz: 'Messen und korrigieren',
+    titel: 'Halb zehn, Pausenraum',
+    kurz: 'Pause',
     art: 'haupt',
     weiter: 'Z6',
     abstecher: [],
@@ -128,57 +117,73 @@ const STEPS = [
   },
   {
     id: 'Z6',
-    titel: 'Deins ist das erste',
-    kurz: 'Feierabend',
+    titel: 'Jetzt macht sie es 200-mal',
+    kurz: 'Serie',
     art: 'haupt',
     weiter: 'Z7',
-    abstecher: [],
+    abstecher: ['Z6.1'],
     eltern: null,
+  },
+  {
+    id: 'Z6.1',
+    titel: 'Wo landen deine Teile?',
+    kurz: 'Teile & Späne',
+    art: 'abstecher',
+    weiter: 'Z7',
+    abstecher: [],
+    eltern: 'Z6',
   },
   {
     id: 'Z7',
-    titel: 'Und danach?',
-    kurz: 'Karriere-Schritte',
+    titel: 'Halb drei, Übergabe',
+    kurz: 'Feierabend',
     art: 'haupt',
     weiter: 'Z8',
-    abstecher: ['Z7.1', 'Z7.2', 'Z7.3'],
+    abstecher: [],
     eltern: null,
   },
   {
-    id: 'Z7.1',
-    titel: 'Meister',
-    kurz: 'Meister',
+    id: 'Z8',
+    titel: 'Und danach?',
+    kurz: 'Karriere-Schritte',
+    art: 'haupt',
+    weiter: 'Z9',
+    abstecher: ['Z8.1', 'Z8.2', 'Z8.3'],
+    eltern: null,
+  },
+  {
+    id: 'Z8.1',
+    titel: 'Industriemeister',
+    kurz: 'Industriemeister',
     art: 'abstecher',
-    weiter: 'Z8',
+    weiter: 'Z9',
     abstecher: [],
-    eltern: 'Z7',
+    eltern: 'Z8',
     immerOffen: true,
   },
   {
-    id: 'Z7.2',
+    id: 'Z8.2',
     titel: 'Techniker',
     kurz: 'Techniker',
     art: 'abstecher',
-    weiter: 'Z8',
+    weiter: 'Z9',
     abstecher: [],
-    eltern: 'Z7',
+    eltern: 'Z8',
     immerOffen: true,
   },
   {
-    id: 'Z7.3',
+    id: 'Z8.3',
     titel: 'Studium',
     kurz: 'Studium',
     art: 'abstecher',
-    weiter: 'Z8',
+    weiter: 'Z9',
     abstecher: [],
-    eltern: 'Z7',
+    eltern: 'Z8',
     immerOffen: true,
   },
   {
-    id: 'Z8',
+    id: 'Z9',
     titel: 'Dein nächster Schritt',
-    // Nicht 'CTA': `kurz` steht im Sheet und auf dem Weitermachen-Knopf des
-    // Splash — Board-Sprache gehört nicht vor den Besucher.
     kurz: 'Dein nächster Schritt',
     art: 'haupt',
     weiter: null,
@@ -193,16 +198,8 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
   kurz: 'Zerspanung',
   zeile: 'Metall auf den Hundertstel. Du programmierst, die CNC fräst.',
   /**
-   * ⚠️ **Unverändert aus `berufe/angekuendigt.ts` übernommen.** Der Vektor
-   * speist bereits den Trichter; wer ihn beim Ausbau ändert, ändert die
-   * Empfehlung für alle vier Berufe (khpl-tage.md §5).
-   *
-   * Das gilt ausdrücklich auch für `team: 0.4`, obwohl drei von vier
-   * Gesprächen das Team unaufgefordert loben, zweimal wörtlich als „wie eine
-   * kleine Familie“ (khpl-tag-zerspanung.md §8). Der Wert bleibt hier stehen;
-   * die Entscheidung darüber gehört an eine Stelle, die alle vier Berufe im
-   * Blick hat. **Der Tag zeigt das Team trotzdem** — in der Schichtübergabe
-   * (S5), im gemeinsamen Fehlersuchen (Z3) und in Z2.
+   * ⚠️ **Unverändert.** Der Vektor speist den Trichter; wer ihn ändert, ändert
+   * die Empfehlung für alle vier Berufe (khpl-tage.md §5).
    */
   merkmale: {
     anpacken: 0.5,
@@ -213,175 +210,121 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
     team: 0.4,
     sinn: 0.3,
   },
-  /**
-   * Kein Szenario-Video im Bestand (khpl-tag-zerspanung.md §10). Ohne
-   * `szenario` fällt die Auftragsannahme von selbst auf `hero` und
-   * `heroPoster` zurück — genau so vorgesehen, kein Notbehelf.
-   */
   medien: {
     karte: '/medien/media/zerspanungsmechaniker/card.webp',
     heroPoster: '/medien/media/zerspanungsmechaniker/hero-poster.webp',
     hero: '/medien/media/zerspanungsmechaniker/hero.mp4',
+    // Kein `szenario`: für die Auftragsannahme gibt es kein eigenes Video —
+    // sie fällt von selbst auf Hero-Poster und Hero-Loop zurück.
   },
   /**
-   * Die Motivliste dieses Tages — am Stück, wie es die Redaktionsentscheidung
-   * verlangt (khpl-tage.md §6.1 V3). **Nur Dateien, die im Repo liegen**;
-   * Herkunft in `MEDIEN.md`, Beschreibungen in `MEDIEN-INVENTAR.md`.
+   * Die Motivliste dieses Tages — am Stück, wie die Redaktionsentscheidung
+   * es verlangt (`typen.ts`, `bilder`). Sie ist kurz, und das ist Absicht:
+   * die drei Übungs-Kerne des Tages sind **gezeichnet** (Z1 technische
+   * Zeichnung, Z3 Werkzeugweg, Z4 Messschraube — `buehne/zerspanung/`),
+   * dort steht kein Foto dahinter.
    *
-   * Die Hälfte der Steps steht bewusst nicht darin. Dieser Tag baut seine
-   * Bühne aus Zeichnung, Werkzeugweg und Zahl (§7) — Z1, Z2, Z3, Z5 und Z6
-   * tragen kein Foto, sondern `buehne/zerspanung/`. Für Z6 (Kiste mit Teilen)
-   * gibt es zusätzlich **kein passendes Motiv im Bestand**; es ist neben dem
-   * Szenario-Video die zweite echte Medienlücke des Tages und die wichtigere,
-   * weil sie die Pointe trägt (§10).
+   * Jeder Eintrag zeigt auf eine Datei, die unter `public/medien/` wirklich
+   * liegt (geprüft am 28.08.2026); Motivbeschreibungen in
+   * `MEDIEN-INVENTAR.md`, Herkunft in `MEDIEN.md`. Kein Motiv doppelt sich
+   * innerhalb des Tages; `card.webp` trägt Z5, weil es das einzige Motiv
+   * mit Menschen ist — und die Pause der menschliche Moment dieses Tages.
    *
-   * `gallery-1.webp` trägt seit dem Ausbau Z7, `schaetzen-spindel.webp` seit
-   * dem Review Z7.1 — der Bestand ist damit ausgeschöpft.
+   * `b91-meister.webp` (gewerkeneutrale Karriere-Motive) ist bewusst
+   * **nicht** verwendet: das Bild zeigt eine Holzwerkstatt und passt nicht
+   * vor einen Metallberuf. Z8.1 trägt stattdessen das eigene Meister-Motiv.
    */
   bilder: {
-    /*
-      Bediener an der CNC-Maschine — der Screen, der `technik: 1` mit trägt.
-
-      **Der Ausschnitt sitzt links, nicht mittig.** Das Motiv ist 16 : 9; auf
-      der stehenden Stele bleibt davon ein Streifen von nicht einmal einem
-      Drittel der Bildbreite, und die untere Hälfte liegt unter dem Panel.
-      Mittig blieben davon die Linearführung und ein helles Brett übrig — das
-      liest sich nach Holz. Links steht die Frässpindel mit dem Werkzeug: der
-      einzige Ausschnitt dieses Bildes, der auch hochkant nach Maschine
-      aussieht. Der zweite Wert wirkt nicht — bei 16 : 9 in einem 9 : 16-Rahmen
-      deckt `cover` die volle Höhe ab, beschnitten wird ausschließlich seitlich.
-
-      TODO: Der Screen fragt „Wer zeichnet das?“ und erklärt die Kette vom
-      CAD-Arbeitsplatz zur Maschine — das Motiv zeigt nur ihr Ende. Ein
-      CAD-Bildschirm mit Metallteil fehlt im Bestand (`m3-cad.webp` zeigt ein
-      Holzhaus und damit ein fremdes Gewerk); bis dahin trägt die Maschine.
-    */
-    'Z1.1': { src: '/medien/media/zerspanungsmechaniker/gallery-2.webp', pos: '22% 45%' },
-    // Kühlmittel spritzt über das Werkstück. Genau das Motiv, das der
-    // Abstecher erklärt.
-    'Z2.1': { src: '/medien/media/zerspanungsmechaniker/gallery-3.webp', pos: '50% 50%' },
-    // Werkzeug über einem Stahlmaßstab: das ruhigste, sauberste Motiv des
-    // Bestands und damit der beste Kandidat für den Messraum (§6 Z4).
-    Z4: {
+    // Werkzeug über dem Stahlmaßstab — Präzision als Bild.
+    'Z1.1': {
       src: '/medien/media/zerspanungsmechaniker/quiz-praezision.webp',
       pos: '50% 50%',
     },
-    // §10 führt für Z7 keinen Slot — ohne Eintrag bliebe die Bühne des
-    // Karriere-Screens leer, und das wäre die einzige Stelle des Tages, an der
-    // sie das täte: hochkant ein schwarzes oberes Drittel, das sich wie ein
-    // Ladefehler liest. `gallery-1.webp` (Fräser trägt Metall ab, Späne
-    // fliegen) steht im Bestand ungenutzt und ist das Motiv mit Vorwärtsdrang
-    // — anders als `schaetzen-spindel.webp`, das neben `gallery-3` (Z2.1)
-    // zweimal dasselbe Kühlmittel zeigte.
-    Z7: { src: '/medien/media/zerspanungsmechaniker/gallery-1.webp', pos: '55% 55%' },
-    /*
-      Z7.1 trägt nicht mehr das geteilte Meisterfoto (`b91-meister.webp`):
-      das zeigt eine Holzwerkstatt, und der Text daneben sagt ausdrücklich
-      „kein Handwerksmeister, sondern Industriemeister **Metall**“ — Bild und
-      Satz widersprachen sich wörtlich (R13/R14). `schaetzen-spindel.webp`
-      (Werkzeug im Futter einer Metall-CNC, sauber, unverkennbar dieses
-      Gewerk) ist der beste Ersatz im Bestand; ein echtes
-      Industriemeister-Motiv mit Mensch steht in
-      `ui-review/medien-luecken-zerspanung.md`.
-
-      Techniker und Studium bleiben gemeinsam — dort zeigt kein Bild ein
-      fremdes Gewerk (khpl-tage.md §6.1 V2).
-    */
-    'Z7.1': {
+    // Gespanntes Teil im Dreibackenfutter — genau der Handgriff von Z2.
+    Z2: {
       src: '/medien/media/zerspanungsmechaniker/schaetzen-spindel.webp',
-      pos: '50% 50%',
+      pos: '50% 45%',
     },
-    'Z7.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
-    'Z7.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
-    /*
-      Zum Schluss Menschen, keine Maschine: hier soll jemand aufstehen und an
-      den Stand gehen. „Team am Maschinenbildschirm“ ist das einzige Motiv im
-      Bestand, auf dem in diesem Beruf jemand mit jemandem redet.
-
-      **Nur der erste Wert entscheidet.** Das Motiv ist 16 : 9; auf der
-      stehenden Stele deckt `cover` die volle Höhe ab und beschneidet
-      ausschließlich seitlich, quer (16 : 9) fällt gar kein Schnitt an. Der
-      zweite Wert steht deshalb nur der Vollständigkeit halber da — die
-      senkrechte Lage ist auf diesem Bild in keiner Ausrichtung verschiebbar.
-
-      ⚠️ **Die Schädeldecken fehlen schon in der Vorlage.** Alle drei Köpfe
-      berühren im Original die obere Kante; kein Ausschnitt der Welt holt sie
-      zurück, und ein tiefer gesetztes Bild ergäbe eine waagerechte Naht mitten
-      durch die Stirnen. Was der Ausschnitt entscheiden kann, ist, ob im
-      stehenden Streifen **Gesichter** stehen oder Rümpfe. Bei 50 % stand darin
-      der junge Kollege und hinter ihm eine Schulter — zwei angeschnittene
-      Kinne, keine Szene. Bei 70 % liegen zwei vollständige Profile im
-      Streifen, beide im Gespräch nach rechts gewandt, dazwischen die Hand mit
-      dem Tablet: der Moment, den dieser Screen als Aufforderung braucht.
-    */
-    Z8: { src: '/medien/media/zerspanungsmechaniker/card.webp', pos: '70% 45%' },
+    // Bediener wacht an der dunklen Maschine — das Einfahren.
+    'Z3.1': { src: '/medien/media/zerspanungsmechaniker/gallery-2.webp', pos: '50% 40%' },
+    // Drei aus der Schicht, ein Bildschirm — die Pause redet.
+    Z5: { src: '/medien/media/zerspanungsmechaniker/card.webp', pos: '50% 30%' },
+    // Die Kiste voller gleicher Teile — die Serie als Bild.
+    Z6: { src: '/medien/media/zerspanungsmechaniker/z6-kiste.webp', pos: '50% 55%' },
+    // Fräser und fliegende Späne — wohin mit ihnen, fragt der Abstecher.
+    'Z6.1': { src: '/medien/media/zerspanungsmechaniker/gallery-1.webp', pos: '50% 50%' },
+    // Messwerkzeuge, abgelegt auf dunklem Grund — der Tag ist durch.
+    Z7: { src: '/medien/media/zerspanungsmechaniker/z4-messraum.webp', pos: '50% 45%' },
+    // Kühlschmierstoff in voller Fahrt — der Beruf in Bewegung.
+    Z8: { src: '/medien/media/zerspanungsmechaniker/gallery-3.webp', pos: '40% 50%' },
+    // Ein Älterer erklärt einem Jüngeren etwas an der Werkbank.
+    'Z8.1': {
+      src: '/medien/media/zerspanungsmechaniker/z7-meister.webp',
+      pos: '50% 40%',
+    },
+    // Die zwei gewerkeneutralen Karriere-Motive (khpl-tage.md §6.1 V2).
+    'Z8.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
+    'Z8.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
+    // Der CTA: die drehende Welle aus dem Hero, unter der Markenzone.
+    Z9: { src: '/medien/media/zerspanungsmechaniker/hero-poster.webp', pos: '50% 50%' },
   } satisfies Partial<Record<Id, StepBild>>,
-  /**
-   * S5 — die Auftragsannahme, `VALIDIERT` (khpl-tag-zerspanung.md §6).
-   *
-   * Sie trägt hier mehr Last als bei den anderen drei: weil der Tag keinen
-   * Schritt „Auftrag gewinnen“ hat, macht sie die **Schichtübergabe** — und
-   * deshalb kann Z1 sofort mit der Zeichnung anfangen.
-   *
-   * Die Viertelstunde vor der Schicht ist `INTERVIEW` (Einblicke
-   * Zerspanungsmechanikerin, 09.07.2026): „Man sollte in der Regel 'ne
-   * Viertelstunde eher da sein, da man in der Regel noch 'ne Schichtübergabe
-   * hat.“ Die Schichtzeiten selbst bleiben **betriebsspezifisch** — ein
-   * Betrieb ist kein Tarifvertrag (§11).
-   */
+  /** S5 — die Auftragsannahme, in-fiction, ohne Meta-Erklärung. */
   auftrag: {
-    etikett: 'Deine Frühschicht',
-    titel: ['Vierhundert Teile.', 'Eins machst du.'],
-    text: 'Viertel vor sechs. Die Nachtschicht übergibt: was gelaufen ist, was noch läuft, was klemmt. Dann steht da eine Zeichnung und ein Zettel — 400 Stück bis Freitag. Die Maschine kann das. Sie weiß nur noch nicht, wie.',
+    etikett: 'Deine Maschine',
+    titel: ['200 Teile.', 'Ein Hundertstel.'],
+    text: 'Du bist Azubi in der Zerspanung. Sechs Uhr, die Halle riecht nach Kühlschmierstoff, deine Maschine ist noch kalt. Der Ausbilder legt dir eine Zeichnung hin: 200 Bolzen für ein Getriebe, bis Freitag. Ab dem ersten Span bist du dran.',
     knopf: 'Schicht übernehmen',
   },
   graph: baueGraph(STEPS, {
     erster: 'Z1',
-    /** Einladungstexte wörtlich aus khpl-tag-zerspanung.md §4 (`VALIDIERT`). */
+    /** Jeder Abstecher einzeln getextet — nie eine Schablone. */
     angebote: {
       'Z1.1': {
-        einladung: 'Woher kommt die Zeichnung?',
-        beschreibung: 'Jemand hat das konstruiert. Schau dir an, wer.',
+        einladung: 'Warum so genau?',
+        beschreibung: 'Passungen — wie Tausendstel entscheiden, ob ein Lager sitzt.',
       },
-      'Z2.1': {
-        einladung: 'Warum spritzt da überall was?',
-        beschreibung: 'Kühlschmierstoff — und was ohne ihn passiert.',
+      'Z3.1': {
+        einladung: 'Und wenn du dich vertippst?',
+        beschreibung: 'Was ein Crash kostet — und das Verfahren dagegen.',
       },
-      'Z7.1': { einladung: 'Meister', beschreibung: 'Eigener Betrieb, eigene Azubis.' },
-      'Z7.2': {
+      'Z6.1': {
+        einladung: 'Wo landen deine Teile?',
+        beschreibung: 'Vom Getriebe bis zur Späne-Kiste — nichts endet im Müll.',
+      },
+      'Z8.1': {
+        einladung: 'Industriemeister',
+        beschreibung: 'Die Schicht führen, Azubis ausbilden.',
+      },
+      'Z8.2': {
         einladung: 'Techniker',
-        beschreibung: 'Konstruieren und planen statt an der Maschine.',
+        beschreibung: 'Fertigung planen statt rüsten.',
       },
-      'Z7.3': { einladung: 'Studium', beschreibung: 'Ja, das geht — auch ohne Abitur.' },
+      'Z8.3': { einladung: 'Studium', beschreibung: 'Ja, das geht — auch ohne Abitur.' },
     } satisfies Partial<Record<Id, Angebot>>,
     /**
-     * Wörtlich aus §4. `Z3 → „Start drücken“` ist der einzige Weiter-Text der
-     * ganzen Anwendung, der eine Handlung in der Fiktion **ist**, statt sie
-     * anzukündigen — an dieser Stelle ist Weitergehen wirklich der Knopfdruck.
-     *
-     * Die beiden Abstecher erben den Text ihres Elternschritts: sie münden in
-     * denselben nächsten Hauptschritt und sollen dorthin nicht anders
-     * einladen als die Hauptlinie.
+     * Weiter-Texte als Ortsangaben des Tages. Die Abstecher tragen denselben
+     * Text wie ihr Elternschritt: sie münden in denselben nächsten
+     * Hauptschritt.
      */
     weiterTexte: {
       Z1: 'Weiter an die Maschine',
       'Z1.1': 'Weiter an die Maschine',
-      Z2: 'Weiter zur Steuerung',
-      'Z2.1': 'Weiter zur Steuerung',
-      Z3: 'Start drücken',
-      Z4: 'Weiter zur Messbank',
-      Z5: 'Weiter zum Feierabend',
+      Z2: 'Weiter zum Programm',
+      Z3: 'Weiter zum ersten Teil',
+      'Z3.1': 'Weiter zum ersten Teil',
+      Z4: 'Weiter in die Pause',
+      Z5: 'Weiter zur Serie',
+      Z6: 'Weiter zum Feierabend',
+      'Z6.1': 'Weiter zum Feierabend',
     } satisfies Partial<Record<Id, string>>,
     /**
-     * Zwei Stellen statt drei — der Tag ist kürzer (§4).
-     *
-     * **Nicht auf Z5**, denn Z6 liegt dann unmittelbar vor dem Ziel Z7: ein
-     * Abstecher, der einen Schritt vor sein Ziel abkürzt, schickt den Besucher
-     * über Z7 → Z8 → zurück auf Z5 → weiter zu Z6 → Z7 — derselbe Bereich
-     * zweimal (dieselbe Regel wie bei `dachdecker.ts`).
+     * Der Karriere-Link auf drei ruhigen Stellen der ersten Tageshälfte —
+     * nicht auf Z7: Z8 ist der nächste Schritt danach, und ein Abstecher,
+     * der einen Schritt vor sein Ziel abkürzt, schickt den Besucher durch
+     * denselben Bereich zweimal.
      */
-    karriereSkipAuf: ['Z1', 'Z3'],
-    karriereBereich: ['Z7', 'Z7.1', 'Z7.2', 'Z7.3', 'Z8'],
-    karriereEinstieg: 'Z7',
+    karriereSkipAuf: ['Z2', 'Z4', 'Z6'],
+    karriereBereich: ['Z8', 'Z8.1', 'Z8.2', 'Z8.3', 'Z9'],
+    karriereEinstieg: 'Z8',
   }),
 }

@@ -1,6 +1,5 @@
-import { Suspense, lazy, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { X } from 'lucide-react'
 import {
   DndContext,
   DragOverlay,
@@ -59,12 +58,6 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  *     ihrem Platz liegen, und das Auto-Scrollen des Panels ist abgeschaltet:
  *     es verschob während des Ziehens den Untergrund.
  *
- * **Ansehen, ohne zu raten.** Eine Karte war bisher nur zu ziehen: Wer wissen
- * wollte, was „Konterlattung“ eigentlich ist, musste sie ablegen — und ein
- * Ablegen ist hier eine Antwort. Ein Tipp auf die Karte holt das Teil deshalb
- * groß und **allein** in eine Vorschau über den Vorrat (`Teilvorschau`), ohne
- * dass dabei etwas beantwortet wird.
- *
  * Die Belohnung ist nicht eine Wertung, sondern die Animation selbst: jedes
  * richtig abgelegte Teil fliegt tatsächlich ein und das Dach wächst weiter.
  *
@@ -121,8 +114,6 @@ export function M7() {
   const [fehler, setFehler] = useState(0)
   const [meldung, setMeldung] = useState<{ text: string; ok: boolean } | null>(null)
   const [zieht, setZieht] = useState<string | null>(null)
-  /** Angesehenes Teil — Label, oder `null`, wenn keine Vorschau offen ist. */
-  const [vorschau, setVorschau] = useState<string | null>(null)
 
   // Wer schon einmal hier war, hat die Vorführung gesehen — er steigt direkt
   // in die Abfrage ein. Alle anderen bekommen erst das ganze Dach zu sehen.
@@ -162,11 +153,6 @@ export function M7() {
     [zieht],
   )
 
-  const angesehen = useMemo(
-    () => (vorschau ? M7_SCHRITTE.find((s) => s.label === vorschau) : undefined),
-    [vorschau],
-  )
-
   /**
    * Was im Karten-Schema als „steht schon“ gezeichnet wird.
    *
@@ -183,9 +169,6 @@ export function M7() {
     const neu = [...gesetzt, schritt.label]
     setGesetzt(neu)
     setMeldung({ text: schritt.richtig, ok: true })
-    // Das Teil ist eingebaut — eine Vorschau darauf steht nur im Weg. Die
-    // Rückmeldung gehört jetzt auf denselben Platz.
-    setVorschau(null)
     merkeAntwort('m7', { gesetzt: neu, fertig: neu.length === M7_SCHRITTE.length })
   }
 
@@ -249,17 +232,13 @@ export function M7() {
           />
         </Suspense>
       }
-      /*
-        Während gebaut wird, trägt allein das Auftragsband die Anweisung — ein
-        Fließtext daneben wäre nur Füllung. Also keiner.
-      */
       warum={
         fertig ? (
           <p>
             Steht. Von der Fußpfette bis zur letzten Dachlatte — in der Reihenfolge, in
             der es geht. Morgen kommen die Ziegel drauf.
           </p>
-        ) : takt === 'bauen' ? null : (
+        ) : takt === 'bauen' ? null : ( // ein Fließtext daneben wäre nur Füllung. Also keiner. // Während gebaut wird, trägt allein das Auftragsband die Anweisung —
           <p>
             So sieht die zweite Hälfte fertig aus. Schau dir an, was in welcher
             Reihenfolge kommt — gleich baust du sie selbst.
@@ -296,44 +275,22 @@ export function M7() {
               <div className="flex flex-col gap-2" data-wisch="aus">
                 <Ablage anzahl={gesetzt.length} gesamt={M7_SCHRITTE.length} />
 
-                {/* Ein Platz, zwei Antworten: die Rückmeldung auf ein abgelegtes
-                    Teil und die Vorschau auf ein angesehenes. Beides zugleich
-                    hieße stapeln — und die Vorschau ist die jüngere Handlung. */}
-                {angesehen ? (
-                  <Teilvorschau schritt={angesehen} onZu={() => setVorschau(null)} />
-                ) : (
-                  <Rueckmeldung
-                    ok={meldung ? meldung.ok : null}
-                    text={meldung ? meldung.text : null}
-                    testid="m7-meldung"
-                  />
-                )}
+                <Rueckmeldung
+                  ok={meldung ? meldung.ok : null}
+                  text={meldung ? meldung.text : null}
+                  testid="m7-meldung"
+                />
 
                 <div className="flex flex-wrap gap-2">
                   {offen.map((s) => (
-                    <Bauteilkarte
-                      key={s.label}
-                      schritt={s}
-                      gebaut={gebaut}
-                      angesehen={s.label === vorschau}
-                      onAnsehen={() =>
-                        setVorschau((v) => (v === s.label ? null : s.label))
-                      }
-                    />
+                    <Bauteilkarte key={s.label} schritt={s} gebaut={gebaut} />
                   ))}
                 </div>
-
-                <p className="text-[0.875rem] leading-snug text-kh-paper/45">
-                  Tipp auf ein Teil zeigt es einzeln.
-                </p>
 
                 <div className="flex flex-wrap justify-start gap-2">
                   <Button
                     variant="leise"
-                    onClick={() => {
-                      setVorschau(null)
-                      setTakt('zeigen')
-                    }}
+                    onClick={() => setTakt('zeigen')}
                     data-testid="m7-nochmal-zeigen"
                   >
                     Noch mal zeigen
@@ -480,103 +437,20 @@ function Ablage({ anzahl, gesamt }: { anzahl: number; gesamt: number }) {
  * Die Zieh-Karte am Platz. Sie trägt selbst **keine** Transformation mehr:
  * am Finger hängt die `DragOverlay`-Kopie, hier bleibt nur der blasse Umriss
  * zurück, damit sichtbar ist, woher das Teil kommt.
- *
- * **Ziehen und Tippen auf derselben Karte.** Das Schema auf der Karte ist
- * 44 px groß — genug, um zu ahnen, wo das Teil sitzt, zu wenig, um es zu
- * erkennen. Ein Tipp holt es deshalb groß und allein in die Vorschau
- * darüber, ohne dass der Besucher es dafür ablegen (und womöglich falsch
- * raten) müsste.
- *
- * Der Tipp wird **selbst gemessen** statt aus `isDragging` abgeleitet: nach
- * einem Zug feuert der Browser auf `pointerup` weiterhin ein `click` auf der
- * Karte, und ob dnd-kits Zustand zu diesem Zeitpunkt schon zurückgesetzt ist,
- * hängt am React-Batching. Ein Vergleich der Zeigerposition beim Drücken und
- * beim Klicken ist unabhängig davon — dieselbe 8-px-Schwelle wie im
- * `PointerSensor`, also genau die Grenze, ab der dnd-kit das Ziehen anfängt.
  */
-const TIPP_SCHWELLE = 8
-
-function Bauteilkarte({
-  schritt,
-  gebaut,
-  angesehen,
-  onAnsehen,
-}: {
-  schritt: Bauschritt
-  gebaut: string[]
-  angesehen: boolean
-  onAnsehen: () => void
-}) {
+function Bauteilkarte({ schritt, gebaut }: { schritt: Bauschritt; gebaut: string[] }) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: schritt.label,
   })
-  const gedrueckt = useRef<{ x: number; y: number } | null>(null)
 
   return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      className="touch-none"
-      onPointerDown={(e) => {
-        gedrueckt.current = { x: e.clientX, y: e.clientY }
-        listeners?.onPointerDown?.(e)
-      }}
-      onClick={(e) => {
-        const p = gedrueckt.current
-        if (!p) return
-        gedrueckt.current = null
-        if (Math.hypot(e.clientX - p.x, e.clientY - p.y) > TIPP_SCHWELLE) return
-        onAnsehen()
-      }}
-    >
+    <div ref={setNodeRef} {...listeners} {...attributes} className="touch-none">
       <Kartenflaeche
         schritt={schritt}
         gebaut={gebaut}
         testid={`m7-teil-${schritt.label}`}
-        className={`${isDragging ? 'opacity-30' : ''} ${
-          angesehen ? 'ring-2 ring-kh-orange' : ''
-        }`}
+        className={isDragging ? 'opacity-30' : ''}
       />
-    </div>
-  )
-}
-
-/**
- * Das angetippte Teil, groß und **ohne den Rest vom Dach**.
- *
- * Die Karte zeigt das Teil im Baustand: orange in einem blassen Gerüst aus
- * allem, was schon steht. Das beantwortet „wo sitzt es“ — aber wenn drei
- * Sparren, zwei Pfetten und eine Kehlbalkenlage blass danebenliegen, ist bei
- * 44 px nicht mehr zu sehen, welcher Strich denn nun gemeint ist. Hier fällt
- * alles Gebaute weg (`gebaut={[]}`): übrig bleiben der Dachumriss zur
- * Orientierung, die Rohdecke und das Teil selbst.
- */
-function Teilvorschau({ schritt, onZu }: { schritt: Bauschritt; onZu: () => void }) {
-  return (
-    <div
-      data-testid="m7-vorschau"
-      className="flex items-start gap-3.5 rounded-kh border-2 border-kh-orange/40 bg-kh-orange/10 p-3"
-    >
-      <span className="grid size-[86px] shrink-0 place-items-center rounded-kh bg-black/35 p-1.5">
-        <DachSchema hervor={schritt.label} gebaut={[]} className="size-full" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="kh-etikett block text-kh-paper/45">Nur dieses Teil</span>
-        <span className="kh-titel-klein mt-0.5 block text-kh-orange">{schritt.name}</span>
-        <p className="mt-1 text-[0.9375rem] leading-snug text-kh-paper/85">
-          {schritt.was}
-        </p>
-      </span>
-      <button
-        type="button"
-        onClick={onZu}
-        data-testid="m7-vorschau-zu"
-        aria-label="Vorschau schließen"
-        className="-mt-1 -mr-1 grid size-11 shrink-0 place-items-center rounded-full text-kh-paper/60"
-      >
-        <X className="size-5" strokeWidth={2.5} />
-      </button>
     </div>
   )
 }

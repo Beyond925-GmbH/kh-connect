@@ -17,13 +17,13 @@ const SPALTEN: Record<number, string> = {
 /**
  * Eine Reihe Felder aus Überschrift und Text — auf schmalen Screens klappbar.
  *
- * **Sie steht in `komponenten/`, weil drei Tage dieselbe Liste tragen.**
- * Gebaut wurde sie für die Zimmerer-Karrierewege; `zerspanung/Z7Weg.tsx` und
- * `anlagenmechanik/A8Weg.tsx` haben unabhängig davon dieselbe Antwort auf
- * dieselbe Klemme gefunden. Drei Fassungen desselben Gedankens sind genau die
- * Doppelung, aus der die drei widersprüchlichen Bühnen-Messer entstanden sind
- * — die beiden anderen gehören hierher migriert, sobald jemand die Zeit hat,
- * sie danach in allen drei Formaten nachzumessen.
+ * **Sie steht in `komponenten/`, weil zwei Tage dieselbe Liste tragen.**
+ * Gebaut wurde sie für die Zimmerer-Karrierewege; `anlagenmechanik/A8Weg.tsx`
+ * hat unabhängig davon dieselbe Antwort auf dieselbe Klemme gefunden. Zwei
+ * Fassungen desselben Gedankens sind genau die Doppelung, aus der die
+ * widersprüchlichen Bühnen-Messer entstanden sind — die andere gehört hierher
+ * migriert, sobald jemand die Zeit hat, sie danach in allen drei Formaten
+ * nachzumessen.
  *
  * **Warum es das gibt.** Zwei Screens des Zimmerer-Tages tragen eine Liste, die
  * ausgeschrieben höher ist als das Panel hochkant hergibt: die Karrierewege
@@ -32,9 +32,8 @@ const SPALTEN: Record<number, string> = {
  * drei Maschinen auf C1.1 (267 px, das Schlusszitat fehlte ganz). Am Messestand
  * wird in einem Panel nicht gescrollt.
  *
- * Die Antwort ist dieselbe wie beim Zerspanungstag: jede **Überschrift**
- * bleibt sichtbar (das ist die Verzeichnis-Funktion der Liste), der Text kommt
- * auf Tipp; der erste Eintrag kommt offen an, damit der Screen nicht mit einer
+ * Die Antwort: jede **Überschrift** bleibt sichtbar (das ist die
+ * Verzeichnis-Funktion der Liste), der Text kommt auf Tipp; der erste Eintrag kommt offen an, damit der Screen nicht mit einer
  * Reihe zugeklappter Zeilen anfängt. Immer nur einer ist offen — zwei offene
  * Einträge holen die Scrollkante zurück. **Gekürzt wird nichts**: was in den
  * Feldern steht, ist recherchiert (`belege/`).
@@ -52,12 +51,6 @@ const SPALTEN: Record<number, string> = {
  * hochkant. `spaltenQuer` legt die Felder im breiten Panel (`karteBreit`) in
  * Spalten nebeneinander — dort ist Höhe knapp und Breite im Überfluss
  * vorhanden.
- *
- * ⚠️ **Gemeldete Doppelung.** `zerspanung/Z7Weg.tsx` trägt dieselbe Liste mit
- * derselben Begründung, und die Karrierekarten sind in allen vier Tagen gleich
- * gebaut. Die Komponente gehört damit eigentlich nach
- * `src/khpl/komponenten/` — das ist nicht die Datei dieses Tages
- * (khpl-tage.md §6.2), deshalb steht sie vorerst hier.
  */
 export function Klappliste({
   abschnitte,
