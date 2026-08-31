@@ -5,6 +5,7 @@ import { beruf, istBerufId } from '@/khpl/berufe/registry'
 import type { BerufId } from '@/khpl/berufe/typen'
 import type { HelmWahl } from '@/khpl/match/helm'
 import { istGeste, type Geste } from '@/khpl/komponenten/gesten'
+import { aktiviereVolleAnalytik, erfasse, neueAnalytikSitzung } from '@/lib/analytik'
 
 /**
  * Sitzungszustand nach khpl-ui-shell.md 7, erweitert um die vier Berufe.
@@ -264,6 +265,14 @@ export interface Fortschritt {
   detourReturnTo: StepId | null
 }
 
+/**
+ * Entscheidung des Besuchers im Zustimmungsdialog (`shell/Zustimmung.tsx`) —
+ * `null` heißt: noch nicht gefragt. Liegt **an der Sitzung**, nicht am Gerät:
+ * das iPad ist geteilt, und mit Verfall oder Reset erlischt auch die
+ * Zustimmung — der nächste Besucher wird selbst gefragt.
+ */
+export type AnalytikWahl = 'voll' | 'anonym'
+
 export interface Sitzung {
   version: 2
   /**
@@ -294,6 +303,7 @@ export interface Sitzung {
    * Genau wie `helm` und `gefragt`.
    */
   gelernteGesten: Geste[]
+  analytik: AnalytikWahl | null
   updatedAt: number
 }
 
@@ -318,6 +328,7 @@ function leereSitzung(): Sitzung {
     helm: null,
     gefragt: {},
     gelernteGesten: [],
+    analytik: null,
     updatedAt: Date.now(),
   }
 }
@@ -632,6 +643,7 @@ function lade(): Sitzung | null {
       helm: pruefeHelm(s.helm),
       gefragt: pruefeGefragt(s.gefragt),
       gelernteGesten: pruefeGesten(s.gelernteGesten),
+      analytik: pruefeAnalytik(s.analytik),
       updatedAt: s.updatedAt,
     }
   } catch {
@@ -676,6 +688,10 @@ function pruefeGesten(roh: unknown): Geste[] {
   return Array.isArray(roh) ? roh.filter(istGeste) : []
 }
 
+function pruefeAnalytik(roh: unknown): AnalytikWahl | null {
+  return roh === 'voll' || roh === 'anonym' ? roh : null
+}
+
 function pruefeGefragt(roh: unknown): Record<string, string> {
   if (typeof roh !== 'object' || roh === null) return {}
   const raus: Record<string, string> = {}
@@ -693,6 +709,10 @@ let sitzung: Sitzung = lade() ?? leereSitzung()
 // mehr vorbei. Ein iPad, das über Nacht steht, böte morgens den Stand von
 // gestern an, samt fremder Antworten im Rückblick.
 if (Date.now() - sitzung.updatedAt > VERFALL_MS) sitzung = leereSitzung()
+
+// Eine in dieser Sitzung erteilte Zustimmung übersteht den Reload — die
+// Aufzeichnung muss dann wieder anlaufen, sonst bliebe sie stumm 'anonym'.
+if (sitzung.analytik === 'voll') aktiviereVolleAnalytik()
 
 /** Ob ein Stand zum Weitermachen bereitliegt. */
 let hatWiedereinstieg = wiedereinstiegMoeglich(sitzung)
@@ -718,10 +738,14 @@ function melde() {
  * auf den Splash, sondern bei der Helmwahl stehen.
  */
 function vergiss(neuerBildschirm: Bildschirm) {
+  // Mit der Sitzung stirbt auch die Analytik-Identität samt Zustimmung — der
+  // nächste Besucher beginnt anonym und wird selbst gefragt.
+  neueAnalytikSitzung()
   sitzung = { ...leereSitzung(), bildschirm: neuerBildschirm }
   hatWiedereinstieg = false
   sichere()
   melde()
+  erfasse('bildschirm_gesehen', { bildschirm: neuerBildschirm })
 }
 
 /**
@@ -742,6 +766,7 @@ function vergiss(neuerBildschirm: Bildschirm) {
 export function pruefeVerfall(): boolean {
   if (!hatWiedereinstieg) return false
   if (Date.now() - sitzung.updatedAt <= VERFALL_MS) return false
+  erfasse('sitzung_verfallen', { beruf: sitzung.aktiverBeruf })
   vergiss('splash')
   return true
 }
@@ -804,7 +829,13 @@ function aendereFortschritt(f: (alt: Fortschritt, graph: StepGraph) => Fortschri
 }
 
 function setzeBildschirm(neu: Bildschirm) {
-  aendere((s) => (s.bildschirm === neu ? s : { ...s, bildschirm: neu }))
+  aendere((s) => {
+    if (s.bildschirm === neu) return s
+    // Screen-Wechsel als Ereignis: die App hat keine URLs, das hier ist ihr
+    // Pageview. Bewusst im Updater — nur ein echter Wechsel zählt.
+    erfasse('bildschirm_gesehen', { bildschirm: neu })
+    return { ...s, bildschirm: neu }
+  })
 }
 
 /** Hochwassermarke fortschreiben — nur auf der Hauptlinie, nie im Skip. */
@@ -833,16 +864,26 @@ function skipStand(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId | n
 /** S0 → S1. Verwirft einen alten Stand vollständig. */
 export function starteNeu() {
   vergiss('helm')
+  erfasse('sitzung_gestartet')
 }
 
 /** S0 → dorthin, wo der letzte Besucher aufgehört hat. */
 export function machWeiter() {
   if (pruefeVerfall()) return
+  erfasse('sitzung_fortgesetzt', { beruf: sitzung.aktiverBeruf })
   setzeBildschirm(sitzung.aktiverBeruf ? 'step' : 'berufe')
 }
 
 export function merkeHelm(wahl: HelmWahl) {
   aendere((s) => ({ ...s, helm: wahl }))
+  erfasse('helm_gewaehlt', { farbe: wahl.farbe, werkzeug: wahl.werkzeug || null })
+}
+
+/** Entscheidung aus dem Zustimmungsdialog (`shell/Zustimmung.tsx`). */
+export function merkeAnalytik(wahl: AnalytikWahl) {
+  aendere((s) => (s.analytik === wahl ? s : { ...s, analytik: wahl }))
+  erfasse('analytik_entschieden', { wahl })
+  if (wahl === 'voll') aktiviereVolleAnalytik()
 }
 
 /**
@@ -863,6 +904,7 @@ export function merkeGeste(geste: Geste) {
 
 export function merkeFrage(frageId: string, antwortId: string) {
   aendere((s) => ({ ...s, gefragt: { ...s.gefragt, [frageId]: antwortId } }))
+  erfasse('frage_beantwortet', { frage: frageId, antwort: antwortId })
 }
 
 export function zeigeFragen() {
@@ -892,11 +934,13 @@ export function betreteBeruf(id: BerufId) {
     // ist ein Blick, kein Wechsel — wer mitten im Zimmerer-Tag neugierig auf
     // Dachdecker tippt, soll danach ohne Umweg weitermachen können.
     merkeAngesehen(id)
+    erfasse('beruf_bald_angesehen', { beruf: id })
     setzeBildschirm('bald')
     return
   }
 
   const schonDa = (sitzung.berufe[id]?.visited.length ?? 0) > 0
+  erfasse('beruf_betreten', { beruf: id, fortgesetzt: schonDa })
   aendere((s) => ({
     ...s,
     aktiverBeruf: id,
@@ -913,6 +957,7 @@ function merkeAngesehen(id: BerufId) {
 export function nimmAuftragAn() {
   const id = sitzung.aktiverBeruf
   if (!id || !beruf(id).graph) return
+  erfasse('auftrag_angenommen', { beruf: id })
 
   aendere((s) => {
     const graph = beruf(id).graph
@@ -936,11 +981,13 @@ export function nimmAuftragAn() {
 
 /** Idle-Rückfall: zurück auf S0, **ohne** zu löschen. */
 export function zumSplash() {
+  erfasse('idle_zurueckgefallen', { bildschirm: sitzung.bildschirm })
   setzeBildschirm('splash')
 }
 
 /** Harter Reset für das Standpersonal. */
 export function setzeZurueck() {
+  erfasse('sitzung_zurueckgesetzt')
   vergiss('splash')
 }
 
@@ -1062,6 +1109,13 @@ export function geheZu(ziel: StepId) {
     // gehören nicht in den Rückblick von M8 — „du hast heute … eine Info-Seite
     // gelesen“ ist keine Tageleistung. Angesehen wird in `answers.m9` vermerkt.
     const zaehlt = def.art === 'abstecher' && !def.immerOffen
+    erfasse('step_gesehen', { beruf: sitzung.aktiverBeruf, step: ziel, art: def.art })
+    // `weiter: null` gibt es nur am Ende der Hauptlinie — das ist die
+    // Conversion des Tages. Der Besuchtheits-Test hält Wiederholungen nach
+    // einem ← draußen.
+    if (def.weiter === null && !alt.visited.includes(ziel)) {
+      erfasse('tag_abgeschlossen', { beruf: sitzung.aktiverBeruf })
+    }
     return {
       ...alt,
       currentStepId: ziel,
@@ -1081,6 +1135,7 @@ export function merkeKarriereweg(ziel: StepId) {
   aendereFortschritt((alt) => {
     const bisher = alt.answers.m9?.angesehen ?? []
     if (bisher[bisher.length - 1] === ziel) return alt
+    erfasse('karriereweg_angesehen', { beruf: sitzung.aktiverBeruf, step: ziel })
     return {
       ...alt,
       answers: {
@@ -1134,6 +1189,7 @@ export function springeZuBesuchtem(ziel: StepId) {
 
 /** Karriere-Skip: merkt den aktuellen Schritt und öffnet den Karriere-Bereich. */
 export function starteKarriereSkip() {
+  erfasse('karriere_geoeffnet', { beruf: sitzung.aktiverBeruf })
   aendereFortschritt((alt, graph) => ({
     ...alt,
     detourReturnTo: alt.currentStepId,
@@ -1173,6 +1229,12 @@ export function merkeAntwort<K extends keyof Antworten>(
     ...alt,
     answers: { ...alt.answers, [schluessel]: wert },
   }))
+  // Der Stand der Übung als Ereignis — Versuche, Schätzungen, Trefferquoten.
+  erfasse('uebung_stand', {
+    beruf: sitzung.aktiverBeruf,
+    uebung: schluessel,
+    stand: wert,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -1201,6 +1263,10 @@ export function useAktiverBeruf(): BerufId | null {
 
 export function useAngesehenerBeruf(): BerufId | null {
   return useSyncExternalStore(abonniere, () => sitzung.angesehenerBeruf)
+}
+
+export function useAnalytikWahl(): AnalytikWahl | null {
+  return useSyncExternalStore(abonniere, () => sitzung.analytik)
 }
 
 /**

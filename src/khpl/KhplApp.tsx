@@ -8,6 +8,7 @@ import { Fragen } from '@/khpl/shell/Fragen'
 import { Helmwahl } from '@/khpl/shell/Helmwahl'
 import { KioskGuard } from '@/khpl/shell/KioskGuard'
 import { Splash } from '@/khpl/shell/Splash'
+import { Zustimmung } from '@/khpl/shell/Zustimmung'
 import { Platzhalter } from '@/khpl/steps/Platzhalter'
 import {
   useAktiverBeruf,
@@ -53,6 +54,7 @@ export function KhplApp() {
       {bildschirm === 'bald' && angesehen && <BerufBald id={angesehen} />}
       {bildschirm === 'intro' && <Auftragsannahme />}
       {bildschirm === 'step' && berufId && <Step beruf={berufId} id={currentStepId} />}
+      <Zustimmung />
     </KioskGuard>
   )
 }
