@@ -47,6 +47,7 @@ type Id =
   | 'A8.1'
   | 'A8.2'
   | 'A8.3'
+  | 'A8.4'
   | 'A9'
 
 /** Bindet auch `weiter`, `eltern` und `abstecher` an die Ids. */
@@ -166,8 +167,20 @@ const STEPS = [
     kurz: 'Karriere-Schritte',
     art: 'haupt',
     weiter: 'A9',
-    abstecher: ['A8.1', 'A8.2', 'A8.3'],
+    // Der Steckbrief zuerst: erst die Ausbildung selbst, dann die drei Wege
+    // danach (Review 31.08. — harte Fakten zum Jobstart).
+    abstecher: ['A8.4', 'A8.1', 'A8.2', 'A8.3'],
     eltern: null,
+  },
+  {
+    id: 'A8.4',
+    titel: 'Die Ausbildung',
+    kurz: 'Steckbrief',
+    art: 'abstecher',
+    weiter: 'A9',
+    abstecher: [],
+    eltern: 'A8',
+    immerOffen: true,
   },
   {
     id: 'A8.1',
@@ -351,6 +364,10 @@ export const ANLAGENMECHANIKER: BerufDef = {
         beschreibung: 'Planen und auslegen statt in den Keller.',
       },
       'A8.3': { einladung: 'Studium', beschreibung: 'Ja, das geht — auch ohne Abitur.' },
+      'A8.4': {
+        einladung: 'Die Ausbildung',
+        beschreibung: 'Dauer, Geld, Aufgaben — die harten Fakten zum Start.',
+      },
     } satisfies Partial<Record<Id, Angebot>>,
     /**
      * Weiter-Texte aus Spec 4 (`VALIDIERT`).
@@ -380,7 +397,7 @@ export const ANLAGENMECHANIKER: BerufDef = {
      * denselben Bereich zweimal.
      */
     karriereSkipAuf: ['A2', 'A4', 'A6'],
-    karriereBereich: ['A8', 'A8.1', 'A8.2', 'A8.3', 'A9'],
+    karriereBereich: ['A8', 'A8.1', 'A8.2', 'A8.3', 'A8.4', 'A9'],
     karriereEinstieg: 'A8',
   }),
 }

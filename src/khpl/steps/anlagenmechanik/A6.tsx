@@ -349,8 +349,10 @@ function Manometer({
 
   return (
     <div className="flex flex-col gap-1.5">
+      {/* Die Skala trägt `h-6`: bei 14 px Höhe waren Zielfenster und
+          Ventilmarke aus Standabstand kaum zu sehen (Review 31.08.). */}
       <div
-        className="relative h-3.5 w-full rounded-full border border-kh-line bg-white/10"
+        className="relative h-6 w-full rounded-full border border-kh-line bg-white/10"
         aria-hidden
       >
         <div
@@ -362,7 +364,7 @@ function Manometer({
         />
         <span
           style={{ left: `${anteil(SICHERHEITSVENTIL_BAR)}%` }}
-          className="absolute top-[-5px] bottom-[-5px] w-[4px] -translate-x-1/2 rounded-full bg-kh-orange"
+          className="absolute top-[-6px] bottom-[-6px] w-[5px] -translate-x-1/2 rounded-full bg-kh-orange"
         />
       </div>
 
@@ -385,7 +387,7 @@ function Manometer({
         className="kh-regler w-full"
       />
 
-      <div className="flex justify-between text-[0.9375rem] text-kh-mute/70 tabular-nums">
+      <div className="flex justify-between text-[1.0625rem] text-kh-mute tabular-nums">
         <span>{bar(MIN_BAR)}</span>
         <span className="text-kh-orange">
           Sicherheitsventil {bar(SICHERHEITSVENTIL_BAR)}

@@ -16,22 +16,26 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * **Fachlich:** Spiel-, Übergangs- und Übermaßpassung (Presspassung) sind
  * die drei Passungsarten nach ISO 286 — Lehrbuchwissen, zeitstabil. Die
  * Beispiele sind bewusst aus der Alltagswelt gewählt.
+ *
+ * Die Labels tragen das Alltagsbeispiel, nicht die Kategorie: „Mit Luft /
+ * Satt / Fest“ hieß vor dem Tippen gar nichts (Review 31.08.). Das Objekt
+ * mit seinem Verhalten lädt ein — der Fachbegriff steht im Text dahinter.
  */
 
 const ARTEN = [
   {
     id: 'spiel',
-    label: 'Mit Luft',
+    label: 'Rad — dreht sich',
     text: 'Spielpassung: die Bohrung ist einen Hauch größer als die Welle. Das Teil kann gleiten und sich drehen — ein Rad auf seiner Achse, ein Bolzen im Gelenk. Die Luft ist gewollt und genau bemessen.',
   },
   {
     id: 'uebergang',
-    label: 'Satt',
+    label: 'Kugellager — sitzt satt',
     text: 'Übergangspassung: fast keine Luft, mal ein Hauch Spiel, mal ein Hauch Übermaß. Das Teil sitzt fühlbar satt und lässt sich mit Kraft fügen und wieder lösen — so sitzt ein Kugellager auf seinem Sitz.',
   },
   {
     id: 'press',
-    label: 'Fest',
+    label: 'Zahnkranz — hält für immer',
     text: 'Presspassung: die Welle ist minimal dicker als die Bohrung. Zusammengepresst hält das für immer — ohne Schraube, ohne Kleber. Ein Zahnkranz auf seiner Nabe kommt so nie wieder ab.',
   },
 ] as const

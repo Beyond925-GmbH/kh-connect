@@ -85,7 +85,9 @@ export function Z6() {
       setStueck(ziel)
       return
     }
-    const takt = window.setInterval(() => setStueck((s) => Math.min(ziel, s + 1)), 110)
+    // 75 ms je Teil: die lange zweite Fahrt (40 → 120) dauert damit ~6 s
+    // statt ~9 — bei 110 ms wurde am Stand gewartet (Review 31.08.).
+    const takt = window.setInterval(() => setStueck((s) => Math.min(ziel, s + 1)), 75)
     return () => window.clearInterval(takt)
   }, [stueck, ziel, reduziert])
 
@@ -128,7 +130,12 @@ export function Z6() {
       }
       ansage={null}
       interaktionOffen={!stabil}
-      buehne={<StepFoto id="Z6" />}
+      buehne={
+        <>
+          <StepFoto id="Z6" />
+          <FallendeTeile laeuft={stueck < ziel} />
+        </>
+      }
       warum={
         <p>
           Serienfertigung heißt: die Maschine macht die Wiederholung, du machst die
@@ -253,6 +260,42 @@ export function Z6() {
         />
       }
     />
+  )
+}
+
+/**
+ * Fallende Bolzen über der Kiste, solange der Zähler läuft — der Takt der
+ * Serie als Bild, nicht nur als Zahl (Review 31.08.). Drei versetzte
+ * Silhouetten, kein Versuch, jeden Zählschritt zu bebildern: die Bühne gibt
+ * den Rhythmus, der Zähler die Wahrheit.
+ */
+function FallendeTeile({ laeuft }: { laeuft: boolean }) {
+  const reduziert = useReducedMotion() ?? false
+  if (!laeuft || reduziert) return null
+
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {[0, 1, 2].map((i) => (
+        <motion.div
+          key={i}
+          initial={{ top: '8%', opacity: 0 }}
+          animate={{
+            top: ['8%', '58%'],
+            opacity: [0, 0.85, 0.85, 0],
+            rotate: [-16 + i * 10, 12 + i * 7],
+          }}
+          transition={{
+            duration: 1.1,
+            delay: i * 0.55,
+            repeat: Infinity,
+            repeatDelay: 0.55,
+            ease: 'easeIn',
+          }}
+          className="absolute h-7 w-2.5 rounded-full bg-[#c6d2dc]/80 shadow-[0_2px_10px_rgb(0_0_0/0.4)]"
+          style={{ left: `${37 + i * 12}%` }}
+        />
+      ))}
+    </div>
   )
 }
 

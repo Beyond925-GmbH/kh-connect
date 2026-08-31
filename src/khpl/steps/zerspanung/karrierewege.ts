@@ -36,6 +36,51 @@ export interface Karriereweg {
   abschnitte: { frage: string; antwort: string }[]
   /** Der personalisierte Aufhänger auf dem CTA-Screen Z9. */
   aufhaenger: string
+  /** Etikett über dem Titel des Abstechers. Ohne Eintrag „Karriere-Weg“. */
+  zusatz?: string
+}
+
+/**
+ * Z8.4 — der Steckbrief der Ausbildung selbst, als vierte Karte vor den drei
+ * Wegen (Review 31.08.: nach den Karrierewegen fehlten die harten Fakten zum
+ * Jobstart — Dauer, Geld, Aufgaben). Gleiche Form wie die Wege, damit Karte,
+ * Abstecher und Aufhänger denselben Mechanismus benutzen; inhaltlich ist er
+ * kein Karriereweg, sondern der Schritt davor.
+ *
+ * ⚠️ Die Vergütungsspanne stammt aus Tarif- und Portalangaben und ist wie
+ * alle Geldzahlen fachlich abzunehmen.
+ */
+export const STECKBRIEF: Karriereweg = {
+  id: 'Z8.4',
+  titel: 'Die Ausbildung',
+  koeder: 'Dauer, Geld, Aufgaben — die harten Fakten.',
+  zusatz: 'Steckbrief',
+  abschnitte: [
+    {
+      frage: 'Wie lange',
+      // 42 Monate nach der Verordnung über die Berufsausbildung in den
+      // industriellen Metallberufen — zeitstabil, steht auch in Z8.
+      antwort:
+        'Dreieinhalb Jahre, Prüfung bei der IHK. Danach bist du Facharbeiter:in — der Brief, auf dem alle drei Wege danach aufbauen.',
+    },
+    {
+      frage: 'Was du im Monat bekommst',
+      antwort:
+        'Ausbildung heißt Gehalt ab dem ersten Tag: in der Metallindustrie je nach Lehrjahr meist zwischen rund 1.000 und 1.300 Euro im Monat.',
+    },
+    {
+      frage: 'Was du den ganzen Tag machst',
+      antwort:
+        'Zeichnungen lesen, Maschinen rüsten, Programme schreiben, messen — und die Serie am Laufen halten. Am Anfang steht jemand daneben, am Ende ist es deine Maschine.',
+    },
+    {
+      frage: 'Was du mitbringen musst',
+      antwort:
+        'Kein Abitur. Die meisten starten mit Realschulabschluss — wichtiger sind Geduld, ein Blick fürs Genaue und keine Angst vor Zahlen mit Komma.',
+    },
+  ],
+  aufhaenger:
+    'Vielleicht wusstest du nicht, dass du in der Ausbildung vom ersten Tag an Geld verdienst.',
 }
 
 export const KARRIEREWEGE: Karriereweg[] = [
@@ -123,7 +168,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
 ]
 
 export function karriereweg(id: StepId): Karriereweg | undefined {
-  return KARRIEREWEGE.find((k) => k.id === id)
+  return [STECKBRIEF, ...KARRIEREWEGE].find((k) => k.id === id)
 }
 
 /** Fällt zurück, wenn in Z8 nichts angesehen wurde. */

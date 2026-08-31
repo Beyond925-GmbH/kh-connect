@@ -328,6 +328,14 @@ export function A2() {
                         <p className="mt-1 text-[1rem] text-kh-mute">
                           Kann das Teil bei der neuen Anlage weiterlaufen?
                         </p>
+                        {/* Dieselbe Einladung wie am Rate-Regler (RATEN_HAKEN):
+                            ohne sie liest sich die Frage als verdeckte Prüfung,
+                            und am Stand wurde gezögert statt getippt
+                            (Review 31.08.). */}
+                        <p className="mt-1 text-[0.9375rem] text-kh-mute/70">
+                          Entscheide nach Gefühl — falsch gibt es hier nicht, gleich steht
+                          da, was wirklich passiert.
+                        </p>
                         <div className="mt-2.5 flex gap-2">
                           <Wahlflaeche
                             onClick={() => entscheide(offen, 'raus')}

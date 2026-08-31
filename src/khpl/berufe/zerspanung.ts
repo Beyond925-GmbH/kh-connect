@@ -40,6 +40,7 @@ type Id =
   | 'Z8.1'
   | 'Z8.2'
   | 'Z8.3'
+  | 'Z8.4'
   | 'Z9'
 
 /** Bindet auch `weiter`, `eltern` und `abstecher` an die Ids. */
@@ -148,8 +149,20 @@ const STEPS = [
     kurz: 'Karriere-Schritte',
     art: 'haupt',
     weiter: 'Z9',
-    abstecher: ['Z8.1', 'Z8.2', 'Z8.3'],
+    // Der Steckbrief zuerst: erst die Ausbildung selbst, dann die drei Wege
+    // danach (Review 31.08. — harte Fakten zum Jobstart).
+    abstecher: ['Z8.4', 'Z8.1', 'Z8.2', 'Z8.3'],
     eltern: null,
+  },
+  {
+    id: 'Z8.4',
+    titel: 'Die Ausbildung',
+    kurz: 'Steckbrief',
+    art: 'abstecher',
+    weiter: 'Z9',
+    abstecher: [],
+    eltern: 'Z8',
+    immerOffen: true,
   },
   {
     id: 'Z8.1',
@@ -300,6 +313,10 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
         beschreibung: 'Fertigung planen statt rüsten.',
       },
       'Z8.3': { einladung: 'Studium', beschreibung: 'Ja, das geht — auch ohne Abitur.' },
+      'Z8.4': {
+        einladung: 'Die Ausbildung',
+        beschreibung: 'Dauer, Geld, Aufgaben — die harten Fakten zum Start.',
+      },
     } satisfies Partial<Record<Id, Angebot>>,
     /**
      * Weiter-Texte als Ortsangaben des Tages. Die Abstecher tragen denselben
@@ -324,7 +341,7 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
      * denselben Bereich zweimal.
      */
     karriereSkipAuf: ['Z2', 'Z4', 'Z6'],
-    karriereBereich: ['Z8', 'Z8.1', 'Z8.2', 'Z8.3', 'Z9'],
+    karriereBereich: ['Z8', 'Z8.1', 'Z8.2', 'Z8.3', 'Z8.4', 'Z9'],
     karriereEinstieg: 'Z8',
   }),
 }

@@ -135,10 +135,12 @@ export const BERUF_KOMPONENTEN: Partial<
     'Z6.1': () => <Z61 />,
     Z7: () => <Z7 />,
     Z8: () => <Z8 />,
-    // Drei Karrierewege, eine Komponente — wie `B9` und `A8Weg`.
+    // Drei Karrierewege und der Steckbrief, eine Komponente — wie `B9` und
+    // `A8Weg`.
     'Z8.1': () => <Z8Weg id="Z8.1" />,
     'Z8.2': () => <Z8Weg id="Z8.2" />,
     'Z8.3': () => <Z8Weg id="Z8.3" />,
+    'Z8.4': () => <Z8Weg id="Z8.4" />,
     Z9: () => <Z9 />,
   },
 
@@ -157,10 +159,12 @@ export const BERUF_KOMPONENTEN: Partial<
     A6: () => <A6 />,
     A7: () => <A7 />,
     A8: () => <A8 />,
-    // Drei Karrierewege, eine Komponente — wie `B9` beim Dachdecker.
+    // Drei Karrierewege und der Steckbrief, eine Komponente — wie `B9` beim
+    // Dachdecker.
     'A8.1': () => <A8Weg id="A8.1" />,
     'A8.2': () => <A8Weg id="A8.2" />,
     'A8.3': () => <A8Weg id="A8.3" />,
+    'A8.4': () => <A8Weg id="A8.4" />,
     A9: () => <A9 />,
   },
 }

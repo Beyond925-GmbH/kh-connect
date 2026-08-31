@@ -5,7 +5,7 @@ import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
 import { wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { KARRIEREWEGE } from './karrierewege'
+import { KARRIEREWEGE, STECKBRIEF } from './karrierewege'
 
 /**
  * A8 — Und danach? Der Karrierebereich, Struktur unverändert wie bei allen vier
@@ -69,8 +69,12 @@ export function A8() {
         </p>
       }
       interaktion={
-        <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-          {KARRIEREWEGE.map((weg, i) => (
+        // Vier Karten seit dem Steckbrief (Review 31.08.), deshalb 2×2 statt
+        // der Dreierreihe von M9/C8 — vier Kacheln in drei Spalten ließen
+        // eine allein in der zweiten Reihe stehen. Die ℹ️-Meldung oben zum
+        // einheitlichen Raster bezog sich auf die Drei-Karten-Fassung.
+        <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          {[STECKBRIEF, ...KARRIEREWEGE].map((weg, i) => (
             <li key={weg.id} className="flex">
               {/*
                 Drei Karten, drei Nummern. Der Titel steht in Anton, damit die

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { StepId } from '@/khpl/flow/steps'
 import { StepFoto } from '@/khpl/buehne/Foto'
+import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { Klappliste } from '@/khpl/komponenten/Klappliste'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -8,8 +9,8 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { karriereweg } from './karrierewege'
 
 /**
- * A8.1 / A8.2 / A8.3 — Meister · Techniker · Studium. Abstecher von A8,
- * münden in A9.
+ * A8.1 / A8.2 / A8.3 / A8.4 — Meister · Techniker · Studium · der Steckbrief
+ * der Ausbildung. Abstecher von A8, münden in A9.
  *
  * Je eine Info-Karte mit gleichem Aufbau (Spec 6, A8): die Abschnitte des
  * Weges als Frage und Antwort. Keine Übung und keine Aha-Karte — dieselbe Form
@@ -53,14 +54,26 @@ export function A8Weg({ id }: { id: StepId }) {
       id={id}
       auftrag={null}
       ansage={null}
-      titelZusatz="Karriere-Weg"
+      titelZusatz={weg.zusatz ?? 'Karriere-Weg'}
       // Fünf Faktenblöcke gegen `max-h-[84%]`: quer lagen „Was du verdienst"
       // und „Was NRW dazugibt" unter der Scrollkante (Sichtprüfung, A8.1,
       // `scrollRest` 153 px). Die Bühne ist hier ein Foto und trägt nichts —
       // im breiten Panel legen sich die Klappfelder in zwei Spalten.
       karteBreit
       interaktionOffen={false}
-      buehne={<StepFoto id={id} />}
+      // Der Steckbrief (A8.4) hat kein Motiv — die Medienliste dieses Tages
+      // gibt keines mehr her (siehe `berufe/anlagenmechanik.ts`, `bilder`).
+      // Er trägt deshalb wie A8 das warme Haus aus A3: derselbe Grund, aus
+      // dem A8 nicht auf schwarzem Grund steht.
+      buehne={
+        id === 'A8.4' ? (
+          <Schnitt
+            zustand={{ szene: 'haus', verluste: [], offen: null, aufgeloest: true }}
+          />
+        ) : (
+          <StepFoto id={id} />
+        )
+      }
       /*
         **Die geteilte `Klappliste` statt einer eigenen Faktenliste.** Diese
         Datei trug dieselbe Antwort auf dieselbe Klemme in einer dritten

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { VERLUSTFLAECHEN } from '@/khpl/buehne/anlagenmechanik/zeichnung'
+import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Lage } from '@/khpl/komponenten/Lage'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
@@ -111,17 +112,14 @@ const ZIEL = { von: 10, bis: 14 } as const
 /** Das Referenzhaus aus `belege/anlagenmechanik.md` — dieselben Annahmen überall. */
 const HAUS = { flaeche: 140, spezifisch: { von: 70, bis: 100 } } as const
 
-const BILANZ = [
-  {
-    was: 'Verbrauch',
-    vorher: '≈ 2.800 l Heizöl',
-    nachher: '≈ 7.000 kWh Strom',
-    gross: false,
-  },
-  // Die eine Zahl, für die dieser Screen gebaut ist: von 7,4 auf 2,4 Tonnen.
-  // Groß genug, um zu wirken, klein genug, um vorstellbar zu bleiben.
-  { was: 'CO₂ im Jahr', vorher: '7,4 t', nachher: '2,4 t', gross: true },
-] as const
+/**
+ * Die eine Zahl, für die dieser Screen gebaut ist: von 7,4 auf 2,4 Tonnen.
+ * Die Verbrauchszeile (2.800 l Heizöl gegen 7.000 kWh Strom) stand als zweite
+ * Währung daneben und ist auf einen Satz eingedampft (Review 31.08.: „bissl
+ * vereinfachen“) — Liter und Kilowattstunden nebeneinander waren eine
+ * Vergleichsrechnung, die niemand nachvollziehen konnte.
+ */
+const BILANZ = { was: 'CO₂ im Jahr', vorher: '7,4 t', nachher: '2,4 t' } as const
 
 const STAND =
   'Angenommen: Jahresarbeitszahl 3,4 aus einer Feldmessung des Fraunhofer ISE an 77 Anlagen im Bestand. CO₂ je Kilowattstunde Strom: 344 Gramm, Umweltbundesamt für 2025, vorläufig. Stand der Rechnung: August 2026.'
@@ -186,6 +184,16 @@ export function A3() {
         <Wechsel takt={aufgeloest ? 'aufgeloest' : (offen ?? 'suchen')}>
           {aufgeloest ? <Aufloesung /> : <Suche verluste={verluste} offen={offen} />}
         </Wechsel>
+      }
+      // A3 war der einzige Übungs-Step des Tages ohne Aha-Karte (Review
+      // 31.08.: „mehr education“). Die Frage ist die, die am Stand wirklich
+      // fällt, wenn hier gerechnet wird.
+      aha={
+        <AhaKarte sichtbar={aufgeloest} eyebrow="Muss ich das rechnen können?">
+          Mitbringen musst du das nicht — die Faustformel lernst du im ersten Lehrjahr.
+          Was zählt, ist das Hinsehen: Baujahr, Dach, Fenster verraten dir mehr über ein
+          Haus als jeder Prospekt.
+        </AhaKarte>
       }
       fuss={
         <StepFuss
@@ -339,39 +347,25 @@ function Aufloesung() {
             <span className="kh-etikett">Vorher · Ölkessel</span>
             <span className="kh-etikett">Nachher · Wärmepumpe</span>
           </div>
-          {BILANZ.map((z) => (
-            <div key={z.was} className="border-b border-kh-line py-2 last:border-0">
-              <p className="text-[0.9375rem] text-kh-mute">{z.was}</p>
-              <div className="flex items-baseline justify-between gap-3">
-                <span
-                  className={`text-kh-paper tabular-nums ${
-                    z.gross
-                      ? 'font-display text-[clamp(1.6rem,1.2rem+1.1vw,2.1rem)] leading-none'
-                      : 'text-[1.0625rem]'
-                  }`}
-                >
-                  {z.vorher}
-                </span>
-                <span
-                  className={`tabular-nums ${
-                    z.gross
-                      ? 'font-display text-[clamp(1.6rem,1.2rem+1.1vw,2.1rem)] leading-none text-kh-orange'
-                      : 'text-[1.0625rem] text-kh-paper'
-                  }`}
-                >
-                  {z.nachher}
-                </span>
-              </div>
+          <div className="border-b border-kh-line py-2">
+            <p className="text-[0.9375rem] text-kh-mute">{BILANZ.was}</p>
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="font-display text-[clamp(1.6rem,1.2rem+1.1vw,2.1rem)] leading-none text-kh-paper tabular-nums">
+                {BILANZ.vorher}
+              </span>
+              <span className="font-display text-[clamp(1.6rem,1.2rem+1.1vw,2.1rem)] leading-none text-kh-orange tabular-nums">
+                {BILANZ.nachher}
+              </span>
             </div>
-          ))}
+          </div>
           {/* 7,4 t brauchen einen Körper-Anker (R12): ein Kleinwagen wiegt
               rund anderthalb Tonnen. */}
           <p className="mt-2.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
             7,4 Tonnen — das wiegt so viel wie fünf Kleinwagen.
           </p>
           <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
-            Dieselbe Wärme, ein Bruchteil der Energie. Die alte Ölheizung war kein Fehler
-            — sie war jahrzehntelang Standard.
+            Statt 2.800 Litern Heizöl zieht das Haus jetzt Strom, ein Bruchteil der
+            Energie. Die alte Ölheizung war kein Fehler — sie war jahrzehntelang Standard.
           </p>
           {/* Der Stand gehört auf den Screen und nicht in eine Fußnote: die
               beiden Faktoren dahinter kommen jedes Jahr neu (Spec 11). */}

@@ -72,7 +72,10 @@ export function Z1() {
   return (
     <StepShell
       id="Z1"
-      auftrag={gefunden ? null : 'Such das Maß, das keinen Spielraum lässt.'}
+      // „Tipp … an“ steht ausdrücklich im Auftrag: die pulsierenden Ringe
+      // allein haben am Stand nicht gereicht — Besucher wussten nicht, dass
+      // die Zeichnung anfassbar ist (Review 31.08.).
+      auftrag={gefunden ? null : 'Tipp die Maße an — such das ohne Spielraum.'}
       ansage={null}
       buehneInteraktiv={!gefunden}
       interaktionOffen={!gefunden}
@@ -128,7 +131,8 @@ function Lesen({ offen }: { offen: MassId | null }) {
         </div>
       ) : (
         <p className="px-1 text-[1rem] text-kh-paper/70">
-          Vier Maße stehen auf dem Blatt. Drei lassen Spielraum — eines nicht.
+          Vier Maße stehen auf dem Blatt — jedes kannst du antippen. Drei lassen
+          Spielraum, eines nicht.
         </p>
       )}
     </div>
@@ -159,6 +163,11 @@ function Gefunden({ zuletzt }: { zuletzt: MassId | null }) {
           >
             ⌀ 25 h7. Nichts nach oben, 21 Tausendstel nach unten.
           </motion.p>
+          {/* Der Körper-Anker zur Zahl (R12): ein Haar kennt jede:r, ein
+              Tausendstel niemand. */}
+          <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+            21 Tausendstel — ein menschliches Haar ist ungefähr dreimal so dick.
+          </p>
           <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/90">
             Auf diesen Sitz kommt ein Kugellager aus einem anderen Werk — von Leuten, die
             dieses Blatt nie sehen. Dass es trotzdem passt, ist der Deal hinter{' '}

@@ -23,6 +23,10 @@ import { Begriff } from './Begriff'
  * Fase?“** Wer eben zugesehen hat, liest jetzt selbst. Ein Fehlgriff zeigt,
  * was der angetippte Satz stattdessen fährt — keine Note, eine Auskunft.
  *
+ * Die Frage kommt mit Denkweg statt nackt (Review 31.08.: „lieber Lernen
+ * als Raten“): eine `Lage` sagt, woran man eine Schräge im Code erkennt.
+ * Wer sie anwendet, liest — wer sie überliest, rät wie vorher.
+ *
  * **Fachlich:** X ist beim Drehen ein Durchmesserwort, Z die Länge ab
  * Stirn; G0 Eilgang, G1 Vorschubfahrt, F der Vorschub je Umdrehung. Die
  * vier Sätze sind der vereinfachte Schlichtgang des Bolzens aus Z1
@@ -113,6 +117,13 @@ export function Z3() {
             <Lage>
               Das ist der Schlichtgang für deinen Bolzen — die letzten vier Sätze vor dem
               fertigen Maß. Jeder Satz ist ein Stück Weg.
+            </Lage>
+          )}
+
+          {fragt && !gefunden && !fehlgriff && (
+            <Lage>
+              Die Fase ist die kleine Schräge an der Kante. Schräg wird es nur, wenn beide
+              Achsen im selben Satz fahren — und schneiden tut nur G1, nicht der Eilgang.
             </Lage>
           )}
 

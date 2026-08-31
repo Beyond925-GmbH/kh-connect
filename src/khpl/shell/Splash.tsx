@@ -235,11 +235,11 @@ export function Splash() {
               aria-hidden
               animate={{ scale: [1, 1.08, 1] }}
               transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="grid size-14 shrink-0 place-items-center rounded-full bg-kh-orange text-[#0E0D0B] animate-puls"
+              className="grid size-20 shrink-0 place-items-center rounded-full bg-kh-orange text-[#0E0D0B] animate-puls"
             >
-              <Hand className="size-7" strokeWidth={2.25} />
+              <Hand className="size-10" strokeWidth={2.25} />
             </motion.span>
-            <span className="text-[clamp(1.25rem,1.05rem+0.8vw,1.75rem)] font-semibold text-kh-paper">
+            <span className="text-[clamp(1.625rem,1.3rem+1.3vw,2.375rem)] font-semibold text-kh-paper">
               Tippen zum Starten
             </span>
           </motion.div>

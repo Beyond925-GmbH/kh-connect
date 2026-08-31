@@ -43,6 +43,53 @@ export interface Karriereweg {
   abschnitte: { frage: string; antwort: string }[]
   /** Der personalisierte Aufhänger auf dem CTA-Screen A9. */
   aufhaenger: string
+  /** Etikett über dem Titel des Abstechers. Ohne Eintrag „Karriere-Weg“. */
+  zusatz?: string
+}
+
+/**
+ * A8.4 — der Steckbrief der Ausbildung selbst, als vierte Karte vor den drei
+ * Wegen. Der Kopf oben lehnt eine vierte Karte für die
+ * **Gebäudeenergieberatung** ab, weil sie unrecherchiert wäre — das gilt
+ * weiter. Diese Karte hier ist etwas anderes: die Review vom 31.08. hat die
+ * harten Fakten zum Jobstart (Dauer, Geld, Aufgaben) ausdrücklich
+ * nachgefordert, und ihre Inhalte sind die zeitstabilen Grunddaten des
+ * Berufs, keine offene Recherche.
+ *
+ * ⚠️ Die Vergütungsspanne stammt aus Tarif- und Portalangaben und ist wie
+ * alle Geldzahlen fachlich abzunehmen.
+ */
+export const STECKBRIEF: Karriereweg = {
+  id: 'A8.4',
+  titel: 'Die Ausbildung',
+  koeder: 'Dauer, Geld, Aufgaben — die harten Fakten.',
+  zusatz: 'Steckbrief',
+  abschnitte: [
+    {
+      frage: 'Wie lange',
+      // 42 Monate nach SHKAMAusbV (`belege/ausbildung-karriere.md` 2) —
+      // dieselbe Zahl wie im Warum-Text von A8.
+      antwort:
+        'Dreieinhalb Jahre, Gesellenprüfung bei der Handwerkskammer. Danach bist du Anlagenmechaniker:in SHK — Sanitär, Heizung, Klima.',
+    },
+    {
+      frage: 'Was du im Monat bekommst',
+      antwort:
+        'Ausbildung heißt Gehalt ab dem ersten Tag: im SHK-Handwerk je nach Lehrjahr meist zwischen rund 800 und 1.100 Euro im Monat.',
+    },
+    {
+      frage: 'Was du den ganzen Tag machst',
+      antwort:
+        'Heizungen und Bäder einbauen, Wärmepumpen anschließen, Störungen finden — jeden Tag eine andere Adresse, jeden Tag Menschen, denen du gerade geholfen hast.',
+    },
+    {
+      frage: 'Was du mitbringen musst',
+      antwort:
+        'Kein Abitur. Die meisten starten mit Haupt- oder Realschulabschluss — wichtiger sind Anpacken, Zuverlässigkeit und keine Scheu, bei fremden Leuten zu klingeln.',
+    },
+  ],
+  aufhaenger:
+    'Vielleicht wusstest du nicht, dass du in der Ausbildung vom ersten Tag an Geld verdienst.',
 }
 
 export const KARRIEREWEGE: Karriereweg[] = [
@@ -164,7 +211,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
 ]
 
 export function karriereweg(id: StepId): Karriereweg | undefined {
-  return KARRIEREWEGE.find((k) => k.id === id)
+  return [STECKBRIEF, ...KARRIEREWEGE].find((k) => k.id === id)
 }
 
 /** Fällt zurück, wenn in A8 nichts angesehen wurde. */

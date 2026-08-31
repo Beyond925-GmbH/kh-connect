@@ -5,7 +5,7 @@ import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
 import { wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { useStepNavigation } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
-import { KARRIEREWEGE } from './karrierewege'
+import { KARRIEREWEGE, STECKBRIEF } from './karrierewege'
 
 /**
  * Z8 — Und danach? Der Karrierebereich, im Aufbau identisch mit M9, C8 und
@@ -37,8 +37,11 @@ export function Z8() {
         </p>
       }
       interaktion={
-        <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
-          {KARRIEREWEGE.map((weg, i) => (
+        // Vier Karten seit dem Steckbrief (Review 31.08.), deshalb 2×2 statt
+        // der Dreierreihe von M9/C8 — vier Kacheln in drei Spalten ließen
+        // eine allein in der zweiten Reihe stehen.
+        <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          {[STECKBRIEF, ...KARRIEREWEGE].map((weg, i) => (
             <li key={weg.id} className="flex">
               <motion.button
                 type="button"

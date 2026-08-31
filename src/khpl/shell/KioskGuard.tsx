@@ -73,6 +73,7 @@ const GEDULD: Partial<Record<string, number>> = {
   'Z8.1': 3,
   'Z8.2': 3,
   'Z8.3': 3,
+  'Z8.4': 3,
 }
 
 /** Wie oft der Splash prüft, ob der gespeicherte Stand abgelaufen ist. */
