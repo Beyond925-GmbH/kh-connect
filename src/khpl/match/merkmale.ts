@@ -37,12 +37,12 @@ export type MerkmalGewichte = Readonly<Partial<Record<MerkmalId, number>>>
  * gesagt hat.
  */
 export const MERKMAL_TEXTE: Readonly<Record<MerkmalId, string>> = {
-  anpacken: 'selbst anpacken und etwas bauen, das man sieht',
+  anpacken: 'anpacken und sehen, was entsteht',
   praezision: 'genau arbeiten, bis auf den Zehntelmillimeter',
   technik: 'Technik und Maschinen',
   draussen: 'draußen sein, bei jedem Wetter',
-  hoehe: 'hoch hinaus — Höhe macht dir nichts aus',
-  team: 'im Team arbeiten, nicht allein',
+  hoehe: 'hoch oben arbeiten, wo anderen mulmig wird',
+  team: 'im Team arbeiten',
   sinn: 'Arbeit, die beim Klima etwas bewegt',
 }
 

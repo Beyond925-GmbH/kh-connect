@@ -145,7 +145,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Warum erst eine Ausbildung?',
         antwort:
-          'Weil sie den Weg nicht zumacht, sondern aufmacht. In Nordrhein-Westfalen berechtigt der Meisterbrief — und auch der Techniker — zur Einschreibung in jeden Studiengang an jeder Hochschule des Landes. Ohne Abitur, ohne Aufnahmeprüfung.',
+          'Weil sie den Weg nicht zumacht, sondern aufmacht. Mit Meisterbrief oder Techniker kannst du dich in NRW an jeder Hochschule einschreiben, in jeden Studiengang. Ohne Abitur, ohne Aufnahmeprüfung.',
       },
       {
         frage: 'Und das geht hier',

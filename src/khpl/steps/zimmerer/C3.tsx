@@ -99,14 +99,14 @@ const SCHICHTEN: Schicht[] = [
     name: 'Ständerwerk mit Dämmung',
     // Ohne „im Gefach": das Fachwort trüge hier nichts Neues und stünde ohne
     // Glossar-Chip mitten im Satz (Designregel R10).
-    was: 'Das tragende Skelett — und zwischen den Ständern die Dämmung. Hier steckt die Wärme des Hauses drin.',
+    was: 'Das tragende Skelett — und zwischen den Ständern die Dämmung. Hier steckt die Wärme des Hauses.',
     dicke: 7,
     farbe: '#D8C48F', // die Gefachdämmung auf der Bühne
   },
   {
     id: 'holzfaser',
     name: 'Holzfaserplatte',
-    was: 'Außen, und diffusionsoffen. Was doch an Feuchte in die Wand gerät, muss hier wieder heraus können.',
+    was: 'Außen, und dampfdurchlässig. Was doch an Feuchte in die Wand gerät, muss hier wieder heraus.',
     dicke: 3,
     farbe: '#B58C4C', // die Holzfaserplatte auf der Bühne
   },
@@ -193,8 +193,9 @@ export function C3() {
       }
       aha={
         <AhaKarte sichtbar={fertig} eyebrow="Ist die Dampfbremse eine Folie gegen Regen?">
-          Nein. Sie hält Luftfeuchte aus dem Zimmer aus der Dämmung heraus. Von außen muss
-          die Wand offen sein, sonst trocknet sie nie wieder.
+          Nein. Sie sitzt innen — dort kommt kein Regen an. Ihr Gegner ist der Wasserdampf
+          aus dem Zimmer. Von außen muss die Wand sogar offen sein, sonst trocknet sie nie
+          wieder.
         </AhaKarte>
       }
       fuss={

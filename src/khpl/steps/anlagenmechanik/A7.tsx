@@ -148,7 +148,7 @@ const FRAGEN: readonly Kundenfrage[] = [
       {
         id: 'blinkt-gut',
         art: 'gut',
-        text: 'Erst mal nichts. Schreiben Sie auf, was im Display steht, und rufen Sie uns an — meist reicht uns die Meldung, damit wir wissen, was wir mitbringen.',
+        text: 'Erst mal nichts. Schreiben Sie auf, was im Display steht, und rufen Sie uns an — meist wissen wir dann schon, was wir mitbringen müssen.',
         reaktion: 'Sie nickt und tippt sich die Nummer ins Telefon.',
       },
     ],

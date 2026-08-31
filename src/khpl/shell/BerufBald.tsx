@@ -66,8 +66,8 @@ export function BerufBald({ id }: { id: BerufId }) {
               ist schlechter als keins — und am Stand steht jemand daneben,
               der die richtige Antwort geben kann. */}
           <p className="text-[1rem] text-kh-mute">
-            Diesen Tag bauen wir gerade. Frag am Stand — dort kann dir jemand schon heute
-            alles dazu erzählen.
+            Diesen Tag bauen wir gerade. Frag am Stand — dort erzählt dir schon heute
+            jemand davon.
           </p>
         </div>
 

@@ -207,7 +207,7 @@ export function Z4() {
                   onClick={() => setKorrektur((k) => Math.max(H_MIN_KORREKTUR, k - 1))}
                   disabled={korrektur <= H_MIN_KORREKTUR}
                   data-testid="z4-minus"
-                  aria-label="Einen Hundertstel mehr wegnehmen"
+                  aria-label="Ein Hundertstel mehr wegnehmen"
                 >
                   <Minus className="size-5" strokeWidth={2.5} />
                 </Button>
@@ -223,7 +223,7 @@ export function Z4() {
                   onClick={() => setKorrektur((k) => Math.min(0, k + 1))}
                   disabled={korrektur >= 0}
                   data-testid="z4-plus"
-                  aria-label="Einen Hundertstel weniger wegnehmen"
+                  aria-label="Ein Hundertstel weniger wegnehmen"
                 >
                   <Plus className="size-5" strokeWidth={2.5} />
                 </Button>
@@ -248,7 +248,7 @@ export function Z4() {
         <AhaKarte sichtbar={frei} eyebrow="Wie viel ist ein Hundertstel?">
           Ein menschliches Haar ist rund sechs Hundertstel Millimeter dick. Die Toleranz
           dieses Sitzes: gut zwei. Du arbeitest genauer, als dein Auge sehen kann —
-          deshalb entscheidet hier die Messschraube und nie das Hinschauen.
+          deshalb entscheidet hier die Messschraube.
         </AhaKarte>
       }
       fuss={

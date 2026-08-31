@@ -23,7 +23,7 @@ export const BEGRIFFE_ZERSPANUNG = {
   cnc: {
     label: 'CNC',
     erklaerung:
-      'Computerized Numerical Control — die Steuerung der Maschine. Sie liest das Programm Satz für Satz und macht daraus Bewegung, auf Tausendstel Millimeter positioniert. Programmiert, eingerichtet und überwacht wird sie von Menschen: von Zerspanungsmechanikerinnen und -mechanikern.',
+      'Computerized Numerical Control — die Steuerung der Maschine. Sie liest das Programm Satz für Satz und macht daraus Bewegung, auf Tausendstel Millimeter genau. Programmiert, eingerichtet und überwacht wird sie von Menschen: von Zerspanungsmechanikerinnen und -mechanikern.',
   },
   toleranz: {
     label: 'Toleranz',
@@ -33,12 +33,12 @@ export const BEGRIFFE_ZERSPANUNG = {
   passung: {
     label: 'Passung',
     erklaerung:
-      'Wie Bohrung und Welle zusammensitzen: mit Luft (Spielpassung — es gleitet), fast ohne Luft (Übergangspassung — es sitzt satt) oder mit Übermaß (Presspassung — es hält ohne Schraube). Festgelegt wird das über genormte Toleranzklassen wie H7 oder h7, nach ISO 286 — damit Teile aus zwei Werken zusammenpassen, ohne dass sich die Werke je gesehen haben.',
+      'Wie Bohrung und Welle zusammensitzen: mit Luft (Spielpassung — es gleitet), fast ohne Luft (Übergangspassung — es sitzt satt) oder mit Übermaß (Presspassung — es hält ohne Schraube). Genormte Toleranzklassen wie H7 oder h7 legen das fest, nach ISO 286 — damit Teile aus zwei Werken zusammenpassen, ohne dass sich die Werke je gesehen haben.',
   },
   ruesten: {
     label: 'Rüsten',
     erklaerung:
-      'Alles, was vor dem ersten Span passiert: Rohteil spannen, Werkzeuge einsetzen und vermessen, Nullpunkt setzen, Programm laden. Beim Rüsten entscheidet sich, ob die Serie läuft — die Maschine macht danach nur noch, was eingerichtet wurde.',
+      'Alles, was vor dem ersten Span passiert: Rohteil spannen, Werkzeuge einsetzen und vermessen, Nullpunkt setzen, Programm laden. Hier entscheidet sich, ob die Serie läuft — die Maschine macht danach nur noch, was eingerichtet wurde.',
   },
   nullpunkt: {
     label: 'Nullpunkt',
@@ -48,7 +48,7 @@ export const BEGRIFFE_ZERSPANUNG = {
   vorschub: {
     label: 'Vorschub',
     erklaerung:
-      'Wie weit die Schneide je Umdrehung am Teil entlangwandert — beim Drehen in Millimetern pro Umdrehung, im Programm steht er hinter dem F. Mehr Vorschub heißt schneller fertig, aber rauere Oberfläche; weniger heißt feiner und langsamer.',
+      'Wie weit die Schneide je Umdrehung am Teil entlangwandert — beim Drehen also Millimeter pro Umdrehung; im Programm steht er hinter dem F. Mehr Vorschub heißt schneller fertig, aber rauere Oberfläche; weniger heißt feiner und langsamer.',
   },
   kuehlschmierstoff: {
     label: 'Kühlschmierstoff',
@@ -58,12 +58,12 @@ export const BEGRIFFE_ZERSPANUNG = {
   aufmass: {
     label: 'Aufmaß',
     erklaerung:
-      'Absichtlich zu viel Material stehen lassen. Der Grund ist eine einfache Asymmetrie: ein Teil, das noch zu groß ist, kann man nachdrehen — ein Teil, das zu klein geworden ist, rettet niemand mehr. Deshalb tastet man sich von oben an das Maß heran.',
+      'Absichtlich zu viel Material stehen lassen. Ein Teil, das noch zu groß ist, kann man nachdrehen — ein Teil, das zu klein geworden ist, rettet niemand mehr. Deshalb tastet man sich von oben an das Maß heran.',
   },
   messschraube: {
     label: 'Bügelmessschraube',
     erklaerung:
-      'Das Messwerkzeug für die genauen Maße: ein Bügel, eine feine Gewindespindel, eine Ratsche, die die Messkraft begrenzt — damit zwei Menschen dasselbe messen. Sie liest auf ein Hundertstel Millimeter ab, digitale Ausführungen auf ein Tausendstel. Der Messschieber daneben ist das gröbere, schnellere Werkzeug.',
+      'Das Messwerkzeug für die genauen Maße: ein Bügel, eine feine Gewindespindel, eine Ratsche, die die Messkraft begrenzt — damit zwei Menschen dasselbe messen. Sie liest auf ein Hundertstel Millimeter ab, digitale auf ein Tausendstel. Der Messschieber daneben ist das gröbere, schnellere Werkzeug.',
   },
 } as const satisfies Record<string, Begriffseintrag>
 

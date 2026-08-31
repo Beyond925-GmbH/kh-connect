@@ -36,7 +36,7 @@ const KRITISCH: MassId = 'sitz'
 const MASSE: Record<MassId, { titel: string; text: string }> = {
   laenge: {
     titel: '38 — die Gesamtlänge',
-    text: 'Keine eigene Angabe, also gilt die Allgemeintoleranz: drei Zehntel nach oben oder unten sind in Ordnung. Da ist Luft — entscheidend ist ein anderes Maß.',
+    text: 'Keine eigene Angabe, also gilt die Allgemeintoleranz: drei Zehntel nach oben oder unten. Da ist Luft — entscheidend ist ein anderes Maß.',
   },
   schaft: {
     titel: '⌀ 20 — der Absatz',
@@ -44,7 +44,7 @@ const MASSE: Record<MassId, { titel: string; text: string }> = {
   },
   fase: {
     titel: '1 × 45° — die Fase',
-    text: 'Die schräge Kante an der Stirn. Sie nimmt der Kante die Schärfe und führt das Lager beim Aufschieben. Genau sein muss sie nicht — nur da sein.',
+    text: 'Die schräge Kante an der Stirn. Sie nimmt die Schärfe und führt das Lager beim Aufschieben. Genau sein muss sie nicht — nur da sein.',
   },
   sitz: {
     titel: '⌀ 25 h7 — der Lagersitz',
@@ -84,7 +84,7 @@ export function Z1() {
       warum={
         <p>
           Zerspanen heißt: wegnehmen, was zu viel ist — Span für Span, bis aus der Stange
-          dieses Blatt geworden ist. Was bleiben muss, sagt die{' '}
+          wird, was auf dem Blatt steht. Was bleiben muss, sagt die{' '}
           <Begriff id="toleranz">Toleranz</Begriff> an jedem Maß.
         </p>
       }
@@ -97,7 +97,7 @@ export function Z1() {
         <AhaKarte sichtbar={gefunden} eyebrow="Warum nicht einfach überall genau?">
           Weil genau teuer ist: bessere Werkzeuge, mehr Messen, mehr Ausschussrisiko.
           Deshalb steht die Genauigkeit nur dort, wo sie gebraucht wird — und die
-          Zeichnung sagt dir, wo das ist.
+          Zeichnung sagt dir, wo.
         </AhaKarte>
       }
       fuss={
@@ -118,8 +118,8 @@ function Lesen({ offen }: { offen: MassId | null }) {
   return (
     <div className="flex flex-col gap-3">
       <Lage>
-        200-mal soll aus Stangenmaterial dieser Bolzen werden. Bevor sich irgendetwas
-        dreht, musst du wissen, wo er genau sein muss — und wo nicht.
+        200-mal soll aus Stangenmaterial dieser Bolzen werden. Bevor sich etwas dreht,
+        musst du wissen, wo er genau sein muss — und wo nicht.
       </Lage>
 
       {mass ? (
@@ -170,7 +170,7 @@ function Gefunden({ zuletzt }: { zuletzt: MassId | null }) {
           </p>
           <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/90">
             Auf diesen Sitz kommt ein Kugellager aus einem anderen Werk — von Leuten, die
-            dieses Blatt nie sehen. Dass es trotzdem passt, ist der Deal hinter{' '}
+            dieses Blatt nie sehen. Dass es trotzdem passt, ist das Versprechen hinter{' '}
             <Begriff id="passung">h7</Begriff>: beide Seiten halten dieselbe Norm.
           </p>
         </>

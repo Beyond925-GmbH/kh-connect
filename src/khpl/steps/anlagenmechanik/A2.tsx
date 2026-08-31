@@ -101,7 +101,7 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
     tut: (
       <>
         Hier lagert das Heizöl, das der Kessel verbrennt. Ohne Kessel braucht es ihn nicht
-        mehr — und der Raum, in dem er steht, wird frei.
+        — und der Raum wird frei.
       </>
     ),
   },
@@ -141,8 +141,7 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
     tut: (
       <>
         An jedem Heizkörper eins. Sie regeln, wie viel warmes Wasser hineinläuft.
-        Hängenbleiben können sie, austauschen muss man sie selten — neu eingestellt werden
-        sie aber alle:{' '}
+        Hängenbleiben können sie; getauscht werden sie selten. Neu eingestellt aber alle:{' '}
         <Fachwort id="hydraulischer-abgleich">hydraulischer Abgleich</Fachwort>.
       </>
     ),
@@ -223,15 +222,14 @@ export function A2() {
       warum={
         vlies ? (
           <p>
-            Der zweite Auftrag beginnt mit Hinsehen: Ölkessel, Tank, Verteiler, Pumpe,
-            Ausdehnungsgefäß, Thermostatventile. Vieles davon bleibt, vieles fliegt raus,
-            und man muss wissen, was was tut.
+            Der zweite Auftrag beginnt mit Hinsehen. Vieles hier unten bleibt, vieles
+            fliegt raus — man muss wissen, was was tut.
           </p>
         ) : (
           <p>
-            Bevor hier irgendetwas ausgebaut wird, wird die Wohnung geschützt: Vlies auf
-            den Boden, empfindliche Sachen abgeklebt. Hier wohnt eine Familie — heute
-            Abend sitzt sie über diesem Keller.
+            Bevor hier etwas ausgebaut wird, wird die Wohnung geschützt: Vlies auf den
+            Boden, empfindliche Sachen abgeklebt. Hier wohnt eine Familie — heute Abend
+            sitzt sie über diesem Keller.
           </p>
         )
       }
@@ -368,8 +366,8 @@ export function A2() {
       }
       aha={
         <AhaKarte sichtbar={genug} eyebrow="Ist der alte Kessel kaputt?">
-          Der Kessel läuft noch. Er ist nicht kaputt — er ist vierzig Jahre alt und
-          verbrennt Öl. Das ist der ganze Grund.
+          Er ist nicht kaputt, er läuft noch. Er ist vierzig Jahre alt und verbrennt Öl —
+          das ist der ganze Grund.
         </AhaKarte>
       }
       fuss={

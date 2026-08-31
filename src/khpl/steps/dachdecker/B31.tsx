@@ -65,7 +65,7 @@ export function B31() {
       }
       aha={
         <>
-          <AhaKarte sichtbar={aha} eyebrow="Einkaufen — gehört das wirklich zum Beruf?">
+          <AhaKarte sichtbar={aha} eyebrow="Einkaufen — gehört das zum Beruf?">
             Ja. „Arbeiten planen“ und „Baustoffe auswählen“ stehen wörtlich im
             Ausbildungsberufsbild — seit dem 1. August 2026 in einer neuen
             Ausbildungsordnung.

@@ -44,7 +44,7 @@ const ARTEN = [
   {
     id: 'pressen',
     label: 'Pressen',
-    text: 'Verbindungsstück aufs Rohr schieben, Zange ansetzen, ein Druck — und es ist dicht. Schnell, ohne Flamme, auch da möglich, wo Holz neben der Leitung liegt. Der Normalfall.',
+    text: 'Verbindungsstück aufs Rohr schieben, Zange ansetzen, ein Druck — und es ist dicht. Schnell, ohne Flamme, geht auch da, wo Holz neben der Leitung liegt. Der Normalfall.',
   },
   {
     id: 'stecken',

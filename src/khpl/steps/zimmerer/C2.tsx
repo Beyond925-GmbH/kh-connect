@@ -150,8 +150,8 @@ export function C2() {
             zugeklappt
             eyebrow="Warum entscheidet das nicht der Zimmerer?"
           >
-            Weil im Bau alles an etwas anderem hängt. Das Skelett der Wand steht in dem
-            Abstand, in dem das gemessen ist, was sie später zudeckt.
+            Weil im Bau alles an etwas anderem hängt. Das Skelett der Wand richtet sich
+            nach dem, was sie später zudeckt.
           </AhaKarte>
         </>
       }

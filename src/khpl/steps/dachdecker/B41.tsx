@@ -391,9 +391,7 @@ function Ladefortschritt({ geladen, fertig }: { geladen: number; fertig: boolean
   return (
     <div className="shrink-0" data-testid="b41-fortschritt">
       <p className="flex flex-wrap items-baseline gap-x-2.5 text-[1.0625rem] font-medium text-kh-paper max-sm:text-[1rem]">
-        {fertig
-          ? 'Vollständig. Alles drauf, was heute gebraucht wird.'
-          : 'Zieh auf den Anhänger, was mit muss.'}
+        {fertig ? 'Alles drauf, was mit muss.' : 'Geladen'}
         <span className="font-display text-[1.5rem] leading-none text-kh-paper/60 tabular-nums">
           {geladen}/{NOETIG}
         </span>

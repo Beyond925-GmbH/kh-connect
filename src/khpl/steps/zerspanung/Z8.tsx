@@ -33,7 +33,7 @@ export function Z8() {
         // industriellen Metallberufen (42 Monate), zeitstabil.
         <p>
           Dreieinhalb Jahre Ausbildung, IHK-Prüfung, Facharbeiterbrief. Danach hört es
-          nicht auf — es fängt an. Drei Wege, alle offen.
+          nicht auf — es fängt an: drei Wege.
         </p>
       }
       interaktion={

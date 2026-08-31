@@ -93,10 +93,9 @@ export function A31() {
               {/* „KfW" fällt nicht mehr unerklärt (R10): der Halbsatz sagt,
                   was das ist — ein Chip wäre für eine Behörde zu viel. */}
               <p className="mt-3">
-                Gefördert wird der Umbau, und zwar erheblich. Wie viel genau, ändert sich
-                mehrmals im Jahr — zuletzt im Juli 2026. Deshalb steht hier keine
-                Prozentzahl. Wer es genau wissen will, sieht bei der KfW nach — der
-                staatlichen Förderbank.
+                Gefördert wird der Umbau, und zwar erheblich. Wie viel, ändert sich
+                mehrmals im Jahr — zuletzt im Juli 2026. Eine Prozentzahl steht deshalb
+                hier nicht; nachsehen kann man bei der KfW, der staatlichen Förderbank.
               </p>
             </>
           )}
@@ -107,7 +106,7 @@ export function A31() {
           Eine Beispielrechnung, kein Versprechen: Zieht man die Förderung ab und rechnet
           die jährliche Ersparnis dagegen, ist ein Haus wie dieses nach etwa zwölf bis
           sechzehn Jahren heraus. Steigt der Ölpreis, geht es schneller; fällt er, dauert
-          es länger. Genau deshalb rechnet man es für jedes Haus einzeln.
+          es länger. Deshalb rechnet man es für jedes Haus einzeln.
         </AhaKarte>
       }
       fuss={<StepFuss id="A3.1" />}

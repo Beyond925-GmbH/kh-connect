@@ -117,7 +117,7 @@ export function M4() {
       auftrag={geloest ? null : 'Zieh die Schnittlinie auf das Maß aus dem Plan.'}
       ansage={{
         geste: 'ziehen-frei',
-        text: 'Jetzt schneidest du einen Balken zu, der später ins Dach kommt.',
+        text: 'Du schneidest einen Balken zu, der später ins Dach kommt.',
         haken: 'Zu kurz geschnitten ist Ausschuss — das Maß holst du nicht zurück.',
       }}
       buehneInteraktiv

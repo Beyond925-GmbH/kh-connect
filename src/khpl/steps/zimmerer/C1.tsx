@@ -127,10 +127,10 @@ export function C1() {
       }
       warum={
         <p>
-          Die <Begriff id="abbundanlage">Abbundanlage</Begriff> hat über Nacht gearbeitet:
-          jedes Holz ist auf Länge, jede <Begriff id="ausklinkung">Ausklinkung</Begriff>{' '}
-          gefräst, jedes Teil nummeriert. Du baust nicht aus dem Kopf, du baust nach
-          Stückliste.
+          Die <Begriff id="abbundanlage">Abbundanlage</Begriff> hat über Nacht
+          vorgearbeitet: jedes Holz auf Länge, jede{' '}
+          <Begriff id="ausklinkung">Ausklinkung</Begriff> gefräst, jedes Teil nummeriert.
+          Du baust nicht aus dem Kopf, du baust nach Stückliste.
         </p>
       }
       interaktion={

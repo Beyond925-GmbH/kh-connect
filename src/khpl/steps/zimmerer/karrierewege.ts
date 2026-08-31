@@ -79,7 +79,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
         // 02.07.2026). SEMA und AutoCAD nennt er selbst beim Namen.
         frage: 'Was du den Tag über machst',
         antwort:
-          'Arbeitsvorbereitung, Zeichnungen am Rechner mit SEMA oder AutoCAD, Aufträge kalkulieren, Material bestellen und disponieren — und dafür sorgen, dass die richtigen Leute zur richtigen Zeit an der richtigen Stelle sind. Ein Meister, den wir gefragt haben, sagt dazu auch: Vieles läuft nicht so, wie es geplant war.',
+          'Arbeitsvorbereitung, Zeichnungen am Rechner mit SEMA oder AutoCAD, Aufträge kalkulieren, Material bestellen und disponieren — und dafür sorgen, dass die richtigen Leute zur richtigen Zeit an der richtigen Stelle sind. Ein Meister, den wir gefragt haben, sagt dazu: Vieles läuft nicht so, wie es geplant war.',
       },
       {
         frage: 'Wie lange',
@@ -142,7 +142,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
         // „fachgebunden" nicht als nacktes Verwaltungswort am Satzende
         // (Designregel R10): der Satz sagt jetzt selbst, was es einschränkt.
         antwort:
-          'Weil sie den Weg nicht zumacht, sondern aufmacht. In Nordrhein-Westfalen berechtigt der Meisterbrief — und auch der Techniker — zur Einschreibung in jeden Studiengang an jeder Hochschule des Landes. Ohne Abitur, ohne Zugangsprüfung. Mit dem Gesellenbrief und drei Jahren im Beruf geht es auch — dann aber nur in einem verwandten Studiengang, etwa Bauingenieurwesen (»fachgebunden«).',
+          'Weil sie den Weg nicht zumacht, sondern aufmacht. Mit Meisterbrief oder Techniker kannst du dich in NRW an jeder Hochschule einschreiben, in jeden Studiengang. Ohne Abitur, ohne Zugangsprüfung. Mit dem Gesellenbrief und drei Jahren im Beruf geht es auch, dann aber nur in einem verwandten Fach wie Bauingenieurwesen — „fachgebunden“ heißt das.',
       },
       {
         frage: 'Und das geht hier',

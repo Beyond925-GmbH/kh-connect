@@ -47,7 +47,7 @@ export function B51() {
           Zwei zusammengesetzte Dachbalken — ein{' '}
           <Begriff id="sparrenpaar">Sparrenpaar</Begriff> — wiegen mehr, als zwei Arme
           tragen. Einer führt am Kran, einer richtet aus, einer sichert. Deshalb wird oben
-          so viel geredet. Die zwei auf dem Foto machen gerade genau das.
+          so viel geredet. Die zwei auf dem Foto tun genau das.
         </p>
       }
       fuss={<StepFuss id="B5.1" />}

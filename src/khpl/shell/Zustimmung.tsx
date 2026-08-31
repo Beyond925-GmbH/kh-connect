@@ -35,7 +35,7 @@ export function Zustimmung() {
         <p className="text-[1.0625rem] text-kh-mute">
           Wir zählen anonym und ohne Cookies mit, wie dieser Stand genutzt wird. Dürfen
           wir zusätzlich für deine Sitzung die Bedienung aufzeichnen — nur Taps und
-          Screens, ohne Namen — damit wir die App besser machen können?
+          Screens, ohne Namen — damit wir die App besser machen?
         </p>
         <div className="flex flex-col items-stretch gap-2 sm:flex-row">
           <Button

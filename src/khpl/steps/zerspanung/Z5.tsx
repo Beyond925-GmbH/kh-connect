@@ -35,7 +35,7 @@ const FRAGEN = [
     id: 'immergleich',
     frage: 'Ist das nicht jeden Tag dasselbe?',
     antwort:
-      'Ehrlich: eine laufende Serie ist Routine. Deshalb betreust du meist mehrere Maschinen gleichzeitig — und jedes neue Teil heißt neu rüsten, neu programmieren, neu denken. Das Gegenteil von gestern ist nicht morgen, sondern der nächste Auftrag.',
+      'Ehrlich: eine laufende Serie ist Routine. Deshalb betreust du meist mehrere Maschinen gleichzeitig — und jedes neue Teil heißt neu rüsten, neu programmieren, neu denken. Die Abwechslung kommt nicht mit dem Tag, sondern mit dem Auftrag.',
   },
   {
     id: 'mathe',
@@ -78,8 +78,8 @@ export function Z5() {
       buehne={<StepFoto id="Z5" />}
       warum={
         <p>
-          Halb zehn, Kaffee, das Fenster zur Halle. Deine Maschine läuft weiter — alle
-          paar Minuten schiebt sie ein fertiges Teil in die Kiste, der{' '}
+          Halb zehn, Kaffee, das Fenster zur Halle. Deine Maschine macht weiter — alle
+          paar Minuten schiebt sie ein Teil in die Kiste, der{' '}
           <Begriff id="kuehlschmierstoff">Kühlschmierstoff</Begriff> läuft im Kreis. Du
           hast Pause, sie nicht.
         </p>

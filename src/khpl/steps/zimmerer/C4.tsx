@@ -350,10 +350,10 @@ export function C4() {
           <AhaKarte sichtbar={geloest} eyebrow="Wozu überhaupt eine Fuge?">
             Der Rahmen ist {m(RICHTIG.breiteMm)} breit, der Ausschnitt{' '}
             {m(AUSSCHNITT_BREITE_MM)}. Die {FUGE_MIN_MM} Millimeter dazwischen werden
-            gedämmt, mit <Begriff id="dichtstoff">Dichtstoff</Begriff> verschlossen — und
-            sie fangen die Bewegung des Materials auf. Ein Fenster, das passgenau in die
-            Öffnung geklemmt wird, ist falsch eingebaut — und das{' '}
-            <Begriff id="wechselholz">Wechselholz</Begriff> rundum hält es.
+            gedämmt und mit <Begriff id="dichtstoff">Dichtstoff</Begriff> verschlossen —
+            sie fangen die Bewegung des Materials auf. Gehalten wird das Fenster vom{' '}
+            <Begriff id="wechselholz">Wechselholz</Begriff> rundum, nicht von der
+            Klemmung.
           </AhaKarte>
           {/* Zwei Regeln, kein Rechenweg: 1,5 mm/m und die Deckelung auf 3 mm
               stehen im Beleg nebeneinander (belege/zimmerer.md 5). „1,5 × 3 = 3“

@@ -242,7 +242,7 @@ function WegeDialog({
             sie Ballast vor der eigentlichen Wahl.
           */}
           <BaseDialog.Description className="sr-only">
-            Tippe den Weg an, auf dem du weitermachen willst. Jeder bringt dich ans Ziel.
+            Tipp den Weg an, auf dem du weitermachst. Jeder bringt dich ans Ziel.
           </BaseDialog.Description>
 
           <div className="mt-4 grid grid-cols-2 gap-3">

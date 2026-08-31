@@ -99,9 +99,8 @@ export function B32() {
       }
       aha={
         <AhaKarte sichtbar={genug} eyebrow="Muss man dafür räumlich denken können?">
-          Räumliches Vorstellungsvermögen ist kein Talent. Es ist Training — und es steht
-          im Lehrplan der Berufsschule. Kehlbalken-Geometrie ist echte 3D-Mathematik, und
-          die lernt man dort systematisch.
+          Räumliches Vorstellungsvermögen ist kein Talent, sondern Training. Es steht im
+          Lehrplan der Berufsschule — Kehlbalken-Geometrie ist echte 3D-Mathematik.
         </AhaKarte>
       }
       fuss={

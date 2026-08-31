@@ -61,7 +61,7 @@ export const STECKBRIEF: Karriereweg = {
       // 42 Monate nach der Verordnung über die Berufsausbildung in den
       // industriellen Metallberufen — zeitstabil, steht auch in Z8.
       antwort:
-        'Dreieinhalb Jahre, Prüfung bei der IHK. Danach bist du Facharbeiter:in — der Brief, auf dem alle drei Wege danach aufbauen.',
+        'Dreieinhalb Jahre, Prüfung bei der IHK. Danach bist du Facharbeiter:in — der Brief, auf dem die drei Wege aufbauen.',
     },
     {
       frage: 'Was du im Monat bekommst',
@@ -97,12 +97,12 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Wie lange',
         antwort:
-          'In Vollzeit rund ein halbes Jahr, neben dem Beruf meist zwei bis zweieinhalb Jahre — viele machen es abends und samstags neben der Schicht.',
+          'In Vollzeit rund ein halbes Jahr, neben dem Beruf meist zwei bis zweieinhalb Jahre — viele abends und samstags, nach der Schicht.',
       },
       {
         frage: 'Was es kostet',
         antwort:
-          'Lehrgang und Prüfung zusammen meist zwischen rund 6.000 und 9.000 Euro. Das Aufstiegs-BAföG — ein staatlicher Zuschuss für Weiterbildungen wie diese — übernimmt davon den größten Teil; wer besteht, zahlt am Ende etwa ein Viertel selbst.',
+          'Lehrgang und Prüfung zusammen meist zwischen rund 6.000 und 9.000 Euro. Das Aufstiegs-BAföG — ein staatlicher Zuschuss für Weiterbildungen wie diese — übernimmt davon den größten Teil. Wer besteht, zahlt am Ende etwa ein Viertel selbst.',
       },
       {
         frage: 'Was du verdienst',
@@ -149,7 +149,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Warum erst eine Ausbildung?',
         antwort:
-          'Weil sie den Weg nicht zumacht, sondern aufmacht. In Nordrhein-Westfalen berechtigen Industriemeister- und Technikerabschluss zur Einschreibung in jeden Studiengang an jeder Hochschule des Landes — ohne Abitur, ohne Aufnahmeprüfung.',
+          'Weil sie den Weg nicht zumacht, sondern aufmacht. Mit Industriemeister oder Techniker darfst du in Nordrhein-Westfalen jeden Studiengang an jeder Hochschule des Landes studieren — ohne Abitur, ohne Aufnahmeprüfung.',
       },
       {
         frage: 'Und ohne Meister?',

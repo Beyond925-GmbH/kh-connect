@@ -326,8 +326,8 @@ export function C6() {
           </p>
         ) : takt === 'einweisen' ? (
           <p>
-            Seite stimmt, oben stimmt. Jetzt über die Schwelle — langsam. Die Last hat
-            Masse: zu schnell gezogen, und sie schwingt über das Ziel hinaus.
+            Seite stimmt, oben stimmt. Die Last hat Masse: zu schnell gezogen, und sie
+            schwingt über das Ziel hinaus.
           </p>
         ) : // Sobald der Fehlertext steht, weicht die Einleitung: sie hat ihre
         // Arbeit dann getan, und ihre Zeilen sind genau die, die der Meldung

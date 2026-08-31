@@ -139,7 +139,7 @@ export const BEGRIFFE = {
     erklaerung:
       // ⚠️ SPANNE GEHÖRT ZUM ZIMMERERHANDWERK (khpl-flow.md §10) und ist für
       // das Dachdeckerhandwerk nicht nachgeschlagen. Vor der Messe belegen.
-      'Was eine Arbeitsstunde im Angebot kostet. Darin steckt nicht nur der Lohn, sondern auch Werkzeug, Fahrzeug, Werkstatt und Verwaltung. Im Bauhandwerk liegt er grob zwischen 50 und 90 Euro.',
+      'Was eine Arbeitsstunde im Angebot kostet. Davon bezahlt der Betrieb nicht nur den Lohn — auch Werkzeug, Fahrzeug, Werkstatt und Verwaltung. Im Bauhandwerk liegt er grob zwischen 50 und 90 Euro.',
     nachgetragen: true,
   },
 } as const satisfies Record<string, Begriffseintrag>

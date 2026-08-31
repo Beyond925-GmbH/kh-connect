@@ -131,8 +131,8 @@ export function A5() {
         <>
           <p>
             Halb eins. Der Transporter steht im Schatten, die Brote liegen auf dem Schoß,
-            auf dem Armaturenbrett das iPad mit den Aufträgen von heute. Zwischen zwei
-            Adressen ist das die Pause.
+            auf dem Armaturenbrett das iPad mit den Aufträgen. Zwischen zwei Adressen ist
+            das die Pause.
           </p>
           {/*
             Die Kehrseite. Sie stand hier offen und trieb den Screen beim

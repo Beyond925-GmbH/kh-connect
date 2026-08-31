@@ -101,7 +101,7 @@ export function Z2() {
           ? null
           : gespannt
             ? 'Schätz, wie schnell sich das Futter gleich dreht.'
-            : 'Wähl aus, womit du das Rohteil spannst.'
+            : 'Wähl, womit du das Rohteil spannst.'
       }
       // Die Ansage kommt erst mit dem Regler — im Spann-Beat gäbe es noch
       // nichts zu ziehen, und eine Ansage vor der falschen Übung wäre eine
@@ -156,7 +156,7 @@ export function Z2() {
             <div className="flex flex-col gap-3">
               <Rueckmeldung
                 ok
-                text="Drei Backen, ein Griff, alles mittig — das Futter zentriert rundes Material von selbst."
+                text="Drei Backen, ein Griff — das Futter zentriert rundes Material von selbst."
                 testid="z2-gespannt"
               />
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -190,9 +190,9 @@ export function Z2() {
       }
       aha={
         <AhaKarte sichtbar={aufgeloest} eyebrow="Warum ist die Tür aus Panzerglas?">
-          Bei dieser Drehzahl wird ein schlecht gespanntes Teil zum Geschoss. Deshalb ist
-          die Tür verriegelt, solange sich etwas dreht — und deshalb ist Spannen der
-          wichtigste Handgriff des Rüstens.
+          Bei dieser Drehzahl wird ein schlecht gespanntes Teil zum Geschoss. Die Tür
+          bleibt verriegelt, solange sich etwas dreht — und Spannen ist der wichtigste
+          Handgriff des Rüstens.
         </AhaKarte>
       }
       fuss={
@@ -237,9 +237,8 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
         variants={TAKT}
         className="text-[1.0625rem] leading-[1.45] text-kh-paper/90"
       >
-        Die Zahl ist keine Einstellung nach Gefühl: am Rand läuft der Stahl mit
-        Radfahrtempo an der Schneide vorbei — daraus rechnet sich die Drehzahl, für jeden
-        Durchmesser neu.
+        Die Zahl ist nicht geschätzt: am Rand läuft der Stahl mit Radfahrtempo an der
+        Schneide vorbei. Daraus rechnet sich die Drehzahl — für jeden Durchmesser neu.
       </motion.p>
     </motion.div>
   )

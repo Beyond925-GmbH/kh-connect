@@ -151,8 +151,8 @@ export function Z6() {
             {phase === 'probe1' || phase === 'laufen1' ? (
               phase === 'probe1' ? (
                 <p className="px-1 text-[1rem] text-kh-paper/70">
-                  Stück {PROBE_1} liegt in der Rutsche. Alle vierzig Teile wird eines
-                  gemessen — das ist deine Aufgabe an dieser Maschine.
+                  Stück {PROBE_1} liegt in der Rutsche. Jedes vierzigste wird gemessen —
+                  das ist deine Aufgabe an dieser Maschine.
                 </p>
               ) : (
                 <p className="px-1 text-[1rem] text-kh-paper/70">
@@ -186,7 +186,7 @@ export function Z6() {
                     </p>
                     <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
                       {phase === 'kippt' && stueck >= KIPPT
-                        ? `${mm(25.01)} — drüber. Die letzten Teile müssen nachgedreht werden: Zeit, kein Schrott, zu dick lässt sich retten. Aber jetzt muss die Korrektur rein.`
+                        ? `${mm(25.01)} — drüber. Die letzten Teile müssen nachgedreht werden: Zeit, kein Schrott. Aber jetzt muss die Korrektur rein.`
                         : `${mm(25.0)} — gerade noch drin. Bei Stück 40 waren es ${mm(24.99)}: die Schneide nutzt sich ab, das Maß wandert nach oben.`}
                     </p>
                   </div>

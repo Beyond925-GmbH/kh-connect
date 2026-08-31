@@ -228,8 +228,7 @@ export function C5() {
       aha={
         <AhaKarte sichtbar eyebrow="Und der halbe Beruf ist gar nicht draußen.">
           Vorgefertigt heißt: die Wände entstehen in der Halle, im Trockenen, im Warmen.
-          Gerade in den kalten Wintermonaten ist das der Teil dieses Berufs, den kaum
-          jemand auf dem Schirm hat.
+          Gerade im Winter. Damit rechnet bei diesem Beruf kaum jemand.
         </AhaKarte>
       }
       fuss={<StepFuss id="C5" />}

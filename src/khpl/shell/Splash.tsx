@@ -214,9 +214,9 @@ export function Splash() {
                 „Ein Tag“ und nicht „vier Tage“: versprochen wird, was ein
                 Besucher am Stand tatsächlich tut — einer davon, ganz. Der
                 Rest steht daneben und wartet. */}
-            <span className="text-kh-orange">auf ganz neue Weise</span>
+            <span className="text-kh-orange">einen Tag lang</span>
             <br />
-            entdecken
+            ausprobieren
           </motion.h1>
 
           <motion.div

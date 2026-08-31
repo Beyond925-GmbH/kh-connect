@@ -235,13 +235,13 @@ export function M7() {
       warum={
         fertig ? (
           <p>
-            Steht. Von der Fußpfette bis zur letzten Dachlatte — in der Reihenfolge, in
-            der es geht. Morgen kommen die Ziegel drauf.
+            Steht. Von der Fußpfette bis zur letzten Dachlatte. Morgen kommen die Ziegel
+            drauf.
           </p>
         ) : takt === 'bauen' ? null : ( // ein Fließtext daneben wäre nur Füllung. Also keiner. // Während gebaut wird, trägt allein das Auftragsband die Anweisung —
           <p>
-            So sieht die zweite Hälfte fertig aus. Schau dir an, was in welcher
-            Reihenfolge kommt — gleich baust du sie selbst.
+            So sieht die zweite Hälfte fertig aus. Achte auf die Reihenfolge — gleich
+            baust du sie.
           </p>
         )
       }

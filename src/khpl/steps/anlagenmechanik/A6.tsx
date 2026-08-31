@@ -233,8 +233,8 @@ export function A6() {
                 </motion.p>
               ) : (
                 <p className="text-[1.0625rem] text-kh-mute">
-                  Die Wärme läuft los — deine Leitung entlang, in den Verteiler, in die
-                  Steigleitungen.
+                  Die Wärme läuft los — deine Leitung entlang, in den Verteiler und nach
+                  oben.
                 </p>
               )}
             </div>
@@ -416,11 +416,11 @@ function Faustformel() {
           auf jedem liegt, ist ungefähr 1 bar. */}
       <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
         Gebäudehöhe in Metern geteilt durch zehn, plus 0,3 bar — je höher das Haus, desto
-        mehr Druck, sonst kommt oben kein Wasser an. Für ein Einfamilienhaus landet man
-        damit bei {bar(FUELLDRUCK.min)} bis {bar(FUELLDRUCK.max)}; darüber öffnet
-        irgendwann das <Fachwort id="sicherheitsventil">Sicherheitsventil</Fachwort>. Zum
-        Anfassen: 1 bar ist ungefähr der Luftdruck, der gerade auf dir liegt — die Anlage
-        braucht nur ein bisschen mehr.
+        mehr Druck, sonst kommt oben kein Wasser an. Für ein Einfamilienhaus sind das{' '}
+        {bar(FUELLDRUCK.min)} bis {bar(FUELLDRUCK.max)}; darüber öffnet irgendwann das{' '}
+        <Fachwort id="sicherheitsventil">Sicherheitsventil</Fachwort>. 1 bar ist ungefähr
+        der Luftdruck, der gerade auf dir liegt — die Anlage braucht nur ein bisschen
+        mehr.
       </p>
     </motion.div>
   )

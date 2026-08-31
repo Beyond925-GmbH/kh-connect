@@ -298,7 +298,7 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       },
       'Z3.1': {
         einladung: 'Und wenn du dich vertippst?',
-        beschreibung: 'Was ein Crash kostet — und das Verfahren dagegen.',
+        beschreibung: 'Was ein Crash kostet — und wie man ihn verhindert.',
       },
       'Z6.1': {
         einladung: 'Wo landen deine Teile?',

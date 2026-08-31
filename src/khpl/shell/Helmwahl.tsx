@@ -165,7 +165,7 @@ export function Helmwahl() {
                   <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
                   Bevor du anfängst
                 </span>
-                <h1 className="kh-titel">Dein Equipment</h1>
+                <h1 className="kh-titel">Deine Ausrüstung</h1>
               </header>
 
               <section>

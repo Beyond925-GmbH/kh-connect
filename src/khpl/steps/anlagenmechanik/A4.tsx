@@ -330,7 +330,7 @@ function Verlustbalken({
         <p className="min-w-0 flex-1 text-[0.9375rem] leading-[1.4] text-kh-mute">
           {schmal
             ? 'Wie viel ein Bogen kostet, hängt am Rohr. Deshalb ein Balken und keine Zahl.'
-            : 'Jeder Bogen kostet Druck — wie viel genau, hängt an Rohrdurchmesser und Fließgeschwindigkeit. Deshalb steht hier ein Balken und keine Zahl.'}
+            : 'Wie viel ein Bogen kostet, hängt an Rohrdurchmesser und Fließgeschwindigkeit. Deshalb ein Balken und keine Zahl.'}
         </p>
         {/*
           **Steht immer da, auch wenn noch nichts gezogen ist.** Vorher tauchte
@@ -372,7 +372,7 @@ function Bewertung({ boegen }: { boegen: number }) {
       <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/85">
         {gut
           ? 'Zwei Bögen — weniger lässt dieser Keller nicht zu. Genau so baut man es: lieber ein Stück Rohr mehr als einen Bogen mehr.'
-          : 'Er passt, er ist dicht, und er bleibt so. Jeder Bogen darin kostet die Pumpe Kraft — gleich, wenn die Anlage anläuft, siehst du es.'}
+          : 'Er passt, er ist dicht, und er bleibt so. Jeder Bogen kostet die Pumpe Kraft — gleich, wenn die Anlage anläuft, siehst du es.'}
       </p>
     </div>
   )

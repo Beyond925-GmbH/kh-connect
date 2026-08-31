@@ -29,7 +29,7 @@ const ZIELE = [
   {
     id: 'kss',
     label: 'Der Kühlschmierstoff',
-    text: 'Das Milchige läuft im Kreis: auffangen, filtern, zurück auf die Schneide — wochenlang dieselbe Füllung. Beim Ausschleudern der Späne wird er zurückgewonnen; erst wenn er verbraucht ist, wird er fachgerecht entsorgt.',
+    text: 'Die milchige Brühe läuft im Kreis: auffangen, filtern, zurück auf die Schneide — wochenlang dieselbe Füllung. Beim Ausschleudern der Späne kommt sie zurück; erst wenn sie verbraucht ist, wird sie fachgerecht entsorgt.',
   },
 ] as const
 
@@ -57,7 +57,7 @@ export function Z61() {
       warum={
         <p>
           Aus einer Stange werden 200 Teile, ein Berg Späne und eine Wanne voll
-          Kühlschmierstoff. Alles drei hat einen Weg — und keiner endet im Müll.
+          Kühlschmierstoff. Alle drei haben einen Weg — und keiner endet im Müll.
         </p>
       }
       interaktion={

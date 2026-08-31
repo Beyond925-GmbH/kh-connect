@@ -98,7 +98,7 @@ import { Fachwort } from './Fachwort'
  * hinausgeht. Reihenfolge und Ids kommen aus `VERLUSTFLAECHEN`.
  */
 const VERLUST_TEXT: Record<string, string> = {
-  dach: 'Wärme steigt nach oben, und über dem Obergeschoss liegt nichts als alte Dachpfannen. Die größte Fläche und die dünnste Stelle zugleich.',
+  dach: 'Wärme steigt nach oben, und über dem Obergeschoss liegt nichts als alte Dachpfannen. Die größte Fläche und die dünnste Stelle.',
   wand: 'Fünfunddreißig Zentimeter Mauerwerk, außen nichts davor. Das war 1972 normal — heute ist es die Fläche, an der am meisten zu holen ist.',
   fenster:
     'Zweifach verglast, Rahmen aus Holz. Ein Quadratmeter Fenster verliert ein Vielfaches von einem Quadratmeter gedämmter Wand.',
@@ -175,8 +175,7 @@ export function A3() {
           <p>
             Einfamilienhaus, Baujahr in den Siebzigern. {HAUS.flaeche} Quadratmeter
             Wohnfläche, nie gedämmt, Ölheizung im Keller. Wie viel Leistung so ein Haus am
-            kältesten Tag braucht, heißt <Fachwort id="heizlast">Heizlast</Fachwort> — und
-            sie hängt an Dämmung, Fläche und Fenstern, nicht am Wunschdenken.
+            kältesten Tag braucht, heißt <Fachwort id="heizlast">Heizlast</Fachwort>.
           </p>
         )
       }
@@ -248,8 +247,8 @@ function Suche({ verluste, offen }: { verluste: string[]; offen: string | null }
       */}
       <Lage>
         Bevor eine Wärmepumpe bestellt wird, muss feststehen, wie viel Wärme dieses Haus
-        überhaupt braucht. Zu klein gekauft friert die Familie, zu groß gekauft zahlt sie
-        jahrelang drauf.
+        braucht. Zu klein gekauft friert die Familie, zu groß gekauft zahlt sie jahrelang
+        drauf.
       </Lage>
 
       {flaeche ? (
@@ -282,8 +281,8 @@ function Suche({ verluste, offen }: { verluste: string[]; offen: string | null }
         </div>
       ) : (
         <p className="px-1 text-[1rem] text-kh-paper/70">
-          Vier Flächen, über die es warm nach draußen geht. Wie viel jede davon kostet,
-          hängt an Dämmung und Fläche — deshalb steht hier ein Balken und keine Zahl.
+          Vier Flächen, über die es warm nach draußen geht. Wie viel jede kostet, hängt an
+          Dämmung und Fläche — deshalb ein Balken und keine Zahl.
         </p>
       )}
 
@@ -315,8 +314,8 @@ function Aufloesung() {
             Warm bleibt es.
           </p>
           <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
-            Genauso warm wie vorher. Für die Familie, die hier wohnt, ändert sich im
-            Winter nichts — außer, dass niemand mehr Öl bestellt.
+            Genauso warm wie vorher. Für die Familie ändert sich im Winter nichts — außer,
+            dass niemand mehr Öl bestellt.
           </p>
         </Takt>
 

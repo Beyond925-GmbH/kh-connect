@@ -101,10 +101,9 @@ export function C31() {
             Holz ist der einzige Baustoff, der nachwächst.
           </p>
           <p className="mt-2">
-            Stimmt so nicht. Nachwachsen tut auch eine ganze Reihe anderer. Richtig ist:
-            Holz ist{' '}
+            Stimmt so nicht — andere wachsen auch nach. Richtig ist: Holz ist{' '}
             <strong className="font-semibold text-kh-paper">einer der besten</strong>{' '}
-            CO₂-Speicher, die ein Haus haben kann — und der mit Abstand wichtigste
+            CO₂-Speicher, die ein Haus haben kann. Und der mit Abstand wichtigste
             nachwachsende Baustoff, aus dem man ein ganzes Tragwerk baut.
           </p>
         </>

@@ -39,7 +39,7 @@ import { Begriff } from './Begriff'
 const INFO: Record<SatzId, { code: string; text: string }> = {
   n10: {
     code: 'N10 G0 X23 Z2',
-    text: 'G0 ist Eilgang: schnell hin, ohne zu schneiden — gestrichelt auf der Bühne. X23 heißt Durchmesser 23, Z2 heißt: zwei Millimeter vor der Stirn anhalten. Knapp davor, nie hinein.',
+    text: 'G0 ist Eilgang: schnell hin, ohne zu schneiden — die gestrichelte Linie. X23 heißt Durchmesser 23, Z2: zwei Millimeter vor der Stirn stoppen. Knapp davor, nie hinein.',
   },
   n20: {
     code: 'N20 G1 Z0 F0.1',
@@ -51,7 +51,7 @@ const INFO: Record<SatzId, { code: string; text: string }> = {
   },
   n40: {
     code: 'N40 G1 Z-22',
-    text: 'Die lange Gerade: 22 Millimeter an der Mantellinie entlang. Hier entsteht der Lagersitz aus Z1 — und der lange, heiße Span.',
+    text: 'Die lange Gerade: 22 Millimeter außen am Teil entlang. Hier entsteht der Lagersitz, den du auf der Zeichnung gefunden hast — und der lange, heiße Span.',
   },
 }
 
@@ -189,8 +189,8 @@ export function Z3() {
       aha={
         <AhaKarte sichtbar={gefunden} eyebrow="Tippt das jemand alles von Hand?">
           Einzelne Teile tippt man direkt an der Steuerung ein, komplizierte kommen aus
-          dem CAM-System am Rechner. Lesen können muss es jede:r hier — sonst merkt
-          niemand, wenn ein Satz falsch ist.
+          dem CAM-System am Rechner. Lesen muss es hier jede:r — sonst merkt niemand, wenn
+          ein Satz falsch ist.
         </AhaKarte>
       }
       fuss={

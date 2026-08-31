@@ -97,7 +97,7 @@ const PRUEFUNGEN: readonly Pruefung[] = [
     // Ohne „Vorlauf": das Wort fiele hier unerklärt (R10) — der Glossar-Chip
     // erreicht diesen String nicht, und die Beobachtung geht auch ohne ihn.
     ergebnis:
-      'Er läuft. Das Wasser geht heiß hinaus, die Heizkörper werden warm. Am Wärmeerzeuger liegt es nicht.',
+      'Er läuft. Das Wasser geht heiß hinaus, die Heizkörper werden warm. Am Kessel liegt es nicht.',
   },
   {
     id: 'speicher',
@@ -108,13 +108,12 @@ const PRUEFUNGEN: readonly Pruefung[] = [
     id: 'regelung',
     frage: 'Was zeigt die Regelung an?',
     ergebnis:
-      'Sie meldet den Speicher als voll geladen und sieht keinen Grund nachzuheizen. Das passt nicht zu dem, was du gerade angefasst hast.',
+      'Sie meldet den Speicher als voll geladen und sieht keinen Grund nachzuheizen. Das passt nicht zu dem, was du eben angefasst hast.',
   },
   {
     id: 'ladepumpe',
     frage: 'Läuft die Speicherladepumpe?',
-    ergebnis:
-      'Sie steht still. Strom hat sie — angefordert wird nur gerade nichts von ihr.',
+    ergebnis: 'Sie steht still. Strom hat sie — nur fordert sie niemand an.',
   },
   {
     id: 'zirkulation',
@@ -126,7 +125,7 @@ const PRUEFUNGEN: readonly Pruefung[] = [
     id: 'mischer',
     frage: 'Steht der Mischer richtig?',
     ergebnis:
-      'Der Mischer steht, wo er stehen soll, und lässt sich gängig verstellen. Er kann nur mischen, was bei ihm ankommt.',
+      'Der Mischer steht, wo er stehen soll. Er kann nur mischen, was bei ihm ankommt.',
   },
 ]
 
@@ -145,13 +144,13 @@ const URSACHEN: readonly Ursache[] = [
     id: 'kessel',
     label: 'Der Kessel macht keine Wärme mehr',
     folge:
-      'Der Kessel läuft, und die Heizkörper im Haus beweisen es. Ein neuer Kessel hätte am warmen Wasser nichts geändert — und du wärst am nächsten Tag noch einmal hergefahren.',
+      'Der Kessel läuft, die Heizkörper beweisen es. Ein neuer hätte am warmen Wasser nichts geändert — und du wärst morgen noch einmal hingefahren.',
   },
   {
     id: 'ladepumpe',
     label: 'Die Speicherladepumpe ist defekt',
     folge:
-      'Die Pumpe steht, das stimmt. Sie steht aber, weil niemand sie anfordert — eine neue hätte genauso stillgestanden. Und du wärst am nächsten Tag noch einmal hergefahren.',
+      'Die Pumpe steht, das stimmt — aber weil niemand sie anfordert. Eine neue hätte genauso stillgestanden, und du wärst morgen noch einmal hingefahren.',
   },
   {
     id: 'fuehler',
@@ -163,13 +162,13 @@ const URSACHEN: readonly Ursache[] = [
     id: 'zirkulation',
     label: 'Die Zirkulationspumpe ist ausgefallen',
     folge:
-      'Ohne Zirkulation dauert es länger, bis oben warmes Wasser ankommt — es kommt aber welches. Hier kommt gar keins. Und du wärst am nächsten Tag noch einmal hergefahren.',
+      'Ohne Zirkulation dauert es länger, bis oben warmes Wasser ankommt — es kommt aber welches. Hier kommt gar keins, und du wärst morgen noch einmal hingefahren.',
   },
   {
     id: 'mischer',
     label: 'Der Mischer ist verstellt',
     folge:
-      'Ein verstellter Mischer macht das Wasser zu kühl, nicht kalt. Der Speicher dahinter ist kalt — daran ändert die Einstellung nichts. Und du wärst am nächsten Tag noch einmal hergefahren.',
+      'Ein verstellter Mischer macht das Wasser zu kühl, nicht kalt. Der Speicher dahinter ist kalt — daran ändert keine Einstellung etwas. Und du wärst morgen noch einmal hingefahren.',
   },
 ]
 
@@ -289,11 +288,10 @@ export function A1() {
       }
       aha={
         <AhaKarte sichtbar={geloest} eyebrow="Warum ist die Rechnung dreistellig?">
-          Das Teil, das ich getauscht habe, kostet ein paar Euro. Die Rechnung wird
-          trotzdem dreistellig — Anfahrt, eine Stunde Kundendienst, Mehrwertsteuer. In
-          dieser einen Stunde stecken Auto, Werkzeug, Werkstatt und Büro; beim Betrieb
-          bleiben davon wenige Prozent. Bezahlt wird nicht das Teil. Bezahlt wird, dass
-          jemand weiß, wo er hinschauen muss.
+          Das Teil, das ich getauscht habe, kostet ein paar Euro. Der Rest sind Anfahrt,
+          eine Stunde Kundendienst, Mehrwertsteuer. In dieser Stunde stecken Auto,
+          Werkzeug, Werkstatt und Büro; beim Betrieb bleiben wenige Prozent. Bezahlt wird
+          nicht das Teil. Bezahlt wird, dass jemand weiß, wo er hinschauen muss.
         </AhaKarte>
       }
       fuss={
@@ -391,7 +389,7 @@ function Suchen({
           <p className="px-1 text-[1rem] text-kh-paper/70">
             {schmal
               ? 'Jede Prüfung schließt etwas aus — und kostet Zeit.'
-              : 'Jede Prüfung schließt etwas aus oder bestätigt etwas. Und jede kostet Zeit — danach wartet die nächste Adresse.'}
+              : 'Jede Prüfung schließt etwas aus oder bestätigt etwas. Und jede kostet Zeit — die nächste Adresse wartet.'}
           </p>
         )}
       </Wechsel>
@@ -579,7 +577,7 @@ function Geloest() {
       <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/90">
         Fühler getauscht, Speicher lädt, Wasser wird warm. Um{' '}
         {uhr(ABFAHRT.stunde, ABFAHRT.minute)} sitzt du wieder im Transporter — vierzig
-        Minuten für alles zusammen.
+        Minuten für alles.
       </p>
 
       <motion.p

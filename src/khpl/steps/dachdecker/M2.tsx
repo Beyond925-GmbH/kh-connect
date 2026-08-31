@@ -295,8 +295,7 @@ function einordnung(abstand: number): string {
   if (abstand === 0)
     return 'Auf den Euro getroffen. Kalkuliert wird trotzdem — Glück ist kein Angebot.'
   if (abstand <= 2000) return 'Nah dran — gutes Auge. Den Rest holt die Kalkulation.'
-  if (abstand >= ECHT / 2)
-    return 'Genau deshalb braucht’s dafür eine Ausbildung — kein Bauchgefühl.'
+  if (abstand >= ECHT / 2) return 'Dafür braucht’s eine Ausbildung — kein Bauchgefühl.'
   return 'Daneben ist hier der Normalfall. Deshalb wird gerechnet, nicht geraten.'
 }
 
@@ -370,7 +369,7 @@ function Mathe() {
         <DialogTitle>Achte Klasse</DialogTitle>
         <DialogDescription>
           Die 120 Quadratmeter hat niemand gemessen. Das Haus ist 85 groß, das Dach 45
-          Grad schräg — daraus rechnet man die Dachfläche. Pythagoras, achte Klasse.
+          Grad schräg — daraus rechnet man die Dachfläche. Pythagoras, mehr nicht.
         </DialogDescription>
       </DialogContent>
     </Dialog>

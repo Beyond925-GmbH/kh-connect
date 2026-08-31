@@ -45,12 +45,12 @@ export const BEGRIFFE_ANLAGENMECHANIK = {
   heizlast: {
     label: 'Heizlast',
     erklaerung:
-      'Wie viel Leistung ein Gebäude braucht, damit es auch am kältesten Auslegungstag warm bleibt — in Kilowatt. Sie hängt an Dämmung, Fläche und Fenstern, nicht am Wunschdenken. Wird sie zu groß angesetzt, ist die Anlage zu groß, teurer und läuft schlechter. Gerechnet wird sie nach DIN EN 12831.',
+      'Wie viel Leistung ein Gebäude braucht, damit es auch am kältesten Tag warm bleibt — in Kilowatt. Sie hängt an Dämmung, Fläche und Fenstern, nicht am Wunschdenken. Wer sie zu hoch ansetzt, kauft eine zu große Anlage: teurer, und sie läuft schlechter. Gerechnet wird nach DIN EN 12831.',
   },
   waermepumpe: {
     label: 'Wärmepumpe',
     erklaerung:
-      'Sie macht keine Wärme, sie holt sie: aus der Luft draußen. Auch Luft bei null Grad steckt voller Wärme — richtig leer wäre sie erst bei minus 273 Grad. Die Wärmepumpe entzieht der Luft diese Wärme und hebt sie mit Strom auf Heiztemperatur. Heutige Geräte schaffen das bis etwa minus 20 Grad; sie brauchen dann nur mehr Strom je Kilowattstunde Wärme.',
+      'Sie macht keine Wärme, sie holt sie: aus der Luft draußen. Auch Luft bei null Grad steckt voller Wärme — richtig leer wäre sie erst bei minus 273 Grad. Die Pumpe entzieht sie der Luft und hebt sie mit Strom auf Heiztemperatur. Heutige Geräte schaffen das bis etwa minus 20 Grad; sie brauchen dann nur mehr Strom je Kilowattstunde Wärme.',
   },
   jahresarbeitszahl: {
     label: 'Jahresarbeitszahl',
@@ -59,12 +59,12 @@ export const BEGRIFFE_ANLAGENMECHANIK = {
     // 77 reale Anlagen in Bestandsgebäuden, Luft/Wasser im Mittel JAZ 3,4
     // (`belege/anlagenmechanik.md` 2).
     erklaerung:
-      'Wie viel Wärme eine Wärmepumpe übers Jahr aus einer Kilowattstunde Strom macht — der Wert, an dem sich die Anlage messen lässt. In einer vierjährigen Feldmessung des Fraunhofer ISE an 77 Anlagen in bestehenden Häusern lag sie bei Luft-Wärmepumpen im Mittel bei 3,4. Aus einer Kilowattstunde Strom werden also gut drei Kilowattstunden Wärme.',
+      'Wie viel Wärme eine Wärmepumpe übers Jahr aus einer Kilowattstunde Strom macht. In einer vierjährigen Feldmessung des Fraunhofer ISE an 77 Anlagen in bestehenden Häusern lag sie bei Luft-Wärmepumpen im Mittel bei 3,4: Aus einer Kilowattstunde Strom werden gut drei Kilowattstunden Wärme.',
   },
   'vorlauf-ruecklauf': {
     label: 'Vorlauf und Rücklauf',
     erklaerung:
-      'Zwei Rohre, ein Kreis. Im Vorlauf läuft das warme Wasser von der Heizung zu den Heizkörpern, im Rücklauf kommt es abgekühlt zurück. Wie weit es dabei abkühlt, sagt, wie viel Wärme im Raum geblieben ist.',
+      'Zwei Rohre, ein Kreis. Im Vorlauf läuft das warme Wasser von der Heizung zu den Heizkörpern, im Rücklauf kommt es abgekühlt zurück. Wie weit es abkühlt, sagt, wie viel Wärme im Raum geblieben ist.',
   },
   verteiler: {
     label: 'Verteiler',
@@ -79,14 +79,14 @@ export const BEGRIFFE_ANLAGENMECHANIK = {
   ausdehnungsgefaess: {
     label: 'Ausdehnungsgefäß',
     erklaerung:
-      'Wasser dehnt sich aus, wenn es warm wird. Das Ausdehnungsgefäß nimmt diesen Zuwachs auf — ein Stahlbehälter mit einer Membran und einem Luftpolster dahinter. Ohne es stiege der Druck bei jedem Aufheizen, bis das Sicherheitsventil abbläst.',
+      'Wasser dehnt sich aus, wenn es warm wird. Das Gefäß nimmt diesen Zuwachs auf — ein Stahlbehälter mit Membran und Luftpolster dahinter. Ohne es stiege der Druck bei jedem Aufheizen, bis das Sicherheitsventil abbläst.',
   },
   sicherheitsventil: {
     label: 'Sicherheitsventil',
     // Ansprechdruck `BELEGT` (`belege/anlagenmechanik.md` 5, zeitstabil):
     // typische EFH-Anlagen 2,5 bar.
     erklaerung:
-      'Das Ventil, das die Anlage vor zu hohem Druck schützt. Bei einer üblichen Anlage im Einfamilienhaus öffnet es bei 2,5 bar und lässt Wasser ab. Dass es abbläst, ist kein Defekt, sondern seine Aufgabe — die Ursache liegt woanders.',
+      'Es schützt die Anlage vor zu hohem Druck. Im Einfamilienhaus öffnet es üblicherweise bei 2,5 bar und lässt Wasser ab. Dass es abbläst, ist kein Defekt, sondern seine Aufgabe — die Ursache liegt woanders.',
   },
   'hydraulischer-abgleich': {
     label: 'hydraulischer Abgleich',
@@ -96,7 +96,7 @@ export const BEGRIFFE_ANLAGENMECHANIK = {
   zirkulation: {
     label: 'Zirkulation',
     erklaerung:
-      'Eine zusätzliche Leitung, die das warme Wasser zwischen Speicher und Zapfstelle in Bewegung hält. Sie ist der Grund, warum in größeren Häusern sofort warmes Wasser kommt und nicht erst nach einer halben Minute — und einer der Punkte, an denen man nachsieht, wenn keins mehr kommt.',
+      'Eine zusätzliche Leitung, die das warme Wasser zwischen Speicher und Zapfstelle in Bewegung hält. Deshalb kommt in größeren Häusern sofort warmes Wasser und nicht erst nach einer halben Minute. Kommt gar keins, sieht man auch hier nach.',
   },
   inbetriebnahme: {
     label: 'Inbetriebnahme',
