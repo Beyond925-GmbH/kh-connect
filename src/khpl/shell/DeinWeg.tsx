@@ -249,9 +249,11 @@ export function DeinWeg({
               wäre eine Einladung an genau den, der gerade mitten in seinem Tag
               steckt.
 
-              Die Fünf-Tap-Geste in der Leiste bleibt daneben bestehen: sie ist
-              der Ausgang für die Screens ohne dieses Sheet — Splash, Helmwahl,
-              Fragen, Berufsliste.
+              Derselbe Reset steht seit dem Kiosk-Umbau als Kreis in jeder
+              Leiste (`Neustart.tsx`) — hier bleibt er trotzdem: wer das Sheet
+              ohnehin offen hat, soll es dafür nicht schließen müssen. Die
+              Staff-Gesten (fünf Finger, fünf Taps) führen daneben ins
+              Personalmenü mit „App neu laden“.
             */}
             <section className="border-t border-kh-line px-4 pt-4 pb-6">
               <h3 className="kh-etikett px-1">Standpersonal</h3>

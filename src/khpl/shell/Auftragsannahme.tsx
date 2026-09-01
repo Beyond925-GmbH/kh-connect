@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { ArrowLeft, ArrowRight, ChevronRight } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
+import { NeustartKnopf } from './Neustart'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
 import {
   nimmAuftragAn,
@@ -208,18 +209,24 @@ export function Auftragsannahme() {
             </button>
           )}
         </div>
-        <button
-          type="button"
-          data-testid="karriere-skip"
-          onClick={() => {
-            nimmAuftragAn()
-            starteKarriereSkip()
-          }}
-          className="flex h-[52px] items-center gap-1 rounded-kh-pill bg-black/35 px-4 text-[1rem] font-medium text-kh-paper/60 backdrop-blur-md transition-transform active:scale-95"
-        >
-          Karriere-Wege
-          <ChevronRight className="size-4" strokeWidth={2} />
-        </button>
+        {/* Wie in der Step-Leiste: Karriere-Link und Reset stehen rechts als
+            eine Gruppe, nicht als zwei weitere Einzelknöpfe neben den beiden
+            links. */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            data-testid="karriere-skip"
+            onClick={() => {
+              nimmAuftragAn()
+              starteKarriereSkip()
+            }}
+            className="flex h-[52px] items-center gap-1 rounded-kh-pill bg-black/35 px-4 text-[1rem] font-medium text-kh-paper/60 backdrop-blur-md transition-transform active:scale-95"
+          >
+            Karriere-Wege
+            <ChevronRight className="size-4" strokeWidth={2} />
+          </button>
+          <NeustartKnopf />
+        </div>
       </div>
 
       <div className="relative flex min-h-0 flex-1 flex-col justify-end gap-6 p-6 landscape:p-10">

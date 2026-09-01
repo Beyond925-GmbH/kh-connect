@@ -17,6 +17,13 @@ import { useCallback, useEffect, useRef } from 'react'
  * jeweilige Screen selbst als leer kennt — der Dehnfuge in der Leiste und dem
  * Logo auf dem Splash — statt an einer Koordinate, die nichts über den Screen
  * darunter weiß.
+ *
+ * **Daneben steht seit dem Kiosk-Umbau der Fünf-Finger-Tap** — fünf Finger
+ * gleichzeitig auf das Glas, egal wo. Er löst dasselbe Fenster aus und ist der
+ * eigentliche Griff am Messetag: er braucht keine leere Fläche, gilt damit auf
+ * *jedem* Screen, und niemand tippt ihn versehentlich. Die Fünf-Tap-Flächen
+ * bleiben trotzdem — auf einem Rechner mit Maus (Vorschau, Test, ein iPad im
+ * Mac-Sidecar) gibt es keine fünf Finger.
  */
 
 /** Fünf Taps innerhalb dieser Spanne zählen als Geste. */
@@ -50,4 +57,28 @@ export function useStaffAusgang() {
       oeffner?.()
     }
   }, [])
+}
+
+/** So viele Finger gleichzeitig öffnen das Personalmenü. */
+const NOETIGE_FINGER = 5
+
+/**
+ * Der Fünf-Finger-Tap, global. Einmal im `KioskGuard` aufgerufen.
+ *
+ * `capture` und `window`: die Geste muss auch über einem Knopf, einem offenen
+ * Sheet und über dem Idle-Hinweis greifen — gerade dort, wo etwas hängt, ist
+ * sie gefragt. `passive`, weil nichts abgefangen wird: die fünf Finger liegen
+ * per Definition nicht auf einem Ziel, das sie gemeinsam meint.
+ *
+ * Gezählt wird `touches`, nicht `changedTouches` — die fünf Finger landen nie
+ * exakt gleichzeitig, und `touches` trägt die schon liegenden mit.
+ */
+export function useFuenfFingerAusgang(oeffnen: () => void) {
+  useEffect(() => {
+    const bei = (e: TouchEvent) => {
+      if (e.touches.length >= NOETIGE_FINGER) oeffnen()
+    }
+    window.addEventListener('touchstart', bei, { passive: true, capture: true })
+    return () => window.removeEventListener('touchstart', bei, { capture: true })
+  }, [oeffnen])
 }

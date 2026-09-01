@@ -10,6 +10,7 @@ import {
   Wrench,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { NeustartKnopf } from './Neustart'
 import { Helm } from '@/khpl/komponenten/Helm'
 import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { FRAGEN_BILDER } from '@/khpl/match/fragen'
@@ -93,6 +94,11 @@ export function Helmwahl() {
         aria-hidden
         className="absolute inset-0 bg-[radial-gradient(90%_70%_at_15%_100%,rgba(255,122,26,0.22),transparent_60%)]"
       />
+
+      {/* Dieser Screen hat keine Leiste — seine Überschrift steht mittig im
+          Block mit der Wahl. Der Reset hängt deshalb frei in der Ecke, an
+          derselben Stelle wie in den Leisten der anderen Screens. */}
+      <NeustartKnopf className="absolute top-3 right-3 z-20 landscape:top-4 landscape:right-4" />
 
       <div className="relative flex min-h-0 flex-1 flex-col gap-4 p-5 landscape:flex-row landscape:gap-8 landscape:p-8">
         {/* Der Helm. Quer links neben der Wahl, hochkant darüber — er ist das

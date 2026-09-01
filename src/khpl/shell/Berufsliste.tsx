@@ -11,6 +11,7 @@ import {
   useFertigeBerufe,
   useSitzung,
 } from '@/khpl/store/fortschritt'
+import { NeustartKnopf } from './Neustart'
 import { useStaffAusgang } from './staffAusgang'
 
 /**
@@ -94,6 +95,7 @@ export function Berufsliste() {
           data-testid="staff-flaeche"
           aria-hidden
         />
+        <NeustartKnopf className="self-start" />
       </header>
 
       <div

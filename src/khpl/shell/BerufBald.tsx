@@ -1,6 +1,7 @@
 import { motion } from 'motion/react'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { NeustartKnopf } from './Neustart'
 import { BerufBild } from '@/khpl/komponenten/BerufBild'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
 import { gebauteBerufe } from '@/khpl/berufe/registry'
@@ -45,6 +46,7 @@ export function BerufBald({ id }: { id: BerufId }) {
         >
           <ArrowLeft className="size-6" strokeWidth={2.25} />
         </button>
+        <NeustartKnopf className="ml-auto" />
       </header>
 
       <motion.div

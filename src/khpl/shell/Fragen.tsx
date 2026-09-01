@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { Button } from '@/components/ui/button'
+import { NeustartKnopf } from './Neustart'
 import { FRAGEN } from '@/khpl/match/fragen'
 import { merkeFrage, zeigeBerufe } from '@/khpl/store/fortschritt'
 import { Bildwahl } from './fragen/Bildwahl'
@@ -98,6 +99,7 @@ export function Fragen() {
           >
             Überspringen
           </Button>
+          <NeustartKnopf />
         </header>
 
         <AnimatePresence mode="wait">

@@ -8,7 +8,7 @@ import {
   useFortschritt,
   zumSplash,
 } from '@/khpl/store/fortschritt'
-import { useStaffDialogAnmeldung } from './staffAusgang'
+import { useFuenfFingerAusgang, useStaffDialogAnmeldung } from './staffAusgang'
 
 /**
  * Das Kiosk-Verhalten: Idle-Rückfall, Reset und Staff-Ausgang.
@@ -29,9 +29,20 @@ import { useStaffDialogAnmeldung } from './staffAusgang'
  * ist, gibt es jetzt den ausdrücklichen Reset — hier im Dialog und unten im
  * Sheet „Dein Weg“.
  *
- * **Der Reset löscht nichts.** Er bringt die App nur auf den Splash; der
- * nächste Besucher wählt dort „Neu starten“, wer kurz abgelenkt war
+ * **Der Idle-Rückfall löscht nichts.** Er bringt die App nur auf den Splash;
+ * der nächste Besucher wählt dort „Neu starten“, wer kurz abgelenkt war
  * „Weitermachen“. Den Rest erledigt die 30-Minuten-Frist.
+ *
+ * **Der ausdrückliche Reset dagegen löscht** — und steht seit dem
+ * Kiosk-Umbau auf *jedem* Screen als 52-px-Kreis in der Leiste
+ * (`Neustart.tsx`). Vorher lag er nur im Sheet „Dein Weg“, also zwei Taps
+ * tief und nur auf Steps; das Standpersonal musste ihn suchen, während der
+ * nächste Besucher danebenstand.
+ *
+ * **Der Staff-Ausgang hat zwei Gesten**: fünf Finger gleichzeitig, global auf
+ * dem Fenster — der Griff am Messetag —, und fünf schnelle Taps auf eine
+ * Fläche, die der Screen als leer kennt, für alles ohne Touchscreen
+ * (`staffAusgang.ts`).
  *
  * **Theme.** Es gibt keins mehr. Das Designsystem „Baustelle“ ist einfarbig
  * dunkel (siehe `index.css`), und damit entfallen Schalter, Pinnen und der
@@ -86,10 +97,13 @@ export function KioskGuard({ children }: { children: React.ReactNode }) {
   /** Sekunden bis zum Rücksprung — läuft nur, solange der Hinweis steht. */
   const [rest, setRest] = useState(IDLE_RESET_MS / 1000)
 
-  // Die Geste selbst hängt an den Screens (leere Dehnfuge in der Leiste, Logo
-  // auf dem Splash) — hier liegt nur das Fenster, das sie öffnet.
+  // Zwei Wege in dasselbe Fenster: der Fünf-Finger-Tap liegt global auf dem
+  // Fenster und gilt damit auf jedem Screen; die Fünf-Tap-Flächen hängen an
+  // den Screens (leere Dehnfuge in der Leiste, Logo auf dem Splash) und sind
+  // der Ersatz für alles, was keine fünf Finger hat.
   const oeffnen = useCallback(() => setStaff(true), [])
   useStaffDialogAnmeldung(oeffnen)
+  useFuenfFingerAusgang(oeffnen)
 
   const geduld = (bildschirm === 'step' && GEDULD[currentStepId]) || 1
 

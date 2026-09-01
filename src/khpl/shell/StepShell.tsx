@@ -9,6 +9,7 @@ import { Auftragsband } from '@/khpl/komponenten/Auftragsband'
 import { WarumBereich } from '@/khpl/komponenten/Warum'
 import type { Geste } from '@/khpl/komponenten/gesten'
 import { DeinWeg } from './DeinWeg'
+import { NeustartKnopf } from './Neustart'
 import { Rail } from './Rail'
 import { SichtfeldMesser } from './SichtfeldKontext'
 import { useStaffAusgang } from './staffAusgang'
@@ -453,17 +454,24 @@ export function StepShell({
                 aria-hidden
               />
 
-              {skipSichtbar && (
-                <button
-                  type="button"
-                  onClick={starteKarriereSkip}
-                  data-testid="karriere-skip"
-                  className="flex h-[52px] shrink-0 items-center gap-1 rounded-kh-pill bg-black/35 px-4 text-[1rem] font-medium text-kh-paper/75 backdrop-blur-md transition-transform active:scale-95"
-                >
-                  Karriere-Wege
-                  <ChevronRight className="size-5" strokeWidth={2} />
-                </button>
-              )}
+              {/* Rechts hängt eine Gruppe, keine Reihe Einzelknöpfe: der
+                  Karriere-Link (nur auf jedem dritten Step) und der Reset
+                  stehen mit `gap-2` enger beieinander als am Rest der Leiste
+                  und lesen sich damit als ein Block. */}
+              <div className="flex shrink-0 items-center gap-2">
+                {skipSichtbar && (
+                  <button
+                    type="button"
+                    onClick={starteKarriereSkip}
+                    data-testid="karriere-skip"
+                    className="flex h-[52px] shrink-0 items-center gap-1 rounded-kh-pill bg-black/35 px-4 text-[1rem] font-medium text-kh-paper/75 backdrop-blur-md transition-transform active:scale-95"
+                  >
+                    Karriere-Wege
+                    <ChevronRight className="size-5" strokeWidth={2} />
+                  </button>
+                )}
+                <NeustartKnopf />
+              </div>
             </header>
           )}
 
@@ -527,6 +535,9 @@ function RueckkehrLeiste({ ziel }: { ziel: StepId }) {
           <span className="text-kh-paper/50"> — {step(graph, ziel).titel}</span>
         </span>
       </button>
+      {/* Auch der Abstecher ist ein Screen, auf dem jemand stehen bleiben
+          kann — der Reset fehlt hier so wenig wie in der normalen Leiste. */}
+      <NeustartKnopf className="ml-auto" />
     </header>
   )
 }
