@@ -15,8 +15,8 @@ import type { BerufDef, StepBild } from './typen'
  * läuft weiter, wenn man geht — kein anderer Tag endet so.
  *
  * **Dieser Tag hat kein `three`.** Seine Bühnen sind Zeichnungen —
- * technische Zeichnung, Werkzeugweg, Messschraube — und liegen unter
- * `buehne/zerspanung/`.
+ * Genauigkeits-Leiter, technische Zeichnung, Werkzeugweg, Messschraube — und
+ * liegen unter `buehne/zerspanung/`.
  *
  * **Er ist ein Industrieberuf (IHK), kein Handwerk.** Das trägt bis in die
  * Karrieretexte: Industriemeister:in Metall statt Handwerksmeister, keine
@@ -53,8 +53,8 @@ type ZerspanungStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher'> & 
 const STEPS = [
   {
     id: 'Z1',
-    titel: 'Das Teil gibt es noch nicht',
-    kurz: 'Zeichnung',
+    titel: 'Wie viel darf danebenliegen?',
+    kurz: 'Genauigkeit',
     art: 'haupt',
     weiter: 'Z2',
     abstecher: ['Z1.1'],
@@ -62,8 +62,8 @@ const STEPS = [
   },
   {
     id: 'Z1.1',
-    titel: 'Warum so genau?',
-    kurz: 'Genauigkeit',
+    titel: 'Locker, satt oder fest',
+    kurz: 'Zusammensitzen',
     art: 'abstecher',
     weiter: 'Z2',
     abstecher: [],
@@ -229,9 +229,10 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
    * Jeder Eintrag zeigt auf eine Datei, die unter `public/medien/` wirklich
    * liegt (geprüft am 28.08.2026); Motivbeschreibungen in
    * `MEDIEN-INVENTAR.md`, Herkunft in `MEDIEN.md`. Kein Motiv doppelt sich
-   * innerhalb des Tages — mit einer bewussten Ausnahme: Z3 und sein
+   * innerhalb des Tages — mit zwei bewussten Ausnahmen: Z3 und sein
    * Abstecher Z3.1 teilen sich den Bediener an der Maschine, denn beide
-   * Screens spielen an derselben Stelle der Halle. `card.webp` trägt Z5,
+   * Screens spielen an derselben Stelle der Halle; Z1 und Z7 teilen sich die
+   * abgelegten Messwerkzeuge als Klammer um den Tag (siehe dort). `card.webp` trägt Z5,
    * weil es das einzige Motiv mit Menschen in der Runde ist — und die Pause
    * der menschliche Moment dieses Tages.
    *
@@ -240,6 +241,14 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
    * vor einen Metallberuf. Z8.1 trägt stattdessen das eigene Meister-Motiv.
    */
   bilder: {
+    // Messwerkzeuge auf dunklem Grund — die Werkbank unter der
+    // Genauigkeits-Leiter. **Das einzige bewusst doppelte Motiv dieses
+    // Tages neben Z3/Z3.1:** es trägt auch Z7. Die beiden liegen an den
+    // Enden des Tages und zeigen dasselbe Werkzeug in zwei Rollen — morgens
+    // die Frage, wie genau es sein muss, abends dieselben Lehren, abgelegt.
+    // Auf Z1 läuft es stark abgedunkelt hinter der Zeichnung (`Z1.tsx`),
+    // auf Z7 vollflächig.
+    Z1: { src: '/medien/media/zerspanungsmechaniker/z4-messraum.webp', pos: '55% 35%' },
     // Werkzeug über dem Stahlmaßstab — Präzision als Bild.
     'Z1.1': {
       src: '/medien/media/zerspanungsmechaniker/quiz-praezision.webp',
@@ -295,15 +304,15 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       'Das Metallstück festspannen, bevor es losgeht',
     ],
     umgebung: {
-      titel: ['Eine Halle,', 'eine Maschine.'],
+      titel: ['Maschinen so ', 'groß wie Autos.'],
       text: 'Gearbeitet wird drinnen, in einer großen Halle. Es riecht nach Öl, die Maschinen brummen. Jede ist so groß wie ein Auto — und an jeder steht ein Mensch, der ihr sagt, was sie tun soll.',
     },
   },
   /** Takt 3 der Auftragsannahme — ab hier spricht die Geschichte. */
   auftrag: {
     etikett: 'Deine Maschine',
-    titel: ['200 Teile.', 'Ein Hundertstel.'],
-    text: 'Du bist Azubi in der Zerspanung. Sechs Uhr, die Hallenbeleuchtung geht gerade an, deine Maschine ist noch kalt. Der Ausbilder legt dir eine Zeichnung hin: 200 Bolzen für ein Getriebe, bis Freitag. Ab dem ersten Span bist du dran.',
+    titel: ['200 Teile mit,', 'höchster Präzision.'],
+    text: 'Du bist Azubi in der Zerspanung. Es ist sechs Uhr, die Hallenbeleuchtung geht gerade an und deine Maschine ist noch kalt. Der Ausbilder legt dir eine Zeichnung hin: 200 Bolzen für ein Getriebe müssen gefertigt werden. Bis du dabei?',
     knopf: 'Schicht übernehmen',
   },
   graph: baueGraph(STEPS, {
@@ -311,9 +320,9 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
     /** Jeder Abstecher einzeln getextet — nie eine Schablone. */
     angebote: {
       'Z1.1': {
-        einladung: 'Warum so genau?',
+        einladung: 'Locker, satt oder fest?',
         beschreibung:
-          'Wie wenig ein Maß danebenliegen darf, damit ein Kugellager noch passt.',
+          'Wie zwei Teile zusammensitzen können — und wie man das vorher festlegt.',
       },
       'Z3.1': {
         einladung: 'Und wenn du dich vertippst?',

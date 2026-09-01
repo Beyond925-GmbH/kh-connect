@@ -33,9 +33,9 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'Z1',
     tat: {
-      erledigt: 'auf einer Zeichnung das entscheidende Maß gefunden',
-      gesehen: 'eine technische Zeichnung gelesen',
-      geloest: (f) => !!f.answers.z1?.gefunden,
+      erledigt: 'einsortiert, wie genau verschiedene Teile sein müssen',
+      gesehen: 'gesehen, wie genau ein Metallteil sein muss',
+      geloest: (f) => !!f.answers.z1?.fertig,
     },
   },
   {

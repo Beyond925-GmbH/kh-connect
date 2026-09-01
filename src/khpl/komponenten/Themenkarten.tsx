@@ -25,7 +25,7 @@ export interface Thema {
 /**
  * **Die Themen-Abstecher in einer Form: Frage → Antwort → Wahl.**
  *
- * **Warum es das gibt.** Die Info-Abstecher („Warum so genau?“, „Ein
+ * **Warum es das gibt.** Die Info-Abstecher („Locker, satt oder fest“, „Ein
  * Tippfehler in Stahl“, …) zeigten drei nackte Wörter und die Zeile „Tipp an,
  * was dich interessiert“ — und weil sie als Übungs-Steps galten, blendete die
  * Shell ausgerechnet den Kontext-Absatz (`warum`) aus. Wer davor stand, hatte

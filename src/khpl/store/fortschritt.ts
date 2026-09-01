@@ -5,7 +5,7 @@ import { beruf, istBerufId } from '@/khpl/berufe/registry'
 import type { BerufId } from '@/khpl/berufe/typen'
 import type { HelmWahl } from '@/khpl/match/helm'
 import { istGeste, type Geste } from '@/khpl/komponenten/gesten'
-import { aktiviereVolleAnalytik, erfasse, neueAnalytikSitzung } from '@/lib/analytik'
+import { erfasse, neueAnalytikSitzung } from '@/lib/analytik'
 
 /**
  * Sitzungszustand, je Beruf getrennt.
@@ -221,8 +221,14 @@ export interface Antworten {
   // der Rückblick in Z7 aufzählt, kommt von hier.
   // -------------------------------------------------------------------------
 
-  /** Z1 — angetippte Maße der Zeichnung, und ob das entscheidende dabei war. */
-  z1?: { angetippt: string[]; gefunden: boolean }
+  /**
+   * Z1 — die einsortierten Dinge der Genauigkeits-Leiter, in Reihenfolge.
+   *
+   * `treffer` zählt keine Punkte, sondern speist nur die Auswertung — auf
+   * dem Screen erscheint die Zahl nie (wie `gut` in A7). `fertig` heißt:
+   * alle vier einsortiert.
+   */
+  z1?: { zugeordnet: string[]; treffer: number; fertig: boolean }
   /**
    * Z2 — Rohteil gespannt (mit Zahl der Fehlgriffe), Drehzahl geschätzt und
    * aufgelöst. `schaetzung` ist der Reglerwert in U/min.
@@ -269,14 +275,6 @@ export interface Fortschritt {
   detourReturnTo: StepId | null
 }
 
-/**
- * Entscheidung des Besuchers im Zustimmungsdialog (`shell/Zustimmung.tsx`) —
- * `null` heißt: noch nicht gefragt. Liegt **an der Sitzung**, nicht am Gerät:
- * das iPad ist geteilt, und mit Verfall oder Reset erlischt auch die
- * Zustimmung — der nächste Besucher wird selbst gefragt.
- */
-export type AnalytikWahl = 'voll' | 'anonym'
-
 export interface Sitzung {
   version: 2
   /**
@@ -307,7 +305,6 @@ export interface Sitzung {
    * Genau wie `helm` und `gefragt`.
    */
   gelernteGesten: Geste[]
-  analytik: AnalytikWahl | null
   updatedAt: number
 }
 
@@ -332,7 +329,6 @@ function leereSitzung(): Sitzung {
     helm: null,
     gefragt: {},
     gelernteGesten: [],
-    analytik: null,
     updatedAt: Date.now(),
   }
 }
@@ -521,8 +517,13 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   // ---------------------------------------------------------------------
 
   const z1 = q.z1 as Antworten['z1']
-  if (z1 && stringListe(z1.angetippt)) {
-    a.z1 = { angetippt: stringListe(z1.angetippt) as string[], gefunden: !!z1.gefunden }
+  if (z1 && stringListe(z1.zugeordnet)) {
+    a.z1 = {
+      zugeordnet: stringListe(z1.zugeordnet) as string[],
+      treffer:
+        typeof z1.treffer === 'number' && Number.isFinite(z1.treffer) ? z1.treffer : 0,
+      fertig: !!z1.fertig,
+    }
   }
   const z2 = q.z2 as Antworten['z2']
   if (z2 && typeof z2.versuche === 'number' && Number.isFinite(z2.versuche)) {
@@ -647,7 +648,6 @@ function lade(): Sitzung | null {
       helm: pruefeHelm(s.helm),
       gefragt: pruefeGefragt(s.gefragt),
       gelernteGesten: pruefeGesten(s.gelernteGesten),
-      analytik: pruefeAnalytik(s.analytik),
       updatedAt: s.updatedAt,
     }
   } catch {
@@ -692,10 +692,6 @@ function pruefeGesten(roh: unknown): Geste[] {
   return Array.isArray(roh) ? roh.filter(istGeste) : []
 }
 
-function pruefeAnalytik(roh: unknown): AnalytikWahl | null {
-  return roh === 'voll' || roh === 'anonym' ? roh : null
-}
-
 function pruefeGefragt(roh: unknown): Record<string, string> {
   if (typeof roh !== 'object' || roh === null) return {}
   const raus: Record<string, string> = {}
@@ -713,10 +709,6 @@ let sitzung: Sitzung = lade() ?? leereSitzung()
 // mehr vorbei. Ein iPad, das über Nacht steht, böte morgens den Stand von
 // gestern an, samt fremder Antworten im Rückblick.
 if (Date.now() - sitzung.updatedAt > VERFALL_MS) sitzung = leereSitzung()
-
-// Eine in dieser Sitzung erteilte Zustimmung übersteht den Reload — die
-// Aufzeichnung muss dann wieder anlaufen, sonst bliebe sie stumm 'anonym'.
-if (sitzung.analytik === 'voll') aktiviereVolleAnalytik()
 
 /** Ob ein Stand zum Weitermachen bereitliegt. */
 let hatWiedereinstieg = wiedereinstiegMoeglich(sitzung)
@@ -742,8 +734,9 @@ function melde() {
  * auf den Splash, sondern bei der Helmwahl stehen.
  */
 function vergiss(neuerBildschirm: Bildschirm) {
-  // Mit der Sitzung stirbt auch die Analytik-Identität samt Zustimmung — der
-  // nächste Besucher beginnt anonym und wird selbst gefragt.
+  // Mit der Sitzung stirbt die Analytik-Identität — der nächste Besucher
+  // zählt als eigener. Die Cookie-Entscheidung bleibt davon unberührt: sie
+  // liegt am Gerät (`lib/analytik.ts`) und überlebt jeden Reset.
   neueAnalytikSitzung()
   sitzung = { ...leereSitzung(), bildschirm: neuerBildschirm }
   hatWiedereinstieg = false
@@ -881,13 +874,6 @@ export function machWeiter() {
 export function merkeHelm(wahl: HelmWahl) {
   aendere((s) => ({ ...s, helm: wahl }))
   erfasse('helm_gewaehlt', { farbe: wahl.farbe, werkzeug: wahl.werkzeug || null })
-}
-
-/** Entscheidung aus dem Zustimmungsdialog (`shell/Zustimmung.tsx`). */
-export function merkeAnalytik(wahl: AnalytikWahl) {
-  aendere((s) => (s.analytik === wahl ? s : { ...s, analytik: wahl }))
-  erfasse('analytik_entschieden', { wahl })
-  if (wahl === 'voll') aktiviereVolleAnalytik()
 }
 
 /**
@@ -1267,10 +1253,6 @@ export function useAktiverBeruf(): BerufId | null {
 
 export function useAngesehenerBeruf(): BerufId | null {
   return useSyncExternalStore(abonniere, () => sitzung.angesehenerBeruf)
-}
-
-export function useAnalytikWahl(): AnalytikWahl | null {
-  return useSyncExternalStore(abonniere, () => sitzung.analytik)
 }
 
 /**

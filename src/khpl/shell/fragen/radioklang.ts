@@ -16,6 +16,13 @@ import type { RadioStil } from '@/khpl/match/fragen'
  * **iOS-Regel:** Audio startet nur nach einer Geste. `entsperre()` wird darum
  * direkt im Pointer-Handler der Station aufgerufen — dort erzeugt es den
  * `AudioContext` und weckt ihn; die Effekte danach dürfen dann spielen.
+ *
+ * **Einmal und nie wieder.** Das Radio ist der Auftakt, kein Soundtrack: nach
+ * `zerstoere()` ist das Gerät *tot* und macht keinen Ton mehr — auch wenn die
+ * Station noch einen Frame lang steht oder jemand danach wieder aufs Band
+ * fasst. Dazu räumt es sich selbst ab, sobald die Seite in den Hintergrund
+ * geht oder verlassen wird (`visibilitychange`, `pagehide`): ein Kiosk, der
+ * aus einem versteckten Tab weitertönt, ist ein spukender Kiosk.
  */
 
 /** Summen-Pegel des Radios. Eine Beilage, keine Beschallung. */
@@ -120,6 +127,7 @@ const MUSTER: Record<RadioStil, Muster> = {
 }
 
 export class Radioklang {
+  private tot = false
   private ctx: AudioContext | null = null
   private summe: GainNode | null = null
   private rauschBuffer: AudioBuffer | null = null
@@ -133,6 +141,7 @@ export class Radioklang {
    * Kontext und weckt ihn. Alles Spätere darf dann aus Effekten kommen.
    */
   entsperre() {
+    if (this.tot) return
     if (!this.ctx) {
       this.ctx = new AudioContext()
       this.summe = this.ctx.createGain()
@@ -143,13 +152,25 @@ export class Radioklang {
       this.rauschBuffer = this.ctx.createBuffer(1, laenge, this.ctx.sampleRate)
       const daten = this.rauschBuffer.getChannelData(0)
       for (let i = 0; i < laenge; i++) daten[i] = Math.random() * 2 - 1
+
+      document.addEventListener('visibilitychange', this.beimVerlassen)
+      window.addEventListener('pagehide', this.beimVerlassen)
     }
     if (this.ctx.state === 'suspended') void this.ctx.resume()
   }
 
+  /**
+   * Seite weg oder im Hintergrund: Gerät ausbauen. `pagehide` gilt immer,
+   * `visibilitychange` nur beim Verstecken — Zurückkommen holt den Ton nicht
+   * wieder, `tot` bleibt tot.
+   */
+  private beimVerlassen = (e: Event) => {
+    if (e.type === 'pagehide' || document.visibilityState === 'hidden') this.zerstoere()
+  }
+
   /** Sender eingestellt: Loop im Stil starten, Rauschen aus. */
   sender(stil: RadioStil, bpm: number) {
-    if (!this.ctx) return
+    if (this.tot || !this.ctx) return
     if (this.takt?.stil === stil) return
     this.stille()
 
@@ -172,7 +193,7 @@ export class Radioklang {
 
   /** Zwischen den Sendern: leises Bandrauschen statt Musik. */
   rauschen() {
-    if (!this.ctx || !this.summe || !this.rauschBuffer) return
+    if (this.tot || !this.ctx || !this.summe || !this.rauschBuffer) return
     this.stopMusik()
     if (this.rauschen_) return
 
@@ -203,9 +224,15 @@ export class Radioklang {
     }
   }
 
-  /** Beim Verlassen der Station: Gerät ausbauen, Decoder freigeben. */
+  /**
+   * Beim Verlassen der Station: Gerät ausbauen, Decoder freigeben — und
+   * endgültig. Ein einmal zerstörter Radioklang lässt sich nicht wiederbeleben.
+   */
   zerstoere() {
+    this.tot = true
     this.stille()
+    document.removeEventListener('visibilitychange', this.beimVerlassen)
+    window.removeEventListener('pagehide', this.beimVerlassen)
     void this.ctx?.close()
     this.ctx = null
     this.summe = null

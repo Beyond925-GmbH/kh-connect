@@ -7,10 +7,17 @@ import { STAHL, TEIL, WARM, type MassId, type ZeichnungZustand } from './kanon'
  * ist kein Foto und kein Schema, sondern das Blatt: Konturen, Mittellinie,
  * Maßpfeile, Schriftfeld. Hier fängt jeder Auftrag an.
  *
- * Die Zeichnung ist die Bedienung: die vier Maße sind antippbar, un-getippte
- * tragen den wartenden Ring (dieselbe Einladung wie die Verlustflächen in
- * A3). Das gefundene entscheidende Maß bleibt warm markiert — Orange gehört
- * der Welt, und das Maß ist die Welt dieses Tages.
+ * **Sie trägt den Einstieg nicht mehr, sie beschließt ihn.** Solange das
+ * Blatt der erste Screen des Tages war, verlangte es die Einsicht, die der
+ * Tag erst herstellt (siehe `steps/zerspanung/Z1.tsx`). Heute sortiert Z1
+ * zuerst Größenordnungen auf der Leiter (`Massstab.tsx`) — und wer will,
+ * holt sich danach die Zeichnung als Auflösung: `gefunden: true`, der
+ * Lagersitz markiert, **ohne `onMass`**.
+ *
+ * Die Maße bleiben antippbar, wo ein Handler übergeben wird: un-getippte
+ * tragen dann den wartenden Ring (dieselbe Einladung wie die Verlustflächen
+ * in A3). Das entscheidende Maß bleibt warm markiert — Orange gehört der
+ * Welt, und das Maß ist die Welt dieses Tages.
  *
  * Gezeichnet wird aus `TEIL` in `kanon.ts` — dieselben Zahlen, die auch der
  * Werkzeugweg (Z3) und die Messschraube (Z4) benutzen. Eine Welt, viele

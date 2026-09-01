@@ -4,7 +4,7 @@ import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 
 /**
- * Z1.1 — Warum so pingelig? Abstecher von Z1, mündet in Z2.
+ * Z1.1 — Locker, satt oder fest. Abstecher von Z1, mündet in Z2.
  *
  * **Der Muster-Screen für die geführte Abstecher-Form** (`Themenkarten`):
  * Die Leitfrage steht als Titel auf der Bühne, das `warum` beantwortet sie in

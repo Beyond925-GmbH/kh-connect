@@ -1,14 +1,14 @@
 import { Button } from '@/components/ui/button'
-import { istAnalytikBereit } from '@/lib/analytik'
-import { merkeAnalytik, useAnalytikWahl, useBildschirm } from '@/khpl/store/fortschritt'
+import { istAnalytikBereit, merkeAnalytik, useAnalytikWahl } from '@/lib/analytik'
+import { useBildschirm } from '@/khpl/store/fortschritt'
 
 /**
  * Der Zustimmungsdialog für Stufe 2 der Analytik (`lib/analytik.ts`).
  *
- * Er erscheint genau einmal je Besucher: auf der Helmwahl — dem ersten Screen
- * nach dem Splash — und nur, solange die Sitzung keine Entscheidung trägt. Mit
- * Verfall oder Reset erlischt die Entscheidung, der nächste Besucher wird
- * selbst gefragt (DSGVO: Zustimmung gilt der Person, nicht dem Gerät).
+ * Er erscheint **einmal am Gerät**: auf der Helmwahl — dem ersten Screen nach
+ * dem Splash — und nur, solange keine Entscheidung gespeichert ist. Reset,
+ * Idle-Verfall und Reload lassen sie unberührt (`lib/analytik.ts`); der Dialog
+ * kommt danach nicht wieder.
  *
  * Wer den Screen ohne Entscheidung verlässt, bleibt anonym — die Frage kommt
  * nicht wieder. Beide Knöpfe sind gleich groß und gleich gebaut: eine

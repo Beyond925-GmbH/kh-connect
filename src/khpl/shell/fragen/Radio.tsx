@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { ArrowRight, RadioTower } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Antwortmoeglichkeit, Frage } from '@/khpl/match/fragen'
+import { useSitzung } from '@/khpl/store/fortschritt'
 import { Radioklang } from './radioklang'
 
 /**
@@ -19,10 +20,15 @@ import { Radioklang } from './radioklang'
  * Signal-Gelbgrün bleibt hier deshalb ungenutzt; die Rückmeldung dieses
  * Screens ist der Sender selbst.
  *
- * **Er klingt.** `radioklang.ts` spielt je Sender eine leise synthetische
- * Loop und zwischen den Sendern Bandrauschen — erst nach dem ersten Griff
- * (iOS-Gestenregel, und ein Kiosk, der ungefragt tönt, wäre auch sonst
- * falsch). Verlassen der Station baut den Klang komplett ab.
+ * **Er klingt — genau einmal.** `radioklang.ts` spielt je Sender eine leise
+ * synthetische Loop und zwischen den Sendern Bandrauschen — erst nach dem
+ * ersten Griff (iOS-Gestenregel, und ein Kiosk, der ungefragt tönt, wäre auch
+ * sonst falsch). Der Weiter-Knopf baut den Klang ab, bevor der Screen wechselt.
+ *
+ * **Und nur beim ersten Durchgang.** Ein Reload setzt den Trichter auf die
+ * erste Station zurück, und das ist diese — wer die Frage schon beantwortet
+ * hat, bekommt den Regler wieder, aber stumm. Das Radio ist der Auftakt, keine
+ * Hintergrundmusik, die einem beim Neuladen hinterherläuft.
  */
 
 const BAND_MIN = 87
@@ -69,9 +75,17 @@ export function Radio({
     null
   const sender = eingestellt?.sender ?? null
 
+  // Der Ton gehört dem ersten Durchgang: eine schon beantwortete Station
+  // bleibt stumm (siehe Kopf). Einmal beim Aufbau festgehalten — die Antwort
+  // fällt in dieser Station, sie darf sie nicht mitten im Griff verstummen
+  // lassen.
+  const gefragt = useSitzung().gefragt
+  const [stumm] = useState(() => frage.id in gefragt)
+
   // Muss in der Geste selbst laufen, nicht im Effekt danach — iOS zählt nur
   // den Handler-Stack als Erlaubnis, Ton zu machen.
   const entsperreKlang = () => {
+    if (stumm) return
     klang.current ??= new Radioklang()
     klang.current.entsperre()
   }
@@ -362,7 +376,12 @@ export function Radio({
             <Button
               variant="weiter"
               size="lg"
-              onClick={() => onFertig(eingestellt.id)}
+              onClick={() => {
+                // Erst still, dann weiter: das Abräumen erst im Unmount ließe
+                // die Loop über die Ausblende des Screens hinweg laufen.
+                klang.current?.zerstoere()
+                onFertig(eingestellt.id)
+              }}
               data-testid="radio-weiter"
             >
               Der läuft bei mir

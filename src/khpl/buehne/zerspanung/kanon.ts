@@ -123,6 +123,79 @@ export const TEIL = {
 export type MassId = 'laenge' | 'schaft' | 'sitz' | 'fase'
 
 // ---------------------------------------------------------------------------
+// Z1 — die Leiter der Genauigkeit
+// ---------------------------------------------------------------------------
+
+/**
+ * Eine Stufe der Genauigkeits-Leiter (Z1), von grob nach fein.
+ *
+ * **Drei Stufen, nicht mehr.** Der Screen ist der Einstieg in den Tag; wer
+ * hier zwischen fünf und zwei Hundertsteln unterscheiden muss, hat die
+ * Lektion verloren, bevor sie anfängt. Die Frage ist nicht „wie viel genau“,
+ * sondern „in welcher Größenordnung“ — und die drei Größenordnungen sind
+ * Millimeter, Zehntel, Hundertstel.
+ */
+export type StufeId = 'millimeter' | 'zehntel' | 'hundertstel'
+
+export interface Stufe {
+  id: StufeId
+  /** Wie die Stufe heißt — auf der Bühne und auf der Kachel dasselbe Wort. */
+  name: string
+  /** Das Maß in Zahlen, kurz. */
+  zahl: string
+  /**
+   * Woran man diese Dicke kennt. **Der Anker ist der ganze Screen:**
+   * „ein Hundertstel Millimeter“ ist eine Zahl, „dünner als ein Haar“ ist
+   * etwas, das man schon mal in der Hand hatte.
+   */
+  anker: string
+  /** Wie breit der Spalt auf der Bühne gezeichnet wird, in Zeicheneinheiten. */
+  spalt: number
+}
+
+/**
+ * Die drei Stufen, grob nach fein — Reihenfolge = Reihenfolge auf der Bühne
+ * und auf den Kacheln.
+ *
+ * **Fachlich:** Kopierpapier (80 g/m²) ist rund 0,1 mm dick, ein
+ * menschliches Haar 0,04 bis 0,1 mm — bei 0,06 mm sind das sechs
+ * Hundertstel. Beide Anker sind Lehrbuchwerte und zeitstabil; die Formel
+ * „sechsmal dünner als ein Haar“ bleibt deshalb auch am oberen Rand der
+ * Spanne im Bereich „deutlich dünner“.
+ */
+export const STUFEN = [
+  {
+    id: 'millimeter',
+    name: 'Millimeter',
+    zahl: '1 mm',
+    anker: 'zehn Blatt Papier',
+    spalt: 10,
+  },
+  {
+    id: 'zehntel',
+    name: 'Zehntel',
+    zahl: '0,1 mm',
+    anker: 'ein Blatt Papier',
+    spalt: 3.4,
+  },
+  {
+    id: 'hundertstel',
+    name: 'Hundertstel',
+    zahl: '0,01 mm',
+    anker: 'dünner als ein Haar',
+    spalt: 1,
+  },
+] as const satisfies readonly Stufe[]
+
+/** Z1 — was schon auf der Leiter liegt. */
+export interface MassstabZustand {
+  /** Das Einsortierte, in der Reihenfolge, in der es gelandet ist. */
+  platziert: readonly { kurz: string; stufe: StufeId }[]
+  /** Das zuletzt Gelandete — es hebt sich heraus. `null` = noch nichts. */
+  zuletzt: string | null
+}
+
+// ---------------------------------------------------------------------------
 // Z3 — die NC-Sätze, die die Werkzeugweg-Bühne fährt
 // ---------------------------------------------------------------------------
 
