@@ -17,7 +17,7 @@ export function Platzhalter({ id }: { id: StepId }) {
   return (
     <StepShell
       id={id}
-      // TODO(vereinfachung): Auftragszeile und Ansage nachtragen — khpl-vereinfachung.md §6.
+      // TODO(vereinfachung): Auftragszeile und Ansage nachtragen.
       auftrag={null}
       ansage={null}
       titelZusatz={def.art === 'abstecher' ? 'Abstecher' : undefined}

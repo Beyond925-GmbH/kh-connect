@@ -41,8 +41,8 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'Z2',
     tat: {
-      erledigt: 'eine CNC-Maschine gerüstet',
-      gesehen: 'beim Rüsten zugesehen',
+      erledigt: 'eine CNC-Maschine eingerichtet',
+      gesehen: 'zugesehen, wie eine CNC-Maschine eingerichtet wird',
       geloest: (f) => !!f.answers.z2?.gespannt,
     },
   },
@@ -57,15 +57,15 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'Z4',
     tat: {
-      erledigt: 'ein Probeteil gemessen und die Serie freigegeben',
-      gesehen: 'ein Probeteil gemessen',
+      erledigt: 'das erste Teil gemessen und die Serie freigegeben',
+      gesehen: 'das erste Teil gemessen',
       geloest: (f) => !!f.answers.z4?.freigegeben,
     },
   },
   {
     id: 'Z6',
     tat: {
-      erledigt: 'eine laufende Serie im Maß gehalten',
+      erledigt: 'dafür gesorgt, dass die Teile gleich bleiben, während die Serie läuft',
       gesehen: 'eine Serie laufen sehen',
       geloest: (f) => !!f.answers.z6?.stabil,
     },
@@ -91,8 +91,9 @@ export function Z7() {
       buehne={<StepFoto id="Z7" />}
       warum={
         <p>
-          Halb drei. Deine Maschine läuft weiter — die Spätschicht übernimmt sie, mitsamt
-          Korrektur und Stichprobenplan. Du brauchst dafür genau zwei Sätze.
+          Halb drei. Deine Maschine läuft weiter — die Spätschicht übernimmt sie, mit
+          deiner Korrektur und deinem Stichprobenplan: wann sie nachmessen muss. Das alles
+          passt in zwei Sätze.
         </p>
       }
       interaktion={

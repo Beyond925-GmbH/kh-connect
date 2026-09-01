@@ -5,7 +5,7 @@ import { ANSICHTEN, KAMERA } from '@/drei/kamera'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 /**
- * Bedienleiste der Demo (Bauplan 6.5). Der Regler schreibt direkt in den
+ * Bedienleiste der Demo. Der Regler schreibt direkt in den
  * Fortschritts-Ref — kein React-State pro Frame.
  */
 export function DebugLeiste({

@@ -8,12 +8,12 @@ import { StepShell } from '@/khpl/shell/StepShell'
 /**
  * M3 — Aus dem Angebot wird ein Auftrag.
  *
- * **Reiner Lese-Step, keine Übung** (khpl-flow.md 7 M3). Nach zwei Übungen in
+ * **Reiner Lese-Step, keine Übung.** Nach zwei Übungen in
  * Folge braucht der Rhythmus eine ruhige Stelle — das ist eine Entscheidung
  * über den Takt der ganzen Anwendung, nicht eine Lücke.
  *
  * Hier werden die beiden losen Board-Stickies `CAD` und `Abbund` als
- * Begriffs-Popover eingelöst (flow 6.3). Danach die erste Verzweigung.
+ * Begriffs-Popover eingelöst. Danach die erste Verzweigung.
  *
  * **Bühne: der Abbundplan selbst.** Der Fachtext spricht vom Plan, in dem jedes
  * Holz mit Länge, Winkel und Nummer steht — bis hierher lag daneben ein Foto
@@ -36,7 +36,7 @@ const Dachstuhl3D = lazy(() => import('@/khpl/buehne/Dachstuhl3D'))
 
 export function M3() {
   // Die Aha-Karte kommt einen Takt später. Sie ist ein Einwurf, keine Ansage —
-  // erst liest man, was passiert, dann kommt der Kommentar dazu (flow 6.4).
+  // erst liest man, was passiert, dann kommt der Kommentar dazu.
   const [aha, setAha] = useState(false)
   useEffect(() => {
     const id = window.setTimeout(() => setAha(true), 900)
@@ -58,24 +58,24 @@ export function M3() {
         </Suspense>
       }
       warum={
-        // Wortlaut aus flow 11 (M3), zweimal ergänzt: die beiden losen
-        // Board-Stickies `CAD` und `Abbund` sind laut 6.3 hier einzulösen,
-        // kommen im Entwurfstext aber nicht vor. Und der Halbsatz „du musst
-        // noch keins davon lesen können“ lizenziert das Nichtwissen (R10):
+        // Zweimal ergänzt gegenüber dem Entwurfstext: die beiden losen
+        // Board-Stickies `CAD` und `Abbund` werden hier eingelöst, kommen
+        // dort aber nicht vor. Und der Halbsatz „du musst noch keins davon
+        // lesen können“ lizenziert das Nichtwissen:
         // die Zeichnung zeigt ~15 Sparren auf einmal, und ohne diesen Satz
         // liest ein Anfänger sie als Prüfung statt als Ausblick. Dafür ist
         // „Parallel stimmst du Termine ab“ zu „Danach müssen …“ gekürzt.
         <p>
           Unterschrieben. Jetzt wird gezeichnet: jedes Holz mit Länge, Winkel und eigener
           Nummer — du musst noch keins davon lesen können. Diese Zeichnung heißt{' '}
-          <Begriff id="abbundplan">Abbundplan</Begriff>. Danach müssen Bauherr, Kran und
-          Gerüst am selben Tag können.
+          <Begriff id="abbundplan">Abbundplan</Begriff>. Danach müssen Kunde, Kran und
+          Gerüst alle am selben Tag Zeit haben.
         </p>
       }
       aha={
         <AhaKarte sichtbar={aha} eyebrow="Was passiert, wenn es regnet?">
-          Kran, Wetter, Lieferung und Gerüst müssen zusammenpassen — ein verregneter Tag
-          verschiebt die ganze Kette.
+          Kran, Wetter, Lieferung und Gerüst müssen zusammenpassen. Ein einziger Regentag
+          verschiebt alles Weitere mit.
         </AhaKarte>
       }
       fuss={<StepFuss id="M3" />}

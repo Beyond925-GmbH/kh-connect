@@ -1,151 +1,134 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { VERLUSTFLAECHEN } from '@/khpl/buehne/anlagenmechanik/zeichnung'
 import { Lage } from '@/khpl/komponenten/Lage'
+import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
-import { Fachwort } from './Fachwort'
 
 /**
- * A3 — Wie viel Wärme braucht ein Haus? **Der eine Schätzmoment dieses Tages**
- * (khpl-tage.md 1, Mechanismus 3) und der Screen, der `sinn: 1` einlöst.
- *
- * **Die Reihenfolge der Auflösung ist nach den Interviews gedreht** (Spec 1
- * und 6): zuerst steht da, dass es in diesem Haus im Winter warm ist — dasselbe
- * warm wie vorher, für die Familie ändert sich nichts. **Danach** kommt, womit.
- * Die Klimabilanz ist die zweite Zeile, nicht die Überschrift. Der Grund: der
- * eine Azubi, der direkt nach dem Umweltbeitrag gefragt wurde, musste
- * nachdenken und antwortete über Fahrtwege. Nach dem Beitrag überhaupt gefragt,
- * antwortete derselbe Beruf ohne Zögern über warme Wohnungen.
- *
- * **Vorsicht bei der Tonlage:** kein Werbescreen, keine Wertung des
- * Vorbesitzers, keine Politik. Zwei Zahlen nebeneinander und ein Satz. Wer eine
- * Ölheizung zu Hause hat, sitzt vielleicht daneben — deshalb steht auf dem
- * Screen, dass die alte Anlage kein Fehler war, sondern jahrzehntelang
- * Standard.
- *
- * **Was auf diesem Screen steht und was nicht** (Spec 6 und 11):
- *
- *  - **Heizlast 10–14 kW** für das Referenzhaus — `BELEGT` nach DIN EN 12831,
- *    zeitstabil. Als **Fenster**, nicht als Punktwert: eine Faustformel liegt
- *    im Einzelfall um ±20 % daneben, und verbindlich ist nur die raumweise
- *    Berechnung.
- *  - **CO₂ 7,4 t → 2,4 t im Jahr** — `BELEGT` (UBA-Strommix 344 g/kWh, 2025
- *    vorläufig; JAZ 3,4 aus der Feldmessung des Fraunhofer ISE). Mit sichtbarem
- *    **Stand**, weil beide Faktoren jährlich neu kommen.
- *  - **Keine Euro-Beträge.** Öl- und Strompreis sind Tagespreise (Öl streut
- *    1,00–1,39 €/l); die Spec empfiehlt ausdrücklich, sie wegzulassen und die
- *    CO₂-Zeile zu zeigen — sie ist die stabilere und für diesen Beruf die
- *    wichtigere. Ein Kiosk läuft an vielen Tagen über Monate.
+ * A3 — Wie viel Wärme braucht dieses Haus? **Der eine Schätzmoment dieses
+ * Tages** und der Screen, der `sinn: 1`
+ * einlöst — und seit diesem Umbau wieder wirklich ein Schätzmoment.
  *
  * ---
  *
  * **Was hier umgebaut wurde und warum.**
  *
- * Der Screen war ein Regler von 2 bis 30 Kilowatt: „Schätz, wie viel Wärme
- * dieses Haus braucht." Zwei Dinge sprachen dagegen.
+ * Die Vorfassung ließ vier Verlustflächen auf dem Schnitt suchen (Dach, Wand,
+ * Fenster, Kellerdecke, je mit Balken und Satz), nannte DIN EN 12831, öffnete
+ * einen Dialog mit der Faustformel und stellte die Jahresbilanz alt gegen neu
+ * als Tabelle mit Standvermerk daneben. Jedes Stück für sich begründet —
+ * zusammen fünf Ideen auf einem Kiosk-Screen, an dem jemand mit vierzehn im
+ * Vorbeigehen steht. Abgenommen wurde: **zu komplex.** Der Screen hat jetzt
+ * genau einen Bogen: *rate, sieh die echte Zahl, versteh, was sie heißt.*
  *
- *  1. **Kilowatt ist für die Zielgruppe kein Anker.** Ein Schätzmoment lebt
- *     davon, dass eine Vorstellung widerlegt wird (M2: der Dachpreis). Wer
- *     nie mit Kilowatt umgegangen ist, hat keine Vorstellung,
- *     die widerlegt werden könnte — er zieht irgendwohin, und die Auflösung
- *     korrigiert nichts.
- *  2. **Es war der dritte Rate-Regler der Anwendung** (M2, C2, A3) und der
- *     zweite in diesem Tag (A6 ist der andere).
+ * **Geraten wird in Wasserkochern, nicht in Kilowatt.** Der alte kW-Regler
+ * flog seinerzeit zu Recht raus: ein Schätzmoment lebt davon, dass eine
+ * Vorstellung widerlegt wird, und „14 Kilowatt" ist für die Zielgruppe keine
+ * Vorstellung. Die Flächensuche, die ihn ersetzte, hatte aber gar keinen
+ * Schätzmoment mehr — und A3 ist der eine dieses Tages.
+ * Der Ausweg: dieselbe Zahl in einer Einheit, zu der jeder eine Vorstellung
+ * hat. Ein Wasserkocher aus der Küche zieht rund 2 kW; die Heizlast des
+ * Referenzhauses liegt nach DIN EN 12831 bei 10–14 kW — macht ehrlich
+ * gerundet **fünf bis sieben
+ * Wasserkocher, alle gleichzeitig**. Drei Antippflächen statt eines Reglers:
+ * der abgeschaffte dritte Rate-Regler der Anwendung kommt nicht zurück, und
+ * `tippen` braucht keine Ansage (`komponenten/gesten.ts`).
  *
- * Statt zu raten, **sucht** der Besucher jetzt: Er tippt die vier Flächen an,
- * über die dieses Haus seine Wärme verliert — Dach, Außenwand, Fenster,
- * Kellerdecke. Jede meldet ihren Anteil als Pfeil auf der Zeichnung. Erst
- * wenn alle vier gefunden sind, steht die Heizlast da, und dann steht sie als
- * **Ergebnis des Hinsehens** und nicht als Auflösung eines Ratespiels.
+ * **Die Reihenfolge der Auflösung kommt aus den Interviews:** zuerst steht
+ * da, dass es in diesem Haus im Winter warm bleibt —
+ * dasselbe warm wie vorher, für die Familie ändert sich nichts. Danach die
+ * Zahl. Die Klimazeile ist die zweite Zeile, nicht die Überschrift, und auf
+ * einen Satz mit Gewichts-Anker eingedampft: 7,4 → 2,4 t CO₂ im Jahr
+ * (UBA-Strommix 344 g/kWh, 2025 vorläufig; JAZ 3,4 aus der
+ * Feldmessung des Fraunhofer ISE) sind rund 5 t gespart — so viel wiegen vier
+ * kleine Autos à gut einer Tonne. **Tonlage unverändert:** kein Werbescreen, keine
+ * Wertung des Vorbesitzers, keine Politik. Wer eine Ölheizung zu Hause hat,
+ * sitzt vielleicht daneben — deshalb steht weiter auf dem Screen, dass die
+ * alte Anlage kein Fehler war, sondern jahrzehntelang normal.
  *
- * ⚠️ **Damit hat dieser Tag keinen Schätzmoment mehr**, und khpl-tage.md 1
- * führt A3 als „den einen Schätzmoment dieses Tages" (Mechanismus 3). Das ist
- * **gemeldet und nicht heimlich geändert**: Der Mechanismus bleibt der
- * Anwendung erhalten (M2 beim Dachdecker, C2 beim Zimmerer), und der Grund für
- * die Abweichung — Kilowatt taugt nicht als Schätzgröße für Sechzehnjährige —
- * gehört mit der Copy abgenommen.
+ * **Was der Kürzung zum Opfer fiel:** die DIN-Nennung, die Tabelle
+ * Verbrauch/CO₂, der Formel-Dialog, die Vier-Flächen-Suche samt Balken. Die
+ * Herkunft der Zahlen steht als leiser Schlusssatz direkt in der Auflösung —
+ * der Stand bleibt damit auf dem Screen, als ein Satz statt als
+ * Fußnotenblock. **Bewusst keine `AhaKarte` und kein tragendes `warum`:** die
+ * `StepShell` friert `leseStep` beim Mounten ein (`auftrag !== null` ⇒
+ * Übungs-Step), und Übungs-Steps zeigen die Klappzeile mit `warum` und `aha`
+ * nicht an — beides erschiene erst beim Wiederbesuch. Was der Screen braucht,
+ * steht deshalb inline: die Hausdaten im Rate-Takt, der Stand in der
+ * Auflösung; `warum` bleibt nur als Zugabe für den Wiederbesuch deklariert.
+ * Wer alt gegen neu ausführlich sehen will, bekommt dafür den Abstecher A3.1
+ * „Wärmepumpe gegen Ölkessel" angeboten (`StepFuss` leitet ihn aus dem
+ * Graphen ab). **Keine Euro-Beträge**, wie gehabt: Öl- und Strompreis sind
+ * Tagespreise, ein Kiosk läuft Monate.
  *
- * **Ein Balken, keine Zahl je Fläche.** Wie viel ein Dach wirklich verliert,
- * hängt an Dämmstärke, Fläche und Baujahr; eine Zahl je Fläche wäre erfunden.
- * Der Anteil ist deshalb relativ, wie der Druckverlust in A4 — die eine
- * belegte Zahl des Screens ist die Heizlast, und sie steht in der Auflösung.
+ * **Die Bühne bleibt dieselbe** (`Schnitt`, Szene `haus`), nur passiv: solange
+ * geraten wird, verliert das kalte Haus sichtbar Wärme (`Waermebedarf` in
+ * `Haus.tsx`); mit der Auflösung färbt es sich zum ersten Mal, und die vier
+ * Pfeile aus `VERLUSTFLAECHEN` zeigen, wo die Wärme rausgeht — als das eine
+ * einfache Bild des Screens, nicht mehr als Tipp-Aufgabe.
  *
- * **`answers.a3`** `{ verluste, aufgeloest }`.
+ * **`answers.a3`** `{ tipp }` — die Auflösung folgt dem Tipp sofort, ein
+ * eigenes `aufgeloest`-Flag trüge also nichts; der Rückblick in A7 liest
+ * direkt `tipp`. Die Form prüft `pruefeAntworten` in `store/fortschritt.ts`.
  */
 
 // ---------------------------------------------------------------------------
-// Text und Zahlen — gebündelt oben (flow 8.4)
+// Text und Zahlen — gebündelt oben
 // ---------------------------------------------------------------------------
 
-/**
- * Was jede Verlustfläche über sich erzählt, wenn man sie antippt.
- *
- * **Je ein Satz, kein Fachtext.** Die Fläche ist schon markiert, der Pfeil
- * zeigt schon die Richtung; der Satz sagt nur, warum ausgerechnet dort so viel
- * hinausgeht. Reihenfolge und Ids kommen aus `VERLUSTFLAECHEN`.
- */
-const VERLUST_TEXT: Record<string, string> = {
-  dach: 'Wärme steigt nach oben, und über dem Obergeschoss liegt nichts als alte Dachpfannen. Die größte Fläche und die dünnste Stelle zugleich.',
-  wand: 'Fünfunddreißig Zentimeter Mauerwerk, außen nichts davor. Das war 1972 normal — heute ist es die Fläche, an der am meisten zu holen ist.',
-  fenster:
-    'Zweifach verglast, Rahmen aus Holz. Ein Quadratmeter Fenster verliert ein Vielfaches von einem Quadratmeter gedämmter Wand.',
-  keller:
-    'Der Keller wird nicht beheizt und ist trotzdem nur eine Betondecke vom Wohnzimmer entfernt. Kalte Füße kommen von hier.',
-}
-
-/** Das belegte Zielfenster für das Referenzhaus, in Kilowatt. */
+/** Das Zielfenster für das Referenzhaus, in Kilowatt (DIN EN 12831). */
 const ZIEL = { von: 10, bis: 14 } as const
 
-/** Das Referenzhaus aus `belege/anlagenmechanik.md` — dieselben Annahmen überall. */
-const HAUS = { flaeche: 140, spezifisch: { von: 70, bis: 100 } } as const
+/** Dieselbe Zahl in Wasserkochern à ~2 kW — der Anker, in dem geraten wird. */
+const KOCHER = { von: 5, bis: 7 } as const
 
-const BILANZ = [
-  {
-    was: 'Verbrauch',
-    vorher: '≈ 2.800 l Heizöl',
-    nachher: '≈ 7.000 kWh Strom',
-    gross: false,
-  },
-  // Die eine Zahl, für die dieser Screen gebaut ist: von 7,4 auf 2,4 Tonnen.
-  // Groß genug, um zu wirken, klein genug, um vorstellbar zu bleiben.
-  { was: 'CO₂ im Jahr', vorher: '7,4 t', nachher: '2,4 t', gross: true },
+/**
+ * Die drei Antworten, die man antippen kann.
+ *
+ * Deutlich auseinander, damit die eigene Vorstellung wirklich widerlegt oder
+ * bestätigt wird — 2 ist „ein Zimmer", 20 ist „ein halbes Schwimmbad". Die Ids
+ * sind Wörter statt Zahlen, weil sie als `answers.a3.tipp` in den Store gehen.
+ */
+const TIPPS = [
+  { id: 'zwei', label: '2 Wasserkocher' },
+  { id: 'sechs', label: '6 Wasserkocher' },
+  { id: 'zwanzig', label: '20 Wasserkocher' },
 ] as const
 
-const STAND =
-  'Angenommen: Jahresarbeitszahl 3,4 aus einer Feldmessung des Fraunhofer ISE an 77 Anlagen im Bestand. CO₂ je Kilowattstunde Strom: 344 Gramm, Umweltbundesamt für 2025, vorläufig. Stand der Rechnung: August 2026.'
+/**
+ * Die Reaktion auf den eigenen Tipp: Danebenliegen ist Inhalt, nie
+ * Versagen. Der Fallback fängt einen manipulierten oder uralten Store ab.
+ */
+function einordnung(tipp: string): string {
+  switch (tipp) {
+    case 'zwei':
+      return 'Du hast auf 2 getippt — es ist mehr. So ein altes Haus verliert viel Wärme. Mehr, als man denkt.'
+    case 'sechs':
+      return 'Du hast auf 6 getippt — Volltreffer. Genau in dem Bereich liegt es.'
+    case 'zwanzig':
+      return 'Du hast auf 20 getippt — ganz so viel ist es nicht. Aber die Richtung stimmt: Ein Haus braucht richtig viel.'
+    default:
+      return 'Genau in diesem Bereich liegt es.'
+  }
+}
+
+/** Nach der Auflösung zeigt die Zeichnung alle vier Verlustpfeile — als Bild. */
+const ALLE_VERLUSTE = VERLUSTFLAECHEN.map((f) => f.id)
 
 export function A3() {
   const gespeichert = useFortschritt().answers.a3
-  const [verluste, setVerluste] = useState<string[]>(() => gespeichert?.verluste ?? [])
-  const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
-  /** Welche Fläche gerade erklärt wird — nur Anzeige, nicht Fortschritt. */
-  const [offen, setOffen] = useState<string | null>(() => null)
+  const [tipp, setTipp] = useState<string | null>(() => gespeichert?.tipp ?? null)
+  // Ein Tipp löst sofort auf — der eine Bogen dieses Screens.
+  const aufgeloest = tipp !== null
 
-  const alle = verluste.length >= VERLUSTFLAECHEN.length
-
-  const tippe = (id: string) => {
-    setOffen(id)
-    if (verluste.includes(id)) return
-    const neu = [...verluste, id]
-    setVerluste(neu)
-    merkeAntwort('a3', { verluste: neu, aufgeloest: false })
-  }
-
-  const aufloesen = () => {
-    setAufgeloest(true)
-    merkeAntwort('a3', { verluste, aufgeloest: true })
+  const rate = (id: string) => {
+    setTipp(id)
+    merkeAntwort('a3', { tipp: id })
   }
 
   return (
@@ -154,60 +137,48 @@ export function A3() {
       auftrag={
         aufgeloest
           ? null
-          : alle
-            ? 'Rechne die Heizlast nach.'
-            : 'Tipp an, wo dieses Haus seine Wärme verliert.'
+          : // „Am kältesten Wintertag": die 10–14 kW sind die Heizlast des
+            // Auslegungstags, nicht ein Winter-Dauerwert — die Frage muss
+            // dieselbe Zahl meinen wie die Auflösung.
+            'Rate: Wie viele Wasserkocher bräuchte es, um dieses Haus am kältesten Wintertag warm zu halten?'
       }
-      // Antippen erklärt sich selbst; die vier Flächen tragen einen limetten
-      // Ring, solange sie nicht gefunden sind (`komponenten/gesten.ts`).
+      // Drei Antippflächen erklären sich selbst; `tippen` bekommt nie eine
+      // Ansage (`komponenten/gesten.ts`).
       ansage={null}
-      buehneInteraktiv={!aufgeloest}
       interaktionOffen={!aufgeloest}
-      // Die Schätzphase bleibt schmal und konzentriert; die Auflösung braucht
-      // die Breite für den Zweispalter aus Zahl und Jahresbilanz.
-      karteBreit={aufgeloest}
       buehne={
+        // Passiv: kein `onVerlust`. Vor der Auflösung verliert das kalte Haus
+        // sichtbar Wärme, danach färbt es sich und die vier Pfeile stehen da.
         <Schnitt
-          zustand={{ szene: 'haus', verluste, offen, aufgeloest }}
-          onVerlust={aufgeloest ? undefined : tippe}
+          zustand={{
+            szene: 'haus',
+            verluste: aufgeloest ? ALLE_VERLUSTE : [],
+            offen: null,
+            aufgeloest,
+          }}
         />
       }
+      // Nur eine Zugabe für den Wiederbesuch: beim ersten Besuch ist A3 ein
+      // Übungs-Step und zeigt die Klappzeile nicht (siehe Kopfkommentar) —
+      // die Hausdaten stehen deshalb zusätzlich inline im Rate-Takt.
       warum={
-        aufgeloest ? undefined : (
-          <p>
-            Einfamilienhaus, Baujahr in den Siebzigern. {HAUS.flaeche} Quadratmeter
-            Wohnfläche, nie gedämmt, Ölheizung im Keller. Wie viel Leistung so ein Haus am
-            kältesten Tag braucht, heißt <Fachwort id="heizlast">Heizlast</Fachwort> — und
-            sie hängt an Dämmung, Fläche und Fenstern, nicht am Wunschdenken.
-          </p>
-        )
+        <p>
+          Einfamilienhaus aus den Siebzigern, 140 Quadratmeter, nie gedämmt. Im Keller
+          steht eine alte Ölheizung. Durch Dach, Wände und Fenster geht viel Wärme
+          verloren — dafür wird gerade eine neue Heizung geplant.
+        </p>
       }
       interaktion={
-        <Wechsel takt={aufgeloest ? 'aufgeloest' : (offen ?? 'suchen')}>
-          {aufgeloest ? <Aufloesung /> : <Suche verluste={verluste} offen={offen} />}
+        <Wechsel takt={aufgeloest ? 'aufgeloest' : 'raten'}>
+          {aufgeloest ? <Aufloesung tipp={tipp} /> : <Frage onTipp={rate} />}
         </Wechsel>
       }
       fuss={
         <StepFuss
           id="A3"
           uebungOffen={!aufgeloest}
-          aktion={
-            aufgeloest ? null : (
-              <Button
-                variant="aktion"
-                onClick={aufloesen}
-                disabled={!alle}
-                data-testid="a3-aufloesen"
-                // `grayscale` zusätzlich zur Deckkraft: Ob der Knopf „noch
-                // nicht" oder „jetzt" sagt, muss man am Kiosk im Vorbeigehen
-                // sehen (R8, wie in A4).
-                className="disabled:grayscale"
-              >
-                Nachrechnen
-              </Button>
-            )
-          }
-          geschafft={aufgeloest ? 'Ausgelegt' : null}
+          aktion={null}
+          geschafft={aufgeloest ? 'Geschätzt' : null}
         />
       }
     />
@@ -215,168 +186,117 @@ export function A3() {
 }
 
 // ---------------------------------------------------------------------------
-// Takt 1 — suchen
+// Takt 1 — raten
 // ---------------------------------------------------------------------------
 
-/**
- * Was im Panel steht, während die vier Flächen gesucht werden.
- *
- * **Eine Ergebnisfläche, kein Stapel** — dieselbe Lösung wie in A1: Die zweite
- * Fläche schreibt ihren Satz dorthin, wo die erste stand. Was schon gefunden
- * ist, steht als Pfeil auf der Zeichnung und muss im Panel nicht noch einmal
- * aufgezählt werden.
- */
-function Suche({ verluste, offen }: { verluste: string[]; offen: string | null }) {
-  const flaeche = VERLUSTFLAECHEN.find((f) => f.id === offen)
-  const fehlen = VERLUSTFLAECHEN.length - verluste.length
-
+function Frage({ onTipp }: { onTipp: (id: string) => void }) {
   return (
     <div className="flex flex-col gap-3">
+      {/* Die Hausdaten inline: das `warum` der Hülle erscheint auf
+          Übungs-Steps nicht (siehe Kopfkommentar), und ohne diese Zeile rät
+          man über ein Haus, von dem man nichts weiß. */}
+      <p className="px-1 text-[1rem] text-kh-paper/70">
+        Das Haus: gebaut in den Siebzigern, 140 Quadratmeter, nie gedämmt. Im Keller steht
+        eine alte Ölheizung.
+      </p>
+
       {/*
-        **Der Einsatz, sichtbar.** Auf Übungs-Steps zeigt die Hülle den
-        Warum-Bereich nicht an (`komponenten/Lage.tsx`); ohne diese Zeile tippt
-        man auf ein Haus, ohne zu wissen, wofür. Der Einsatz ist konkret und
-        teuer: Danach wird eine Anlage bestellt.
+        Der Einsatz, sichtbar (`komponenten/Lage.tsx`): ohne diese Zeile tippt
+        man auf Wasserkocher, ohne zu wissen, wofür. Er ist konkret und teuer —
+        danach wird eine Anlage bestellt.
       */}
       <Lage>
-        Bevor eine Wärmepumpe bestellt wird, muss feststehen, wie viel Wärme dieses Haus
-        überhaupt braucht. Zu klein gekauft friert die Familie, zu groß gekauft zahlt sie
-        jahrelang drauf.
+        Bevor die neue Heizung bestellt wird, muss klar sein, wie viel Wärme dieses Haus
+        braucht. Zu klein: Die Familie friert. Zu groß: Sie zahlt drauf.
       </Lage>
 
-      {flaeche ? (
-        <div className="kh-feld px-4 py-3" data-testid="a3-verlust">
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="kh-etikett">{flaeche.label}</p>
-            <span className="text-[0.9375rem] text-kh-mute">
-              {flaeche.staerke >= 0.9
-                ? 'größter Anteil'
-                : flaeche.staerke >= 0.6
-                  ? 'großer Anteil'
-                  : 'kleinerer Anteil'}
-            </span>
-          </div>
-          {/* Ein Balken, keine Zahl — dieselbe Währung wie der Druckverlust in
-              A4, und aus demselben Grund (`VERLUSTFLAECHEN`). */}
-          <div className="mt-2 h-2.5 w-full overflow-hidden rounded-full border border-kh-line bg-white/10">
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: flaeche.staerke }}
-              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-              style={{ transformOrigin: 'left' }}
-              className="h-full rounded-full bg-kh-orange/45 ring-1 ring-kh-orange ring-inset"
-              aria-hidden
-            />
-          </div>
-          <p className="mt-2 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-            {VERLUST_TEXT[flaeche.id]}
-          </p>
-        </div>
-      ) : (
-        <p className="px-1 text-[1rem] text-kh-paper/70">
-          Vier Flächen, über die es warm nach draußen geht. Wie viel jede davon kostet,
-          hängt an Dämmung und Fläche — deshalb steht hier ein Balken und keine Zahl.
-        </p>
-      )}
-
-      <p className="text-[0.9375rem] text-kh-mute" data-testid="a3-fehlen">
-        {fehlen > 0
-          ? `Noch ${fehlen} von ${VERLUSTFLAECHEN.length} Flächen.`
-          : 'Alle vier gefunden. Jetzt lässt sich die Heizlast rechnen.'}
+      {/* Der Raten-Haken, in Panel-Form statt als Ansage: Wortlaut und Grund
+          wie `RATEN_HAKEN` (gesten.ts), aber `tippen` bekommt keine Ansage. */}
+      <p className="px-1 text-[1rem] text-kh-paper/70">
+        Wissen kann das niemand — tipp einfach. Gleich siehst du die echte Zahl.
       </p>
+
+      <div className="flex flex-col gap-2">
+        {TIPPS.map((t) => (
+          <Wahlflaeche
+            key={t.id}
+            form="zeile"
+            onClick={() => onTipp(t.id)}
+            data-testid={`a3-tipp-${t.id}`}
+          >
+            {t.label}
+          </Wahlflaeche>
+        ))}
+      </div>
     </div>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Takt 2 — auflösen. Zuerst das warme Haus, dann die Zahl, dann die Bilanz.
+// Takt 2 — auflösen. Zuerst das warme Haus, dann die Zahl, dann das Klima.
 // ---------------------------------------------------------------------------
 
-function Aufloesung() {
+function Aufloesung({ tipp }: { tipp: string }) {
   return (
     <motion.div
       initial="aus"
       animate="an"
       variants={{ an: { transition: { staggerChildren: 0.55 } } }}
-      className="flex flex-col gap-4 landscape:grid landscape:grid-cols-[1fr_1.05fr] landscape:items-start landscape:gap-x-7"
+      className="flex flex-col gap-4"
     >
-      <div className="flex flex-col gap-3">
-        {/* Zuerst der Mensch, dann die Bilanz (Spec 1). */}
-        <Takt>
-          <p className="kh-titel-klein text-kh-paper" data-testid="a3-warm">
-            Warm bleibt es.
-          </p>
-          <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
-            Genauso warm wie vorher. Für die Familie, die hier wohnt, ändert sich im
-            Winter nichts — außer, dass niemand mehr Öl bestellt.
-          </p>
-        </Takt>
-
-        <Takt>
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span data-testid="a3-ziel" className="kh-zahl text-kh-orange">
-              {ZIEL.von}–{ZIEL.bis}
-            </span>
-            <span className="font-display text-[1.5rem] leading-none text-kh-orange">
-              kW
-            </span>
-          </div>
-          {/* Der Körper-Anker zur Zahl (R12): ein Wasserkocher zieht rund
-              zwei Kilowatt — das kennt jeder aus der Küche. */}
-          <p className="mt-2 text-[1rem] leading-[1.4] text-kh-mute">
-            {ZIEL.von} bis {ZIEL.bis} Kilowatt — so viel ziehen fünf bis sieben
-            Wasserkocher gleichzeitig.
-          </p>
-          <div className="pt-2.5">
-            <Rechnung />
-          </div>
-        </Takt>
-      </div>
+      {/* Zuerst der Mensch, dann die Zahl — die Reihenfolge aus den Interviews. */}
+      <Takt>
+        <p className="kh-titel-klein text-kh-paper" data-testid="a3-warm">
+          Warm bleibt es.
+        </p>
+        <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
+          In den Keller kommt eine Wärmepumpe statt der alten Ölheizung. Genauso warm wie
+          vorher — für die Familie ändert sich im Winter nichts. Nur Öl bestellt niemand
+          mehr.
+        </p>
+      </Takt>
 
       <Takt>
-        <div className="flex flex-col" data-testid="a3-bilanz">
-          <div className="flex items-baseline justify-between gap-3 pb-1.5">
-            <span className="kh-etikett">Vorher · Ölkessel</span>
-            <span className="kh-etikett">Nachher · Wärmepumpe</span>
-          </div>
-          {BILANZ.map((z) => (
-            <div key={z.was} className="border-b border-kh-line py-2 last:border-0">
-              <p className="text-[0.9375rem] text-kh-mute">{z.was}</p>
-              <div className="flex items-baseline justify-between gap-3">
-                <span
-                  className={`text-kh-paper tabular-nums ${
-                    z.gross
-                      ? 'font-display text-[clamp(1.6rem,1.2rem+1.1vw,2.1rem)] leading-none'
-                      : 'text-[1.0625rem]'
-                  }`}
-                >
-                  {z.vorher}
-                </span>
-                <span
-                  className={`tabular-nums ${
-                    z.gross
-                      ? 'font-display text-[clamp(1.6rem,1.2rem+1.1vw,2.1rem)] leading-none text-kh-orange'
-                      : 'text-[1.0625rem] text-kh-paper'
-                  }`}
-                >
-                  {z.nachher}
-                </span>
-              </div>
-            </div>
-          ))}
-          {/* 7,4 t brauchen einen Körper-Anker (R12): ein Kleinwagen wiegt
-              rund anderthalb Tonnen. */}
-          <p className="mt-2.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
-            7,4 Tonnen — das wiegt so viel wie fünf Kleinwagen.
-          </p>
-          <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
-            Dieselbe Wärme, ein Bruchteil der Energie. Die alte Ölheizung war kein Fehler
-            — sie war jahrzehntelang Standard.
-          </p>
-          {/* Der Stand gehört auf den Screen und nicht in eine Fußnote: die
-              beiden Faktoren dahinter kommen jedes Jahr neu (Spec 11). */}
-          <p className="mt-2 text-[0.875rem] leading-[1.4] text-kh-mute/80">{STAND}</p>
+        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <span data-testid="a3-ziel" className="kh-zahl text-kh-orange">
+            {KOCHER.von}–{KOCHER.bis}
+          </span>
+          <span className="font-display text-[1.5rem] leading-none text-kh-orange">
+            Wasserkocher
+          </span>
         </div>
+        <p className="mt-2 text-[1.0625rem] leading-[1.45] text-kh-paper/80">
+          {einordnung(tipp)}
+        </p>
+        {/* Kilowatt kommt vor — aber übersetzt an Ort und Stelle. Und
+            „am kältesten Tag", weil die 10–14 kW die Heizlast des
+            Auslegungstags sind, kein Winter-Dauerwert. */}
+        <p className="mt-1.5 text-[1rem] leading-[1.4] text-kh-mute">
+          Fachleute messen das in Kilowatt: {ZIEL.von} bis {ZIEL.bis} sind es hier am
+          kältesten Tag. Ein Wasserkocher hat ungefähr 2. Die Pfeile am Haus zeigen, wo
+          die Wärme rausgeht.
+        </p>
+      </Takt>
+
+      {/* Das Klima als zweite Zeile, nicht als Überschrift — und ohne Wertung
+          des Vorbesitzers. */}
+      <Takt>
+        <p
+          className="text-[1.0625rem] leading-[1.45] text-kh-paper/80"
+          data-testid="a3-klima"
+        >
+          Und das Klima? Die Wärmepumpe spart hier jedes Jahr rund 5 Tonnen CO₂ — so viel
+          wiegen vier kleine Autos. Die alte Ölheizung war trotzdem kein Fehler. Sie war
+          jahrzehntelang ganz normal.
+        </p>
+        {/* Der Stand gehört auf den Screen und nicht in eine Fußnote — die
+            Faktoren dahinter kommen jedes Jahr neu. Nur eben als
+            ein leiser Satz statt als Block. */}
+        <p className="mt-2 text-[0.875rem] leading-[1.4] text-kh-mute/80">
+          Die Wärme rechnen Fachleute für jedes Haus einzeln aus, Raum für Raum. Die
+          Klima-Zahlen kommen vom Umweltbundesamt und aus einer Messung des
+          Fraunhofer-Instituts. Stand: August 2026.
+        </p>
       </Takt>
     </motion.div>
   )
@@ -394,27 +314,5 @@ function Takt({ children }: { children: React.ReactNode }) {
     >
       {children}
     </motion.div>
-  )
-}
-
-/** Antippbar, nicht aufgedrängt — dasselbe Prinzip wie die Mathe-Karte in M2. */
-function Rechnung() {
-  return (
-    <Dialog>
-      <DialogTrigger className="rounded-kh-pill border-2 border-kh-line-strong bg-white/5 px-4 py-2.5 text-[1rem] font-medium text-kh-paper/85 transition-transform active:scale-95">
-        Woher kommt diese Zahl?
-      </DialogTrigger>
-      <DialogContent>
-        <DialogTitle>Fläche mal Wärmeverlust</DialogTitle>
-        <DialogDescription>
-          Ein ungedämmtes Haus aus den Siebzigern verliert im Winter grob{' '}
-          {HAUS.spezifisch.von} bis {HAUS.spezifisch.bis} Watt je Quadratmeter. Mal{' '}
-          {HAUS.flaeche} Quadratmeter sind das {ZIEL.von} bis {ZIEL.bis} Kilowatt — fünf
-          bis sieben Wasserkocher gleichzeitig. Das ist die Faustformel; im Einzelfall
-          liegt sie um ein Fünftel daneben. Verbindlich wird erst die Rechnung Raum für
-          Raum: jedes Fenster, jede Außenwand.
-        </DialogDescription>
-      </DialogContent>
-    </Dialog>
   )
 }

@@ -13,7 +13,7 @@ import {
 /**
  * **A1 — der Anlagenausschnitt.** Speicher, Zirkulation, Mischer,
  * Umwälzpumpe: Vektor und kein Foto, weil man antippen können muss, was man
- * prüft (Spec 6, A1).
+ * prüft.
  *
  * Die Zeichnung sagt das Symptom, bevor ein Wort daneben steht: **der
  * Heizkreis unten ist warm, die Warmwasserseite oben ist kalt.** „Heizung wird
@@ -21,9 +21,9 @@ import {
  * sie gelesen zu haben. Ist der Fall gelöst, läuft die Wärme auch nach oben.
  *
  * **Was die Zeichnung *nicht* weiß: welche Prüfung die richtige ist.** Die
- * Störung, die Prüfschritte und die Ursache sind laut Spec 11 fachlich
- * abzunehmen — „eine plausible, aber falsche Fehlersuche vor einem
- * interessierten Publikum ist die schlechteste Sorte Fehler". Sie kennt nur
+ * Störung, die Prüfschritte und die Ursache sind fachlich abzunehmen: eine
+ * plausible, aber falsche Fehlersuche vor einem interessierten Publikum ist
+ * die schlechteste Sorte Fehler. Sie kennt nur
  * Orte: `ANLAGENPUNKTE` in `zeichnung.ts`. Eine `PruefungId`, zu der es keinen
  * Punkt gibt, lässt die Zeichnung ruhig — kein Fehler, sondern der Normalfall,
  * solange die Liste offen ist.
@@ -51,7 +51,7 @@ export function Anlage({
     deutlich höher als dieser Rahmen: `kamera` richtet sich nach der Breite,
     und ober- wie unterhalb der Anlage blieb bis zu einem Viertel der
     Sichthöhe nichts als der auslaufende Grundton — die obere Bildhälfte war
-    faktisch leer (Designregel R1). Das Haus hat für diese Zonen seine
+    faktisch leer. Das Haus hat für diese Zonen seine
     Umgebung; die Umgebung einer Anlage ist Rohr. Steigstrang und
     Kaltwasserzulauf laufen deshalb bis kurz vor die tatsächlich sichtbaren
     Ränder — quer, wo die Sicht dem Rahmen entspricht, ändert sich nichts.
@@ -341,8 +341,8 @@ function PumpenSymbol({ x, y }: { x: number; y: number }) {
 
 /**
  * Ein antippbarer Punkt. Die unsichtbare Trefferfläche ist deutlich größer als
- * der Ring: hier tippt jemand im Stehen auf ein festgeschraubtes iPad
- * (khpl-tage.md 3, 60 × 60 pt).
+ * der Ring: hier tippt jemand im Stehen auf ein festgeschraubtes iPad, und
+ * dafür gelten 60 × 60 pt.
  */
 function Pruefpunkt({
   punkt,
@@ -364,9 +364,8 @@ function Pruefpunkt({
    * **Offen und antippbar** — der Zustand, der eine Affordanz braucht.
    *
    * Seit A1 seine sechs Prüfungen nicht mehr als Knopfliste im Panel führt,
-   * ist dieser Punkt die Bedienung des Screens. R8 sieht dafür ausdrücklich
-   * den Fall vor, dass „die Bühne selbst die Interaktion ist" — dann trägt das
-   * antippbare Objekt die Limette-Affordanz. Vorher war der Punkt ein
+   * ist dieser Punkt die Bedienung des Screens. Ist die Bühne selbst die
+   * Interaktion, trägt das antippbare Objekt die Limette-Affordanz. Vorher war der Punkt ein
    * gestrichelter grauer Ring ohne Beschriftung; man konnte ihn antippen, aber
    * nichts an ihm sagte das.
    */

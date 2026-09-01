@@ -1,36 +1,34 @@
 import type { StepId } from '@/khpl/flow/steps'
 
 /**
- * Die drei Karrierewege des Zimmerer-Tages (khpl-tag-zimmerer.md 6, C8).
+ * Die drei Karrierewege des Zimmerer-Tages.
  *
  * **Eigene Datei je Beruf, und das ist keine Aufräumarbeit, sondern eine
- * Korrektur** (khpl-tage.md §6.1 V2 und 0c). Der Bestand führt
- * Zimmerer-Zahlen unter einem Dachdecker-Namen, und dieselben Zahlen wären ohne
- * die Recherche vom 24.08.2026 in zwei weitere Berufe kopiert worden, in die
- * sie erst recht nicht gehören: zwischen 937 € und 1.243 € im ersten Lehrjahr
- * liegt ein Drittel, zwischen 5.600 € und 13.500 € Meisterkosten mehr als das
- * Doppelte.
+ * Korrektur.** Der Bestand führt Zimmerer-Zahlen unter einem Dachdecker-Namen,
+ * und dieselben Zahlen wären ohne die Recherche vom 24.08.2026 in zwei weitere
+ * Berufe kopiert worden, in die sie erst recht nicht gehören: zwischen 937 €
+ * und 1.243 € im ersten Lehrjahr liegt ein Drittel, zwischen 5.600 € und
+ * 13.500 € Meisterkosten mehr als das Doppelte.
  *
- * **Alle Zahlen hier stammen aus `belege/ausbildung-karriere.md`, Spalte
- * Zimmerer**, Stand 24.08.2026. Verdikt je Wert:
+ * **Alle Zahlen hier sind eigens für den Zimmerer recherchiert**, Stand
+ * 24.08.2026. Quelle je Wert:
  *
- * | Aussage | Verdikt |
+ * | Aussage | Quelle |
  * | --- | --- |
- * | Meisterlehrgang ~10.100 €, Okt–Mai, 1.200 h | `BELEGT` (BBZ Arnsberg, Kursjahr 2026/27) |
- * | Meister Ø ~49.000 €/Jahr, Einstieg 35.000–45.000 | `TEILWEISE BELEGT` (Gehaltsportale) |
- * | NRW-Meisterprämie 2.500 € | `BELEGT` — gilt hier, weil Handwerk |
- * | Techniker Holz-/Bautechnik, 2 J. Vollzeit, schulgeldfrei | `BELEGT` |
- * | Techniker-Verdienst 2.750–3.800 € Einstieg | `TEILWEISE BELEGT` (Portale) |
- * | Studium ohne Abitur nach BBHZVO | `BELEGT` |
- * | TH OWL Detmold, Holzbau, 7 Semester | `BELEGT` — passt für diesen Beruf |
- * | Biberacher Modell, 5 Jahre 3 Monate | `BELEGT` — **reines Zimmerer-Modell** |
+ * | Meisterlehrgang ~10.100 €, Okt–Mai, 1.200 h | BBZ Arnsberg, Kursjahr 2026/27 |
+ * | Meister Ø ~49.000 €/Jahr, Einstieg 35.000–45.000 | Gehaltsportale |
+ * | NRW-Meisterprämie 2.500 € | Land NRW — gilt hier, weil Handwerk |
+ * | Techniker Holz-/Bautechnik, 2 J. Vollzeit, schulgeldfrei | Recherche 24.08.2026 |
+ * | Techniker-Verdienst 2.750–3.800 € Einstieg | Gehaltsportale |
+ * | Studium ohne Abitur nach BBHZVO | BBHZVO |
+ * | TH OWL Detmold, Holzbau, 7 Semester | Recherche 24.08.2026 — passt für diesen Beruf |
+ * | Biberacher Modell, 5 Jahre 3 Monate | Recherche 24.08.2026 — **reines Zimmerer-Modell** |
  *
- * Formulierungsregel, die auch nach einer Freigabe gilt: was aus Gehaltsportalen
- * stammt, erscheint **nur als Spanne oder mit „rund“** — nie als exakter Wert
- * und nie als Versprechen.
+ * Formulierungsregel: was aus Gehaltsportalen stammt, erscheint **nur als
+ * Spanne oder mit „rund“** — nie als exakter Wert und nie als Versprechen.
  *
- * ⚠️ **Was diese Karten bewusst *nicht* tun.** khpl-tage.md 0 hält fest, dass in
- * 25 Gesprächen **niemand** von sich aus über Geld gesprochen hat, und die
+ * ⚠️ **Was diese Karten bewusst *nicht* tun.** In 25 Gesprächen hat **niemand**
+ * von sich aus über Geld gesprochen, und die
  * Karrierekarten des Bestands tragen fast nur Zahlen. Deshalb steht auf jeder
  * Karte zuerst, was man in diesem Weg **tut**, und erst danach, was er kostet
  * und bringt.
@@ -52,14 +50,13 @@ export const KARRIEREWEGE: Karriereweg[] = [
     id: 'C8.1',
     titel: 'Meister',
     /**
-     * ⚠️ **Widerspruch in der Spec, gemeldet statt gelöst.**
-     * khpl-tag-zimmerer.md 4 validiert diesen Wortlaut als Einladungstext;
-     * derselbe Abschnitt 6 verlangt, die Meister-Karte umzuschreiben, weil
-     * „Eigener Betrieb, eigene Azubis“ den Meister als **Besitzstand**
-     * beschreibt — und der einzige befragte Zimmerermeister von Disposition,
-     * Kalkulation und Dauerstress erzählt, nicht von Besitz.
+     * ⚠️ **Zwei Anforderungen ziehen hier gegeneinander.** „Eigener Betrieb,
+     * eigene Azubis“ ist der Satz, der zum Antippen bringt — und zugleich
+     * beschreibt er den Meister als **Besitzstand**, während der einzige
+     * befragte Zimmerermeister von Disposition, Kalkulation und Dauerstress
+     * erzählt, nicht von Besitz.
      *
-     * Aufgelöst wie folgt: der **Knopf** trägt den validierten Wortlaut (er
+     * Aufgelöst wie folgt: der **Knopf** trägt den einladenden Wortlaut (er
      * steht im Graphen, `berufe/zimmerer.ts`), die **Karte** trägt die
      * Korrektur — sie steht gleich im zweiten Abschnitt und ist der längste.
      * Für den Teil des Publikums, der gern organisiert, ist das der
@@ -74,27 +71,27 @@ export const KARRIEREWEGE: Karriereweg[] = [
           'Der Meisterbrief im Zimmererhandwerk. Damit darfst du einen eigenen Betrieb führen und selbst ausbilden.',
       },
       {
-        // Der Befund aus khpl-tag-zimmerer.md 6: was ein Meister tatsächlich
-        // tut, aus dem Gespräch mit einem Zimmerermeister (`INTERVIEW`,
-        // 02.07.2026). SEMA und AutoCAD nennt er selbst beim Namen.
+        // Was ein Meister tatsächlich tut, aus dem Gespräch mit einem
+        // Zimmerermeister (Interview, 02.07.2026). SEMA und AutoCAD nennt er
+        // selbst beim Namen.
         frage: 'Was du den Tag über machst',
         antwort:
-          'Arbeitsvorbereitung, Zeichnungen am Rechner mit SEMA oder AutoCAD, Aufträge kalkulieren, Material bestellen und disponieren — und dafür sorgen, dass die richtigen Leute zur richtigen Zeit an der richtigen Stelle sind. Ein Meister, den wir gefragt haben, sagt dazu auch: Vieles läuft nicht so, wie es geplant war.',
+          'Den nächsten Tag planen. Wände am Computer zeichnen, mit Programmen wie SEMA oder AutoCAD. Ausrechnen, was ein Auftrag kostet. Material bestellen. Und dafür sorgen, dass die richtigen Leute zur richtigen Zeit an der richtigen Stelle sind. Ein Meister, den wir gefragt haben, sagt dazu auch: Vieles läuft nicht so, wie es geplant war.',
       },
       {
         frage: 'Wie lange',
         antwort:
-          'Der Vollzeitlehrgang läuft von Oktober bis Mai, rund 1.200 Stunden. Neben dem Beruf zwei bis drei Jahre.',
+          'In Vollzeit von Oktober bis Mai, rund 1.200 Stunden Unterricht — ungefähr so viel wie ein ganzes Schuljahr. Wer nebenbei weiter arbeitet, braucht zwei bis drei Jahre.',
       },
       {
         frage: 'Was es kostet',
         antwort:
-          'Rund 10.100 Euro für Lehrgang und Prüfung. Das Aufstiegs-BAföG übernimmt einen großen Teil davon, und wer besteht, bekommt in Nordrhein-Westfalen 2.500 Euro Meisterprämie.',
+          'Rund 10.100 Euro für Kurs und Prüfung — so viel wie ein gebrauchtes Auto. Einen großen Teil davon zahlt der Staat dazu; das nennt sich Aufstiegs-BAföG. Und wer besteht, bekommt in Nordrhein-Westfalen 2.500 Euro Meisterprämie obendrauf.',
       },
       {
         frage: 'Was du verdienst',
         antwort:
-          'Als Zimmerermeister:in im Schnitt rund 49.000 Euro im Jahr, zum Einstieg etwa 35.000 bis 45.000.',
+          'Als Zimmerermeister:in im Schnitt rund 49.000 Euro im Jahr — das sind grob 4.000 im Monat. Zum Einstieg etwa 35.000 bis 45.000 im Jahr.',
       },
     ],
     aufhaenger:
@@ -108,7 +105,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Was ist das',
         antwort:
-          'Staatlich geprüfte:r Techniker:in, Fachrichtung Holztechnik oder Bautechnik. Du planst, rechnest und leitest, statt selbst in der Halle zu stehen.',
+          'Ein zweiter Abschluss nach der Ausbildung: staatlich geprüfte:r Techniker:in, für Holztechnik oder Bautechnik. Du planst, rechnest und leitest, statt selbst in der Halle zu stehen.',
       },
       {
         frage: 'Wie lange',
@@ -117,7 +114,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Was es kostet',
         antwort:
-          'An den öffentlichen Fachschulen und Berufskollegs in NRW ist der Weg schulgeldfrei — es bleiben Gebühren und Material. Private Anbieter verlangen deutlich mehr.',
+          'An den staatlichen Schulen in NRW kostet der Unterricht nichts. Du zahlst nur kleinere Gebühren und dein Material. Private Schulen verlangen deutlich mehr.',
       },
       {
         frage: 'Der Punkt, den kaum jemand kennt',
@@ -139,20 +136,20 @@ export const KARRIEREWEGE: Karriereweg[] = [
     abschnitte: [
       {
         frage: 'Warum erst eine Ausbildung?',
-        // „fachgebunden" nicht als nacktes Verwaltungswort am Satzende
-        // (Designregel R10): der Satz sagt jetzt selbst, was es einschränkt.
+        // Das Verwaltungswort „fachgebunden" ist ganz gestrichen: der Satz
+        // sagt selbst, was die Regel einschränkt.
         antwort:
-          'Weil sie den Weg nicht zumacht, sondern aufmacht. In Nordrhein-Westfalen berechtigt der Meisterbrief — und auch der Techniker — zur Einschreibung in jeden Studiengang an jeder Hochschule des Landes. Ohne Abitur, ohne Zugangsprüfung. Mit dem Gesellenbrief und drei Jahren im Beruf geht es auch — dann aber nur in einem verwandten Studiengang, etwa Bauingenieurwesen (»fachgebunden«).',
+          'Weil sie den Weg nicht zumacht, sondern aufmacht. Mit dem Meisterbrief darfst du in Nordrhein-Westfalen jedes Fach an jeder Hochschule studieren. Ohne Abitur, ohne Aufnahmeprüfung. Als Techniker:in genauso. Auch mit dem Gesellenbrief und drei Jahren Arbeit im Beruf geht es. Dann kannst du aber nur ein Fach wählen, das zu deinem Beruf passt — Bauingenieur zum Beispiel.',
       },
       {
         frage: 'Und das geht hier',
         antwort:
-          'Die TH OWL hat ihren Fachbereich Bauingenieurwesen in Detmold, mit einem eigenen Fachgebiet Holzbau. Bachelor, sieben Semester, 30 Kilometer von hier.',
+          'Die Hochschule TH OWL bildet in Detmold Bauingenieure aus, mit einem eigenen Schwerpunkt Holzbau. Bachelor, dreieinhalb Jahre, 30 Kilometer von hier.',
       },
       {
         frage: 'Beides gleichzeitig',
         antwort:
-          'In Biberach gibt es ein Modell, das Ausbildung, Meister und Ingenieurstudium zusammenlegt: fünf Jahre und drei Monate. Am Ende hast du den Gesellenbrief, den Meister und den Bachelor.',
+          'In Biberach gibt es einen Weg, der Ausbildung, Meister und Studium zusammenlegt: fünf Jahre und drei Monate. Am Ende hast du alle drei Abschlüsse — Geselle, Meister, Bachelor.',
       },
     ],
     aufhaenger:

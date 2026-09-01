@@ -92,7 +92,7 @@ export function Z4() {
       return
     }
     setMeldung(
-      `Schau gegen das Fenster: erlaubt ist ${hmm(H_SOLL.unten)} bis ${hmm(H_SOLL.oben)} — das Teil liegt vier Hundertstel drüber. Gut, dass es erst eines ist.`,
+      `Vergleich die zwei Zahlen: erlaubt ist ${hmm(H_SOLL.unten)} bis ${hmm(H_SOLL.oben)} — dein Teil liegt vier Hundertstel drüber. Gut, dass es erst eines ist.`,
     )
   }
 
@@ -318,7 +318,7 @@ function Freigabe({ wert }: { wert: number | null }) {
     <div className="flex flex-col gap-3">
       <Rueckmeldung
         ok
-        text={`${wert === null ? '' : hmm(wert)} — im Fenster. Die Serie ist freigegeben.`}
+        text={`${wert === null ? '' : hmm(wert)} — im erlaubten Fenster. Die Serie ist freigegeben.`}
         testid="z4-frei"
       />
       <motion.p

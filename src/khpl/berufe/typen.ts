@@ -15,7 +15,7 @@ import type { MerkmalVektor } from '@/khpl/match/merkmale'
  */
 
 /**
- * **Jeder Beruf hat sein eigenes Step-Id-Präfix** (khpl-tage.md §6.1 V4).
+ * **Jeder Beruf hat sein eigenes Step-Id-Präfix.**
  *
  * | Beruf | Präfix | Beispiel |
  * | --- | --- | --- |
@@ -58,7 +58,7 @@ export interface BerufMedien {
   heroPoster: string
   /** Kurzer Loop, Ton egal (wird stumm abgespielt). Fehlt er, bleibt das Poster. */
   hero?: string
-  /** Das längere Szenario-Video für die Auftragsannahme (S5). */
+  /** Das längere Szenario-Video für die Auftragsannahme. */
   szenario?: string
   szenarioPoster?: string
 }
@@ -88,8 +88,8 @@ export interface BerufDef {
    *
    * Stand bis zum Parallelbau als flacher `Record<StepId, Bild>` in
    * `buehne/Foto.tsx`. Vier Berufe mit je einem `M1` sprengen das, deshalb
-   * hängt die Liste jetzt am Beruf und `StepFoto` liest sie über den aktiven
-   * (khpl-tage.md §6.1 V3). Das redaktionelle Argument bleibt gewahrt: je
+   * hängt die Liste jetzt am Beruf und `StepFoto` liest sie über den aktiven.
+   * Das redaktionelle Argument bleibt gewahrt: je
    * Beruf steht die Liste weiterhin an einem Stück, nur eben in seiner Datei —
    * man muss überblicken können, welcher Screen noch kein eigenes Bild hat und
    * wo sich ein Motiv doppelt. Herkunft und Urheber:innen jeder Datei stehen
@@ -110,7 +110,51 @@ export interface BerufDef {
    * dieser Stellen zum Nachdenken gezwungen.
    */
   graph: StepGraph | null
-  /** Der Einstiegs-Screen (S5) — in-fiction, ohne Meta-Erklärung. */
+  /**
+   * Takt 1 und 2 der Auftragsannahme — die Meta-Erklärung vor der Geschichte.
+   *
+   * Der Screen war lange rein in-fiction; am Stand zeigte sich, dass viele mit
+   * dem ersten Step anfingen, ohne zu wissen, was der Beruf überhaupt ist.
+   * Deshalb erklärt er jetzt in zwei Takten erst den Beruf und seinen Ort,
+   * bevor `auftrag` die Fiktion setzt (Begründung ausführlich in
+   * `shell/Auftragsannahme.tsx`).
+   *
+   * Die Inhalte gehören zum Beruf, nicht zur Hülle — dieselbe Aufteilung wie
+   * bei `auftrag`. Fehlt das Feld, zeigt der Screen nur den Fiktions-Takt:
+   * ein Beruf soll begehbar sein, sobald sein Graph steht, auch wenn die Copy
+   * fehlt.
+   *
+   * Heißt bewusst **nicht** `intro`: `bilder.intro` ist bereits vergeben —
+   * das Motiv des Intro-Screens. Zwei Felder gleichen Namens mit Bild- und
+   * Textinhalt wären in jedem Diff eine Verwechslung.
+   */
+  vorstellung?: {
+    /**
+     * Takt 1: Zwei Zeilen, die zweite in Orange (wie `auftrag.titel`).
+     * Je Beruf getextet statt aus `kurz` gebaut: „Du hast dir Zerspanung
+     * ausgesucht“ ohne Artikel liest sich als Plakat kaputt — der Satz
+     * braucht je Beruf seinen eigenen Artikel und Fall.
+     */
+    titel: readonly [string, string]
+    /** Takt 1: Was dieser Beruf IST — ein Satz, Alltagssprache. */
+    was: string
+    /**
+     * Takt 1: 2–4 typische Aufgaben. Konkret und greifbar („Rohre so
+     * verlegen, dass nichts tropft“), keine Broschürensätze.
+     */
+    aufgaben: readonly string[]
+    /** Takt 2: Wo man in diesem Beruf arbeitet und wie es dort ist. */
+    umgebung: {
+      /** Zwei Zeilen; die zweite steht in Orange (wie `auftrag.titel`). */
+      titel: readonly [string, string]
+      text: string
+    }
+  }
+  /**
+   * Takt 3 der Auftragsannahme — der In-Fiction-Einstieg: „Heute bist du
+   * Azubi, dein Auftrag ist …“. Ab hier spricht die Geschichte, nicht mehr
+   * die App.
+   */
   auftrag?: {
     etikett: string
     /** Zwei Zeilen; die zweite steht in Orange. */

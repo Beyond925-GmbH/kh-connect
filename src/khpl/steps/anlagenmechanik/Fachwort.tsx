@@ -18,9 +18,9 @@ import {
  * `glossar/begriffe.ts` verdrahtet (`id: BegriffId`, Nachschlag in `BEGRIFFE`)
  * und kennt die Glossare der drei neuen Tage nicht. Die richtige Lösung ist
  * eine Hüllenänderung — ein `eintrag`-Prop an `Begriff` oder eine Auflösung
- * über den aktiven Beruf —, und die gehört nicht in einen einzelnen Tag
- * (khpl-tage.md 6.2: „Wer hier etwas braucht, meldet es, statt es zu
- * ändern"). Bis das entschieden ist, hält diese Datei den Tag lauffähig,
+ * über den aktiven Beruf —, und die gehört nicht in einen einzelnen Tag: Wer
+ * an der Hülle etwas braucht, meldet es, statt es im Vorbeigehen zu ändern.
+ * Bis das entschieden ist, hält diese Datei den Tag lauffähig,
  * **ohne** an einer geteilten Datei zu drehen.
  *
  * Markup und Klassen sind bewusst identisch mit `Begriff` übernommen: eine

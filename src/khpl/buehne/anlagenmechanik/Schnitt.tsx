@@ -24,10 +24,10 @@ import { Transporter } from './Transporter'
  * Haus des zweiten Auftrags nichts zu tun. Alles andere spielt in **einer**
  * Welt (`Haus`): dieselbe `viewBox`, dieselben Koordinaten, nur ein anderer
  * Kamerarahmen. Deshalb ist der Keller in A4 sichtbar derselbe wie in A2 und
- * nicht ein zweiter, der ihm ähnelt — „eine Welt, viele Zustände"
- * (khpl-tage.md 1, Mechanismus 2), gezeichnet statt gebaut.
+ * nicht ein zweiter, der ihm ähnelt — **eine Welt, viele Zustände**,
+ * gezeichnet statt gebaut.
  *
- * **Dieser Tag hat kein `three`** (Spec 7). Nicht als Verzicht, sondern als
+ * **Dieser Tag hat kein `three`.** Nicht als Verzicht, sondern als
  * Beweis, dass die Hülle nicht am 3D hängt. Diese Datei darf deshalb ganz
  * normal statisch importiert werden — sie hat keine lazy-Grenze und braucht
  * keine.
@@ -39,7 +39,7 @@ import { Transporter } from './Transporter'
  *
  * **Farbe:** ausschließlich `KALT` und `WARM` aus `kanon.ts`. Kein Token, kein
  * Eingriff in `src/index.css`, und keine gefüllte orange Fläche — die eine pro
- * Screen ist *Weiter* (khpl-tage.md 3). Warm erscheint hier als Strich, als
+ * Screen ist *Weiter*. Warm erscheint hier als Strich, als
  * Verlauf und als sehr flacher Schein, nie als Fläche.
  *
  * **Wo die Zeichnung im Screen sitzt.** Nicht bildfüllend: die `StepShell`

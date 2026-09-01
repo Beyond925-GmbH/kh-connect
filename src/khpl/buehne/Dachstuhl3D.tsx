@@ -22,10 +22,11 @@ import { ANFAHRT_DAUER } from '@/khpl/buehne/kanon'
  *   M7    ab dort weiter, aber nur, wenn der Besucher richtig antwortet
  *   M8    das fertige Dach am Abend — das Dach, das er selbst gebaut hat
  *
- * Genau das war die Empfehlung in flow 9 („Im Code parametrisch bauen“): die
- * Aufbau-Animation fällt als Nebenprodukt ab, dasselbe Modell, andere Zeitachse.
+ * Genau dafür ist das Modell im Code parametrisch gebaut und nicht als Asset
+ * eingekauft: die Aufbau-Animation fällt als Nebenprodukt ab, dasselbe Modell,
+ * andere Zeitachse.
  *
- * **Lazy-Grenze.** Dieses Modul zieht `three` nach (≤ 500 KB gzip, flow 8.5).
+ * **Lazy-Grenze.** Dieses Modul zieht `three` nach (≤ 500 KB gzip).
  * Es darf deshalb nur über `lazy(() => import(...))` eingebunden werden, nie
  * statisch — sonst landet three im Erststart-Bündel und reißt die 1,5-MB-Grenze.
  */
@@ -132,7 +133,7 @@ export default function Dachstuhl3D({
   )
   // Kamera auf den Baustand statt auf das fertige Dach: sonst rahmt sie bei
   // liegender Rohdecke schon die Firsthoehe ein und der Unterbau sitzt als
-  // Streifen unter leerer Flaeche (R1). Ueber `zielT`, damit der Sprung nur
+  // Streifen unter leerer Flaeche. Ueber `zielT`, damit der Sprung nur
   // am Tap-Wechsel passiert — s. `huelleBeiT`.
   const kameraHuelle = useMemo(() => huelleBeiT(masse, zielT), [masse, zielT])
   const teile = useMemo(() => erzeugeTeile(masse), [masse])

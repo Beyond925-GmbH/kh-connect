@@ -5,7 +5,7 @@ import { KhplApp } from '@/khpl/KhplApp'
 /**
  * Die Dachstuhl-Demo hängt an einem Query-Parameter statt an einem Router: die
  * App bleibt unberührt, und `three` landet dank `lazy` nicht im Hauptbundle
- * (flow 8.5 — Erststart ≤ 1,5 MB).
+ * (Erststart ≤ 1,5 MB).
  */
 const DachstuhlDemo = lazy(() => import('@/dachstuhl/DachstuhlDemo'))
 

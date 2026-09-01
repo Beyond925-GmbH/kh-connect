@@ -8,8 +8,6 @@ import type { Ansicht, Sichtfeld } from './kamera'
 import { KAMERA, START_ANSICHT, passeEin } from './kamera'
 
 /**
- * OrbitControls nach Bauplan 5.5.
- *
  * Bewusst ohne Azimut-Limit: ein Dachstuhl ist von allen Seiten interessant,
  * und wer beim Drehen gegen eine unsichtbare Wand laeuft, haelt das fuer einen
  * Fehler. Die Polarwinkel-Limits bleiben — von unten durch die Rohdecke oder

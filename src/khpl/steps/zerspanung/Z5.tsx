@@ -35,19 +35,19 @@ const FRAGEN = [
     id: 'immergleich',
     frage: 'Ist das nicht jeden Tag dasselbe?',
     antwort:
-      'Ehrlich: eine laufende Serie ist Routine. Deshalb betreust du meist mehrere Maschinen gleichzeitig — und jedes neue Teil heißt neu rüsten, neu programmieren, neu denken. Das Gegenteil von gestern ist nicht morgen, sondern der nächste Auftrag.',
+      'Ehrlich: Wenn die Serie läuft, ist es Routine. Deshalb hast du meist mehrere Maschinen gleichzeitig im Blick. Und beim nächsten Auftrag fängst du wieder ganz von vorn an: neu einrichten, neu programmieren, neu nachdenken.',
   },
   {
     id: 'mathe',
     frage: 'Muss ich gut in Mathe sein?',
     antwort:
-      'Rechnen ja, höhere Mathematik nein: Dreisatz, Winkel, Drehzahlen — und die Steuerung rechnet mit. Wichtiger ist der Blick fürs Genaue: zu merken, wenn eine Zahl nicht sein kann.',
+      'Rechnen ja, Mathe-Leistungskurs nein. Dreisatz, Winkel, Drehzahlen — und das meiste rechnet der Computer der Maschine mit. Wichtiger ist, dass du stutzig wirst, wenn eine Zahl gar nicht stimmen kann.',
   },
   {
     id: 'schichten',
     frage: 'Und die Schichten?',
     antwort:
-      'Viele Betriebe fahren zwei oder drei Schichten — die Maschinen sollen nicht stillstehen. Früh heißt um fünf aufstehen, dafür ist um halb drei Feierabend. Nachtschicht gibt es meist erst nach der Ausbildung, und sie wird mit Zuschlägen bezahlt.',
+      'In vielen Betrieben wird in zwei oder drei Schichten gearbeitet, damit die Maschinen nicht stillstehen. Frühschicht heißt: um fünf aufstehen — dafür hast du um halb drei frei, der ganze Nachmittag gehört dir. Nachts arbeitest du meist erst nach der Ausbildung, und dafür gibt es mehr Geld.',
   },
 ] as const
 

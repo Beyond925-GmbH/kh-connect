@@ -42,7 +42,7 @@ const HUELLE: Huelle = {
   // kamerazugewandten Flanke (bis z ≈ 1,55) und sollen im Bild bleiben.
   // Nach oben endet die Hülle knapp über dem Kofferaufbau (Oberkante 2,35 m):
   // die alte Kante bei 2,7 m war leere Luft, und die zentrierte Einpassung
-  // schob die Szene um genau diese Luft nach unten (R1).
+  // schob die Szene um genau diese Luft nach unten.
   min: [-4.2, 0, -1.6],
   max: [10.2, 2.45, 1.6],
   mitte: [3.0, 1.2, 0],
@@ -63,7 +63,7 @@ const HUELLE_HOCHKANT: Huelle = {
 }
 
 /**
- * Höhen-Füllung quer (Design-Review, R1) — dieselbe Mechanik wie in
+ * Höhen-Füllung quer (Design-Review) — dieselbe Mechanik wie in
  * `Zuschnitt3D.tsx` (dort ausführlich begründet): das Gespann ist ~6-mal so
  * breit wie hoch, `passeEin` lässt quer deshalb rund die halbe Bühnenhöhe
  * leer. Die Hülle wird quer auf ihre Mitte zusammengezogen, bis die Höhe

@@ -19,7 +19,7 @@ import { Fachwort } from './Fachwort'
 
 /**
  * A4 — Der kürzeste Weg ist nicht der richtige. **Der Fehler mit Preis**
- * (khpl-tage.md 1, Mechanismus 5) und der Screen, ab dem der Weg der Rohre dem
+ * dieses Tages, und der Screen, ab dem der Weg der Rohre dem
  * Besucher gehört.
  *
  * **Die Bühne ist die Interaktion.** Der Besucher zieht die Leitung durch den
@@ -30,7 +30,7 @@ import { Fachwort } from './Fachwort'
  * Weg. Dieselbe Arbeitsteilung wie bei M4 und `Zuschnitt3D`.
  *
  * **M7 fragt „in welcher Reihenfolge". Dieser Screen fragt „auf welchem Weg"**
- * — zwei Tage dürfen nicht dieselbe Hauptübung haben (khpl-tage.md 4), und
+ * — zwei Tage dürfen nicht dieselbe Hauptübung haben, und
  * Wegsuche ist etwas anderes als Reihenfolge.
  *
  * **Kein Blockieren.** Wer durch die tragende Wand will, bekommt einen Satz und
@@ -39,33 +39,33 @@ import { Fachwort } from './Fachwort'
  * fertigbaut, darf ihn behalten: gleich läuft die Wärme dann sichtbar
  * langsamer los. **Eine Folge, keine Note.**
  *
- * ⚠️ **Keine Zahl je Bogen auf den Screen** (Spec 11, `NICHT BELEGBAR`): der
- * Druckverlust rechnet sich über ζ · ρ/2 · v² und hängt an Durchmesser,
+ * **Keine Zahl je Bogen auf den Screen** — sie wäre nicht seriös zu
+ * belegen: der Druckverlust rechnet sich über ζ · ρ/2 · v² und hängt an Durchmesser,
  * Strömungsgeschwindigkeit und Bogenform. Der Balken misst einen **relativen**
  * Verlust, kein Bar — und der Screen sagt das auch.
  *
- * Belegt und deshalb nennbar (`belege/anlagenmechanik.md` 6): die
+ * Recherchiert und deshalb nennbar: die
  * Halterungsabstände für Kupfer (Ø 22 mm → 2,0 m) und die Dämmpflicht nach
  * **GEG § 69 mit Anlage 8** (bis Ø 22 mm → 20 mm Dämmung). Beide stehen als
  * Einwurf und nicht im Panel: sie erklären den Beruf, sie sind nicht die
  * Aufgabe.
  *
- * **`answers.a4`** `{ pfad, boegen, fertig }` (Spec 6).
+ * **`answers.a4`** `{ pfad, boegen, fertig }`.
  */
 
 /**
  * Bis hierher ist der Weg sauber geführt; jeder Bogen darüber ist einer zu
  * viel.
  *
- * ⚠️ **Gemeldet, nicht gelöst** (khpl-tage.md, Kopf): Spec 6 beschreibt den
- * Handel als „der kürzeste Weg hat vier Bögen und einen Durchbruch durch eine
- * tragende Wand; der richtige ist zwei Meter länger und hat zwei Bögen".
+ * **Gemeldet, nicht gelöst.** Gedacht war der Handel einmal so: „der
+ * kürzeste Weg hat vier Bögen und einen Durchbruch durch eine tragende Wand;
+ * der richtige ist zwei Meter länger und hat zwei Bögen."
  * Auf dem gebauten Raster gibt es diesen Handel nicht — die tragende Wand
  * sperrt die oberen Zeilen ganz, es gibt keinen Durchbruch, und der Weg mit
  * zwei Bögen ist zugleich der kürzeste mögliche. Mehr Bögen heißt hier immer
  * gleich lang oder länger, nie kürzer. Ein zweiter, kürzerer Weg mit mehr
  * Richtungswechseln wäre eine Änderung an der Geometrie und damit an der
- * abgenommenen Übung; **die Copy unten richtet sich deshalb nach dem, was auf
+ * Übung selbst; **die Copy unten richtet sich deshalb nach dem, was auf
  * dem Raster wirklich passiert.**
  */
 const BOEGEN_GUT = 2
@@ -75,7 +75,8 @@ const BOEGEN_GUT = 2
  * damit die Copy an einer Stelle liegt — und weil er auf dem Handy an einem
  * anderen Ort im Panel landet als quer (s. `schmal` unten).
  */
-const ABWEISUNG = 'Da geht nichts durch — das ist tragend. Such einen anderen Weg.'
+const ABWEISUNG =
+  'Da geht nichts durch — diese Wand trägt das Haus. Such einen anderen Weg.'
 
 export function A4() {
   const schmal = useSchmal()
@@ -228,8 +229,9 @@ export function A4() {
             sichtbar={gezogen}
             eyebrow="Wie oft muss so ein Rohr befestigt werden?"
           >
-            Ein 22-Millimeter-Kupferrohr bekommt alle zwei Meter eine Schelle. Kunststoff
-            braucht mehr davon — es ist weicher und hängt sonst durch.
+            Ein 22-Millimeter-Kupferrohr bekommt alle zwei Meter eine Schelle — eine
+            Klammer, die es an der Wand hält. Kunststoffrohr braucht mehr davon: es ist
+            weicher und hängt sonst durch.
           </AhaKarte>
           <AhaKarte sichtbar={fertig} eyebrow="Warum kriegen die Rohre einen Mantel?">
             Weil ein warmes Rohr im kalten Keller Wärme abgibt, die niemand bestellt hat.
@@ -268,7 +270,7 @@ export function A4() {
                   `grayscale` zusätzlich zur 40-%-Deckkraft der Hülle: der
                   Knopf wird während der ganzen Übung angesehen, und ob er
                   gerade „noch nicht" oder „jetzt" sagt, muss man am Kiosk im
-                  Vorbeigehen sehen (R8). Nur Alpha reichte dafür nicht — in
+                  Vorbeigehen sehen. Nur Alpha reichte dafür nicht — in
                   der Abnahme sahen alle drei Zieh-Zustände gleich aus.
                 */
                 <Button
@@ -292,7 +294,7 @@ export function A4() {
 
 /**
  * Der Balken. **Kein Bar, kein Pascal, keine Zahl** — er misst einen relativen
- * Verlust, und der Screen sagt auch, warum das so ist (Spec 11).
+ * Verlust, und der Screen sagt auch, warum das so ist.
  */
 function Verlustbalken({
   verlust,
@@ -330,7 +332,7 @@ function Verlustbalken({
         <p className="min-w-0 flex-1 text-[0.9375rem] leading-[1.4] text-kh-mute">
           {schmal
             ? 'Wie viel ein Bogen kostet, hängt am Rohr. Deshalb ein Balken und keine Zahl.'
-            : 'Jeder Bogen kostet Druck — wie viel genau, hängt an Rohrdurchmesser und Fließgeschwindigkeit. Deshalb steht hier ein Balken und keine Zahl.'}
+            : 'Jeder Bogen kostet Druck — wie viel genau, hängt davon ab, wie dick das Rohr ist und wie schnell das Wasser fließt. Deshalb steht hier ein Balken und keine Zahl.'}
         </p>
         {/*
           **Steht immer da, auch wenn noch nichts gezogen ist.** Vorher tauchte

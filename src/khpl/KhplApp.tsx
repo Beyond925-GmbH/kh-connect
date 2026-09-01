@@ -18,7 +18,7 @@ import {
 } from '@/khpl/store/fortschritt'
 
 /**
- * KHPL Connect — die Hülle um den Flow (khpl-ui-shell.md 3).
+ * KHPL Connect — die Hülle um den Flow.
  *
  * Es gibt weiterhin keinen Router: die App hat keine URLs und keine
  * Tiefenlinks. Der Zustand ist `bildschirm` plus der aktive Beruf mit seinem
@@ -34,10 +34,9 @@ import {
  *
  *   Splash → Helm → Fragen → Berufsliste → Auftrag → Step
  *
- * Die Berufsliste hat zwei Rollen: Station im Trichter — sie trägt seit
- * `khpl-vereinfachung.md` §5 auch den Vorschlag, der vorher ein eigener
- * Screen davor war — und Daueradresse für jeden, der später den Beruf
- * wechselt.
+ * Die Berufsliste hat zwei Rollen: Station im Trichter — sie trägt seit der
+ * Vereinfachung auch den Vorschlag, der vorher ein eigener Screen davor war —
+ * und Daueradresse für jeden, der später den Beruf wechselt.
  */
 export function KhplApp() {
   const bildschirm = useBildschirm()

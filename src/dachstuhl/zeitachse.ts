@@ -1,7 +1,7 @@
 import type { DachstuhlMasse, Huelle } from './mass'
 
 /**
- * Zeitachse der Aufbau-Animation (Bauplan 4). Reine Funktionen, kein React,
+ * Zeitachse der Aufbau-Animation. Reine Funktionen, kein React,
  * kein three — der Fortschritt t kommt immer von aussen.
  */
 
@@ -163,7 +163,7 @@ export function phaseAt(t: number): Phase {
  * `masse.huelle` reserviert die volle Firsthoehe, auch wenn bei `t` erst die
  * Rohdecke liegt: die Kamera passt dann einen fast leeren Kasten ein, und der
  * gebaute Unterbau sitzt als schmaler Streifen unter viel dunkler Flaeche
- * (khpl-designregeln.md R1, Befund M5). Drei Stufen statt einer stetigen
+ * — und das sieht nach Fehler aus. Drei Stufen statt einer stetigen
  * Funktion, und gerechnet wird ueber `zielT`, nicht ueber den animierten
  * Fortschritt: die Kamera springt beim Einpassen (`Kamerasteuerung` setzt
  * hart) — mit Stufen tut sie das hoechstens an einem Tap-Wechsel, nie

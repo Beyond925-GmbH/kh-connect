@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { useSchmal } from '@/khpl/shell/schmal'
 
 export interface Abschnitt {
@@ -36,7 +36,7 @@ const SPALTEN: Record<number, string> = {
  * Verzeichnis-Funktion der Liste), der Text kommt auf Tipp; der erste Eintrag kommt offen an, damit der Screen nicht mit einer
  * Reihe zugeklappter Zeilen anfängt. Immer nur einer ist offen — zwei offene
  * Einträge holen die Scrollkante zurück. **Gekürzt wird nichts**: was in den
- * Feldern steht, ist recherchiert (`belege/`).
+ * Feldern steht, ist recherchiert.
  *
  * `ersterOffen={false}` ist für Screens, die über der Liste schon einen Absatz
  * tragen: dort fängt nichts mit zugeklappten Zeilen an, und die Liste ist eher
@@ -47,7 +47,7 @@ const SPALTEN: Record<number, string> = {
  *
  * Das gilt auch quer auf der Kiosk-Stele. Die Vorfassung schrieb dort alle
  * Texte gleichzeitig aus — fünf volle Absätze auf einem Screen, und das
- * Wortbudget (R5, ~50 Wörter sichtbar) gilt im Querformat genauso wie
+ * Wortbudget (~50 Wörter sichtbar) gilt im Querformat genauso wie
  * hochkant. `spaltenQuer` legt die Felder im breiten Panel (`karteBreit`) in
  * Spalten nebeneinander — dort ist Höhe knapp und Breite im Überfluss
  * vorhanden.
@@ -66,6 +66,7 @@ export function Klappliste({
   ersterOffen?: boolean
 }) {
   const schmal = useSchmal()
+  const ruhig = useReducedMotion()
   const [offen, setOffen] = useState(ersterOffen ? 0 : -1)
   const felder = useRef<(HTMLDivElement | null)[]>([])
   // Beim ersten Lauf nicht: der Screen soll nicht schon beim Ankommen
@@ -78,8 +79,13 @@ export function Klappliste({
       return
     }
     if (offen < 0) return
-    felder.current[offen]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-  }, [offen])
+    felder.current[offen]?.scrollIntoView({
+      block: 'nearest',
+      // Das Heranholen ist Bewegung wie jede andere: wer sie abbestellt hat,
+      // bekommt den Sprung statt der Fahrt.
+      behavior: ruhig ? 'auto' : 'smooth',
+    })
+  }, [offen, ruhig])
 
   return (
     // Quer **Spalten statt Raster**. Mit `grid-cols-2` bestimmt der längste

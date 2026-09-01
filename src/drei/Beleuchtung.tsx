@@ -4,8 +4,8 @@ import { useFrame } from '@react-three/fiber'
 import { SZENE_FARBEN } from '@/dachstuhl/bauteil-texte'
 
 /**
- * Beleuchtung nach Bauplan 5.4. Genau ein schattenwerfendes Licht —
- * mehr kostet auf dem iPad spuerbar Bilder pro Sekunde und bringt nichts.
+ * Genau ein schattenwerfendes Licht — mehr kostet auf dem iPad spuerbar
+ * Bilder pro Sekunde und bringt nichts.
  *
  * Die Schattenkamera ist eng auf die Huellkugel des Dachstuhls zugeschnitten
  * (Radius rund 8,5 m um den Ursprung). Zusammen mit `normalBias` verschwindet

@@ -47,22 +47,22 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Was ist das',
         antwort:
-          'Industriemeister:in Metall — die IHK-Weiterbildung über dem Facharbeiterbrief. Du führst eine Schicht oder eine Fertigung, planst Aufträge und Personal und darfst selbst ausbilden.',
+          'Industriemeister:in Metall — die nächste Stufe nach der Ausbildung. Geprüft wird bei der IHK, der Industrie- und Handelskammer. Du führst dann eine Schicht, teilst Aufträge und Leute ein und darfst selbst Azubis ausbilden.',
       },
       {
         frage: 'Wie lange',
         antwort:
-          'In Vollzeit rund ein halbes Jahr, neben dem Beruf meist zwei bis zweieinhalb Jahre — viele machen es abends und samstags neben der Schicht.',
+          'In Vollzeit rund ein halbes Jahr. Neben dem Beruf dauert es zwei bis zweieinhalb Jahre — viele lernen abends und samstags, nach der Schicht.',
       },
       {
         frage: 'Was es kostet',
         antwort:
-          'Lehrgang und Prüfung zusammen meist zwischen rund 6.000 und 9.000 Euro. Das Aufstiegs-BAföG — ein staatlicher Zuschuss für Weiterbildungen wie diese — übernimmt davon den größten Teil; wer besteht, zahlt am Ende etwa ein Viertel selbst.',
+          'Kurs und Prüfung zusammen meist rund 6.000 bis 9.000 Euro — so viel wie ein gebrauchtes Auto. Das Aufstiegs-BAföG — Geld vom Staat für genau solche Weiterbildungen — übernimmt davon den größten Teil. Wer besteht, zahlt am Ende etwa ein Viertel selbst.',
       },
       {
         frage: 'Was du verdienst',
         antwort:
-          'Je nach Betrieb und Schichtmodell meist zwischen rund 50.000 und 65.000 Euro im Jahr — die Metall- und Elektroindustrie gehört zu den am besten bezahlten Branchen.',
+          'Je nach Betrieb und Schicht meist rund 50.000 bis 65.000 Euro im Jahr. Das sind grob 4.000 bis 5.400 Euro im Monat, bevor Steuern und Abgaben abgehen. In der Metallindustrie wird gut bezahlt.',
       },
     ],
     aufhaenger:
@@ -71,12 +71,12 @@ export const KARRIEREWEGE: Karriereweg[] = [
   {
     id: 'Z8.2',
     titel: 'Techniker',
-    koeder: 'Fertigung planen statt rüsten.',
+    koeder: 'Am Plan arbeiten statt an der Maschine.',
     abschnitte: [
       {
         frage: 'Was ist das',
         antwort:
-          'Staatlich geprüfte:r Techniker:in Maschinenbautechnik. Du legst fest, wie ein Teil gefertigt wird: Werkzeuge, Spannmittel, Programme, Taktzeiten — die Arbeit vor der Maschine wird zur Arbeit am Plan.',
+          'Staatlich geprüfte:r Techniker:in, Fachrichtung Maschinenbautechnik. Du legst fest, wie ein Teil gebaut wird: welches Werkzeug, wie das Teil festgehalten wird, welches Programm, wie lange ein Stück dauern darf. Du stehst dann nicht mehr an der Maschine — du planst für alle, die dort stehen.',
       },
       {
         frage: 'Wie lange',
@@ -85,12 +85,12 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Was es kostet',
         antwort:
-          'An den öffentlichen Fachschulen in NRW kostet der Unterricht nichts — nur Gebühren und Material.',
+          'An den staatlichen Fachschulen in NRW kostet der Unterricht nichts. Du zahlst nur ein paar Gebühren und dein Material.',
       },
       {
         frage: 'Der Punkt, den kaum jemand kennt',
         antwort:
-          'Der Abschluss steht offiziell auf derselben Stufe wie ein Bachelor. Der Titel heißt sogar so: Bachelor Professional in Technik.',
+          'Der Abschluss zählt offiziell genauso viel wie ein Bachelor an der Uni. Er heißt sogar so: Bachelor Professional in Technik.',
       },
     ],
     aufhaenger:
@@ -104,17 +104,17 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Warum erst eine Ausbildung?',
         antwort:
-          'Weil sie den Weg nicht zumacht, sondern aufmacht. In Nordrhein-Westfalen berechtigen Industriemeister- und Technikerabschluss zur Einschreibung in jeden Studiengang an jeder Hochschule des Landes — ohne Abitur, ohne Aufnahmeprüfung.',
+          'Weil sie den Weg nicht zumacht, sondern aufmacht. Wer in Nordrhein-Westfalen den Industriemeister oder den Techniker hat, darf sich an jeder Hochschule des Landes für jedes Fach einschreiben — ohne Abitur, ohne Aufnahmeprüfung.',
       },
       {
         frage: 'Und ohne Meister?',
         antwort:
-          'Mit bestandener Abschlussprüfung und drei Jahren im Beruf darfst du fachgebunden studieren — alles, was zu deiner Ausbildung passt. Auch dafür braucht es keine Zugangsprüfung.',
+          'Auch dann. Mit bestandener Abschlussprüfung und drei Jahren im Beruf darfst du alles studieren, was zu deiner Ausbildung passt. Auch dafür brauchst du keine extra Prüfung.',
       },
       {
         frage: 'Was dann',
         antwort:
-          'Maschinenbau — und das direkt vor der Haustür: die Universität Paderborn bildet Maschinenbauer:innen aus. Wer heute Teile fertigt, rechnet dann aus, wie die Maschinen von morgen aussehen.',
+          'Maschinenbau — und das direkt vor der Haustür: An der Universität Paderborn kannst du das studieren. Wer heute Teile fertigt, rechnet dann aus, wie die Maschinen von morgen aussehen.',
       },
     ],
     aufhaenger:
@@ -128,4 +128,4 @@ export function karriereweg(id: StepId): Karriereweg | undefined {
 
 /** Fällt zurück, wenn in Z8 nichts angesehen wurde. */
 export const AUFHAENGER_OHNE =
-  'Vielleicht hat dich heute etwas überrascht — ein Hundertstel zum Beispiel.'
+  'Vielleicht hat dich heute etwas überrascht — zum Beispiel, wie winzig ein Hundertstel Millimeter ist.'

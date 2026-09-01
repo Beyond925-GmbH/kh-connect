@@ -15,7 +15,7 @@ import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
 
 /**
  * A9 — Dein nächster Schritt. Der CTA-Screen, unverändert wie bei allen vier
- * Tagen (Spec 6, A9 und khpl-tage.md 3): vollflächig orange, „Sprich jetzt mit
+ * Tagen: vollflächig orange, „Sprich jetzt mit
  * … am Stand“ und das Angebot „Noch einen Beruf“.
  *
  * Zweiteilig wie M10:
@@ -28,21 +28,20 @@ import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
  *     auf einen Platzhalter im Klartext.
  *
  * Wer im Karriere-Skip bis hierher durchgeht, bekommt zusätzlich **[ Zurück zu
- * deinem Tag ]** (khpl-ui-shell.md 6) — der Skip bleibt ein Abstecher, auch
+ * deinem Tag ]** — der Skip bleibt ein Abstecher, auch
  * wenn er bis ans Ende führt. „Von vorn“ ist der Knopf des Standpersonals für
  * den nächsten Besucher, nicht der des Besuchers; deshalb steht daneben „Noch
  * einen Beruf“ als der eine Weg nach vorn.
  *
- * ⚠️ **Zwei Meldungen an die Hülle, keine Änderungen in diesem Tag**
- * (khpl-tage.md 0 und 6.2):
+ * ⚠️ **Zwei Meldungen an die Hülle, keine Änderungen in diesem Tag:**
  *
  *  - Der meistgegebene Rat an Neulinge ist quer durch alle 25 Gespräche „mach
  *    ein Praktikum“ — konkreter als „Sprich jetzt mit … am Stand“. Das betrifft
  *    alle vier Tage und gehört an die Hülle.
  *  - Für diesen Beruf nennen die Befragten ein zweites Argument: man kann ihn
- *    gut gebrauchen, wenn man später selbst ein Haus hat. Spec 12 führt das
- *    ausdrücklich als **nicht aufgenommen** und als Material für spätere
- *    Ausbaustufen — es steht deshalb nicht auf diesem Screen.
+ *    gut gebrauchen, wenn man später selbst ein Haus hat. Das ist Material
+ *    für eine spätere Ausbaustufe und steht deshalb **nicht** auf diesem
+ *    Screen.
  *
  * ⚠️ **`Abschlussfeld` ist eine bewusste Doppelung von M10** und gemeldet: der
  * CTA ist eine Markenzone und muss an allen vier Tagen gleich aussehen, aber er
@@ -149,9 +148,9 @@ export function A9() {
  * zeigt. `mix-blend-multiply` behält die Zeichnung des Fotos, statt es
  * zuzukleistern.
  *
- * ⚠️ **Spec 10 vergibt für den CTA dieses Tages kein Motiv.** Ohne Eintrag trug
- * die Farbfläche mit der Paderborner Silhouette allein, und hochkant stand
- * darunter rund ein Drittel Bildhöhe reines Orange (Abnahme, A9) — eine leere
+ * ⚠️ **Für den CTA dieses Tages gibt es kein eigenes Motiv.** Ohne Eintrag
+ * trug die Farbfläche mit der Paderborner Silhouette allein, und hochkant
+ * stand darunter rund ein Drittel Bildhöhe reines Orange — eine leere
  * Farbfläche fordert niemanden auf, mit einem Menschen zu sprechen. Die
  * Motivliste dieses Berufs führt deshalb für A9 das Kartenmotiv; die
  * Begründung steht dort (`berufe/anlagenmechanik.ts`, `bilder`). Kommt ein

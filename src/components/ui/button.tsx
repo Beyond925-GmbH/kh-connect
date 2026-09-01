@@ -16,10 +16,10 @@ import { cn } from '@/lib/utils'
  * zusätzlich einen harten Schatten nach unten — er sieht aus wie eine Taste,
  * die man herunterdrücken kann, und beim Drücken fährt der Schatten ein.
  *
- * **Farbregel (R3): Orange = die Welt, Limette = du.** Orange gehört den
+ * **Farbregel: Orange = die Welt, Limette = du.** Orange gehört den
  * Fakten, Maßen und Zeichnungen — Knöpfe sind immer eine Handlung des
  * Besuchers und damit limette. Und **genau ein gefülltes limettes Element pro
- * Screen heißt „hier geht's weiter“** (R8); die Varianten sind danach benannt:
+ * Screen heißt „hier geht's weiter“**; die Varianten sind danach benannt:
  *
  *   `weiter` — die eine Handlung, die den Screen verlässt: die gefüllte Pille
  *   `aktion` — die Handlung *innerhalb* einer Übung (prüfen, auflösen):

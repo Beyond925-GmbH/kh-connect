@@ -608,7 +608,7 @@ export function Holzstapel({
   onHolz,
 }: {
   gesuchteNummer?: number
-  /** „Zeig mir wie“ (khpl-tage.md 3): hebt das gesuchte Holz sichtbar an. */
+  /** „Zeig mir wie“: hebt das gesuchte Holz sichtbar an. */
   hinweis?: boolean
   /**
    * Der Step weiß beim Wiedereinstieg über „Dein Weg“, dass das Holz längst
@@ -658,8 +658,8 @@ const PLATTE_M = PLATTENBREITE_CM / 100
  * Das leere Rähmwerk mit einem Ständer; der nächste folgt dem Regler. Beim
  * Auflösen schnappt er auf das Raster, dann legen sich zwei Bauplatten auf —
  * ihre gemeinsame Kante trifft sichtbar eine Ständermitte — und die übrigen
- * Ständer fliegen ins Raster ein. **Eine Bauplatte, keine Dämmmatte**
- * (belege/zimmerer.md 1).
+ * Ständer fliegen ins Raster ein. **Eine Bauplatte, keine Dämmmatte**: das
+ * Raster kommt aus der Plattenbreite.
  */
 export function Staenderwerk({
   achsmassCm = ACHSMASS_CM,

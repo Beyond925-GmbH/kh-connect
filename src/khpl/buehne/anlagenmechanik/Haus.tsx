@@ -12,9 +12,13 @@ import {
   FUELLDRUCK,
   KALT,
   SICHERHEITSVENTIL_BAR,
+  SKALA_MAX,
   WAERMELAUF_DAUER,
   WARM,
+  amKreis,
+  bogen,
   druckverlust,
+  winkel,
   type BauteilId,
   type BuehnenZustand,
   type KnotenId,
@@ -25,7 +29,6 @@ import {
   HAUS,
   HEIZKOERPER,
   RAHMEN,
-  RAHMEN_INBETRIEBNAHME_BAND,
   RICHTIGER_WEG,
   VERLUSTFLAECHEN,
   START,
@@ -65,8 +68,8 @@ type HausZustand = Exclude<BuehnenZustand, { szene: 'anlage' } | { szene: 'trans
  * Die `viewBox` ist in allen fünf dieselbe; was sich ändert, ist der
  * Kamerarahmen auf der Gruppe darin (`RAHMEN`, `kamera`). Das ist der Grund,
  * warum A2 und A4 sichtbar **derselbe Keller** sind und nicht zwei Bilder, die
- * einander ähneln — „eine Welt, viele Zustände" (khpl-tage.md 1, Mechanismus
- * 2), nur gezeichnet statt gebaut.
+ * einander ähneln — **eine Welt, viele Zustände**, nur gezeichnet statt
+ * gebaut.
  *
  * **Bewegungsgefühl: Fluss.** Alles, was sich hier bewegt, wandert an einer
  * Linie entlang: die Vliesbahn rollt aus, die Wärme läuft den Weg hinauf, den
@@ -98,18 +101,23 @@ export function Haus({
   const sicht = sichtfeld(seiten)
 
   /**
-   * Der Kamerarahmen der Szene — mit einer Ausnahme: ist die Fläche in A6 nur
-   * ein flaches Band (Handy hochkant, Panel aufgeklappt: ~366 × 103 px), zeigt
-   * die Kamera den Keller mit dem Manometer statt des ganzen Hauses, denn ein
-   * Manometer mit 18 px Durchmesser ist keine Anzeige. Die Schwelle 1,8 trifft
-   * nur dieses Band — iPad hochkant liegt bei ~1,3 und behält das Haus, und
-   * sobald die Anlage läuft und das Panel sich zusammenzieht, kippt das
-   * Verhältnis unter die Schwelle und die Wärme steigt im vollen Hausschnitt.
+   * Der Kamerarahmen der Szene.
+   *
+   * Die frühere Ausnahme für A6 auf flachen Flächen — ab Seitenverhältnis
+   * 1,8 der Keller mit dem Manometer statt des ganzen Hauses
+   * (`RAHMEN_INBETRIEBNAHME_BAND`, die Konstante liegt weiter in
+   * `zeichnung.ts`) — ist mit dem A6-Panelumbau **bewusst stillgelegt**: die
+   * ablesbare Druckanzeige ist seitdem die große Uhr im Panel
+   * (`steps/anlagenmechanik/A6.tsx`, `Manometer`), das kleine Manometer hier
+   * ist Requisite, und das Band zeigte direkt über der großen Uhr eine
+   * zweite, redundante. Dazu kommt: das hohe Füll-Panel schiebt hochkant
+   * jedes Tablet über die alte Schwelle, und jede Rückmeldungszeile ändert
+   * die Panelhöhe — eine Schwelle ohne Totband hieße eine Kamera, die mitten
+   * in der Übung zwischen Band und Haus umspringt. Ein klein gedrücktes Haus
+   * ist als Kulisse der ruhigere Handel; sobald die Anlage läuft, zieht sich
+   * das Panel ohnehin zusammen, und die Wärme steigt im vollen Hausschnitt.
    */
-  const blickfeld =
-    szene === 'inbetriebnahme' && seiten > 1.8
-      ? RAHMEN_INBETRIEBNAHME_BAND
-      : RAHMEN[szene]
+  const blickfeld = RAHMEN[szene]
 
   /**
    * Der Weg der Wärme. In A6 und A7 ist das **der Weg aus A4** und kein
@@ -137,8 +145,8 @@ export function Haus({
 
   /**
    * **Der Preis eines verlustreichen Weges, in der Währung dieses Screens.**
-   * „Wer einen zu verlustreichen Weg fertigbaut, darf ihn behalten: in A6
-   * läuft die Wärme dann sichtbar langsamer los" (Spec 6, A4) — eine Folge,
+   * Wer einen zu verlustreichen Weg fertigbaut, darf ihn behalten: in A6
+   * läuft die Wärme dann sichtbar langsamer los — eine Folge,
    * keine Note. Gerechnet aus dem, was der Step schickt, damit sein
    * Ersatzwecker und diese Wanderung dieselbe Dauer meinen.
    */
@@ -279,7 +287,7 @@ export function Haus({
         )}
 
         {szene === 'inbetriebnahme' && (
-          <Manometer bar={zustand.druckBar} imFenster={zustand.imFenster} />
+          <Manometer bar={zustand.druckBar} imFenster={zustand.imFenster} ruhig={ruhig} />
         )}
       </g>
 
@@ -401,8 +409,8 @@ function Defs() {
         <stop offset="100%" stopColor={WARM.linie} stopOpacity={0} />
       </radialGradient>
       {/*
-        **Feierabend im Hellen** (Spec 6, A7): „vier Feierabende, vier
-        Lichter". Der erste Anlauf blieb mit 13 % unter der
+        **Feierabend im Hellen** — vier Feierabende, vier Lichter. Der erste
+        Anlauf blieb mit 13 % unter der
         Wahrnehmungsschwelle — auf dem Screen war A7 genauso dunkel wie A2, und
         das Unterscheidungsmerkmal dieses Tages war einfach nicht da. Jetzt ein
         flächiger warmer Schein, der oben am hellsten ist und nach unten
@@ -720,8 +728,8 @@ function BauteilFigur({
     Die Vorfassung nahm dafür `WARM.linie`. Damit stand Orange schon in A2 im
     Keller — vier Screens, bevor die Anlage läuft — und nahm dem Farbumschlag
     in A6 einen Teil seiner Wirkung. Die Farbregel dieses Tages sagt für A2
-    ausdrücklich: „Kalte Palette — der Keller ist grau und blau, und er bleibt
-    es bis A6" (Spec 6, A2). Ein hellerer Strich und ein Ring machen dieselbe
+    ausdrücklich: Kalte Palette — der Keller ist grau und blau, und er bleibt
+    es bis A6. Ein hellerer Strich und ein Ring machen dieselbe
     Auswahl sichtbar, ohne die Temperatur vorwegzunehmen.
   */
   const stroke = offen ? KALT.wahl : angetippt ? KALT.linie : KALT.linieMatt
@@ -863,7 +871,7 @@ function Thermostatventile({
 
 /**
  * **Die Vliesbahn.** Bevor irgendetwas ausgebaut wird, wird die fremde Wohnung
- * geschützt (`INTERVIEW`, Spec 6 A2) — die eine Sache, die diesen Beruf von
+ * geschützt — die eine Sache, die diesen Beruf von
  * allen anderen im Angebot trennt: du arbeitest in der Wohnung von jemandem.
  *
  * Sie rollt aus, sie springt nicht auf: der Handgriff ist der Inhalt.
@@ -884,7 +892,7 @@ function Vliesbahn({ ausgerollt, ruhig }: { ausgerollt: boolean; ruhig: boolean 
         height={7}
         rx={1.5}
         // Ein Vlies ist weder kalt noch warm — ein stumpfes Papiergrau, lokal
-        // und ohne Token (Spec 7).
+        // und ohne Token.
         fill="rgba(206,198,184,0.42)"
         stroke="rgba(206,198,184,0.7)"
         strokeWidth={1.2}
@@ -1005,8 +1013,8 @@ function Waermepumpe({
  *     sie läuft, auch wenn sie auf einer Wandlinie liegt.
  *  3. **Das Rohr** in `KALT.rohr` — die Materialfarbe eines blanken Rohrs,
  *     nicht die nächste Graustufe. Innerhalb der Bühne ist Material erlaubt;
- *     die Farbregel („Kalt und Warm nur auf der Bühne", Spec 7) bleibt
- *     unberührt, Orange bleibt A6 vorbehalten.
+ *     die Farbregel — Kalt und Warm nur auf der Bühne — bleibt unberührt,
+ *     Orange bleibt A6 vorbehalten.
  *  4. **Das Glanzlicht** als schmaler heller Kern darin: dunkle Kanten, helle
  *     Mitte — das ist der Unterschied zwischen einer Linie und einem Zylinder.
  *
@@ -1147,8 +1155,8 @@ function Heizkoerper({
 
 /**
  * Solange geschätzt wird, verliert das Haus Wärme: durch Dach, Wände und
- * Fenster. **Ohne Zahl und ohne Skala** — der Reglerwert steht im Panel, und
- * eine Bühne, die ihn in eine Pfeillänge übersetzt, würde eine Genauigkeit
+ * Fenster. **Ohne Zahl und ohne Skala** — geraten wird im Panel, und eine
+ * Bühne, die die Zahl in eine Pfeillänge übersetzt, würde eine Genauigkeit
  * behaupten, die sie nicht hat.
  */
 function Waermebedarf({ gezeigt, ruhig }: { gezeigt: boolean; ruhig: boolean }) {
@@ -1338,35 +1346,29 @@ function Rasterfeld({
 // A6 — das Manometer
 // ---------------------------------------------------------------------------
 
-const SKALA_MAX = 4
-
-function winkel(bar: number): number {
-  return 135 + (Math.min(Math.max(bar, 0), SKALA_MAX) / SKALA_MAX) * 270
-}
-
-function amKreis(cx: number, cy: number, r: number, grad: number): Punkt {
-  const rad = (grad * Math.PI) / 180
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
-}
-
-function bogen(cx: number, cy: number, r: number, von: number, bis: number): string {
-  const a = amKreis(cx, cy, r, von)
-  const b = amKreis(cx, cy, r, bis)
-  const gross = bis - von > 180 ? 1 : 0
-  return `M${a.x} ${a.y} A${r} ${r} 0 ${gross} 1 ${b.x} ${b.y}`
-}
-
 /**
  * Das Manometer. Zielfenster **1,2–1,8 bar** und Ansprechdruck des
  * Sicherheitsventils bei **2,5 bar** stehen als `FUELLDRUCK` und
- * `SICHERHEITSVENTIL_BAR` in `kanon.ts` und sind `BELEGT`, zeitstabil
- * (Spec 11). Die Skala bis 4 bar ist eine Zeichenentscheidung — so sieht ein
- * Heizungsmanometer aus.
+ * `SICHERHEITSVENTIL_BAR` in `kanon.ts` — zeitstabile Praxiswerte. Skala und
+ * Zeigergeometrie (`SKALA_MAX`, `winkel`, `amKreis`,
+ * `bogen`) kommen ebenfalls von dort: die große Uhr im Panel von A6 zeigt
+ * dieselbe Skala, und zwei Kopien derselben Rechnung wären irgendwann zwei
+ * Zeiger, die sich widersprechen.
  *
  * Kein Rot. Das Fenster ist warm markiert, alles andere kalt — die Anzeige
  * bewertet nicht, sie zeigt.
  */
-function Manometer({ bar, imFenster }: { bar: number; imFenster: boolean }) {
+function Manometer({
+  bar,
+  imFenster,
+  ruhig,
+}: {
+  bar: number
+  imFenster: boolean
+  /** `prefers-reduced-motion`: der Zeiger springt, statt nachzuschwingen —
+   *  im selben Takt wie die große Uhr im Panel von A6. */
+  ruhig: boolean
+}) {
   const cx = 208
   const cy = 196
   const r = 17
@@ -1411,7 +1413,9 @@ function Manometer({ bar, imFenster }: { bar: number; imFenster: boolean }) {
         strokeLinecap="round"
         initial={false}
         animate={{ d: `M${cx} ${cy} L${zeiger.x} ${zeiger.y}` }}
-        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        transition={
+          ruhig ? { duration: 0 } : { duration: 0.35, ease: [0.22, 1, 0.36, 1] }
+        }
       />
       <circle cx={cx} cy={cy} r={2.4} fill={imFenster ? WARM.linie : KALT.linie} />
     </g>
@@ -1420,11 +1424,11 @@ function Manometer({ bar, imFenster }: { bar: number; imFenster: boolean }) {
 
 /**
  * **Feierabend im Hellen.** Dieser Tag endet nachmittags im Wohnhaus einer
- * Familie, nicht auf einem Dach im Abendlicht — vier Feierabende, vier Lichter
- * (Spec 6, A7). Das ist das Unterscheidungsmerkmal dieses Tages gegenüber den
+ * Familie, nicht auf einem Dach im Abendlicht: vier Feierabende, vier
+ * Lichter. Das ist das Unterscheidungsmerkmal dieses Tages gegenüber den
  * anderen drei, und es muss **zu sehen** sein: zwei Lagen im Screen-Modus,
  * eine flächige und ein schräg einfallendes Band. Warm auf der Bühne ist
- * ausdrücklich erlaubt (Spec 7), gefüllt ist hier nichts — die eine gefüllte
+ * ausdrücklich erlaubt, gefüllt ist hier nichts — die eine gefüllte
  * orange Fläche des Screens bleibt *Weiter*.
  */
 function Feierabendlicht({ sicht }: { sicht: Rahmen }) {
@@ -1457,20 +1461,18 @@ function Feierabendlicht({ sicht }: { sicht: Rahmen }) {
  *
  * ---
  *
- * **Wofür das gebaut ist.** A3 fragte „Schätz, wie viel Wärme dieses Haus
- * braucht" und gab dafür einen Regler von 2 bis 30 kW. Für die Zielgruppe ist
- * das keine Schätzung, sondern ein Griff ins Dunkle: Wer nie mit Kilowatt
- * umgegangen ist, hat keinen Anker, den die Auflösung widerlegen könnte — und
- * es war der dritte Regler dieser Art in derselben Anwendung.
+ * **Seit dem zweiten A3-Umbau reine Anzeige.** Zwischenzeitlich waren die
+ * vier Flächen eine Suchaufgabe — antippbar, mit Ring als Affordanz und einem
+ * Anteil je Fläche im Panel. A3 ist inzwischen wieder der eine Schätzmoment
+ * des Tages und auf einen Bogen gekürzt (siehe `steps/anlagenmechanik/A3.tsx`):
+ * der Step reicht kein `onVerlust` mehr herein, und die Pfeile erscheinen
+ * erst mit der Auflösung — als Bild dafür, wo die Wärme rausgeht, nicht als
+ * Aufgabe. Ring und Tipp-Fläche bleiben gebaut; sie kosten nichts, solange
+ * `onTipp` fehlt, und die Bühne schreibt den Steps nicht vor, wie sie ihre
+ * Zustände fahren.
  *
- * Jetzt sucht der Besucher stattdessen, **wo** die Wärme hingeht. Die vier
- * Flächen sind antippbar, jede meldet ihren Anteil, und erst wenn alle vier
- * gefunden sind, steht die Heizlast da — als Ergebnis des Hinsehens statt als
- * Auflösung eines Ratespiels.
- *
- * **Ein Balken, keine Zahl je Fläche** (`VERLUSTFLAECHEN`): Der Anteil ist
- * relativ, wie der Druckverlust in A4. Die eine belegte Zahl des Screens steht
- * in der Auflösung.
+ * **Die Dicke, keine Zahl je Fläche** (`VERLUSTFLAECHEN`): Der Anteil ist
+ * relativ, wie der Druckverlust in A4 — eine Zahl je Fläche wäre erfunden.
  */
 function Verlustpfeil({
   flaeche,
@@ -1521,7 +1523,7 @@ function Verlustpfeil({
         </g>
       )}
 
-      {/* Solange nicht gefunden: ein limetter Ring auf der Fläche. R8 — ist
+      {/* Solange nicht gefunden: ein limetter Ring auf der Fläche. Ist
           die Bühne die Interaktion, trägt das antippbare Objekt die
           Affordanz. */}
       {!gefunden && onTipp && (

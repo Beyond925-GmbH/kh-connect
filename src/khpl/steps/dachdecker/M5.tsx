@@ -15,7 +15,7 @@ import { useFortschritt, useGraph } from '@/khpl/store/fortschritt'
 /**
  * M5 — Aufrichten.
  *
- * **Erste Hälfte des einzigen Lernpaars** (khpl-flow.md 7 M5). Der Unterbau
+ * **Erste Hälfte des einzigen Lernpaars.** Der Unterbau
  * entsteht Bauteil für Bauteil, jedes wird beim Einfliegen benannt — aber
  * **der Besucher setzt es selbst**.
  *
@@ -32,12 +32,12 @@ import { useFortschritt, useGraph } from '@/khpl/store/fortschritt'
  * machen. M7 fragt dieselbe Reihenfolge ohne Ansage ab. Erst mitmachen, dann
  * aus dem Kopf. Vorher war es zuschauen, dann aus dem Kopf.
  *
- * Die Strecke endet, bevor der erste Sparren fliegt. Genau dort setzt die
- * Spec den Aha-Moment („bevor der erste Sparren fliegt“) — beim Anhalten ist
+ * Die Strecke endet, bevor der erste Sparren fliegt. Genau dort sitzt
+ * der Aha-Moment („bevor der erste Sparren fliegt“) — beim Anhalten ist
  * der Satz also wörtlich wahr. Was danach kommt, macht der Besucher in M7
  * selbst; das ist das Versprechen, mit dem der Fachtext hier endet.
  *
- * Tonlage `ENTSCHIEDEN` (flow 7 M5): **nur diese eine Zahl.** Die ebenfalls
+ * Zur Tonlage ist entschieden: **nur diese eine Zahl.** Die ebenfalls
  * belegten Todeszahlen bleiben aus dem UI heraus — der Punkt ist „deshalb wird
  * gesichert“, nicht „das ist ein gefährlicher Beruf“.
  *
@@ -105,7 +105,8 @@ export function M5() {
         <p>
           Erst wird gesichert — Gurt, Helm, Geländer. Das nennt sich{' '}
           <Begriff id="absturzsicherung">Absturzsicherung</Begriff>. Dann wächst der
-          Unterbau, von unten nach oben, ein Holz nach dem anderen.
+          Unterbau — das Holzgerippe, auf dem später die Sparren liegen. Von unten nach
+          oben, ein Holz nach dem anderen.
         </p>
       }
       interaktion={

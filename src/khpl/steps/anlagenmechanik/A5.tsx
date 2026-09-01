@@ -9,45 +9,45 @@ import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 /**
- * A5 — Halb eins, im Transporter. **Die Zäsur** (khpl-tage.md 1, Mechanismus 4):
- * zwischen A4 (führt vor) und A6/A7 (fragt ab) muss Luft sein, sonst ist A7
- * eine Ablesung und keine Erinnerungsleistung.
+ * A5 — Halb eins, im Transporter. **Die Zäsur:** zwischen A4 (führt vor) und
+ * A6/A7 (fragt ab) muss Luft sein, sonst ist A7 eine Ablesung und keine
+ * Erinnerungsleistung.
  *
  * Vier Pausen, vier Bilder — diese hier ist die einzige, in der man **sitzt und
  * nichts sieht als Armaturenbrett und Straße**. Für einen Beruf, der einen
  * erheblichen Teil des Tages im Auto verbringt, ist das die ehrlichste.
  *
- * **Aufbau nach dem Muster M6** (Spec 6, A5): kein Prüfknopf, keine Aufgabe,
- * aber auch keine Wartezeit — drei Fragen liegen da, jede einen Tap von ihrer
- * Antwort entfernt. Die Antwort **ersetzt** die vorige, sie stapelt sich nicht
+ * **Aufbau nach dem Muster M6:** kein Prüfknopf, keine Aufgabe, aber auch
+ * keine Wartezeit — drei Fragen liegen da, jede einen Tap von ihrer Antwort
+ * entfernt. Die Antwort **ersetzt** die vorige, sie stapelt sich nicht
  * darunter.
  *
- * **Die ehrliche Kehrseite dieses Tages sitzt hier** (khpl-tage.md 1,
- * Mechanismus 8): ungeduldige Kunden. In drei von vier Gesprächen dieselbe
- * Antwort, und die einzige, die dieser Beruf überhaupt nennt. Sie steht als
+ * **Die ehrliche Kehrseite dieses Tages sitzt hier:** ungeduldige Kunden. In
+ * drei von vier Gesprächen dieselbe Antwort, und die einzige, die dieser Beruf
+ * überhaupt nennt. Sie steht als
  * **ein Satz an der Stelle, wo er hingehört** — nicht als Warnung, nicht als
  * eigener Screen. Direkt daneben steht, was der Beruf dagegensetzt, ebenfalls
  * aus dem Gespräch: ruhig bleiben, weiterarbeiten, den Kunden beruhigen.
  *
  * **Das iPad auf dem Armaturenbrett ist keine Requisite**, sondern
- * Arbeitsalltag (`INTERVIEW`: „Wir ham iPads, wo Aufträge drauf sind, wo man
- * jederzeit Fotos mitmachen kann"). Es steht hier in einem Nebensatz und wird
- * **nicht erklärt** — am Stand läuft diese Anwendung auf demselben Gerät, und
- * das ist der ganze Beleg. `technik: 0.85` wird damit nebenbei mit eingelöst.
+ * Arbeitsalltag. Aus dem Interview: „Wir ham iPads, wo Aufträge drauf sind, wo
+ * man jederzeit Fotos mitmachen kann". Es steht hier in einem Nebensatz und
+ * wird **nicht erklärt** — am Stand läuft diese Anwendung auf demselben Gerät,
+ * und das ist der ganze Beleg. `technik: 0.85` wird damit nebenbei mit
+ * eingelöst.
  *
  * ⚠️ **Dreifache Idle-Geduld** wie M6 — das ist eine **Änderung an der Hülle**
- * (`KioskGuard`, `GEDULD`) und gehört gemeldet, nicht gebaut (khpl-tage.md
- * 6.2). Bis sie da ist, fragt der Kiosk nach einer Minute auf ausgerechnet dem
+ * (`KioskGuard`, `GEDULD`) und gehört gemeldet, nicht im Vorbeigehen gebaut.
+ * Bis sie da ist, fragt der Kiosk nach einer Minute auf ausgerechnet dem
  * Screen nach, der niemanden drängen soll.
  *
  * **Die Bühne ist eine Zeichnung** (`buehne/anlagenmechanik/Transporter.tsx`).
- * Spec 10 hält fest, dass das Foto fehlt; Spec 6 erlaubt für genau diesen
- * Screen die Alternative — „Foto **oder eine ruhige Zeichnung**. Warmes Licht
- * durch die Windschutzscheibe … auf dem Armaturenbrett liegt ein iPad". Bis
- * hierher trug allein eine Lichtlage über einem leeren `StepFoto`, und der
- * Screen war zu vier Fünfteln schwarz. Die Zeichnung trägt die **erste Wärme
- * des Tages**, noch bevor die Anlage läuft, und das iPad steht darin, wo es im
- * Interview steht: auf dem Armaturenbrett.
+ * Das vorgesehene Foto gibt es nicht, und für genau diesen Screen ist die
+ * Alternative die bessere: warmes Licht durch die Windschutzscheibe, auf dem
+ * Armaturenbrett ein iPad. Bis hierher trug allein eine Lichtlage über einem
+ * leeren `StepFoto`, und der Screen war zu vier Fünfteln schwarz. Die
+ * Zeichnung trägt die **erste Wärme des Tages**, noch bevor die Anlage läuft,
+ * und das iPad steht darin, wo es im Interview steht: auf dem Armaturenbrett.
  */
 
 /**
@@ -56,34 +56,35 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * gerade Pause machen soll.
  *
  * Herkunft je Frage steht am Eintrag. Zwei davon kommen aus den Gesprächen,
- * die dritte ist die Berufsbezeichnung selbst — laut Spec 9 „die erste Hürde",
- * und deshalb wird `SHK` hier zusätzlich zum Glossareintrag eingelöst.
+ * die dritte ist die Berufsbezeichnung selbst — die erste Hürde dieses
+ * Berufs, und deshalb wird `SHK` hier zusätzlich zum Glossareintrag eingelöst.
  */
 const FRAGEN = [
   {
     id: 'name',
     frage: 'Warum heißt der Beruf so kompliziert?',
-    // Spec 6 (A5) und Spec 9: Sanitär, Heizung, Klima — drei Gewerke, ein
-    // Beruf. Wortgleich mit dem Glossareintrag `shk`, damit dieselbe Sache
-    // nicht zweimal verschieden erklärt wird.
+    // Sanitär, Heizung, Klima — drei Bereiche, ein Beruf. Wortgleich mit dem
+    // Glossareintrag `shk`, damit dieselbe Sache nicht zweimal verschieden
+    // erklärt wird. („Bereiche" statt „Gewerke": das Fachwort fiele in diesem
+    // String unerklärt.)
     antwort:
-      'Sanitär, Heizung, Klima. Drei Gewerke in einem Beruf: Wasser und Abwasser im Bad, die Heizung im Keller, Lüftung und Kühlung. Deshalb der lange Name — Anlagenmechaniker/-mechanikerin SHK.',
+      'Sanitär, Heizung, Klima. Drei Bereiche in einem Beruf: Wasser und Abwasser im Bad, die Heizung im Keller, Lüftung und Kühlung. Deshalb der lange Name — Anlagenmechaniker/-mechanikerin SHK.',
   },
   {
     id: 'morgen',
     frage: 'Was machst du eigentlich morgen?',
-    // `INTERVIEW` — Anlagenmechaniker Alltag, 02.07.2026. Die Antwort ist die
-    // Struktur des Betriebs, und sie steht wörtlich in Spec 6 (A5).
+    // Aus dem Interview — Anlagenmechaniker Alltag, 02.07.2026. Die Antwort
+    // ist die Struktur des Betriebs, in Alltagswörter übersetzt: „Sparte" und
+    // „vom Rohbau bis zur Feinmontage" sagen einem Vierzehnjährigen nichts.
     antwort:
-      'Kommt drauf an, in welcher Sparte du steckst. Kundendienst: Wartungen, Reparaturen, Kleinigkeiten. Montage: Heizungs- und Klimaanlagen einbauen. Und Sanierung — eine Badsanierung machen wir vom Rohbau bis zur Feinmontage.',
+      'Kommt drauf an, wo du eingeteilt bist. Kundendienst: Wartungen, Reparaturen, Kleinigkeiten. Montage: Heizungen und Klimaanlagen einbauen. Und Badsanierung: ein altes Bad komplett neu machen — von den nackten Wänden bis zum letzten Handgriff.',
   },
   {
     id: 'adressen',
     frage: 'Wie viele Adressen sind das an einem Tag?',
-    // ⚠️ **`NICHT BELEGBAR`** (Spec 11, `belege/anlagenmechanik.md` 9): es gibt
-    // dazu keine Statistik, nur Stellenanzeigen. Deshalb steht hier **keine
-    // Zahl als Fakt**, sondern die weiche Formulierung, die die Spec
-    // ausdrücklich erlaubt — „mal zwei, mal fünf".
+    // ⚠️ **Dazu gibt es nichts Belastbares**: keine Statistik, nur
+    // Stellenanzeigen. Deshalb steht hier **keine Zahl als Fakt**, sondern
+    // die weiche Formulierung „mal zwei, mal fünf".
     antwort:
       'Mal zwei, mal fünf. Eine Störung ist manchmal in zwanzig Minuten erledigt, manchmal dauert die Suche den halben Tag. Eine Zahl, die für jeden Betrieb stimmt, gibt es nicht.',
   },
@@ -118,10 +119,9 @@ export function A5() {
       // und *Weiter* bleibt der eine laute Knopf.
       interaktionOffen={false}
       /*
-        Die Zäsur bekommt die von Spec 6 (A5) ausdrücklich erlaubte
-        Alternative: „Foto **oder eine ruhige Zeichnung**. Warmes Licht durch
-        die Windschutzscheibe … auf dem Armaturenbrett liegt ein iPad."
-        Vorher stand hier `StepFoto` — und weil das Motiv fehlt (Spec 10),
+        Die Zäsur bekommt statt eines Fotos eine ruhige Zeichnung: warmes
+        Licht durch die Windschutzscheibe, auf dem Armaturenbrett ein iPad.
+        Vorher stand hier `StepFoto` — und weil das Motiv fehlt,
         rendert es nichts: der wichtigste Screen des Tages war zu vier
         Fünfteln schwarz. Die Zeichnung löst zugleich das iPad ein und damit
         `technik: 0.85`.
@@ -136,7 +136,7 @@ export function A5() {
           </p>
           {/*
             Die Kehrseite. Sie stand hier offen und trieb den Screen beim
-            Ankommen auf ~68 Wörter (R5) — jetzt liegt sie hinter einer
+            Ankommen auf ~68 Wörter — jetzt liegt sie hinter einer
             Klappzeile, deren Frage sie nicht versteckt: wer sie antippt,
             bekommt den Anton-Satz und direkt darunter das, was der Beruf
             dagegensetzt. Ohne den zweiten Absatz wäre der erste eine Warnung;
@@ -190,7 +190,7 @@ export function A5() {
             in A2 und A4.1 `Wahlflaeche` mit Signal-Ton, und hier ist nichts
             vorläufig — die Wahl gilt, sobald sie fällt. Die alte Fassung
             baute die Chips von Hand und färbte sie orange, die Farbe der
-            Welt (R3): derselbe Griff sah damit auf drei Screens verschieden
+            Welt: derselbe Griff sah damit auf drei Screens verschieden
             aus.
           */}
           <div className="flex flex-wrap gap-2">

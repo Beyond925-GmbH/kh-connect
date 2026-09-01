@@ -3,11 +3,11 @@ import type { BauteilTyp } from './bauteil-texte'
 import { farbeFuer, textFuer } from './bauteil-texte'
 
 /**
- * Erzeugt die vollstaendige Teileliste aus den abgeleiteten Massen (Bauplan 3).
+ * Erzeugt die vollstaendige Teileliste aus den abgeleiteten Massen.
  * Kein Bauteil ist von Hand positioniert — jede Zahl kommt aus `mass.ts`.
  */
 
-/** Bezugssystem eines Bauteils. `dach+`/`dach-` ist der Dachflaechen-Frame (Bauplan 2.1). */
+/** Bezugssystem eines Bauteils. `dach+`/`dach-` ist der Dachflaechen-Frame. */
 export type Rahmen = 'welt' | 'dach+' | 'dach-'
 
 /** `box` benutzt den geteilten Einheitswuerfel, die uebrigen je ein extrudiertes Profil. */

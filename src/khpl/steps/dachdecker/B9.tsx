@@ -12,12 +12,12 @@ import { karriereweg } from './karrierewege'
  * B9.1 / B9.2 / B9.3 — Meister · Techniker · Studium.
  * Abstecher von M9, münden in M10.
  *
- * Je eine Info-Karte mit gleichem Aufbau (khpl-flow.md 7 B9.x): Was ist das ·
- * Wie lange · Was es kostet · Was du verdienst. `Info only` auf dem Board —
- * deshalb keine Interaktion und keine Aha-Karte (ui-shell 5).
+ * Je eine Info-Karte mit gleichem Aufbau: Was ist das · Wie lange · Was es
+ * kostet · Was du verdienst. `Info only` auf dem Board — deshalb keine
+ * Interaktion und keine Aha-Karte.
  *
- * **Nur der erste und der letzte Abschnitt stehen offen** (Design-Review,
- * R5): alle vier gleichzeitig waren ~80 Wörter Fließtext — ein Steckbrief
+ * **Nur der erste und der letzte Abschnitt stehen offen** (Design-Review):
+ * alle vier gleichzeitig waren ~80 Wörter Fließtext — ein Steckbrief
  * zum Durchlesen, kein Screen zum Erfassen. Offen bleibt, was die
  * Entscheidung „interessiert mich“ trägt: was das ist und was man verdient.
  * Dauer und Kosten liegen als Klappzeilen dazwischen (geteilte `Klappliste`,
@@ -48,7 +48,7 @@ export function B9({ id }: { id: StepId }) {
   return (
     <StepShell
       id={id}
-      // Info-Screen (ui-shell §5: `Info only`). Wird gelesen.
+      // Info-Screen (`Info only`). Wird gelesen.
       auftrag={null}
       ansage={null}
       titelZusatz="Karriere-Weg"

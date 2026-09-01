@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 
 /**
- * Tap gegen Dreh-Geste (Bauplan 5.1). OrbitControls hat keinen eigenen
+ * Tap gegen Dreh-Geste. OrbitControls hat keinen eigenen
  * Schwellwert — ohne diese Messung wird jedes Verwackeln beim Drehen zum
  * Fehl-Tap auf ein Bauteil.
  */

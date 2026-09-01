@@ -122,11 +122,81 @@ export const TEIL = {
 /** Ein antippbares Maß auf der Zeichnung (Z1). */
 export type MassId = 'laenge' | 'schaft' | 'sitz' | 'fase'
 
-/** Ein NC-Satz des Schlichtgangs (Z3). */
-export type SatzId = 'n10' | 'n20' | 'n30' | 'n40'
+// ---------------------------------------------------------------------------
+// Z3 — die NC-Sätze, die die Werkzeugweg-Bühne fährt
+// ---------------------------------------------------------------------------
 
-/** Reihenfolge der Sätze — die Bühne fährt sie in dieser Ordnung. */
-export const SAETZE: readonly SatzId[] = ['n10', 'n20', 'n30', 'n40']
+/**
+ * Ein NC-Satz, wie Z3 ihn zeigt und die Bühne ihn fährt. **Eine Quelle für
+ * Code und Bewegung:** das Panel druckt `code`, die Bühne rechnet aus `x`/`z`
+ * die Bahn — so kann die Zeile auf dem Screen der Fahrt auf der Bühne nie
+ * widersprechen.
+ *
+ * Drehmaschinen-Konvention wie überall an diesem Tag: **X ist ein
+ * Durchmesserwort**, Z die Länge ab Stirnfläche (negativ Richtung Futter).
+ * Fehlt eine Achse, bleibt sie stehen — genau wie in echtem G-Code.
+ */
+export interface NcSatz {
+  /** Die Zeile, wie sie im Programm steht. */
+  code: string
+  /** Ziel-Durchmesser in mm. */
+  x?: number
+  /** Ziel-Position in mm ab Stirnfläche. */
+  z?: number
+  /** 0 = Eilgang (schnell, schneidet nichts), 1 = Vorschub. */
+  g: 0 | 1
+  /** Fliegt dabei ein Span? G1 durch Luft (anstellen, antasten) schneidet nichts. */
+  span?: boolean
+  /** Fahrzeit auf der Bühne in Sekunden. */
+  dauer: number
+}
+
+/**
+ * Kapitel 1 der Z3-Bühne: **drei Befehle, eine Übungs-Stange** (Ø 24).
+ * Bewusst das kleinstmögliche Programm, das trotzdem etwas herstellt —
+ * hinfahren, zustellen, eine gerade Linie schneiden. Die Nut, die dabei
+ * entsteht (Ø 20, 30 lang), ist der ganze Beweis: drei Zeilen, ein Absatz.
+ */
+export const UEBUNGS_SAETZE: readonly NcSatz[] = [
+  { code: 'G0 X26 Z2', x: 26, z: 2, g: 0, dauer: 0.8 },
+  { code: 'G1 X20', x: 20, g: 1, dauer: 0.9 },
+  { code: 'G1 Z-30', z: -30, g: 1, span: true, dauer: 2.4 },
+]
+
+/**
+ * Kapitel 2: **das Programm für den Bolzen des Tages** — Schruppen in drei
+ * Schnitten, dann der Schlichtgang mit Fase, wie ihn Z1 zeichnet (Ø 25 h7,
+ * Sitz 22 lang, Fase 1 × 45°, Schaft Ø 20 dahinter).
+ *
+ * **Fachlich vereinfacht, aber in sich konsistent:** Rohstange Ø 28; alle
+ * Schnitte enden bei Z −34, damit vor den Spannbacken ein Bund Rohmaterial
+ * stehen bleibt — abgestochen wird später, nicht in diesem Programm. Der
+ * Schaft ist deshalb hier 12 statt 16 mm frei; für die Bühne zählt die
+ * Silhouette, nicht die Stückliste. Der Dialekt wäre SINUMERIK — gesagt wird
+ * das dem Besucher nicht: Z3 zeigt das Konzept, nicht die Syntax.
+ */
+export const PROGRAMM_SAETZE: readonly NcSatz[] = [
+  { code: 'N10 G0 X26 Z2', x: 26, z: 2, g: 0, dauer: 0.6 },
+  { code: 'N20 G1 Z-34 F0.2', z: -34, g: 1, span: true, dauer: 2.4 },
+  { code: 'N30 G0 X32', x: 32, g: 0, dauer: 0.35 },
+  { code: 'N40 G0 Z-22', z: -22, g: 0, dauer: 0.5 },
+  { code: 'N50 G1 X23', x: 23, g: 1, span: true, dauer: 0.5 },
+  { code: 'N60 G1 Z-34', z: -34, g: 1, span: true, dauer: 1.6 },
+  { code: 'N70 G0 X32', x: 32, g: 0, dauer: 0.35 },
+  { code: 'N80 G0 Z-22', z: -22, g: 0, dauer: 0.45 },
+  { code: 'N90 G1 X20', x: 20, g: 1, span: true, dauer: 0.5 },
+  { code: 'N100 G1 Z-34', z: -34, g: 1, span: true, dauer: 1.6 },
+  { code: 'N110 G0 X32', x: 32, g: 0, dauer: 0.35 },
+  { code: 'N120 G0 Z2', z: 2, g: 0, dauer: 0.6 },
+  { code: 'N130 G0 X23', x: 23, g: 0, dauer: 0.3 },
+  { code: 'N140 G1 Z0 F0.1', z: 0, g: 1, dauer: 0.45 },
+  { code: 'N150 G1 X25 Z-1', x: 25, z: -1, g: 1, span: true, dauer: 0.5 },
+  { code: 'N160 G1 Z-22', z: -22, g: 1, span: true, dauer: 1.9 },
+  { code: 'N170 G0 X44 Z16', x: 44, z: 16, g: 0, dauer: 0.7 },
+]
+
+/** Die zwei Kapitel der Z3-Bühne: erst drei Befehle, dann das Programm. */
+export type Kapitel = 'befehle' | 'programm'
 
 /** Z1 — die technische Zeichnung. */
 export interface ZeichnungZustand {
@@ -139,12 +209,24 @@ export interface ZeichnungZustand {
 
 /** Z3 — der Werkzeugweg über dem Teil. */
 export interface WegZustand {
-  /** Der Satz, den die Zeichnung gerade abfährt. `null` = Werkzeug wartet. */
-  aktiv: SatzId | null
-  /** Schon abgefahrene Sätze — ihre Bahn bleibt stehen. */
-  gesehen: readonly SatzId[]
-  /** Die Fase ist gefunden — ihr Stück der Bahn bleibt warm. */
-  geloest: boolean
+  /** Welches Kapitel die Bühne zeigt — es bestimmt Sätze, Rohteil und Kontur. */
+  kapitel: Kapitel
+  /**
+   * Der angetippte Befehl (Index in die Satzliste des Kapitels) — sein Stück
+   * Bahn pulsiert als Vorschau. `null` = nichts markiert.
+   */
+  markiert: number | null
+  /**
+   * Zähler der gestarteten Fahrten. Jede Erhöhung startet die Fahrt von
+   * vorn — `0` heißt: noch nie gefahren. Ein Zähler statt eines Booleans,
+   * damit „Nochmal abspielen“ ohne Zwischenzustand auskommt.
+   */
+  fahrt: number
+  /**
+   * Das Kapitel wurde schon einmal zu Ende gefahren — beim Mounten (etwa nach
+   * einem Wiederbesuch) steht die Bühne dann gleich im Endzustand.
+   */
+  gefahren: boolean
 }
 
 /** Z4 — die Messschraube. */

@@ -1,27 +1,25 @@
 import { BEGRIFFE, type Begriffseintrag } from './begriffe'
 
 /**
- * Das Glossar des Anlagenmechanik-Tages (Spec 9, khpl-tage.md §6.1 V6).
+ * Das Glossar des Anlagenmechanik-Tages.
  *
- * **Eigene Datei je Beruf**, und der Grund steht in khpl-tage.md 0c: derselbe
+ * **Eigene Datei je Beruf**, und der Grund ist inhaltlich: derselbe
  * Begriff heißt in zwei Gewerken nicht dasselbe. Der Bestandseintrag
  * „Stundensatz 50–90 € im Zimmererhandwerk" ist das Musterbeispiel — er ist
  * hier durch nichts ersetzt, weil dieser Tag über die Kundendienststunde
- * anders redet (Spec 6, A1: „bezahlt wird, dass jemand weiß, wo er hinschauen
- * muss").
+ * anders redet: bezahlt wird, dass jemand weiß, wo er hinschauen muss.
  *
- * **Drei Einträge sind aus dem Bestand wiederverwendet** statt kopiert
- * (Spec 9): `PSA`, `Gewerk`, `laufender Meter`. Sie zeigen auf dieselbe
+ * **Drei Einträge sind aus dem Bestand wiederverwendet** statt kopiert:
+ * `PSA`, `Gewerk`, `laufender Meter`. Sie zeigen auf dieselbe
  * Definition wie beim Dachdecker — zwei Fassungen desselben Begriffs sind
  * genau der Fehler, den `kehlbalken` in `begriffe.ts` schon einmal produziert
  * hat.
  *
- * ⚠️ **Die zwölf neuen Definitionstexte sind `ENTWURF – UNGEPRÜFT` und
- * fachlich abzunehmen** (Spec 11). Hier ist eine falsche Definition peinlicher
- * als anderswo, weil der Besucher sie für die Antwort hält. Was an Zahlen
- * darin steht, ist `BELEGT` und trägt seine Quelle im Kommentar:
- * Fülldruck und Sicherheitsventil aus `belege/anlagenmechanik.md` 5, die
- * Jahresarbeitszahl aus 2, die Einsatzgrenze der Wärmepumpe aus 3.
+ * **Die elf neuen Definitionstexte gehören fachlich gegengelesen.** Hier ist
+ * eine falsche Definition peinlicher als anderswo, weil der Besucher sie für
+ * die Antwort hält. Die Zahlen darin tragen ihre Quelle im Kommentar
+ * darüber: Fülldruck und Sicherheitsventil, die Jahresarbeitszahl und die
+ * Einsatzgrenze der Wärmepumpe.
  */
 
 export const BEGRIFFE_ANLAGENMECHANIK = {
@@ -31,35 +29,34 @@ export const BEGRIFFE_ANLAGENMECHANIK = {
 
   psa: BEGRIFFE.psa,
   gewerk: BEGRIFFE.gewerk,
-  // ⚠️ Der Bestandstext nennt als Beispiele „Balken, Pfetten, Rinnen" — das ist
-  // die Sprache der Bauberufe. Für dieses Gewerk wären es Rohrleitungen. Spec 9
-  // führt den Eintrag ausdrücklich als wiederverwendbar; ob er umformuliert
-  // gehört, entscheidet die Abnahme und nicht dieser Tag.
+  // Der Bestandstext nennt als Beispiele „Balken, Pfetten, Rinnen" — das ist
+  // die Sprache der Bauberufe. Für dieses Gewerk wären es Rohrleitungen. Der
+  // Eintrag bleibt trotzdem wiederverwendet: eine gewerkespezifische Fassung
+  // wäre eine Änderung für alle Tage und gehört nicht in diesen hier.
   'laufender-meter': BEGRIFFE['laufender-meter'],
 
   // -------------------------------------------------------------------------
-  // Neu — zwölf Einträge, `ENTWURF – UNGEPRÜFT`
+  // Neu — elf Einträge
   // -------------------------------------------------------------------------
 
-  /** A3. Fachlich nach DIN EN 12831, `BELEGT` (`belege/anlagenmechanik.md` 1). */
-  heizlast: {
-    label: 'Heizlast',
-    erklaerung:
-      'Wie viel Leistung ein Gebäude braucht, damit es auch am kältesten Auslegungstag warm bleibt — in Kilowatt. Sie hängt an Dämmung, Fläche und Fenstern, nicht am Wunschdenken. Wird sie zu groß angesetzt, ist die Anlage zu groß, teurer und läuft schlechter. Gerechnet wird sie nach DIN EN 12831.',
-  },
+  // `heizlast` stand hier für A3 (fachlich nach DIN EN 12831). Seit dem
+  // Schätz-Umbau sagt kein Screen das Wort mehr — A3 übersetzt die Zahl in
+  // Wasserkocher, und ein Glossareintrag ohne <Fachwort>-Anker ist toter
+  // Inhalt. Wer das Wort wieder auf einen Screen bringt, holt den Eintrag aus
+  // der Historie zurück.
+
   waermepumpe: {
     label: 'Wärmepumpe',
     erklaerung:
-      'Sie macht keine Wärme, sie holt sie: aus der Luft draußen. Auch Luft bei null Grad steckt voller Wärme — richtig leer wäre sie erst bei minus 273 Grad. Die Wärmepumpe entzieht der Luft diese Wärme und hebt sie mit Strom auf Heiztemperatur. Heutige Geräte schaffen das bis etwa minus 20 Grad; sie brauchen dann nur mehr Strom je Kilowattstunde Wärme.',
+      'Sie macht keine Wärme, sie holt sie: aus der Luft draußen. Auch Luft bei null Grad steckt voller Wärme — richtig leer wäre sie erst bei minus 273 Grad. Die Wärmepumpe holt der Luft diese Wärme heraus und macht sie mit Strom heiß genug fürs Heizen. Heutige Geräte schaffen das bis etwa minus 20 Grad; sie brauchen dann nur mehr Strom für dieselbe Wärme.',
   },
   jahresarbeitszahl: {
     label: 'Jahresarbeitszahl',
-    // Spec 9 lässt diesen Eintrag nur zu, „wenn ein belegter Wert dazu
-    // vorliegt". Er liegt vor: Fraunhofer-ISE-Feldprojekt „WP-QS im Bestand",
-    // 77 reale Anlagen in Bestandsgebäuden, Luft/Wasser im Mittel JAZ 3,4
-    // (`belege/anlagenmechanik.md` 2).
+    // Dieser Eintrag lohnt sich nur mit einem echten Wert dahinter, und den
+    // gibt es: Fraunhofer-ISE-Feldprojekt „WP-QS im Bestand", 77 reale
+    // Anlagen in Bestandsgebäuden, Luft/Wasser im Mittel JAZ 3,4.
     erklaerung:
-      'Wie viel Wärme eine Wärmepumpe übers Jahr aus einer Kilowattstunde Strom macht — der Wert, an dem sich die Anlage messen lässt. In einer vierjährigen Feldmessung des Fraunhofer ISE an 77 Anlagen in bestehenden Häusern lag sie bei Luft-Wärmepumpen im Mittel bei 3,4. Aus einer Kilowattstunde Strom werden also gut drei Kilowattstunden Wärme.',
+      'Wie viel Wärme eine Wärmepumpe übers Jahr aus dem Strom macht, den sie verbraucht — der Wert, an dem man eine Anlage misst. Forscher (Fraunhofer ISE) haben das vier Jahre lang an 77 Anlagen in echten Häusern gemessen: Luft-Wärmepumpen lagen im Mittel bei 3,4. Aus einer Kilowattstunde Strom werden also gut drei Kilowattstunden Wärme.',
   },
   'vorlauf-ruecklauf': {
     label: 'Vorlauf und Rücklauf',
@@ -79,14 +76,13 @@ export const BEGRIFFE_ANLAGENMECHANIK = {
   ausdehnungsgefaess: {
     label: 'Ausdehnungsgefäß',
     erklaerung:
-      'Wasser dehnt sich aus, wenn es warm wird. Das Ausdehnungsgefäß nimmt diesen Zuwachs auf — ein Stahlbehälter mit einer Membran und einem Luftpolster dahinter. Ohne es stiege der Druck bei jedem Aufheizen, bis das Sicherheitsventil abbläst.',
+      'Wasser dehnt sich aus, wenn es warm wird. Das Ausdehnungsgefäß fängt diesen Zuwachs auf — ein Stahlbehälter mit einem Luftpolster darin, das nachgibt wie ein Ball, den man eindrückt. Ohne es würde der Druck bei jedem Aufheizen steigen, bis das Sicherheitsventil Wasser ablässt.',
   },
   sicherheitsventil: {
     label: 'Sicherheitsventil',
-    // Ansprechdruck `BELEGT` (`belege/anlagenmechanik.md` 5, zeitstabil):
-    // typische EFH-Anlagen 2,5 bar.
+    // Der Ansprechdruck ist zeitstabil: typische EFH-Anlagen 2,5 bar.
     erklaerung:
-      'Das Ventil, das die Anlage vor zu hohem Druck schützt. Bei einer üblichen Anlage im Einfamilienhaus öffnet es bei 2,5 bar und lässt Wasser ab. Dass es abbläst, ist kein Defekt, sondern seine Aufgabe — die Ursache liegt woanders.',
+      'Das Ventil, das die Anlage vor zu viel Druck schützt. Bei einer üblichen Anlage im Einfamilienhaus öffnet es bei 2,5 bar — ungefähr so viel Druck wie in einem Autoreifen — und lässt Wasser ab. Dass es das tut, ist kein Defekt, sondern seine Aufgabe; die Ursache liegt woanders.',
   },
   'hydraulischer-abgleich': {
     label: 'hydraulischer Abgleich',
@@ -96,7 +92,7 @@ export const BEGRIFFE_ANLAGENMECHANIK = {
   zirkulation: {
     label: 'Zirkulation',
     erklaerung:
-      'Eine zusätzliche Leitung, die das warme Wasser zwischen Speicher und Zapfstelle in Bewegung hält. Sie ist der Grund, warum in größeren Häusern sofort warmes Wasser kommt und nicht erst nach einer halben Minute — und einer der Punkte, an denen man nachsieht, wenn keins mehr kommt.',
+      'Eine zusätzliche Leitung, die das warme Wasser zwischen Speicher und Wasserhahn in Bewegung hält. Sie ist der Grund, warum in größeren Häusern sofort warmes Wasser kommt und nicht erst nach einer halben Minute — und einer der Punkte, an denen man nachsieht, wenn keins mehr kommt.',
   },
   inbetriebnahme: {
     label: 'Inbetriebnahme',
@@ -105,11 +101,13 @@ export const BEGRIFFE_ANLAGENMECHANIK = {
   },
   shk: {
     label: 'SHK',
-    // Spec 9: „**`SHK` gehört zwingend dazu.** Die Berufsbezeichnung selbst ist
-    // die erste Hürde." Der Begriff wird in A5 zusätzlich als eine der drei
+    // `SHK` gehört zwingend ins Glossar: die Berufsbezeichnung selbst ist die
+    // erste Hürde. Der Begriff wird in A5 zusätzlich als eine der drei
     // Pausenfragen eingelöst.
+    // „Bereiche" statt „Gewerke": im Erklärtext eines Chips darf kein zweites
+    // Fachwort stecken. Wortgleich gehalten mit der Pausenfrage in A5.
     erklaerung:
-      'Sanitär, Heizung, Klima. Drei Gewerke in einem Beruf: Wasser und Abwasser im Bad, die Heizung im Keller, Lüftung und Kühlung. Deshalb heißt der Beruf so lang — Anlagenmechaniker/-mechanikerin SHK.',
+      'Sanitär, Heizung, Klima. Drei Bereiche in einem Beruf: Wasser und Abwasser im Bad, die Heizung im Keller, Lüftung und Kühlung. Deshalb heißt der Beruf so lang — Anlagenmechaniker/-mechanikerin SHK.',
   },
 } as const satisfies Record<string, Begriffseintrag>
 

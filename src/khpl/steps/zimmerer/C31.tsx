@@ -6,11 +6,11 @@ import { StepShell } from '@/khpl/shell/StepShell'
 import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
 
 /**
- * C3.1 — Holz ist der einzige Baustoff, der… Abstecher von C3, mündet in C4
- * (khpl-tag-zimmerer.md 6, C3.1).
+ * C3.1 — Holz ist der einzige Baustoff, der… Abstecher von C3, mündet in
+ * C4.
  *
  * **Eine Korrektur, keine Werbung.** Das Miro-Board behauptet, Holz sei „der
- * einzige Baustoff, der nachwächst“; `khpl-flow.md` weist das als falsch zurück.
+ * einzige Baustoff, der nachwächst“ — das ist sachlich falsch.
  * Der Screen macht genau daraus seine Pointe: er sagt zuerst die Halbwahrheit,
  * streicht sie **sichtbar** durch und nennt die anderen nachwachsenden
  * Baustoffe. **Kein Fehler des Besuchers** — eine Korrektur an der App, vor
@@ -21,14 +21,14 @@ import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
  * ist, und ein Haus aus Holz ist auf Jahrzehnte ein Lager.
  *
  * ⚠️ **Die Korrektur darf ihre eigene Figur nicht wiederholen.** Was den
- * durchgestrichenen Satz ersetzt, steht wörtlich so im Beleg: „einer der besten“
+ * durchgestrichenen Satz ersetzt, bleibt deshalb abwägend: „einer der besten“
  * CO₂-Speicher und „der mit Abstand wichtigste nachwachsende
- * Konstruktionsbaustoff“ (`belege/zimmerer.md` 3). Ein zweites „der einzige …“
+ * Konstruktionsbaustoff“. Ein zweites „der einzige …“
  * wäre auf genau diesem Screen unbelegt **und** angreifbar — lasttragenden
  * Strohballenbau gibt es hierzulande.
  *
- * ⚠️ **Die Zahlen stehen als Spanne da und werden nie ausmultipliziert**
- * (`TEILWEISE BELEGT`, `belege/zimmerer.md` 3): rund 1 t CO₂ je m³ verbautem
+ * ⚠️ **Die Zahlen stehen als Spanne da und werden nie ausmultipliziert**,
+ * weil die Quellenlage nur Spannen hergibt: rund 1 t CO₂ je m³ verbautem
  * Holz, real 0,6–1,7 t; 30 bis 70 m³ in einem Einfamilienhaus. „Ein Holzhaus
  * speichert 50 Tonnen“ wäre eine Zahl aus zwei Spannen und täuschte eine
  * Genauigkeit vor, die es nicht gibt. Der Screen sagt das auch — auf einem
@@ -37,8 +37,8 @@ import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
  *
  * **Kein Übungselement.** Lesescreen.
  *
- * ⚠️ **Für diesen Screen liegt kein eigenes Motiv im Repo**
- * (khpl-tag-zimmerer.md 10). Er trägt deshalb einen **Platzhalter** —
+ * ⚠️ **Für diesen Screen liegt kein eigenes Motiv im Repo.** Er trägt
+ * deshalb einen **Platzhalter** —
  * `gallery-3.webp`, ein Mann auf einem Balken beim Verschrauben: verbautes
  * Holz, und genau davon handelt der Screen. Die leere Bühne der ersten Fassung
  * war der ehrlichere, aber schlechtere Zustand: hochkant ist sie ein schwarzes
@@ -47,8 +47,8 @@ import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
  */
 
 // ---------------------------------------------------------------------------
-// Text — gebündelt oben (flow 8.4). Die Liste wörtlich aus khpl-flow.md,
-// wo die Board-Behauptung zurückgewiesen wird.
+// Text — gebündelt oben in der Datei. Die Liste nennt die nachwachsenden
+// Baustoffe, an denen die Board-Behauptung scheitert.
 // ---------------------------------------------------------------------------
 
 const NACHWACHSEND = ['Stroh', 'Hanf', 'Flachs', 'Schilf', 'Kork', 'Bambus']
@@ -72,12 +72,12 @@ const BELEGE: Abschnitt[] = [
   {
     frage: 'Was das Holz speichert',
     antwort:
-      'In einem Kubikmeter Holz steckt ungefähr eine Tonne CO₂. In einem Holzhaus stecken 30 bis 70 Kubikmeter. Solange das Haus steht, bleibt das drin.',
+      'In einem Kubikmeter Holz — ein Würfel, jede Kante einen Meter — steckt ungefähr eine Tonne CO₂. In einem Holzhaus stecken 30 bis 70 solcher Würfel. Solange das Haus steht, bleibt das drin.',
   },
   {
     frage: 'Warum hier keine Tonnenzahl steht',
     antwort:
-      'Beides miteinander multipliziert ergäbe eine schöne, runde Tonnenzahl. Sie stünde auf zwei Spannen und wäre geraten — deshalb steht sie hier nicht.',
+      'Beide Zahlen sind nur ungefähr. Ungefähr mal ungefähr ergibt eine Zahl, die genau aussieht, aber geraten ist — deshalb steht sie hier nicht.',
   },
 ]
 
@@ -105,7 +105,7 @@ export function C31() {
             Holz ist{' '}
             <strong className="font-semibold text-kh-paper">einer der besten</strong>{' '}
             CO₂-Speicher, die ein Haus haben kann — und der mit Abstand wichtigste
-            nachwachsende Baustoff, aus dem man ein ganzes Tragwerk baut.
+            nachwachsende Baustoff, der ein ganzes Haus tragen kann.
           </p>
         </>
       }

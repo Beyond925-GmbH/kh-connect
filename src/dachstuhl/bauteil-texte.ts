@@ -1,15 +1,15 @@
 /**
- * Bauteiltypen, Beschriftungen, Erklaertexte und Materialfarben (Bauplan 5.2 + 5.3).
+ * Bauteiltypen, Beschriftungen, Erklaertexte und Materialfarben.
  *
- * ENTWURF – UNGEPRUEFT: die Erklaertexte gehoeren vor der Messe der Innung zum
- * Gegenlesen vorgelegt, genau wie das uebrige Glossar.
+ * Die Erklaertexte gehoeren vor der Messe der Innung zum Gegenlesen vorgelegt,
+ * genau wie das uebrige Glossar.
  *
- * Sobald diese Karten ueber B3.2 am Stand erscheinen, gilt fuer sie die
- * ⚠️-Regel des Flow-Dokuments: konkrete Masse und Mengen sind daraus entfernt
- * (Saeulenabstand, Lattweite). Sie waren mit den Modellparametern konsistent,
- * aber durch keine Quelle gedeckt — und ein Jugendlicher liest eine Zahl auf
- * einer Erklaerkarte als Tatsache ueber echte Daecher, nicht als Angabe ueber
- * dieses eine Modell.
+ * Sobald diese Karten ueber B3.2 am Stand erscheinen, gilt fuer sie dieselbe
+ * Vorsicht wie fuer jede Zahl auf der Buehne: konkrete Masse und Mengen sind
+ * daraus entfernt (Saeulenabstand, Lattweite). Sie waren mit den
+ * Modellparametern konsistent, aber durch keine Quelle gedeckt — und ein
+ * Jugendlicher liest eine Zahl auf einer Erklaerkarte als Tatsache ueber echte
+ * Daecher, nicht als Angabe ueber dieses eine Modell.
  *
  * Die Farben stehen bewusst hier und nicht als Tailwind-Token: innerhalb des
  * <Canvas> gibt es kein Tailwind. Theme-abhaengig sind nur Hintergrund, Boden
@@ -53,7 +53,7 @@ export const BAUTEIL_TEXTE: Record<BauteilTyp, BauteilText> = {
     // Pfettendach: die Sparren werden einzeln auf die Pfetten aufgelegt. Als
     // fertiges Dreieck eingehoben werden Sparren- und Kehlbalkendaecher oder
     // Nagelbinder — nicht diese Konstruktion.
-    text: 'Die schrägen Hölzer heißen Sparren. Sie liegen auf drei Pfetten auf: unten auf der Fußpfette, in der Mitte auf der Mittelpfette, oben auf der Firstpfette. Zwei gegenüberliegende Sparren bilden ein Sparrenpaar.',
+    text: 'Die schrägen Hölzer heißen Sparren. Sie liegen auf drei Längsbalken auf — unten, auf halber Höhe und oben an der Spitze. Diese Längsbalken heißen Pfetten. Zwei gegenüberliegende Sparren bilden ein Sparrenpaar.',
     antippbar: true,
   },
   kehlbalken: {
@@ -63,32 +63,32 @@ export const BAUTEIL_TEXTE: Record<BauteilTyp, BauteilText> = {
   },
   firstpfette: {
     label: 'Firstpfette',
-    text: 'Der oberste Längsbalken, direkt unter der Dachspitze. Alle Sparren sind mit einer Kerve auf ihn aufgeklaut — ohne ihn wäre der First nur eine Linie und kein Bauteil.',
+    text: 'Der oberste Längsbalken, direkt unter der Dachspitze. Alle Sparren sitzen mit einer Kerbe auf ihm. Ohne ihn wäre die Dachspitze nur eine Linie und kein Bauteil.',
     antippbar: true,
   },
   mittelpfette: {
     label: 'Mittelpfette',
-    text: 'Der Längsbalken etwa auf halber Dachfläche. Er halbiert die Strecke, die ein Sparren frei überspannen muss. Deshalb reicht hier ein schlankerer Sparren. Getragen wird sie von den Stuhlsäulen.',
+    text: 'Der Längsbalken etwa auf halber Höhe der Dachfläche. Er halbiert die Strecke, die ein Sparren ohne Stütze überbrücken muss. Deshalb reicht hier ein dünnerer Sparren. Getragen wird er von den Stuhlsäulen.',
     antippbar: true,
   },
   fusspfette: {
     label: 'Fußpfette (Mauerlatte)',
-    text: 'Das unterste Holz, es liegt auf der Mauerkrone. Jeder Sparrenfuß sitzt mit einer Kerbe darauf — die heißt Kerve — und gibt seine Last an die Wand weiter.',
+    text: 'Das unterste Holz, es liegt oben auf der Mauer. Jeder Sparren sitzt mit einer Kerbe darauf — die heißt Kerve — und gibt das Gewicht, das auf ihm liegt, an die Wand weiter.',
     antippbar: true,
   },
   stuhlschwelle: {
     label: 'Stuhlschwelle',
-    text: 'Das liegende Holz unter einer Säulenreihe. Es verteilt die Last der Stuhlsäulen auf mehrere Deckenbalken, statt sie auf einen einzigen abzusetzen.',
+    text: 'Das liegende Holz unter einer Säulenreihe. Es verteilt das Gewicht, das die Säulen von oben herunterbringen, auf mehrere Deckenbalken, statt alles auf einen einzigen zu drücken.',
     antippbar: true,
   },
   firstsaeule: {
     label: 'Stuhlsäule',
-    text: 'Der senkrechte Pfosten unter einer Pfette. Er steht auf der Stuhlschwelle und leitet die Last nach unten in die Decke — in regelmäßigen Abständen über die ganze Länge.',
+    text: 'Der senkrechte Pfosten unter einem Längsbalken. Er steht auf der Stuhlschwelle und gibt das Gewicht, das von oben kommt, nach unten an die Decke weiter — in regelmäßigen Abständen über die ganze Länge.',
     antippbar: true,
   },
   mittelsaeule: {
     label: 'Stuhlsäule',
-    text: 'Der senkrechte Pfosten unter einer Pfette. Er steht auf der Stuhlschwelle und leitet die Last nach unten in die Decke — in regelmäßigen Abständen über die ganze Länge.',
+    text: 'Der senkrechte Pfosten unter einem Längsbalken. Er steht auf der Stuhlschwelle und gibt das Gewicht, das von oben kommt, nach unten an die Decke weiter — in regelmäßigen Abständen über die ganze Länge.',
     antippbar: true,
   },
   kopfband: {
@@ -98,7 +98,7 @@ export const BAUTEIL_TEXTE: Record<BauteilTyp, BauteilText> = {
   },
   bundbalken: {
     label: 'Bundbalken',
-    text: 'Der waagerechte Balken quer über das Haus. Er hält die beiden Traufseiten zusammen, damit das Dach die Wände nicht auseinanderdrückt, und trägt zugleich den Boden des Dachbodens.',
+    text: 'Der waagerechte Balken quer über das Haus. Er hält die beiden Außenwände zusammen, damit das Dach sie nicht auseinanderdrückt, und trägt zugleich den Boden des Dachbodens.',
     antippbar: true,
   },
   windrispe: {
@@ -108,7 +108,7 @@ export const BAUTEIL_TEXTE: Record<BauteilTyp, BauteilText> = {
   },
   traglatte: {
     label: 'Dachlatte',
-    text: 'Auf diesen waagerechten Latten werden später die Ziegel eingehängt. Ihr Abstand hängt davon ab, wie weit ein Ziegel den nächsten überdeckt. An der Traufe sitzt die erste Latte etwas enger.',
+    text: 'Auf diesen waagerechten Latten werden später die Ziegel eingehängt. Ihr Abstand hängt davon ab, wie weit ein Ziegel den nächsten überdeckt. Ganz unten am Dachrand — der heißt Traufe — sitzt die erste Latte etwas enger.',
     antippbar: true,
   },
   konterlatte: {
@@ -118,12 +118,12 @@ export const BAUTEIL_TEXTE: Record<BauteilTyp, BauteilText> = {
   },
   traufbohle: {
     label: 'Traufbohle (Stirnbrett)',
-    text: 'Das Brett quer vor den Sparrenköpfen. Es schließt die Dachfläche an der Traufe ab, gibt der untersten Dachlatte Halt und trägt später die Dachrinne.',
+    text: 'Das Brett quer vor den Sparrenenden. Es schließt die Dachfläche unten an der Traufe ab, gibt der untersten Dachlatte Halt und trägt später die Dachrinne.',
     antippbar: true,
   },
   ortgangbrett: {
     label: 'Ortgangbrett (Windbrett)',
-    text: 'Das Brett an der Giebelseite, außen auf dem letzten Sparren. Es deckt die Lattenenden ab und hält den Wind davon ab, unter die Ziegel zu greifen.',
+    text: 'Das Brett an der schrägen Seitenkante des Dachs — dem Ortgang —, außen auf dem letzten Sparren. Es deckt die Lattenenden ab und hält den Wind davon ab, unter die Ziegel zu greifen.',
     antippbar: true,
   },
   'zone-first': {

@@ -4,12 +4,12 @@ import { wegzustand } from '@/khpl/flow/uebergaenge'
 import type { Fortschritt } from '@/khpl/store/fortschritt'
 
 /**
- * Die Progress-Rail aus khpl-ui-shell.md 4 — ein Segment pro **Hauptschritt**.
- * Abstecher bekommen kein Segment; sie erscheinen nur im Sheet „Dein Weg“.
+ * Die Progress-Rail — ein Segment pro **Hauptschritt**. Abstecher bekommen
+ * kein Segment; sie erscheinen nur im Sheet „Dein Weg“.
  *
- * Die Segmentzahl kommt aus `graph.haupt.length`, nie aus einer Konstanten
- * (ui-shell 9, Punkt 1) — und ist seit den vier Berufen zusätzlich je Beruf
- * verschieden. Ein Tap öffnet S3.
+ * Die Segmentzahl kommt aus `graph.haupt.length`, nie aus einer Konstanten —
+ * und ist seit den vier Berufen zusätzlich je Beruf verschieden. Ein Tap
+ * öffnet „Dein Weg“.
  *
  * **Der Beruf steht in der Pille, nicht daneben.** Mit vier Berufen muss auf
  * jedem Screen beantwortet sein, in welchem man gerade steckt; ein eigener

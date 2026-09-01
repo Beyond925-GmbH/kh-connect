@@ -4,9 +4,8 @@ import type { BerufDef, StepBild } from './typen'
 /**
  * Zerspanungsmechaniker/-mechanikerin — der Tag als Route.
  *
- * Neun Hauptschritte, sechs Abstecher. **Sein Id-Präfix ist `Z`**
- * (khpl-tage.md §6.1 V4): `Z1`–`Z9` auf der Hauptlinie, Abstecher mit
- * `.`-Suffix (`Z3.1`).
+ * Neun Hauptschritte, sechs Abstecher. **Sein Id-Präfix ist `Z`**: `Z1`–`Z9`
+ * auf der Hauptlinie, Abstecher mit `.`-Suffix (`Z3.1`).
  *
  * **Was diesen Tag von den anderen drei unterscheidet:** er hat keinen
  * Kunden und keinen Ortswechsel — er hat eine Maschine und ein Maß. Die
@@ -64,7 +63,7 @@ const STEPS = [
   {
     id: 'Z1.1',
     titel: 'Warum so genau?',
-    kurz: 'Passungen',
+    kurz: 'Genauigkeit',
     art: 'abstecher',
     weiter: 'Z2',
     abstecher: [],
@@ -73,7 +72,7 @@ const STEPS = [
   {
     id: 'Z2',
     titel: 'Fest, sonst fliegt es',
-    kurz: 'Rüsten',
+    kurz: 'Einrichten',
     art: 'haupt',
     weiter: 'Z3',
     abstecher: [],
@@ -81,7 +80,7 @@ const STEPS = [
   },
   {
     id: 'Z3',
-    titel: 'Vier Sätze, ein Weg',
+    titel: 'Die Sprache der Maschine',
     kurz: 'Programm',
     art: 'haupt',
     weiter: 'Z4',
@@ -91,7 +90,7 @@ const STEPS = [
   {
     id: 'Z3.1',
     titel: 'Ein Tippfehler in Stahl',
-    kurz: 'Einfahren',
+    kurz: 'Testlauf',
     art: 'abstecher',
     weiter: 'Z4',
     abstecher: [],
@@ -100,7 +99,7 @@ const STEPS = [
   {
     id: 'Z4',
     titel: 'Das erste Teil entscheidet',
-    kurz: 'Probeteil',
+    kurz: 'Erstes Teil',
     art: 'haupt',
     weiter: 'Z5',
     abstecher: [],
@@ -196,10 +195,11 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
   id: 'zerspanungsmechaniker',
   name: 'Zerspanungsmechaniker/-mechanikerin',
   kurz: 'Zerspanung',
-  zeile: 'Metall auf den Hundertstel. Du programmierst, die CNC fräst.',
+  zeile:
+    'Metall auf ein Hundertstel genau — dünner als ein Haar. Du programmierst, die Maschine fräst.',
   /**
-   * ⚠️ **Unverändert.** Der Vektor speist den Trichter; wer ihn ändert, ändert
-   * die Empfehlung für alle vier Berufe (khpl-tage.md §5).
+   * **Der Merkmalsvektor bleibt, wie er war.** Er speist den Trichter; wer ihn
+   * ändert, ändert die Empfehlung für alle vier Berufe.
    */
   merkmale: {
     anpacken: 0.5,
@@ -218,17 +218,22 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
     // sie fällt von selbst auf Hero-Poster und Hero-Loop zurück.
   },
   /**
-   * Die Motivliste dieses Tages — am Stück, wie die Redaktionsentscheidung
-   * es verlangt (`typen.ts`, `bilder`). Sie ist kurz, und das ist Absicht:
-   * die drei Übungs-Kerne des Tages sind **gezeichnet** (Z1 technische
-   * Zeichnung, Z3 Werkzeugweg, Z4 Messschraube — `buehne/zerspanung/`),
-   * dort steht kein Foto dahinter.
+   * Die Motivliste dieses Tages — am Stück, damit die Redaktionsentscheidung
+   * an einer einzigen Stelle fällt (`typen.ts`, `bilder`). Sie ist kurz, und
+   * das ist Absicht: die drei Übungs-Kerne des Tages sind **gezeichnet** (Z1
+   * technische Zeichnung, Z3 Werkzeugweg, Z4 Messschraube —
+   * `buehne/zerspanung/`), dort steht kein Foto dahinter. Z3 trägt sein Foto
+   * nur im ersten Kapitel — die Maschine kennenlernen —, danach übernimmt die
+   * Zeichnung.
    *
    * Jeder Eintrag zeigt auf eine Datei, die unter `public/medien/` wirklich
    * liegt (geprüft am 28.08.2026); Motivbeschreibungen in
    * `MEDIEN-INVENTAR.md`, Herkunft in `MEDIEN.md`. Kein Motiv doppelt sich
-   * innerhalb des Tages; `card.webp` trägt Z5, weil es das einzige Motiv
-   * mit Menschen ist — und die Pause der menschliche Moment dieses Tages.
+   * innerhalb des Tages — mit einer bewussten Ausnahme: Z3 und sein
+   * Abstecher Z3.1 teilen sich den Bediener an der Maschine, denn beide
+   * Screens spielen an derselben Stelle der Halle. `card.webp` trägt Z5,
+   * weil es das einzige Motiv mit Menschen in der Runde ist — und die Pause
+   * der menschliche Moment dieses Tages.
    *
    * `b91-meister.webp` (gewerkeneutrale Karriere-Motive) ist bewusst
    * **nicht** verwendet: das Bild zeigt eine Holzwerkstatt und passt nicht
@@ -245,7 +250,11 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       src: '/medien/media/zerspanungsmechaniker/schaetzen-spindel.webp',
       pos: '50% 45%',
     },
-    // Bediener wacht an der dunklen Maschine — das Einfahren.
+    // Bediener an der CNC-Maschine — der Auftakt von Z3: erst die echte
+    // Maschine kennenlernen, dann ihre Sprache (die Bühne wechselt danach
+    // zur Werkzeugweg-Zeichnung).
+    Z3: { src: '/medien/media/zerspanungsmechaniker/gallery-2.webp', pos: '50% 40%' },
+    // Bediener wacht an der dunklen Maschine — der erste vorsichtige Testlauf.
     'Z3.1': { src: '/medien/media/zerspanungsmechaniker/gallery-2.webp', pos: '50% 40%' },
     // Drei aus der Schicht, ein Bildschirm — die Pause redet.
     Z5: { src: '/medien/media/zerspanungsmechaniker/card.webp', pos: '50% 30%' },
@@ -262,17 +271,39 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       src: '/medien/media/zerspanungsmechaniker/z7-meister.webp',
       pos: '50% 40%',
     },
-    // Die zwei gewerkeneutralen Karriere-Motive (khpl-tage.md §6.1 V2).
+    // Die zwei gewerkeneutralen Karriere-Motive.
     'Z8.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
     'Z8.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
     // Der CTA: die drehende Welle aus dem Hero, unter der Markenzone.
     Z9: { src: '/medien/media/zerspanungsmechaniker/hero-poster.webp', pos: '50% 50%' },
   } satisfies Partial<Record<Id, StepBild>>,
-  /** S5 — die Auftragsannahme, in-fiction, ohne Meta-Erklärung. */
+  /**
+   * Takt 1 und 2 der Auftragsannahme (`typen.ts`, `vorstellung`).
+   * Aus dem Tag destilliert: Programm (Z3), Serie (Z6),
+   * Messen (Z4/Z1.1), Einrichten (Z2). „Dünner als ein Haar" übersetzt das
+   * Hundertstel, das der Tag überall voraussetzt, in ein Bild, das man
+   * kennt. Die Umgebung beschreibt den Ort, ohne die Rolle vorwegzunehmen:
+   * das „Du bist Azubi“ gehört dem Fiktions-Takt.
+   */
+  vorstellung: {
+    titel: ['Du hast dir', 'die Zerspanung ausgesucht.'],
+    was: 'Zerspanungsmechaniker fertigen Teile aus Metall — so genau, dass sie später in Motoren und Maschinen exakt passen.',
+    aufgaben: [
+      'Eine computergesteuerte Maschine so einstellen, dass 200 Teile gleich werden',
+      'Der Maschine mit einem Programm sagen, wo sie fräsen soll',
+      'Jedes Maß nachmessen — auf ein Hundertstel Millimeter, dünner als ein Haar',
+      'Das Metallstück festspannen, bevor es losgeht',
+    ],
+    umgebung: {
+      titel: ['Eine Halle,', 'eine Maschine.'],
+      text: 'Gearbeitet wird drinnen, in einer großen Halle. Es riecht nach Öl, die Maschinen brummen. Jede ist so groß wie ein Auto — und an jeder steht ein Mensch, der ihr sagt, was sie tun soll.',
+    },
+  },
+  /** Takt 3 der Auftragsannahme — ab hier spricht die Geschichte. */
   auftrag: {
     etikett: 'Deine Maschine',
     titel: ['200 Teile.', 'Ein Hundertstel.'],
-    text: 'Du bist Azubi in der Zerspanung. Sechs Uhr, die Halle riecht nach Kühlschmierstoff, deine Maschine ist noch kalt. Der Ausbilder legt dir eine Zeichnung hin: 200 Bolzen für ein Getriebe, bis Freitag. Ab dem ersten Span bist du dran.',
+    text: 'Du bist Azubi in der Zerspanung. Sechs Uhr, die Hallenbeleuchtung geht gerade an, deine Maschine ist noch kalt. Der Ausbilder legt dir eine Zeichnung hin: 200 Bolzen für ein Getriebe, bis Freitag. Ab dem ersten Span bist du dran.',
     knopf: 'Schicht übernehmen',
   },
   graph: baueGraph(STEPS, {
@@ -281,11 +312,13 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
     angebote: {
       'Z1.1': {
         einladung: 'Warum so genau?',
-        beschreibung: 'Passungen — wie Tausendstel entscheiden, ob ein Lager sitzt.',
+        beschreibung:
+          'Wie wenig ein Maß danebenliegen darf, damit ein Kugellager noch passt.',
       },
       'Z3.1': {
         einladung: 'Und wenn du dich vertippst?',
-        beschreibung: 'Was ein Crash kostet — und das Verfahren dagegen.',
+        beschreibung:
+          'Was es kostet, wenn das Werkzeug ins Teil kracht — und wie man das vorher merkt.',
       },
       'Z6.1': {
         einladung: 'Wo landen deine Teile?',
@@ -297,7 +330,7 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
       },
       'Z8.2': {
         einladung: 'Techniker',
-        beschreibung: 'Fertigung planen statt rüsten.',
+        beschreibung: 'Am Plan arbeiten statt an der Maschine.',
       },
       'Z8.3': { einladung: 'Studium', beschreibung: 'Ja, das geht — auch ohne Abitur.' },
     } satisfies Partial<Record<Id, Angebot>>,

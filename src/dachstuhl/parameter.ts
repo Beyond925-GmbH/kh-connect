@@ -1,5 +1,5 @@
 /**
- * Parametersatz des Dachstuhls (Bauplan 1.2 + 1.3).
+ * Parametersatz des Dachstuhls.
  * Reine Daten, keine Importe — damit `mass.ts` ohne three testbar bleibt.
  * Alle Laengen in Metern, alle Winkel in Radiant.
  */

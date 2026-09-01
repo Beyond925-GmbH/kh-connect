@@ -12,17 +12,17 @@
  * Ausnahme, und sie ist bewusst: `TRAGENDE_WAND`, `START` und `ZIEL` stehen
  * hier, obwohl A4 über sie redet. Der Grund ist derselbe wie bei
  * `onAbgewiesen` — **die Zeichnung erkennt die Wand, den Satz dazu sagt der
- * Step** (Spec 6, A4). Wer den Satz textet, will wissen, worauf er sich
+ * Step**. Wer den Satz textet, will wissen, worauf er sich
  * bezieht; deshalb sind die drei exportiert und nicht versteckt.
  *
  * Die Datei ist three-frei und JSX-frei, wie `kanon.ts`. Dieser Tag hat kein
- * `three` (Spec 7), aber die Trennung hält die Grenze trotzdem sauber.
+ * `three`, aber die Trennung hält die Grenze trotzdem sauber.
  *
  * ---
  *
  * **Die Welt ist ein Haus mit einem Keller darunter**, 320 × 260 Einheiten, und
  * jede Szene ist ein Ausschnitt daraus. Das ist die gezeichnete Fassung von
- * „eine Welt, viele Zustände" (khpl-tage.md 1, Mechanismus 2): A2 und A4 sehen
+ * „eine Welt, viele Zustände": A2 und A4 sehen
  * denselben Keller, A3 sieht das Haus darüber, A6 sieht beides — und weil es
  * dieselben Koordinaten sind, ist es sichtbar dasselbe Haus und nicht drei
  * Bilder, die einander ähneln.
@@ -62,19 +62,19 @@ export const HAUS = {
 } as const
 
 /**
- * **Wo dieses Haus seine Wärme verliert** — die vier Flächen, die A3 antippen
- * lässt.
+ * **Wo dieses Haus seine Wärme verliert** — die vier Pfeile, die A3 mit der
+ * Auflösung zeigt (seit dem zweiten Umbau als Bild, nicht mehr als
+ * Suchaufgabe — siehe `steps/anlagenmechanik/A3.tsx`).
  *
  * Der Pfeil zeigt nach außen, weil die Wärme nach außen geht; `staerke` ist
  * seine Dicke und damit sein **relativer** Anteil am Verlust.
  *
  * ⚠️ **Bewusst kein Kilowatt je Fläche.** Wie viel ein Dach wirklich verliert,
  * hängt an Dämmstärke, Fläche, Ausrichtung und Baujahr; eine Zahl je Fläche
- * hinzuschreiben wäre erfunden, und was `NICHT BELEGBAR` heißt, erscheint auf
- * keinem Screen (khpl-tage.md §0b). Gezeigt wird deshalb dieselbe Währung wie
- * beim Druckverlust in A4: ein Balken, keine Einheit. Die eine belegte Zahl
- * des Screens — die Heizlast von 10 bis 14 kW nach DIN EN 12831 — steht in der
- * Auflösung, und zwar als Fenster.
+ * hinzuschreiben wäre erfunden, und was sich nicht belegen lässt, erscheint
+ * auf keinem Screen. Die eine belegte Zahl des Screens — die
+ * Heizlast von 10 bis 14 kW nach DIN EN 12831 — steht in der Auflösung, dort
+ * als Fenster und in Wasserkocher übersetzt.
  *
  * Die Reihenfolge ist die Reihenfolge der Anteile: Ein ungedämmtes Dach ist
  * die größte Fläche nach oben, alte Fenster die schwächste Stelle je
@@ -287,8 +287,8 @@ export function kamera(rahmen: Rahmen, sicht: Rahmen): string {
  * Für eine querformatige Zeichnung in einer hochkanten Fläche — die Stele,
  * oder quer der Streifen neben dem Panel — heißt das: ober- und unterhalb des
  * Rahmens wird bis zur halben Sichthöhe frei. Eine Zeichnung, die dort nichts
- * hinlegt, steht als Band im Schwarzen, und die obere Bildhälfte ist leer
- * (Designregel R1). Das Haus füllt diese Zonen mit seiner Umgebung; wer wie
+ * hinlegt, steht als Band im Schwarzen, und die obere Bildhälfte ist leer.
+ * Das Haus füllt diese Zonen mit seiner Umgebung; wer wie
  * die Anlage keine hat, fragt hier nach den Rändern und zeichnet bis dorthin.
  */
 export function sichtbareWelt(rahmen: Rahmen, sicht: Rahmen): Rahmen {
@@ -373,8 +373,8 @@ export const TREPPE: readonly KnotenId[] = [
  * genau das: eine Lücke im Band.
  *
  * Wer hier durch will, bekommt keinen Punktabzug, sondern einen Satz — „Da
- * geht nichts durch, das ist tragend" — und die Leitung geht nicht weiter
- * (Spec 6, A4). **Den Satz sagt der Step**, damit die Copy an einer Stelle
+ * geht nichts durch, das ist tragend" — und die Leitung geht nicht weiter.
+ * **Den Satz sagt der Step**, damit die Copy an einer Stelle
  * liegt; die Zeichnung meldet nur über `onAbgewiesen`.
  */
 export const TRAGENDE_WAND = {
@@ -395,8 +395,9 @@ export const TRAGENDE_WAND = {
  *
  * ⚠️ Auf diesem Raster ist er **zugleich der kürzeste legale Weg** — die Wand
  * sperrt die Zeilen 0–2 vollständig, einen Durchbruch gibt es nicht. Jeder Weg
- * mit mehr Bögen ist gleich lang oder länger. Der Handel aus Spec 6 („der
- * kürzeste Weg hat vier Bögen und einen Durchbruch") existiert hier also nicht;
+ * mit mehr Bögen ist gleich lang oder länger. Der ursprünglich gedachte
+ * Handel — der kürzeste Weg hat vier Bögen und einen Durchbruch — existiert
+ * hier also nicht;
  * A4 textet deshalb, was auf dem Raster wirklich passiert, und meldet den
  * Widerspruch, statt die Geometrie eigenmächtig umzubauen.
  *
@@ -615,15 +616,15 @@ export const WAERMEPUMPE_ORT: Kasten = { x: 230, y: 170, b: 20, h: 56 }
 /**
  * **Die Punkte, die man in A1 antippt.**
  *
- * Den Kern nennt die Spec für diese Bühne selbst (Spec 6, A1: „Speicher,
- * Zirkulation, Mischer, Umwälzpumpe"); dazu kommen der Wärmeerzeuger und die
+ * Den Kern bilden Speicher, Zirkulation, Mischer und Umwälzpumpe; dazu
+ * kommen der Wärmeerzeuger und die
  * Regelung, weil der Fall in `steps/anlagenmechanik/A1.tsx` sie prüft und ein
  * Prüfschritt ohne Ort auf der Zeichnung eine Zeile im Panel wäre statt einer
  * Handlung an der Anlage.
  *
  * **Was hier bewusst nicht steht: welcher Punkt der richtige ist.** Die
- * Störung, die Prüfschritte und die Ursache sind laut Spec 11 fachlich
- * abzunehmen — die Zeichnung kennt Orte, keine Lösung.
+ * Störung, die Prüfschritte und die Ursache sind fachlich abzunehmen — die
+ * Zeichnung kennt Orte, keine Lösung.
  *
  * Der Vertrag zum Step: `PruefungId` ist ein freier String (`kanon.ts`), und
  * die Zeichnung hebt die Prüfung hervor, deren Id einem dieser Punkte

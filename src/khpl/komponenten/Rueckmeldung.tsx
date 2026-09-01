@@ -12,16 +12,16 @@ import { Check, X } from 'lucide-react'
  * **Richtig** springt einmal über, und das Häkchen dreht sich dabei ein.
  * Gefeiert wird mit Rand, Schrift und Bewegung — nicht mit einer gefüllten
  * Fläche: die einzige satte Gelbgrün-Fläche eines Screens ist der
- * Weiter-Knopf (khpl-designregeln.md R8), und genau in dem Moment, in dem
+ * Weiter-Knopf, und genau in dem Moment, in dem
  * diese Meldung erscheint, steht er darunter. Zwei gefüllte Signalflächen
  * zugleich hießen zweimal „hier geht's weiter“.
  *
  * **Falsch** bleibt ruhig: dunkler Grund, oranger Rand, ein einzelnes
- * Kopfschütteln. Kein Rot. Rot bewertet, und bewertet wird hier nicht (flow
- * 6.6 — kein Punktestand, keine Note). Ein falscher Zuschnitt ist kein Fehler
+ * Kopfschütteln. Kein Rot. Rot bewertet, und bewertet wird hier nicht — es
+ * gibt keinen Punktestand und keine Note. Ein falscher Zuschnitt ist kein Fehler
  * des Besuchers, sondern die Lektion des Screens.
  *
- * Kein Ton (flow 5 „Stumm“). Bei „Bewegung reduzieren“ nimmt `MotionConfig` im
+ * Kein Ton: die App bleibt stumm. Bei „Bewegung reduzieren“ nimmt `MotionConfig` im
  * KioskGuard beiden Varianten die Bewegung; die Farbe trägt dann allein.
  *
  * **Sie holt sich selbst ins Bild.** Seit die auslösende Handlung im

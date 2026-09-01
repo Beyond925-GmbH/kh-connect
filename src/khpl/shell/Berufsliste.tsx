@@ -14,7 +14,7 @@ import {
 import { useStaffAusgang } from './staffAusgang'
 
 /**
- * S4 — alle vier Berufe nebeneinander.
+ * Die Berufsliste — alle vier Berufe nebeneinander.
  *
  * Der Screen, auf den jeder Weg im Trichter zurückführt: aus dem Vorschlag,
  * aus dem Sheet, vom Ende eines Tages. Er ist deshalb der einzige, der ohne
@@ -26,12 +26,12 @@ import { useStaffAusgang } from './staffAusgang'
  * Reihenfolge der Registry. Eine gewürfelte Reihenfolge wäre schlimmer als
  * eine feste: sie sähe nach Empfehlung aus.
  *
- * **Hier steht jetzt auch der Vorschlag** (`khpl-vereinfachung.md` §5). Er war
- * ein eigener Screen davor (S0.3) und hat den Trichter auf neun Taps bis zum
- * ersten Handwerk gebracht. Was er konnte, kann diese Liste besser: die
- * Begründung steht auf der empfohlenen Karte, die Alternativen liegen im
- * selben Blick daneben statt einen Screen später — und „Dicht dahinter“, das
- * dort ein Nachsatz war, ist hier ein Etikett auf der Karte, die es meint.
+ * **Hier steht jetzt auch der Vorschlag.** Er war ein eigener Screen davor und
+ * hat den Trichter auf neun Taps bis zum ersten Handwerk gebracht. Was er
+ * konnte, kann diese Liste besser: die Begründung steht auf der empfohlenen
+ * Karte, die Alternativen liegen im selben Blick daneben statt einen Screen
+ * später — und „Dicht dahinter“, das dort ein Nachsatz war, ist hier ein
+ * Etikett auf der Karte, die es meint.
  *
  * Der Kaltstart-Sonderfall des Vorschlags („ohne Aussage kein Vorschlag“)
  * löst sich damit von selbst auf: ohne Antworten hat die Liste eben keine
@@ -50,8 +50,8 @@ export function Berufsliste() {
   const zweitbester = kaltstart ? null : zweiter?.beruf.id
 
   /**
-   * Die Begründung auf der empfohlenen Karte — wörtlich die des früheren
-   * Vorschlag-Screens. Ohne zitierbares Merkmal ist es ein Einstieg und kein
+   * Die Begründung auf der empfohlenen Karte — dieselbe wie auf dem früheren
+   * Vorschlag-Screen. Ohne zitierbares Merkmal ist es ein Einstieg und kein
    * Treffer; dann bleibt die Zeile des Berufs stehen. Der Unterschied kostet
    * einen Satz und ist der ganze Unterschied zwischen einer Auskunft und einer
    * Verkaufszeile.
@@ -235,7 +235,7 @@ function Karte({
             )}
             {/*
             Der angefangene Beruf — dieselbe Auskunft wie im Sheet „Dein Weg“,
-            und wörtlich dieselbe Formulierung.
+            und dieselbe Formulierung Wort für Wort.
 
             Vorher trug er dasselbe gelbgrüne Etikett wie „du bist hier“, nur
             mit anderem Wort: zwei Zustände, ein Bild. Jetzt sagt die Karte,

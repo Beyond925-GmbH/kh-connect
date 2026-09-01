@@ -9,32 +9,29 @@ import { WELT, sichtfeldFuellend, viewBoxVon } from './zeichnung'
  *
  * - **A5, die Zäsur.** „Halb eins, im Transporter." Warmes Licht durch die
  *   Windschutzscheibe — **die erste Wärme des Tages**, noch bevor die Anlage
- *   läuft, als leise Vorbereitung auf A6 (Spec 6, A5).
+ *   läuft, als leise Vorbereitung auf A6.
  * - **A1.1, der Notdienst.** Derselbe Blick, dieselbe Scheibe, nur dass
  *   draußen nichts ist als Straße, eine Laterne und ein einziges Fenster, in
  *   dem noch Licht brennt. „Wer fährt eigentlich nachts?" — das ist die
  *   Antwort als Bild.
  *
- * **Warum gezeichnet und nicht fotografiert.** Spec 7 vergibt beide Screens an
- * Fotos, Spec 10 hält für beide fest: *das Motiv fehlt*. Ohne Eintrag in der
+ * **Warum gezeichnet und nicht fotografiert.** Beide Screens waren als Fotos
+ * geplant, und für beide *fehlt das Motiv*. Ohne Eintrag in der
  * Motivliste rendert `StepFoto` nichts — die Zäsur des Tages stand auf
- * schwarzem Grund. Für A5 nennt Spec 6 die Zeichnung ausdrücklich als
- * gleichwertige Alternative („Foto **oder eine ruhige Zeichnung**"), und
- * welches Medium eine Bühne benutzt, entscheidet ohnehin jeder Tag selbst
- * (khpl-tage.md 4). A1.1 bekommt dieselbe Zeichnung bei Nacht: eine Welt, zwei
- * Zustände.
+ * schwarzem Grund. Eine ruhige Zeichnung ist für A5 gleichwertig, und
+ * welches Medium eine Bühne benutzt, entscheidet ohnehin jeder Tag selbst.
+ * A1.1 bekommt dieselbe Zeichnung bei Nacht: eine Welt, zwei Zustände.
  *
  * **Das iPad auf dem Armaturenbrett ist keine Requisite**, sondern
- * Arbeitsalltag: „*Wir ham iPads, wo Aufträge drauf sind, wo man jederzeit
- * Fotos mitmachen kann*" (`INTERVIEW` — Anlagenmechaniker SHK Einblicke). Am
- * Stand läuft diese Anwendung auf demselben Gerät. Es steht hier ohne
+ * Arbeitsalltag: Aufträge liegen auf dem iPad, Fotos macht man jederzeit
+ * damit. Am Stand läuft diese Anwendung auf demselben Gerät. Es steht hier ohne
  * Erklärung da, und genau das ist der Beleg; `technik: 0.85` wird damit
  * nebenbei mit eingelöst.
  *
  * **Farbe:** ausschließlich `KALT` und `WARM` aus `kanon.ts`, kein Token, kein
  * Eingriff in `src/index.css`. Warm erscheint als Verlauf und als Schein, nie
  * als Fläche unter einem Knopf — die eine gefüllte orange Fläche pro Screen
- * ist *Weiter* (khpl-tage.md 3).
+ * ist *Weiter*.
  *
  * **Sie bewegt sich nicht.** Eine Pause, die animiert ist, ist keine.
  */

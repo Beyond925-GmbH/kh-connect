@@ -14,10 +14,9 @@ import {
 import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
 
 /**
- * C9 — Dein nächster Schritt. Der CTA und der Endpunkt dieses Tages
- * (khpl-tag-zimmerer.md 6, C9).
+ * C9 — Dein nächster Schritt. Der CTA und der Endpunkt dieses Tages.
  *
- * **Unverändert nach dem Muster des gebauten Tages**, wie die Spec es verlangt.
+ * **Unverändert nach dem Muster des gebauten Tages.**
  * Zweiteilig: erst der personalisierte Aufhänger, der aufgreift, was in C8
  * angesehen wurde — genau die `XYZ`-Logik des Boards —, dann der eigentliche
  * Aufruf, groß. Der Name kommt aus `public/stand.json` und fällt ohne
@@ -29,7 +28,7 @@ import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
  * wieder die Kreishandwerkerschaft. Deshalb steht hier auch das Logo, das die
  * App sonst nur auf dem Splash zeigt. **Genau ein orange gefülltes Feld pro
  * Screen** — hier ist es die ganze Fläche, und `text-[#0E0D0B]` darauf ist die
- * einzige erlaubte Ausnahme von der Farbregel (khpl-tage.md 3).
+ * einzige erlaubte Ausnahme von der Farbregel.
  *
  * **Der Aufhänger liest `answers.c8`, nicht `answers.m9`.** `m9` gehört dem
  * Dachdecker; die Trennung ist in `store/fortschritt.ts` im Zimmerer-Abschnitt
@@ -141,7 +140,7 @@ export function C9() {
  * ein Drittel Bildhöhe reines Orange (Abnahme-Befund), und das Argument des
  * gebauten Tages gilt unverändert — eine leere Farbfläche fordert niemanden
  * auf, mit einem Menschen zu sprechen. Der Medienbedarf für ein eigenes
- * C9-Motiv bleibt gemeldet (khpl-tag-zimmerer.md 10).
+ * C9-Motiv bleibt gemeldet.
  */
 function Abschlussfeld() {
   const bild = useStepBild('C9')

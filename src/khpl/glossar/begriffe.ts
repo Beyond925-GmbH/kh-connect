@@ -1,20 +1,21 @@
 /**
- * Glossar nach khpl-flow.md 12 — zwanzig Einträge, wörtlich übernommen.
+ * Der gemeinsame Begriffsbestand — zwanzig Einträge, die mehr als ein Tag
+ * braucht.
  *
- * `ENTWURF – UNGEPRÜFT` in der Formulierung: laut Spec vor der Messe von der
- * Innung gegenlesen lassen. Hier ist eine falsche Definition peinlicher als
- * anderswo, weil der Besucher sie für die Antwort hält.
+ * Die Formulierungen gehören vor der Messe von der Innung gegengelesen. Hier
+ * ist eine falsche Definition peinlicher als anderswo, weil der Besucher sie
+ * für die Antwort hält.
  *
- * Ein einundzwanzigster Eintrag steht darunter: `stundensatz` wird in der
- * Umsetzung von M2 (khpl-flow.md 7) als antippbarer Begriff genannt, fehlt aber
- * in der Liste aus 6.3. Er ist deshalb gesondert markiert.
+ * Ein einundzwanzigster Eintrag steht darunter: `stundensatz` wird in M2 als
+ * antippbarer Begriff gebraucht, gehört aber nicht zum ursprünglichen
+ * Zwanziger-Satz. Er ist deshalb gesondert markiert.
  */
 
 export interface Begriffseintrag {
   /** Überschrift im Popover. */
   label: string
   erklaerung: string
-  /** Nicht in der Liste aus khpl-flow.md 6.3 — braucht eine eigene Freigabe. */
+  /** Nachträglich ergänzt — braucht ein eigenes Gegenlesen. */
   nachgetragen?: boolean
 }
 
@@ -35,15 +36,14 @@ export const BEGRIFFE = {
       'Ein waagerechter Balken, der quer unter den Sparren liegt und sie stützt. Nach ihrer Lage heißen sie Fußpfette, Mittelpfette und Firstpfette.',
   },
   /**
-   * ⚠️ **Abweichung von flow 12, mit Absicht.** Der Glossarentwurf sagt „auf
-   * halber Höhe … bildet nebenbei die **Decke** des Spitzbodens“. Beides passt
+   * **Bewusst umformuliert.** Eine ältere Fassung sagte „auf halber Höhe …
+   * bildet nebenbei die **Decke** des Spitzbodens“. Beides passt
    * nicht: der Spitzboden ist der Raum **über** dem Kehlbalken, der Balken ist
    * also dessen Boden, nicht dessen Decke. Und das Modell setzt ihn nach
    * `parameter.ts` (`fKB = 1/3`) ins obere Drittel, nicht auf halbe Höhe.
    *
-   * Der Text steht in flow 12 als `ENTWURF – UNGEPRÜFT` mit dem ausdrücklichen
-   * Hinweis, ihn gegenlesen zu lassen — „hier ist eine falsche Definition
-   * peinlicher als anderswo, weil der Besucher sie für die Antwort hält“.
+   * Eine falsche Definition ist hier peinlicher als anderswo, weil der
+   * Besucher sie für die Antwort hält.
    * Zusätzlich stand dieselbe Erklärung zweimal im Code, einmal hier und
    * einmal an den Bauteilen des 3D-Modells, mit unterschiedlichem Inhalt: wer
    * das Wort antippte, bekam eine andere Antwort als wer den Balken antippte.
@@ -137,8 +137,8 @@ export const BEGRIFFE = {
   stundensatz: {
     label: 'Stundensatz',
     erklaerung:
-      // ⚠️ SPANNE GEHÖRT ZUM ZIMMERERHANDWERK (khpl-flow.md §10) und ist für
-      // das Dachdeckerhandwerk nicht nachgeschlagen. Vor der Messe belegen.
+      // ⚠️ Die Spanne stammt aus dem Zimmererhandwerk und ist für das
+      // Dachdeckerhandwerk nicht nachgeschlagen. Vor der Messe recherchieren.
       'Was eine Arbeitsstunde im Angebot kostet. Darin steckt nicht nur der Lohn, sondern auch Werkzeug, Fahrzeug, Werkstatt und Verwaltung. Im Bauhandwerk liegt er grob zwischen 50 und 90 Euro.',
     nachgetragen: true,
   },

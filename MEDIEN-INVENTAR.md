@@ -9,8 +9,10 @@ Pexels-Links und Urheber:innen dokumentiert), ergänzt um eigene Sichtprüfung d
 Zimmerer-Dateien und des Start-Posters. Wo weder Dateiname noch `MEDIEN.md` noch
 Sichtprüfung etwas hergeben, steht **unbekannt**.
 
-**Lizenz:** alles Pexels-Lizenz — kostenlos, kommerziell nutzbar, keine
-Namensnennung nötig. Urheber:innen stehen in `kh-connect/MEDIEN.md`.
+**Lizenz:** alles **aus `kh-connect`** Pexels-Lizenz — kostenlos, kommerziell
+nutzbar, keine Namensnennung nötig. Urheber:innen stehen in
+`kh-connect/MEDIEN.md`. Die später ergänzten Dateien (Abschnitt „Neu
+hinzugekommen“ unten) sind **teils namensnennungspflichtig** (CC BY-SA).
 
 **Technisch:** alle Bilder WebP 1280 × 720, alle Videos MP4 / H.264 High,
 `yuv420p`, `+faststart`, 25 fps, **ohne Tonspur**.
@@ -53,7 +55,25 @@ Namensnennung nötig. Urheber:innen stehen in `kh-connect/MEDIEN.md`.
 | `start-ipad.png` | Grafik | 44 K | Screenshot des Startscreens der alten App auf dem iPad — kein Motivmaterial | — |
 | `start-now.png` | Grafik | 423 K | Screenshot des Startscreens der alten App — kein Motivmaterial | — |
 
-**31 Dateien, ~17 MB.** Davon 22 Fotos, 5 Videos, 4 Grafiken/Screenshots.
+**31 Dateien, ~17 MB in der `kh-connect`-Kopie** (ohne die später ergänzten
+Dateien unten). Davon 22 Fotos, 5 Videos, 4 Grafiken/Screenshots.
+
+## Neu hinzugekommen (nicht aus `kh-connect`)
+
+Sechs Bauteilfotos für die Fehlersuche in A1 (Foto-Kacheln), Wikimedia
+Commons, heruntergeladen und beschnitten am 2026-08-31. **Keine
+Archiv-Dateien** — sie werden von `steps/anlagenmechanik/A1.tsx` referenziert.
+Vollständige Quellen-Links und Lizenz-Links: `MEDIEN.md`, Abschnitt
+„Anlagenmechanik".
+
+| Pfad | Typ | Größe | Motiv | Urheber:in | Lizenz |
+| --- | --- | --- | --- | --- | --- |
+| `media/anlagenmechaniker/pruefung-kessel.webp` | Foto | 31 K | Wandhängender Gaskessel | Boulderhydronics | CC BY-SA 3.0 |
+| `media/anlagenmechaniker/pruefung-speicher.webp` | Foto | 31 K | Warmwasserspeicher mit Kupferrohren | Julie Anne Workman | CC BY-SA 3.0 |
+| `media/anlagenmechaniker/pruefung-regelung.webp` | Foto | 50 K | Schaltfeld einer Heizungssteuerung (Lampen, Schalter) | Asurnipal | CC BY-SA 4.0 |
+| `media/anlagenmechaniker/pruefung-ladepumpe.webp` | Foto | 67 K | Rote Grundfos-Umwälzpumpe | Asurnipal | CC BY-SA 4.0 |
+| `media/anlagenmechaniker/pruefung-zirkulation.webp` | Foto | 111 K | Kleine Trinkwasser-Zirkulationspumpe an Messingrohren | wiDaki | CC BY-SA 3.0 |
+| `media/anlagenmechaniker/pruefung-mischer.webp` | Foto | 45 K | Schwarzer Mischer-Drehgriff mit roter Skala | SchmiAlf | CC0 1.0 |
 
 ### Aufschlüsselung `media/zimmerer/szenario.mp4` (52 s)
 

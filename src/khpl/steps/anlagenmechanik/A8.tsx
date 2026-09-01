@@ -9,13 +9,13 @@ import { KARRIEREWEGE } from './karrierewege'
 
 /**
  * A8 — Und danach? Der Karrierebereich, Struktur unverändert wie bei allen vier
- * Tagen (Spec 6, A8) und im Aufbau identisch mit M9.
+ * Tagen und im Aufbau identisch mit M9.
  *
  * Drei antippbare Karten nebeneinander. **Alle drei bleiben jederzeit
  * erreichbar** — A8.1–A8.3 sind im Graphen als `immerOffen` markiert und
  * verschwinden nicht, sobald sie einmal geöffnet wurden.
  *
- * ℹ️ Die Abnahme meldete „A8 zeigt drei Kacheln, die anderen drei Tage eine
+ * ℹ️ Gemeldet wurde einmal „A8 zeigt drei Kacheln, die anderen drei Tage eine
  * Liste — vier Tage, zwei Layouts". Nachgeprüft: das Raster unten ist
  * `grid-cols-1 sm:grid-cols-3` und steht in M9, C8 und hier **zeichengleich**;
  * es gibt keine Container-Query und keine abweichende Panelbreite (A8 setzt
@@ -31,16 +31,16 @@ import { KARRIEREWEGE } from './karrierewege'
  * ⚠️ **Die Zahlen sind die dieses Berufs und keine geerbten.** Der Bestand in
  * `steps/dachdecker/karrierewege.ts` führt Zimmerer-Zahlen; für SHK gelten
  * andere Kosten, eine andere Technikerfachrichtung und ein anderer
- * Studien-Anker (khpl-tage.md 0c, `belege/ausbildung-karriere.md`). Sie stehen
+ * Studien-Anker. Sie stehen
  * deshalb in `steps/anlagenmechanik/karrierewege.ts`.
  *
  * **Die Bühne fährt zurück.** Die Medienliste dieses Tages nennt für A8 selbst
- * kein Foto, nur für die drei Karten (Spec 10) — `StepFoto` rendert dann
+ * kein Foto, nur für die drei Karten — `StepFoto` rendert dann
  * nichts, und der Einstieg in den Karrierebereich stand auf schwarzem Grund.
  * Statt ein fremdes Motiv zu leihen, zeigt der Screen das Haus aus A3, jetzt
  * warm: A7 steht im Keller mit dem angeschnittenen Haus darüber, A8 nimmt die
  * Kamera heraus und zeigt das Ganze. Das ist derselbe Gedanke wie beim
- * Fadenobjekt — **eine Welt, viele Zustände** (khpl-tage.md 1, Mechanismus 2)
+ * Fadenobjekt — **eine Welt, viele Zustände**
  * — und es beantwortet die Frage des Screens im Bild: das Haus ist fertig, und
  * danach?
  */
@@ -59,13 +59,14 @@ export function A8() {
         />
       }
       warum={
-        // Dreieinhalb Jahre, `BELEGT` (`belege/ausbildung-karriere.md` 2:
-        // SHKAMAusbV, 42 Monate). Nicht drei wie beim Dachdecker.
+        // Dreieinhalb Jahre — 42 Monate nach SHKAMAusbV, nicht drei wie
+        // beim Dachdecker.
         // Ohne „Schau dir an, was dich interessiert": der Satz stand fast
-        // wortgleich schon im Auftragsband — und M9 (das abgenommene Vorbild)
-        // endet ebenfalls bei „alle offen".
+        // wortgleich schon im Auftragsband — und M9, das Vorbild dieses
+        // Screens, endet ebenfalls bei „alle offen".
         <p>
-          Dreieinhalb Jahre Ausbildung, dann Geselle. Danach drei Wege — alle drei offen.
+          Dreieinhalb Jahre Ausbildung, dann bist du Geselle. Danach drei Wege — alle drei
+          offen.
         </p>
       }
       interaktion={

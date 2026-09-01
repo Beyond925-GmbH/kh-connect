@@ -14,7 +14,8 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
 /**
- * Z2 — Fest, sonst fliegt es. **Rüsten**, in zwei Beats:
+ * Z2 — Fest, sonst fliegt es. **Die Maschine einrichten** (Rüsten), in zwei
+ * Beats:
  *
  *  1. *Spannen* — drei Spannmittel, eines passt zu rundem Stangenmaterial.
  *     Ein Fehlgriff kostet keinen Punkt, sondern zeigt seine Folge in der
@@ -38,7 +39,7 @@ const SPANNMITTEL = [
     label: 'Maschinenschraubstock',
     zeile: 'Zwei gerade Backen pressen zu.',
     folge:
-      'Zwei gerade Backen auf einem runden Teil: Kontakt auf zwei schmalen Linien. Beim ersten Span dreht sich die Stange durch — Riefen im Material, gespannt ist nichts.',
+      'Zwei gerade Backen auf einem runden Teil: Sie berühren es nur an zwei schmalen Linien. Beim ersten Span dreht sich die Stange durch — Kratzer im Metall, gespannt ist nichts.',
   },
   {
     id: 'futter',
@@ -51,7 +52,7 @@ const SPANNMITTEL = [
     label: 'Spannpratzen',
     zeile: 'Klammern drücken aufs Maschinenbett.',
     folge:
-      'Spannpratzen halten Platten auf einem Frästisch fest. Hier soll nichts stillstehen: das Teil selbst muss sich drehen — mitsamt seiner Spannung.',
+      'Solche Klammern halten flache Platten fest, die stillliegen sollen. Dein Teil soll sich aber drehen — mitsamt dem, was es festhält. Dafür sind Klammern nicht gebaut.',
   },
 ] as const
 
@@ -124,7 +125,7 @@ export function Z2() {
             passiert. Spannen, Werkzeuge messen, Programm laden.
           </p>
           <p>
-            Zuletzt wird der <Begriff id="nullpunkt">Nullpunkt</Begriff> angetastet — der
+            Zuletzt stellst du den <Begriff id="nullpunkt">Nullpunkt</Begriff> ein — den
             Punkt, von dem aus die Maschine jedes Maß rechnet.
           </p>
         </>
@@ -156,7 +157,7 @@ export function Z2() {
             <div className="flex flex-col gap-3">
               <Rueckmeldung
                 ok
-                text="Drei Backen, ein Griff, alles mittig — das Futter zentriert rundes Material von selbst."
+                text="Drei Backen, ein Griff, alles mittig — das Futter setzt ein rundes Teil von ganz allein genau in die Mitte."
                 testid="z2-gespannt"
               />
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -237,9 +238,9 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
         variants={TAKT}
         className="text-[1.0625rem] leading-[1.45] text-kh-paper/90"
       >
-        Die Zahl ist keine Einstellung nach Gefühl: am Rand läuft der Stahl mit
-        Radfahrtempo an der Schneide vorbei — daraus rechnet sich die Drehzahl, für jeden
-        Durchmesser neu.
+        Die Zahl ist nicht nach Gefühl gewählt, sie ist gerechnet: Außen am Teil saust der
+        Stahl ungefähr in Fahrradtempo an der Schneide vorbei. Daraus rechnet man die
+        Drehzahl aus — für jedes dickere oder dünnere Teil neu.
       </motion.p>
     </motion.div>
   )

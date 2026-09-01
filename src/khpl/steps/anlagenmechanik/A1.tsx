@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
-import { Check, ChevronDown, Clock } from 'lucide-react'
+import { ChevronDown, Clock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
@@ -12,11 +12,12 @@ import { StepShell } from '@/khpl/shell/StepShell'
 import { useSchmal } from '@/khpl/shell/schmal'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Fachwort } from './Fachwort'
+import { PruefKacheln, type PruefKachelDaten } from './PruefKacheln'
 
 /**
  * A1 — Kein warmes Wasser. Der Einstieg, und die **Signaturübung** dieses
  * Berufs: *Suchen.* Kein anderer der vier Tage hat eine Übung, in der man
- * nicht baut, sondern herausfindet (Spec 1 und 6, A1).
+ * nicht baut, sondern herausfindet.
  *
  * Drei Takte: **suchen** (drei Prüfungen aus sechs) → **entscheiden** (auf die
  * Ursache tippen) → **gelöst** (was das für die Person bedeutet, bei der man
@@ -35,29 +36,28 @@ import { Fachwort } from './Fachwort'
  * ein zweiter Versuch ist offen, und nach dem Fehlgriff zeigt der Screen,
  * **welche Prüfung die entscheidende gewesen wäre** — ohne Note.
  *
- * ⚠️ **Die Störung, die sechs Prüfungen und die richtige Ursache sind
- * `ENTWURF – UNGEPRÜFT` und fachlich abzunehmen** (Spec 11): „eine plausible,
+ * **Die Störung, die sechs Prüfungen und die richtige Ursache gehören
+ * fachlich gegengelesen:** eine plausible,
  * aber falsche Fehlersuche vor einem interessierten Publikum ist die
- * schlechteste Sorte Fehler." Der Fall ist deshalb bewusst **zahlenfrei**
+ * schlechteste Sorte Fehler. Der Fall ist deshalb bewusst **zahlenfrei**
  * gebaut — kein Grad, kein Bar, kein Messwert, den jemand für einen Beleg
  * halten könnte. Er lebt von einem Widerspruch: der Speicher ist kalt, die
  * Regelung hält ihn für voll geladen. Wer beides prüft, hat die Ursache.
  *
- * **Die Uhr steht im Panel und nicht oben rechts auf der Bühne**, obwohl Spec 6
- * das so beschreibt. Sie erfüllt ihren Zweck („nicht als Druck, sondern als
- * Anzeige") auch neben der Aufgabe, und die Hülle dafür zu ändern verbietet
- * khpl-tage.md 6.2. (Der Grund, aus dem die Ecke oben rechts früher besetzt
- * war — der zeitgesteuerte Einwurf —, ist mit `khpl-vereinfachung.md`
- * entfallen; der Einwurf liegt jetzt in der Warum-Zeile im Panel.)
+ * **Die Uhr steht im Panel und nicht oben rechts auf der Bühne.** Sie
+ * erfüllt ihren Zweck — nicht als Druck, sondern als Anzeige — auch neben der
+ * Aufgabe, und dafür die Hülle zu ändern wäre ein Eingriff für alle Tage.
+ * (Die Ecke oben rechts war früher vom zeitgesteuerten Einwurf besetzt; der
+ * ist entfallen und liegt jetzt in der Warum-Zeile im Panel.)
  *
- * **`answers.a1`** `{ geprueft, ursache, richtig }` (Spec 6).
+ * **`answers.a1`** `{ geprueft, ursache, richtig }`.
  */
 
 // ---------------------------------------------------------------------------
-// Der Fall — Text und Takt gebündelt oben (flow 8.4)
+// Der Fall — Text und Takt gebündelt oben
 // ---------------------------------------------------------------------------
 
-/** Drei Prüfungen sind frei. Danach entscheidet man — oder früher (Spec 6). */
+/** Drei Prüfungen sind frei. Danach entscheidet man — oder früher. */
 const PRUEFUNGEN_FREI = 3
 
 /**
@@ -72,13 +72,15 @@ const ANKUNFT = { stunde: 7, minute: 40 }
 /** Was eine Prüfung an Zeit kostet. Anzeige, kein Druck. */
 const MINUTEN_JE_PRUEFUNG = 8
 /**
- * Wieder im Auto. **Vierzig Minuten** — die Dauer des ersten Auftrags steht
- * wörtlich in Spec 1 („der erste dauert vierzig Minuten und ist gelöst").
+ * Wieder im Auto. **Vierzig Minuten** — so lange dauert der erste Auftrag,
+ * dann ist er gelöst.
  */
 const ABFAHRT = { stunde: 8, minute: 20 }
 
-interface Pruefung {
-  id: string
+/** Wo die sechs Bauteilfotos liegen. Herkunft und Lizenzen: `MEDIEN.md`. */
+const BILDER = '/medien/media/anlagenmechaniker'
+
+interface Pruefung extends PruefKachelDaten {
   frage: string
   ergebnis: string
 }
@@ -89,44 +91,64 @@ interface Pruefung {
  *
  * `speicher` und `regelung` sind das Paar, das den Fall löst: erst anfassen,
  * dann ablesen, was die Anlage über sich selbst behauptet.
+ *
+ * Jede Prüfung trägt ihr **Foto und ihr Label** gleich mit (`PruefKachelDaten`):
+ * die Kachel und ihr Befund gehören zusammen, und zwei Listen mit denselben
+ * sechs Ids in zwei Dateien laufen auseinander.
  */
 const PRUEFUNGEN: readonly Pruefung[] = [
   {
     id: 'kessel',
+    label: 'Kessel',
+    bild: `${BILDER}/pruefung-kessel.webp`,
     frage: 'Läuft der Kessel?',
-    // Ohne „Vorlauf": das Wort fiele hier unerklärt (R10) — der Glossar-Chip
+    // Ohne „Vorlauf": das Wort fiele hier unerklärt — der Glossar-Chip
     // erreicht diesen String nicht, und die Beobachtung geht auch ohne ihn.
+    // „Kessel" statt „Wärmeerzeuger": dasselbe Ding, das kürzere Wort, und es
+    // steht so auf der Kachel.
     ergebnis:
-      'Er läuft. Das Wasser geht heiß hinaus, die Heizkörper werden warm. Am Wärmeerzeuger liegt es nicht.',
+      'Er läuft. Das Wasser geht heiß hinaus, die Heizkörper werden warm. Am Kessel liegt es nicht.',
   },
   {
     id: 'speicher',
+    label: 'Speicher',
+    bild: `${BILDER}/pruefung-speicher.webp`,
     frage: 'Wie warm ist der Speicher?',
     ergebnis: 'Kalt. Nicht lauwarm — kalt. Hier ist seit Stunden keine Wärme angekommen.',
   },
   {
     id: 'regelung',
+    label: 'Regelung',
+    bild: `${BILDER}/pruefung-regelung.webp`,
     frage: 'Was zeigt die Regelung an?',
+    // Ohne „das passt nicht zu dem, was du gerade angefasst hast": das stimmte
+    // nur, wenn der Speicher schon dran war. Der Satz trägt jetzt in beiden
+    // Reihenfolgen.
     ergebnis:
-      'Sie meldet den Speicher als voll geladen und sieht keinen Grund nachzuheizen. Das passt nicht zu dem, was du gerade angefasst hast.',
+      'Sie meldet: Der Speicher ist voll geladen. Deshalb heizt sie nicht nach. Ob das stimmt, weiß nur, wer den Speicher selbst prüft.',
   },
   {
     id: 'ladepumpe',
+    label: 'Ladepumpe',
+    bild: `${BILDER}/pruefung-ladepumpe.webp`,
     frage: 'Läuft die Speicherladepumpe?',
-    ergebnis:
-      'Sie steht still. Strom hat sie — angefordert wird nur gerade nichts von ihr.',
+    ergebnis: 'Sie steht still. Strom hat sie. Es fordert sie nur gerade niemand an.',
   },
   {
     id: 'zirkulation',
+    label: 'Zirkulation',
+    bild: `${BILDER}/pruefung-zirkulation.webp`,
     frage: 'Läuft die Zirkulation?',
     ergebnis:
       'Die Zirkulationspumpe läuft nach ihrem Zeitplan. Sie hält warmes Wasser in Bewegung; machen kann sie keins.',
   },
   {
     id: 'mischer',
+    label: 'Mischer',
+    bild: `${BILDER}/pruefung-mischer.webp`,
     frage: 'Steht der Mischer richtig?',
     ergebnis:
-      'Der Mischer steht, wo er stehen soll, und lässt sich gängig verstellen. Er kann nur mischen, was bei ihm ankommt.',
+      'Der Mischer steht, wo er stehen soll, und lässt sich leicht verstellen. Er kann nur mischen, was bei ihm ankommt.',
   },
 ]
 
@@ -229,14 +251,14 @@ export function A1() {
           ? null
           : entscheiden
             ? 'Sag, woran es liegt.'
-            : 'Tipp in der Anlage an, was du prüfen willst.'
+            : 'Tipp an, was du prüfen willst.'
       }
       ansage={null}
-      // Die Zeichnung ist jetzt die Bedienung und nicht mehr die Begleitung.
-      buehneInteraktiv={!entscheiden && !geloest}
-      // Nur die Entscheidung braucht quer die breite Spalte: Dort stehen fünf
-      // ausformulierte Ursachen. Während der Suche gehört die Fläche der
-      // Anlage — sie *ist* die Bedienung.
+      // Nur die Entscheidung braucht quer die breite Spalte (fünf
+      // ausformulierte Ursachen). Während der Suche reicht den sechs
+      // Foto-Kacheln die normale — und die Zeichnung behält daneben genug
+      // Fläche, dass ihre Protokoll-Haken lesbar bleiben. Die sind jetzt das
+      // einzige Protokoll des Screens.
       karteBreit={entscheiden || geloest}
       interaktionOffen={!geloest}
       buehne={
@@ -252,7 +274,14 @@ export function A1() {
             ursache: geloest ? gewaehlt : null,
             geloest,
           }}
-          onPruefpunkt={entscheiden || geloest || offeneP <= 0 ? undefined : pruefe}
+          // Kein `onPruefpunkt` mehr: geprüft wird auf den Foto-Kacheln im
+          // Panel (`PruefKacheln`). Die Zeichnung führt Protokoll — Haken an
+          // den geprüften Punkten, Puls am zuletzt angefassten.
+          //
+          // Damit hat `onPruefpunkt` in `Schnitt`/`Anlage` **keinen Aufrufer
+          // mehr**. Der tote Ast bleibt vorerst absichtlich stehen: an der
+          // Bühne wird gerade parallel gearbeitet (A6), und der Rückbau ist
+          // separat eingeplant — nicht hier nebenbei erledigen.
         />
       }
       /*
@@ -283,7 +312,12 @@ export function A1() {
               schmal={schmal}
             />
           ) : (
-            <Suchen geprueft={geprueft} offen={offeneP} schmal={schmal} />
+            <Suchen
+              geprueft={geprueft}
+              offen={offeneP}
+              onPruefe={pruefe}
+              schmal={schmal}
+            />
           )}
         </Wechsel>
       }
@@ -323,39 +357,57 @@ export function A1() {
 // ---------------------------------------------------------------------------
 
 /**
- * Takt 1 — **die Suche findet auf der Anlage statt, nicht in einer Liste.**
+ * Takt 1 — **die Suche findet auf sechs Foto-Kacheln statt.**
  *
  * ---
  *
- * **Was hier ersetzt wurde.** Der Screen zeigte sechs Knöpfe mit sechs Sätzen:
- * „Läuft der Kessel?", „Läuft die Speicherladepumpe?", „Steht der Mischer
- * richtig?". Für jemanden, der vom Beruf nichts weiß — also für die
- * Zielgruppe —, war das eine Liste aus sechs deutschen Komposita, von denen
- * vier nichts bedeuten. Man wählt dann nicht, man tippt das kürzeste Wort an.
- *
- * Dabei stand die bessere Fassung schon da: **die Anlage daneben war längst
- * antippbar** (`Anlage.tsx`, `onPruefpunkt`), und jeder der sechs Prüfpunkte
- * sitzt dort an dem Ding, um das es geht. Die Liste war eine zweite Bedienung
- * für dieselbe Handlung — und ausgerechnet die schlechtere: Sie fragt nach
- * Wörtern, die Zeichnung zeigt Sachen.
+ * **Der dritte Anlauf für dieselbe Handlung, und warum.** Zuerst war die
+ * Suche eine Liste aus sechs Fragen — sechs deutsche Komposita, von denen
+ * vier der Zielgruppe nichts sagen. Dann bediente die Zeichnung: sechs
+ * Prüfpunkte auf dem Anlagenausschnitt, jeder an dem Ding, um das es geht.
+ * Besser — aber ein Kreis an einem grauen Vektorkasten zeigt immer noch ein
+ * Symbol, kein Ding. Jetzt tragen **echte Fotos** die Wahl (`PruefKacheln`):
+ * eine rote Pumpe ist eine Pumpe, ein Speicher mit Kupferrohren ein
+ * Speicher. Dazu füllt das Raster die Panelfläche, die auf dem Tablet
+ * vorher leer neben der Zeichnung lag.
  *
  * Geblieben ist alles, was den Screen inhaltlich trägt: dieselben sechs
- * Prüfungen, dieselben Ergebnisse, dieselbe Uhr, dieselbe Entscheidung
- * danach. Das Panel führt jetzt **Protokoll**, statt zu bedienen — dieselbe
- * Rolle wie der Verlustbalken in A4.
+ * Prüfungen, dieselben Befunde, dieselbe Uhr, dieselbe Entscheidung danach.
+ * Und die Zeichnung bleibt als Kulisse stehen und führt **Protokoll** —
+ * Haken an den geprüften Punkten —, damit die Entscheidung danach auf etwas
+ * Sichtbarem fußt. Die frühere Haken-Liste im Panel ist dafür entfallen:
+ * dieselben Haken sitzen jetzt auf den Kacheln selbst.
  */
 function Suchen({
   geprueft,
   offen,
+  onPruefe,
   schmal = false,
 }: {
   geprueft: string[]
   offen: number
+  onPruefe: (id: string) => void
   /** Handy hochkant: kürzere Zeilen, damit das Ergebnis ins Fenster passt. */
   schmal?: boolean
 }) {
   const zuletzt = geprueft.at(-1)
   const letzte = PRUEFUNGEN.find((p) => p.id === zuletzt)
+
+  /**
+   * Der Befund holt sich selbst ins Bild — dasselbe Muster (und derselbe
+   * Frame-Versatz) wie in `Rueckmeldung`. Der Grund: Handy hochkant stapelt
+   * das Raster drei Zeilen hoch, und wer die unterste Kachel tippt, hat die
+   * Antwort darauf oberhalb der Scrollkante. `nearest` scrollt nur so weit
+   * wie nötig; auf dem Tablet, wo alles ins Fenster passt, tut es nichts.
+   */
+  const befundAnker = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!zuletzt) return
+    const id = requestAnimationFrame(() => {
+      befundAnker.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    })
+    return () => cancelAnimationFrame(id)
+  }, [zuletzt])
 
   return (
     <div className="flex flex-col gap-3">
@@ -373,47 +425,44 @@ function Suchen({
       </div>
 
       {/*
-        Eine Ergebnisfläche, kein Stapel: die zweite Prüfung schreibt ihr
-        Ergebnis dorthin, wo die erste stand. Was schon geprüft ist, trägt auf
-        der Zeichnung einen Haken — das Panel wächst nicht mit jedem Tap.
+        Eine Ergebnisfläche, kein Stapel: die zweite Prüfung schreibt ihren
+        Befund dorthin, wo der erste stand. Sie steht **über** dem Raster,
+        damit der Tap auf eine Kachel seine Antwort im Fenster hat und nicht
+        unter der Scrollkante.
       */}
-      <Wechsel takt={zuletzt ?? 'nichts'}>
-        {letzte ? (
-          <div className="kh-feld px-4 py-3" data-testid="a1-ergebnis">
-            <p className="kh-etikett">{letzte.frage}</p>
-            <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-              {letzte.ergebnis}
-            </p>
-          </div>
-        ) : (
-          // R4: Der Imperativ steht einmal, im Auftragsband. Hier steht nur,
-          // was er kostet.
-          <p className="px-1 text-[1rem] text-kh-paper/70">
-            {schmal
-              ? 'Jede Prüfung schließt etwas aus — und kostet Zeit.'
-              : 'Jede Prüfung schließt etwas aus oder bestätigt etwas. Und jede kostet Zeit — danach wartet die nächste Adresse.'}
-          </p>
-        )}
-      </Wechsel>
-
       {/*
-        Das Protokoll. Es bedient nichts — es zeigt, was schon angefasst wurde,
-        damit nach drei Prüfungen die Entscheidung auf etwas Sichtbarem fußt
-        und nicht auf Erinnerung.
+        Der Anker liegt **um** den `Wechsel`, nicht im Takt: das Feld darin
+        wird beim Tap aus- und wieder eingehängt, und im Moment des Effekts
+        zeigte ein innerer Ref noch auf das alte (oder gar kein) Element —
+        dieselbe Falle, die `Rueckmeldung` dokumentiert.
       */}
-      {geprueft.length > 0 && (
-        <ul className="flex flex-wrap gap-x-4 gap-y-1" data-testid="a1-protokoll">
-          {geprueft.map((id) => (
-            <li
-              key={id}
-              className="flex items-center gap-1.5 text-[0.9375rem] text-kh-mute"
-            >
-              <Check className="size-4 shrink-0 text-kh-signal" strokeWidth={3} />
-              {PRUEFUNGEN.find((p) => p.id === id)?.frage}
-            </li>
-          ))}
-        </ul>
-      )}
+      <div ref={befundAnker}>
+        <Wechsel takt={zuletzt ?? 'nichts'}>
+          {letzte ? (
+            <div className="kh-feld px-4 py-3" data-testid="a1-ergebnis">
+              <p className="kh-etikett">{letzte.frage}</p>
+              <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
+                {letzte.ergebnis}
+              </p>
+            </div>
+          ) : (
+            // Der Imperativ steht einmal, im Auftragsband. Hier steht nur,
+            // was er kostet.
+            <p className="px-1 text-[1rem] text-kh-paper/70">
+              {schmal
+                ? 'Jede Prüfung schließt etwas aus — und kostet Zeit.'
+                : 'Jede Prüfung schließt etwas aus oder bestätigt etwas. Und jede kostet Zeit — danach wartet die nächste Adresse.'}
+            </p>
+          )}
+        </Wechsel>
+      </div>
+
+      <PruefKacheln
+        kacheln={PRUEFUNGEN}
+        geprueft={geprueft}
+        tippbar={offen > 0}
+        onPruefe={onPruefe}
+      />
     </div>
   )
 }
@@ -544,10 +593,15 @@ function Entscheiden({
       />
 
       {/*
-        Ohne Note, wie die Spec es verlangt: kein „falsch", sondern die eine
+        Ohne Note: kein „falsch", sondern die eine
         Prüfung, an der der Fall gekippt wäre. Wer sie schon gemacht hat,
         bekommt sie noch einmal vorgelegt — wer nicht, bekommt sie hier
         nachgereicht. Danach darf er noch einmal tippen.
+
+        Der Schluss nennt den Speicher-Befund **ausdrücklich**: Wer den
+        Speicher nie angefasst hat, weiß sonst nicht, wovon der letzte Satz
+        redet — und der Regelung-Befund allein endet offen („ob das stimmt
+        …"), was hier ohne Auflösung ein Widerspruch wäre.
       */}
       {fehlgriff && schluessel && (
         <div className="kh-feld px-4 py-3" data-testid="a1-schluessel">
@@ -555,8 +609,9 @@ function Entscheiden({
             {hatSchluessel ? 'Das hattest du schon' : 'Entscheidend gewesen wäre'}
           </p>
           <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-            {schluessel.frage} — {schluessel.ergebnis} Ein kalter Speicher, den die
-            Regelung für voll geladen hält: Das kann nur einer erzählt haben.
+            {schluessel.frage} — {schluessel.ergebnis} Und der Speicher selbst? Der ist
+            kalt, seit Stunden ohne Wärme. Ein kalter Speicher, den die Regelung für voll
+            geladen hält: Das kann nur einer erzählt haben.
           </p>
         </div>
       )}
@@ -569,8 +624,8 @@ function Entscheiden({
 // ---------------------------------------------------------------------------
 
 /**
- * Was die gelöste Störung bewirkt hat — der stärkste Moment der Anwendung
- * (Spec 6, A1), und er trägt nur, wenn man ihn in Ruhe lässt: **ein Satz, kein
+ * Was die gelöste Störung bewirkt hat — der stärkste Moment der Anwendung,
+ * und er trägt nur, wenn man ihn in Ruhe lässt: **ein Satz, kein
  * Foto, keine Rührung.** Die Zurückhaltung ist das, was ihn trägt.
  */
 function Geloest() {

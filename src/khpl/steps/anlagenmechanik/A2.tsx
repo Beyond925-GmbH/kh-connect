@@ -14,44 +14,53 @@ import { Fachwort } from './Fachwort'
 
 /**
  * A2 — Vierzig Jahre Keller. Die **geführte Hälfte des Lernpaars**: was dieser
- * Screen aufbaut, fragt A7 ab (Spec 3 und 6, A2).
+ * Screen aufbaut, fragt A7 ab.
  *
  * Zwei Takte:
  *
  *  1. **Der Schutz einer fremden Wohnung** — der Handgriff, den keiner der
  *     anderen drei Tage hat. Bevor irgendetwas ausgebaut wird, werden
- *     „*empfindliche Sachen abgeklebt und geschützt mit Vlies*" (`INTERVIEW` —
- *     Anlagenmechaniker SHK Einblicke). Zwei Sätze und eine kleine Handlung,
- *     mehr braucht es nicht: **du arbeitest in der Wohnung von jemandem.** Ein
- *     Dachdecker ist auf dem Dach, ein Zimmerer in der Halle, ein Zerspaner an
- *     der Maschine.
- *  2. **Sechs Bauteile sortieren** — bei jedem entscheidet der Besucher
- *     zuerst selbst: fliegt raus oder bleibt? Danach erst steht da, was es tut
- *     und was wirklich damit passiert.
+ *     „*empfindliche Sachen abgeklebt und geschützt mit Vlies*" — so
+ *     beschreibt es ein Anlagenmechaniker SHK im Interview. Zwei Sätze und
+ *     eine kleine Handlung, mehr braucht es nicht: **du arbeitest in der
+ *     Wohnung von jemandem.** Ein Dachdecker ist auf dem Dach, ein Zimmerer in
+ *     der Halle, ein Zerspaner an der Maschine.
+ *  2. **Sechs Bauteile sortieren** — bei jedem **rät** der Besucher zuerst
+ *     selbst: fliegt raus oder bleibt? Danach erst steht da, was es tut und
+ *     was wirklich damit passiert. Dass hier geraten wird, sagt der Screen
+ *     ausdrücklich: ein Vierzehnjähriger *kann* diese Teile nicht kennen, und
+ *     eine Frage, die wie eine Wissensprüfung aussieht, lädt zum Nicht-Tippen
+ *     ein. Schätzen ist hier ausdrücklich der Beruf — der Monteur im echten
+ *     Keller schaut auch erst hin und schätzt, bevor er misst.
  *
  * ---
  *
  * **Was an Takt 2 umgebaut wurde und warum.**
  *
  * Der Screen war bis hierher „Tipp an, was in diesem Keller steht" — sechs
- * Flächen, sechs Texte, aufdecken. Das war für sich in Ordnung, nur ist es
- * inzwischen die **dritte** Aufdeck-Übung dieses Tages: A1 tippt Prüfpunkte an,
- * A3 tippt Verlustflächen an. Drei Screens hintereinander mit demselben Verb
- * lesen sich als ein Screen, den man dreimal sieht.
+ * Flächen, sechs Texte, aufdecken. Das war für sich in Ordnung, nur war es
+ * zeitweise die **dritte** Aufdeck-Übung dieses Tages: A1 tippt Prüfpunkte an,
+ * und A3 ließ damals Verlustflächen suchen (inzwischen schätzt A3 wieder).
+ * Screens hintereinander mit demselben Verb lesen sich als ein Screen, den
+ * man mehrmals sieht — der Umbau hier bleibt deshalb richtig.
  *
  * Die Sortierung war ohnehin schon da — jedes Bauteil trug seit jeher ein
  * `los` („fliegt raus", „bleibt", „wird getauscht"). Sie stand nur als
  * Etikett neben dem Text, statt eine Frage zu sein. Jetzt ist sie die Frage,
  * und der Text ist die Antwort.
  *
- * **Kein Falsch, kein Richtig** (R11, Vorbild B3.2 und M5): Auf eine Wahl
- * folgt keine Note, sondern die Sache selbst. Wer beim Verteiler „fliegt raus"
- * tippt, liest danach, warum die neue Anlage sich genau dort einhängt — das
- * korrigiert wirksamer als ein rotes Kreuz. Wer hier nichts entscheidet, kann
- * in A7 trotzdem weiter; er hat nur weniger zu erzählen.
+ * **Keine Note, aber ein warmes Echo** — Vorbild ist die Reaktion der
+ * Bauherrin in A7: Auf einen Tipp folgt kein Häkchen und kein rotes Kreuz,
+ * sondern zuerst eine Zeile in Worten — und die beginnt bei jedem Ausgang
+ * freundlich, weil ein danebengegangener Tipp hier kein Fehler ist, sondern
+ * genau das, worum gebeten wurde. Alle Ausgänge sehen gleich aus; allein die
+ * Worte unterscheiden sie (wie in A7). Danach kommt die Sache selbst: Wer beim
+ * Verteiler „fliegt raus" tippt, liest, warum die neue Anlage sich genau dort
+ * einhängt — das korrigiert wirksamer als ein rotes Kreuz. Wer hier nichts
+ * entscheidet, kann in A7 trotzdem weiter; er hat nur weniger zu erzählen.
  *
- * Die sechs Bauteile stehen als `BAUTEILE` in `buehne/anlagenmechanik/kanon.ts`
- * (Spec 6 nennt sie dort namentlich); **die Sätze dazu stehen hier und nicht in
+ * Die sechs Bauteile stehen als `BAUTEILE` in
+ * `buehne/anlagenmechanik/kanon.ts`; **die Sätze dazu stehen hier und nicht in
  * der Zeichnung** — die Zeichnung malt, der Step textet.
  *
  * **Angetippt wird an zwei Stellen, und beide führen in denselben Zustand:**
@@ -60,7 +69,7 @@ import { Fachwort } from './Fachwort'
  * Vorbeigehen gefunden wird — und der einzige, der ohne Zeigefinger auf einem
  * kleinen Symbol auskommt.
  *
- * **`answers.a2`** `{ angetippt }` (Spec 6).
+ * **`answers.a2`** `{ angetippt }`.
  */
 
 /** Ab so vielen gelesenen Bauteilen hat der Screen seinen Zweck erfüllt. */
@@ -71,23 +80,43 @@ const GENUG = 2
  *
  * Ohne ihn stünde beim Wiederkommen über „Dein Weg" oder Zurück der
  * Anfangszustand da, und der Besucher müsste den Handgriff samt seines Textes
- * ein zweites Mal machen. Die Form aus Spec 6 (`{ angetippt: string[] }`)
- * bleibt unberührt: die Marke ist kein Bauteil und wird überall
- * herausgefiltert, wo gezählt oder gezeichnet wird.
+ * ein zweites Mal machen. Die Form des Antwortfeldes
+ * (`{ angetippt: string[] }`) bleibt unberührt: die Marke ist kein Bauteil
+ * und wird überall herausgefiltert, wo gezählt oder gezeichnet wird.
  */
 export const VLIES_MARKE = 'vlies'
 
 /**
- * Was jedes Bauteil tut und ob es bleibt.
+ * Was jedes Bauteil tut und ob es bleibt. `los` ist das Etikett fürs Angebot;
+ * `echo` die erste Zeile nach dem Tipp — **je eine Fassung pro Tipp, direkt
+ * neben dem Etikett**, damit beide in einer Handschrift stehen und ein
+ * fachlicher Reviewer sie zusammen redigiert. (Eine getrennte
+ * Richtig-falsch-Achse wäre beim Redigieren von `los` unbemerkt
+ * auseinandergelaufen.)
  *
- * ⚠️ **`ENTWURF – UNGEPRÜFT`** (Spec 6, A2) — fachlich abzunehmen. Bewusst
+ * **Regeln für die Echo-Zeilen** — Vorbild sind die Reaktion der Bauherrin in
+ * A7 und die Einordnung der Wasserkocher-Tipps in A3: jede Fassung fängt
+ * freundlich an. Wer danebenlag, liest zuerst, warum sein Tipp vernünftig war
+ * — Danebenliegen ist hier Inhalt, nie Versagen. Bei Pumpe („wird getauscht")
+ * und Ausdehnungsgefäß („wird geprüft") sind ohnehin beide Tipps halb wahr,
+ * und die Zeilen sagen genau das, statt eine Seite zur falschen zu erklären.
+ *
+ * **Diese Texte gehören fachlich gegengelesen.** Sie sind bewusst
  * ohne Zahlen: was hier steht, soll ein Vierzehnjähriger verstehen, und jeder
  * Millimeter- oder Wattwert wäre eine Behauptung, für die dieser Screen keine
  * Quelle hat.
  */
-const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
+const TEXTE: Record<
+  BauteilId,
+  { los: string; echo: Record<'raus' | 'bleibt', string>; tut: React.ReactNode }
+> = {
   kessel: {
     los: 'fliegt raus',
+    echo: {
+      raus: 'Gut geschätzt — genau der muss raus.',
+      bleibt:
+        'Verständlich — er läuft ja noch. Trotzdem ist er der Einzige, der raus muss.',
+    },
     tut: (
       <>
         Verbrennt Öl und macht daraus heißes Heizungswasser. Vierzig Winter lang, jeden
@@ -98,6 +127,11 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
   },
   tank: {
     los: 'fliegt raus',
+    echo: {
+      raus: 'Richtig geschätzt — der geht zusammen mit dem Kessel.',
+      bleibt:
+        'Kann man denken — so groß und fest, wie er dasteht. Nur braucht ihn ohne Kessel keiner mehr.',
+    },
     tut: (
       <>
         Hier lagert das Heizöl, das der Kessel verbrennt. Ohne Kessel braucht es ihn nicht
@@ -107,6 +141,10 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
   },
   verteiler: {
     los: 'bleibt',
+    echo: {
+      raus: 'Sieht auch so aus — alt und grau. Dabei läuft genau hier alles zusammen.',
+      bleibt: 'Gut geschätzt — der bleibt.',
+    },
     tut: (
       <>
         Am <Fachwort id="verteiler">Verteiler</Fachwort> teilt sich die Leitung auf die
@@ -118,6 +156,11 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
   },
   pumpe: {
     los: 'wird getauscht',
+    echo: {
+      raus: 'Fast ein Volltreffer: Die alte fliegt wirklich raus — nur ganz ohne Pumpe geht es nicht.',
+      bleibt:
+        'Fast ein Volltreffer: Eine Pumpe bleibt hier immer nötig — nur nicht mehr diese.',
+    },
     tut: (
       <>
         Sie schiebt das Wasser durch die Rohre — ohne sie bliebe die Wärme im Keller.
@@ -127,6 +170,11 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
   },
   ausdehnungsgefaess: {
     los: 'bleibt, wird geprüft',
+    echo: {
+      raus: 'Kann so kommen — sicher weiß das hier noch keiner. Das entscheidet erst die Messung.',
+      bleibt:
+        'Gut möglich — sicher weiß das hier noch keiner. Das entscheidet erst die Messung.',
+    },
     tut: (
       <>
         Wasser dehnt sich aus, wenn es warm wird. Das{' '}
@@ -138,6 +186,10 @@ const TEXTE: Record<BauteilId, { los: string; tut: React.ReactNode }> = {
   },
   thermostatventile: {
     los: 'bleiben',
+    echo: {
+      raus: 'Klingt logisch — neue Heizung, neue Ventile. Hier reicht es aber, die alten neu einzustellen.',
+      bleibt: 'Gut geschätzt — die bleiben dran.',
+    },
     tut: (
       <>
         An jedem Heizkörper eins. Sie regeln, wie viel warmes Wasser hineinläuft.
@@ -160,7 +212,7 @@ export function A2() {
    * Was der Besucher je Bauteil entschieden hat.
    *
    * **Nur für diesen Besuch**, bewusst nicht im Store: Gespeichert wird, *dass*
-   * ein Bauteil bearbeitet wurde (`answers.a2.angetippt`, Spec 6) — die Wahl
+   * ein Bauteil bearbeitet wurde (`answers.a2.angetippt`) — die Wahl
    * selbst braucht kein späterer Screen, und eine Formänderung am Antwortfeld
    * nur für eine Anzeige wäre der teurere Weg.
    */
@@ -184,8 +236,9 @@ export function A2() {
   }
 
   /**
-   * Die Entscheidung. Sie wird gespeichert, aber **nicht bewertet**: Was
-   * danach im Panel steht, ist die Sache — nicht das Urteil über die Wahl.
+   * Der Tipp. Er wird gespeichert und bekommt **ein Echo in Worten, aber
+   * keine Note**: erst die freundliche Zeile des Bauteils (`TEXTE[..].echo`),
+   * dann die Sache selbst — nie ein Urteil in Häkchen, Kreuz oder Rot.
    */
   const entscheide = (id: BauteilId, wahl: 'raus' | 'bleibt') => {
     setWahl((alt) => ({ ...alt, [id]: wahl }))
@@ -208,7 +261,7 @@ export function A2() {
           : !vlies
             ? 'Roll die Vliesbahn aus.'
             : offen
-              ? 'Entscheide: fliegt raus oder bleibt?'
+              ? 'Was schätzt du: fliegt raus oder bleibt?'
               : 'Geh den Keller durch — Teil für Teil.'
       }
       ansage={null}
@@ -307,12 +360,22 @@ export function A2() {
                     {wahl[offen] ? (
                       <>
                         {/*
-                          **Erst die Sache, dann das Etikett.** Kein „richtig"
-                          und kein „falsch" (R11): Was hier steht, ist, was mit
-                          dem Teil passiert — und das gilt unabhängig davon,
-                          worauf getippt wurde. Wer danebenlag, liest den
-                          Grund und nicht sein Ergebnis.
+                          **Erst das Echo, dann die Sache, dann das Etikett.**
+                          Das Echo ist eine Zeile Worte wie A7s
+                          Kundinnen-Reaktion — kein Häkchen, kein X, kein Rot:
+                          für jeden Ausgang dieselbe Gestalt. Anders
+                          als in A7 bleibt es in Papierweiß: das eine Orange
+                          dieser kleinen Karte gehört dem Etikett „Im Angebot
+                          steht" darunter. Danach steht, was das Teil tut —
+                          wer danebenlag, liest den Grund und nicht sein
+                          Ergebnis.
                         */}
+                        <p
+                          className="kh-titel-klein mt-1.5 text-kh-paper"
+                          data-testid="a2-echo"
+                        >
+                          {karte.echo[wahl[offen]]}
+                        </p>
                         <p className="mt-1.5 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
                           {karte.tut}
                         </p>
@@ -328,6 +391,22 @@ export function A2() {
                         <p className="mt-1 text-[1rem] text-kh-mute">
                           Kann das Teil bei der neuen Anlage weiterlaufen?
                         </p>
+                        {/*
+                          **Der Raten-Haken, an der Stelle der Frage.**
+                          Wortlaut und Grund wie `RATEN_HAKEN` (gesten.ts), in
+                          Panel-Form wie auf A3 — er nimmt die Erwartung weg,
+                          man müsse das wissen, und sagt, warum Schätzen
+                          reicht: die Auflösung kommt gleich. Nur bis zur
+                          ersten Entscheidung: danach ist der Takt bekannt —
+                          auch für Wiederkehrer, denn `angetippt` kommt aus
+                          dem Store (`answers.a2`).
+                        */}
+                        {angetippt.length === 0 && (
+                          <p className="mt-1.5 text-[1rem] text-kh-paper/70">
+                            Wissen kann das niemand — schätz einfach. Gleich siehst du,
+                            was wirklich passiert.
+                          </p>
+                        )}
                         <div className="mt-2.5 flex gap-2">
                           <Wahlflaeche
                             onClick={() => entscheide(offen, 'raus')}

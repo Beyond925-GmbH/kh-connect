@@ -11,8 +11,7 @@ import { merkeAntwort, useFortschritt, useGraph } from '@/khpl/store/fortschritt
 import { Begriff } from './Begriff'
 
 /**
- * C5 — Elf Uhr, das Element geht raus. **Die Zäsur**
- * (khpl-tag-zimmerer.md 6, C5).
+ * C5 — Elf Uhr, das Element geht raus. **Die Zäsur.**
  *
  * **Warum das die Zäsur ist und nicht eine Mittagspause.** Der Dachdecker-Tag
  * hat um halb zwölf eine Brotzeit auf dem Rohbau — der Screen sagt „schau
@@ -27,8 +26,8 @@ import { Begriff } from './Begriff'
  * Unterschied liegt in der Bühne. M6 zeigt ein Foto von Menschen, hier fährt
  * das Gespann **weg** und der Blick bleibt in der leeren Halle zurück.
  *
- * **Die ehrliche Kehrseite dieses Tages sitzt hier** (khpl-tage.md 1,
- * Mechanismus 8) — als die dritte der drei Fragen, und mit **beiden Hälften**
+ * **Die ehrliche Kehrseite dieses Tages sitzt hier** — als die dritte der
+ * drei Fragen, und mit **beiden Hälften**
  * des Zitats in dieser Reihenfolge. Der zweite Satz ohne den ersten ist
  * Werbung, der erste ohne den zweiten Abschreckung.
  *
@@ -39,11 +38,11 @@ import { Begriff } from './Begriff'
  * Fließtext.
  *
  * ⚠️ **Die vierte Frage ist gestrichen.** „Wie viele Elemente sind ein Haus?“
- * ist `NICHT BELEGBAR` (khpl-tag-zimmerer.md 11) — die Zahl hängt an Grundriss
- * und Betrieb, und ein Platzhalter ist kein Beleg. Sie kommt hier nicht vor,
+ * lässt sich nicht belegen — die Zahl hängt an Grundriss und Betrieb, und ein
+ * Platzhalter ist kein Beleg. Sie kommt hier nicht vor,
  * auch nicht entschärft.
  *
- * ⚠️ **Gemeldet, nicht gebaut** (khpl-tage.md §6.2): Dieser Screen bräuchte wie
+ * ⚠️ **Gemeldet, nicht gebaut:** Dieser Screen bräuchte wie
  * M6 die dreifache Geduld im `KioskGuard` — ein Overlay, das nach einer Minute
  * fragt, ob noch jemand da ist, wäre genau der Druck, den die Zäsur nicht
  * ausüben soll. Der Timer kennt heute genau einen Ausnahme-Step, und `shell/`
@@ -68,17 +67,16 @@ const FRAGEN = [
   {
     id: 'gewicht',
     frage: 'Wie viel wiegt so ein Element?',
-    // `BELEGT` **als Spanne** (belege/zimmerer.md 4): 70–125 kg je m²
-    // Wandfläche. Nie ein Punktwert — das Gewicht hängt am Aufbau. Der
-    // Kleinwagen ist der Körper-Anker (Designregel R12): Tonnen fühlt niemand,
-    // Autos hat jeder gesehen.
+    // Belegt ist die Spanne 70–125 kg je m² Wandfläche, nie ein Punktwert —
+    // das Gewicht hängt am Aufbau. Der Kleinwagen ist der Körper-Anker:
+    // Tonnen fühlt niemand, Autos hat jeder gesehen.
     antwort:
       '70 bis 125 Kilo je Quadratmeter. Deine Wand ist acht Meter breit und drei hoch — grob eineinhalb bis drei Tonnen am Haken. So viel wie ein bis zwei Kleinwagen.',
   },
   {
     id: 'hochkant',
     frage: 'Warum steht es hochkant?',
-    // `BELEGT` (belege/zimmerer.md 4): zulässige Transportmaße, und der Kran
+    // Grund sind die zulässigen Transportmaße auf der Straße, und der Kran
     // hebt direkt vom Anhänger.
     antwort:
       'Flach liegend wäre die Ladung zu breit für die Straße. Hochkant passt sie — und der Kran hebt sie direkt vom Anhänger an ihren Platz.',
@@ -86,7 +84,7 @@ const FRAGEN = [
   {
     id: 'regen',
     frage: 'Und wenn es regnet?',
-    // Die ehrliche Kehrseite. `INTERVIEW` — Zimmerer Ausbildungsalltag,
+    // Die ehrliche Kehrseite. Aus dem Interview — Zimmerer Ausbildungsalltag,
     // 10.07.2026. **Beide Hälften, in dieser Reihenfolge**, und mit Sprecher:
     // ohne Zuschreibung wäre der Satz eine Behauptung über den Beruf, mit ihr
     // ist er die Auskunft eines Menschen.
@@ -138,7 +136,7 @@ export function C5() {
             abfahrt={!schonDagewesen}
             deinElement
             // Der Ausschnitt aus C4 — auf dem Anhänger steht *dein* Element,
-            // nicht irgendeins (khpl-tag-zimmerer.md 2).
+            // nicht irgendeins.
             ausschnitt={answers.c4?.ausschnitt}
           />
         </Suspense>
@@ -148,8 +146,8 @@ export function C5() {
           <p>
             Das Element wird aufgestellt, auf den{' '}
             <Begriff id="innenlader">Innenlader</Begriff> gefahren, gesichert. Elf Uhr,
-            das Gespann rollt vom Hof. Bis zur Baustelle sitzt du und tust nichts — in der
-            Vorfertigung ist die Fahrt die Pause.
+            der Laster rollt vom Hof. Bis zur Baustelle sitzt du und tust nichts. Wenn die
+            Wände in der Halle fertig gebaut werden, ist die Fahrt die Pause.
           </p>
           <motion.p
             initial={{ opacity: 0 }}
@@ -227,9 +225,8 @@ export function C5() {
       }
       aha={
         <AhaKarte sichtbar eyebrow="Und der halbe Beruf ist gar nicht draußen.">
-          Vorgefertigt heißt: die Wände entstehen in der Halle, im Trockenen, im Warmen.
-          Gerade in den kalten Wintermonaten ist das der Teil dieses Berufs, den kaum
-          jemand auf dem Schirm hat.
+          Die Wände entstehen in der Halle: im Trockenen, im Warmen. Gerade im Winter ist
+          das der Teil dieses Berufs, an den kaum jemand denkt.
         </AhaKarte>
       }
       fuss={<StepFuss id="C5" />}

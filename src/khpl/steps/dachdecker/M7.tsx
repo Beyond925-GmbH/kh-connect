@@ -32,7 +32,7 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 /**
  * M7 — Jetzt du.
  *
- * **Zweite Hälfte des Lernpaars** (khpl-flow.md 7 M7). Gleiche Grafik wie M5,
+ * **Zweite Hälfte des Lernpaars.** Gleiche Grafik wie M5,
  * gedrehte Rolle. Der Besucher zieht die Bauteile selbst in der richtigen
  * Reihenfolge an ihren Platz; falsche Reihenfolge lässt das Bauteil
  * zurückrutschen, mit einem Satz dazu, warum es noch nicht drankommt.
@@ -61,7 +61,7 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * Die Belohnung ist nicht eine Wertung, sondern die Animation selbst: jedes
  * richtig abgelegte Teil fliegt tatsächlich ein und das Dach wächst weiter.
  *
- * Nach zwei Fehlversuchen: „Zeig mir wie“ (flow 6.6) — es legt das nächste
+ * Nach zwei Fehlversuchen: „Zeig mir wie“ — es legt das nächste
  * Teil selbst ab und erklärt dabei, warum es dieses ist.
  *
  * Hier hat der Fuß keine eigene Aktion: die Bühne ist die Handlung. Solange
@@ -235,8 +235,8 @@ export function M7() {
       warum={
         fertig ? (
           <p>
-            Steht. Von der Fußpfette bis zur letzten Dachlatte — in der Reihenfolge, in
-            der es geht. Morgen kommen die Ziegel drauf.
+            Steht. Von der Fußpfette ganz unten bis zur letzten Dachlatte — in der
+            Reihenfolge, in der es geht. Morgen kommen die Ziegel drauf.
           </p>
         ) : takt === 'bauen' ? null : ( // ein Fließtext daneben wäre nur Füllung. Also keiner. // Während gebaut wird, trägt allein das Auftragsband die Anweisung —
           <p>
@@ -341,7 +341,7 @@ export function M7() {
       aha={
         <AhaKarte sichtbar={fertig} eyebrow="Wie heißt das, was du gerade gemacht hast?">
           Aufrichten. Der Kran, der die Sparrenpaare einhebt, steht dafür einen Tag auf
-          der Baustelle — den hast du in der Kalkulation schon bezahlt.
+          der Baustelle — den hast du vorhin beim Preis schon mitgerechnet.
         </AhaKarte>
       }
       fuss={
@@ -374,7 +374,7 @@ export function M7() {
 /**
  * Was während der Vorführung im Panel steht.
  *
- * Name **und** Ein-Satz-Erklärung dessen, was gerade einfliegt (R10): drei
+ * Name **und** Ein-Satz-Erklärung dessen, was gerade einfliegt: drei
  * der fünf Begriffe kommen in M5 nie vor — die Vorführung ist die eine
  * Stelle, an der sie erklärt sind, bevor die Abfrage sie als Zieh-Karten
  * abruft. Der Ausweg für den, der die Reihenfolge schon kennt, steht im Fuß
@@ -464,7 +464,7 @@ function Bauteilkarte({ schritt, gebaut }: { schritt: Bauschritt; gebaut: string
  * hat, und dem Teil darin orange — die Karte zeigt also nicht nur, was sie
  * ist, sondern auch, wo es hinkäme.
  *
- * Unter dem Namen steht der `was`-Satz aus M5s Kartenmuster (R10): ohne ihn
+ * Unter dem Namen steht der `was`-Satz aus M5s Kartenmuster: ohne ihn
  * waren „Windrispenbänder“ und „Konterlattung“ nackte Vokabeln neben einer
  * 44-px-Zeichnung. Auf dem Handy hochkant entfällt der Satz (`max-sm:hidden`)
  * — dort zählt jedes Pixel Panelhöhe, und die Vorführung hat die Begriffe

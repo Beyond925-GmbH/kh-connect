@@ -10,8 +10,7 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
 /**
- * C3 — Eine Wand ist ein Sandwich. **Die geführte Hälfte des Lernpaars**
- * (khpl-tag-zimmerer.md 6, C3).
+ * C3 — Eine Wand ist ein Sandwich. **Die geführte Hälfte des Lernpaars.**
  *
  * Fünf Schichten, eine Karte je Schicht, in fester Reihenfolge, mit je einem
  * Satz. Ein Tap, die Schicht legt sich auf. **Man kann nichts falsch machen** —
@@ -26,10 +25,10 @@ import { Begriff } from './Begriff'
  * ist für jemanden mit fünfzehn kein Wort, sondern ein Rätsel; die kleine
  * Zeichnung beantwortet *wo sitzt das*, bevor der Name gelesen ist. Dieselbe
  * Begründung wie bei `DachSchema` in M5 — nur ist die Achse hier der Aufbau
- * und nicht die Zeit (khpl-tage.md 4).
+ * und nicht die Zeit.
  *
- * Schichtenfolge und Prinzip `BELEGT` (`belege/zimmerer.md` 2, WBA Weimar;
- * Prinzip nach DIN 4108-3).
+ * Schichtenfolge und Prinzip sind fachlich abgesichert (WBA Weimar; Prinzip
+ * nach DIN 4108-3).
  *
  * ⚠️ **Vorbehalt, und er steht auf dem Screen:** Es gibt Bauweisen ohne
  * separate Dampfbremsfolie — dann übernimmt die OSB-Beplankung die Funktion —
@@ -42,7 +41,7 @@ import { Begriff } from './Begriff'
 const Wandelement3D = lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))
 
 // ---------------------------------------------------------------------------
-// Text — gebündelt oben (flow 8.4).
+// Text — gebündelt oben in der Datei.
 // ---------------------------------------------------------------------------
 
 interface Schicht {
@@ -81,16 +80,16 @@ const SCHICHTEN: Schicht[] = [
   {
     id: 'innen',
     name: 'Innenbeplankung',
-    was: 'Die Platte, die im fertigen Zimmer die Wand ist. Davor liegt meist noch eine Installationsebene für Kabel und Dosen — damit später niemand durch die Dichtung bohrt.',
+    was: 'Die Platte, die im fertigen Zimmer die Wand ist — an so eine hängst du deine Poster. Dahinter bleibt meist noch etwas Platz für Kabel und Steckdosen, damit später niemand durch die Folie bohrt.',
     wasKurz:
-      'Die Platte, die im fertigen Zimmer die Wand ist. Davor liegt meist noch eine Installationsebene für Kabel und Dosen.',
+      'Die Platte, die im fertigen Zimmer die Wand ist — an so eine hängst du deine Poster. Dahinter bleibt Platz für Kabel und Steckdosen.',
     dicke: 2,
     farbe: '#DDD8CF', // Gipsplatte auf der Bühne
   },
   {
     id: 'dampfbremse',
     name: 'Dampfbremse',
-    was: 'Auf die warme Innenseite, direkt vor die Dämmung. Sie hält die Luftfeuchte aus dem Zimmer aus der Wand heraus.',
+    was: 'Kommt auf die warme Innenseite, direkt vor die Dämmung. Sie hält die feuchte Luft aus dem Zimmer aus der Wand heraus.',
     dicke: 1,
     farbe: '#7FA9B5', // die blaugraue Bahn auf der Bühne
   },
@@ -98,7 +97,7 @@ const SCHICHTEN: Schicht[] = [
     id: 'daemmung',
     name: 'Ständerwerk mit Dämmung',
     // Ohne „im Gefach": das Fachwort trüge hier nichts Neues und stünde ohne
-    // Glossar-Chip mitten im Satz (Designregel R10).
+    // Glossar-Chip mitten im Satz.
     was: 'Das tragende Skelett — und zwischen den Ständern die Dämmung. Hier steckt die Wärme des Hauses drin.',
     dicke: 7,
     farbe: '#D8C48F', // die Gefachdämmung auf der Bühne
@@ -106,14 +105,14 @@ const SCHICHTEN: Schicht[] = [
   {
     id: 'holzfaser',
     name: 'Holzfaserplatte',
-    was: 'Außen, und diffusionsoffen. Was doch an Feuchte in die Wand gerät, muss hier wieder heraus können.',
+    was: 'Kommt ganz außen drauf und lässt Wasserdampf durch. Feuchtigkeit, die doch in die Wand kommt, muss hier wieder raus.',
     dicke: 3,
     farbe: '#B58C4C', // die Holzfaserplatte auf der Bühne
   },
   {
     id: 'fassade',
     name: 'Fassade',
-    was: 'Was man von der Straße sieht: Putz, Lattung, Schalung. Das entscheidet der Bauherr — die vier Schichten davor entscheidet die Bauphysik.',
+    was: 'Was man von der Straße sieht: Putz oder Holz. Das entscheiden die Leute, denen das Haus gehört — die vier Schichten davor entscheidet die Physik.',
     dicke: 2,
     farbe: '#A8814A', // die Hauswand in C7 (kulissen.tsx)
   },
@@ -154,7 +153,7 @@ export function C3() {
         </Suspense>
       }
       warum={
-        // Eine Fassung statt zweier, ein Fachwort statt dreier (Regel R2).
+        // Eine Fassung statt zweier, ein Fachwort statt dreier.
         // Die Schichten heißen jetzt nach ihrer Aufgabe; wie sie im Betrieb
         // heißen, steht auf den Karten darunter, eine nach der anderen.
         fertig ? undefined : (
@@ -213,8 +212,8 @@ export function C3() {
  * der Knopf**: ein Kasten mit Zeichnung und Text und daneben ein
  * „Auflegen“-Button hätte zwei Ziele für eine Handlung.
  *
- * **Und weil sie der Knopf ist, trägt sie Limette** (Designregeln R3/R8):
- * das antippbare Objekt bekommt die Handlungs-Affordanz. Orange bleibt dem
+ * **Und weil sie der Knopf ist, trägt sie Limette:** das antippbare Objekt
+ * bekommt die Handlungs-Affordanz. Orange bleibt dem
  * Querschnitt-Schema (`Wandschnitt`) vorbehalten — dort heißt es „diese
  * Schicht wird gerade behandelt", eine Lese-Info, keine Handlung.
  */
@@ -336,8 +335,8 @@ function Prinzip() {
       </p>
 
       <p className="text-[1rem] leading-snug text-kh-mute">
-        So ist der Regelfall. Es gibt Wände ohne eigene Folie; dort übernimmt die
-        Beplankung ihre Aufgabe.
+        So ist es meistens. Es gibt auch Wände ohne eigene Folie — dann übernehmen die
+        Platten diese Aufgabe.
       </p>
 
       <p className="text-[1.0625rem] leading-snug text-kh-paper/70">

@@ -15,16 +15,16 @@ import { BEGRIFFE_ZIMMERER, type ZimmererBegriffId } from '@/khpl/glossar/zimmer
  * `komponenten/Begriff` ist auf `BegriffId` aus `glossar/begriffe.ts` typisiert
  * und wird vom gebauten Dachdecker-Tag benutzt. Die zehn neuen Holzrahmenbau-
  * Begriffe stehen dort nicht, und `komponenten/` gehört keinem der drei
- * Agenten (khpl-tage.md §6.2) — eine gemeinsame Datei umzubauen, während drei
+ * Agenten — eine gemeinsame Datei umzubauen, während drei
  * Tage gleichzeitig entstehen, ist genau die Kollision, die die Dateihoheit
  * verhindern soll.
  *
  * Der Preis sind zwanzig Zeilen Doppelung; sie ist gemeldet. Sobald alle vier
  * Tage stehen, gehört `Begriff` einmal auf ein Glossar je Beruf umgestellt —
- * das ist V6 zu Ende gedacht und betrifft alle vier, also nicht die Hoheit
- * eines einzelnen Tages.
+ * das ist die Vereinheitlichung zu Ende gedacht und betrifft alle vier, also
+ * nicht die Hoheit eines einzelnen Tages.
  *
- * Klassen wörtlich aus `komponenten/Begriff` übernommen: zwei Begriffe im
+ * Klassen identisch zu `komponenten/Begriff`: zwei Begriffe im
  * selben Absatz dürfen nicht unterschiedlich aussehen, nur weil sie aus
  * verschiedenen Listen kommen.
  */

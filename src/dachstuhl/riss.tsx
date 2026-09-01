@@ -23,13 +23,13 @@ import { AUSWAHL_EMISSIV, RISS_FARBEN } from './bauteil-texte'
  * zweiter `erzeugeTeile`-Lauf. Der Matrixaufbau repliziert exakt die
  * Transformationskette aus `Bauteil.tsx` und `Dachflaeche.tsx`.
  *
- * **Ein Sparren ist hervorgehoben, der Rest gedimmt** (Design-Review, R10):
+ * **Ein Sparren ist hervorgehoben, der Rest gedimmt** (Design-Review):
  * ~15 Sparren plus Innenstreben in derselben Helligkeit sind fuer jemanden
  * ohne Vorwissen eine Wand aus Linien. Hervorgehoben wird der vorderste
  * Sparren der z+-Seite — genau der, an dessen Unterkante die Sparrenlaengen-
  * Masskette (`lS`) anliegt: Zeichnung und Mass zeigen damit auf dasselbe
  * Holz. Der uebrige Kantenzug faellt auf ~45 % Deckkraft; die Massketten
- * bleiben voll lesbar (R9: eine technische Zeichnung ist Inhalt, nicht Deko).
+ * bleiben voll lesbar — eine technische Zeichnung ist Inhalt, nicht Deko.
  * Diese Datei wird nur von M3 (Dachdecker) gerendert — der Zweig braucht
  * deshalb keinen Schalter.
  */
@@ -90,7 +90,7 @@ function nurPosition(g: THREE.BufferGeometry): THREE.BufferGeometry {
 export interface Riss {
   fuellung: THREE.BufferGeometry
   kanten: THREE.BufferGeometry
-  /** Der eine hervorgehobene Sparren (R10) — `null` nur ohne Sparren im Modell. */
+  /** Der eine hervorgehobene Sparren — `null` nur ohne Sparren im Modell. */
   hervor: THREE.BufferGeometry | null
   entsorge: () => void
 }
@@ -283,7 +283,7 @@ export function Planriss({
           polygonOffsetUnits={1}
         />
       </mesh>
-      {/* Der Kantenzug gedimmt, ein Sparren in Orange obenauf (R10) — die
+      {/* Der Kantenzug gedimmt, ein Sparren in Orange obenauf — die
           Zeichnung bleibt vollstaendig, aber sie zeigt, wo man hinschauen
           soll: auf das eine Holz, dessen Laenge die Masskette daneben nennt. */}
       <lineSegments geometry={riss.kanten} renderOrder={1}>

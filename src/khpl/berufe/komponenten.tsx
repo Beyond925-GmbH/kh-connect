@@ -68,10 +68,10 @@ import { Z9 } from '@/khpl/steps/zerspanung/Z9'
  * Ein Beruf, dessen Stationen aus wiederverwendbaren Übungen bestehen, taucht
  * hier gar nicht auf: was fehlt, rendert der `Platzhalter`.
  *
- * **Geteilte Datei, ein Block je gebautem Beruf** (khpl-tage.md §6.1 V6 und
- * §6.2). Jeder Agent trägt **nur in seinem Block** ein und rührt die anderen
- * nicht an; die Step-Ids kollidieren dank der Präfixe aus V4 nicht (`M`/`B`,
- * `C`, `A`, `Z`). Die Import-Zeilen oben gehören zum jeweiligen Block.
+ * **Geteilte Datei, ein Block je gebautem Beruf.** Wer an einem Beruf
+ * arbeitet, trägt **nur in seinem Block** ein und rührt die anderen nicht an;
+ * die Step-Ids kollidieren dank der Präfixe nicht (`M`/`B`, `C`, `A`, `Z`).
+ * Die Import-Zeilen oben gehören zum jeweiligen Block.
  */
 export const BERUF_KOMPONENTEN: Partial<
   Record<BerufId, Readonly<Record<StepId, () => React.ReactNode>>>

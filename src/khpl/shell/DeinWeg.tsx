@@ -8,8 +8,8 @@ import type { BerufId } from '@/khpl/berufe/typen'
 import type { Fortschritt } from '@/khpl/store/fortschritt'
 
 /**
- * S3 „Dein Weg“ (khpl-ui-shell.md 4) — die Antwort auf „Was habe ich bisher
- * gemacht?“, und seit den vier Berufen auch auf „was gibt es sonst noch?“.
+ * „Dein Weg“ — die Antwort auf „Was habe ich bisher gemacht?“, und seit den
+ * vier Berufen auch auf „was gibt es sonst noch?“.
  *
  * Die ganze Hauptlinie als Liste, Abstecher eingerückt unter ihrem
  * Elternschritt. ✓ ist antippbar (Nachlesen, Interaktion wiederholen), ● ist
@@ -53,7 +53,7 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
 
 /**
  * Eine Zeile der Achse. `nummer` trägt die Rail-Zählung; Abstecher bekommen
- * keine, weil sie in der Rail kein Segment haben (ui-shell 4).
+ * keine, weil sie in der Rail kein Segment haben.
  *
  * `bahn` ist der Hauptschritt, unter dem die Zeile hängt — bei Hauptschritten
  * sie selbst. Daran hängt die Farbe der Achse: ein nicht genommener Abstecher
@@ -293,6 +293,34 @@ export function DeinWeg({
                 </button>
               )}
             </section>
+
+            {/*
+              Der Bildnachweis — **eine Lizenzpflicht, keine Geste.** Fünf der
+              sechs Bauteilfotos in A1 stehen unter CC BY bzw. CC BY-SA, und
+              diese Lizenzen verlangen die Namensnennung *im Medium selbst*,
+              nicht nur in einer Datei im Repo. Das Sheet ist die einzige
+              Meta-Fläche der App und damit der Ort dafür; ganz unten und
+              leise, aus demselben Grund wie der Reset darüber.
+
+              Die Liste ist bewusst Prosa und hart verdrahtet: sie ändert sich
+              nur, wenn Fotos getauscht werden, und das passiert in `MEDIEN.md`
+              (dort stehen Quelle-Links und Lizenz-Links je Datei) — diese
+              Zeilen hier müssen dann mitziehen.
+            */}
+            <section className="border-t border-kh-line px-4 pt-4 pb-8">
+              <h3 className="kh-etikett px-1">Bildnachweis</h3>
+              <p className="mt-1.5 px-1 text-[0.8125rem] leading-[1.55] text-kh-mute/80">
+                Die Bauteilfotos im Beruf Anlagenmechanik stammen von Wikimedia Commons
+                und wurden beschnitten: „Vitodens 200 condensing boiler“ von
+                Boulderhydronics (CC BY-SA 3.0) · „Hot water storage“ von Julie Anne
+                Workman (CC BY-SA 3.0) · „KÖB Hackschnitzelheizung, Steuerung“ und
+                „Grundfos-Umwälzpumpe“ (Dornbirn) von Asurnipal (CC BY-SA 4.0) ·
+                „Trinkwasser-Zirkulationspumpe“ von wiDaki (CC BY-SA 3.0) · „Regelung
+                Vorlauftemperatur Fußbodenheizung“ von SchmiAlf (CC0 1.0). Die Ausschnitte
+                stehen unter derselben Lizenz wie ihr Original — Lizenztexte:
+                creativecommons.org/licenses.
+              </p>
+            </section>
           </div>
         </BaseDialog.Popup>
       </BaseDialog.Portal>
@@ -357,7 +385,7 @@ function Zeile({
           />
           <span className="ml-7 grid size-6 shrink-0 place-items-center" aria-hidden>
             {zustand === 'besucht' ? (
-              // „Erledigt“ ist app-weit limette (R3) — wie die
+              // „Erledigt“ ist app-weit limette — wie die
               // geschafft-Zeile im Step-Fuß. Als Kontur, nicht gefüllt:
               // das stärkste Element bleibt der gefüllte „du bist
               // hier“-Punkt.
@@ -387,10 +415,10 @@ function Zeile({
         die beiden Abnahmen widersprochen haben.
 
         Wer den Screen gesehen hat, erinnert sich an seine Überschrift: „Was
-        kostet dieses Dach?“. Ihm „Angebots-Kalkulation, Vertrag“ vorzusetzen,
-        ist eine zweite Sprache, die er nie gelesen hat. Wer den Screen noch
+        kostet dieses Dach?“ — ihm stattdessen „Preis rechnen, Vertrag“
+        vorzusetzen, benennt dieselbe Sache ein zweites Mal. Wer den Screen noch
         nicht gesehen hat, kann mit „Jetzt du“ dagegen nichts anfangen — da ist
-        der beschreibende Board-Name richtig.
+        der beschreibende Name richtig.
 
         Also: besucht und aktuell zeigen `titel`, gesperrt zeigt `kurz`.
       */}
@@ -458,7 +486,7 @@ function Zeile({
  * jetzt dieselbe Zählung zeigen. Die Nummer steht **im** Knoten: sie ist
  * dadurch Teil der Achse und braucht keine eigene Spalte.
  *
- * „Besucht“ ist limette wie jede Erledigt-Marke der App (R3) — aber als
+ * „Besucht“ ist limette wie jede Erledigt-Marke der App — aber als
  * Kontur, eine Stufe leiser als „aktuell“: nur der Punkt, an dem der
  * Besucher gerade steht, ist die gefüllte Fläche mit Ring.
  */

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 /**
- * Der Dachflaechen-Frame (Bauplan 2.1). Innerhalb dieser Gruppe sind Lattung
+ * Der Dachflaechen-Frame. Innerhalb dieser Gruppe sind Lattung
  * und Windrispen achsparallele Boxen ohne eigene Drehung:
  *
  *   lokal x = Gebaeudelaenge, identisch mit Welt-X

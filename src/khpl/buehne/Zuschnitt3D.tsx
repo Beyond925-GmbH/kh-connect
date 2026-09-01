@@ -79,7 +79,7 @@ const PRESET = {
 }
 
 /**
- * Höhen-Füllung für die Gespann-Phasen (Design-Review, R1).
+ * Höhen-Füllung für die Gespann-Phasen (Design-Review).
  *
  * Das Werkhof-Motiv ist um ein Mehrfaches breiter als hoch. `passeEin` passt
  * die Hülle vollständig ein — quer bindet dann die Breite, und die Szene
@@ -446,7 +446,7 @@ function Werkstatt({
   // M4-Ableitung genau MIN−0,5 .. MAX+0,5. Nach oben endet die Hülle knapp
   // über dem Anriss (er ragt Q.h + 0,35 über die Balkenunterkante): die alte
   // Kante bei y0 + 0,9 reservierte ~0,3 m leere Luft, und weil quer die Höhe
-  // bindet, stand genau diese Luft als dunkler Streifen über der Szene (R1).
+  // bindet, stand genau diese Luft als dunkler Streifen über der Szene.
   const huelleSchnitt = useMemo<Huelle>(
     () => ({
       min: [roh - 2.5, 0, -0.4],
@@ -469,8 +469,8 @@ function Werkstatt({
     }),
     [roh, gespannX],
   )
-  // Endbild: nur noch der Anhänger mit deinem Sparren obenauf (R1, Befund
-  // M4). Ladungsoberkante + Band liegen bei ~2,05 m; der Transporter trägt
+  // Endbild: nur noch der Anhänger mit deinem Sparren obenauf (Befund aus der
+  // Abnahme von M4). Ladungsoberkante + Band liegen bei ~2,05 m; der Transporter trägt
   // zum Motiv nichts mehr bei und darf anschneiden. Die Kamera gleitet nach
   // der Landung weich von `huelleWeit` hierher (Lerp in `Kamerafahrt`).
   const huelleFertig = useMemo<Huelle>(

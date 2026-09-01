@@ -28,15 +28,14 @@ import {
 import { kannVerlaufZurueck, verlaufZurueck } from '@/khpl/store/verlauf'
 
 /**
- * S2 — das Arbeitspferd (khpl-ui-shell.md 2 + 5). Rendert jeden Step, Haupt
- * wie Abstecher, aus denselben Slots:
+ * Der Step-Screen — das Arbeitspferd. Rendert jeden Step, Haupt wie Abstecher,
+ * aus denselben Slots:
  *
  *   Bühne · Titel · Warum · **Auftrag** · Interaktion · Fuß
  *
  * ---
  *
  * **Was sich mit der Vereinfachung geändert hat, und warum**
- * (`khpl-vereinfachung.md`).
  *
  * Der Screen trug bis zu dreizehn Elemente gleichzeitig: Zurück, Rail,
  * Staff-Fläche, Karriere-Link, Titel, Bühne (oft selbst die Interaktion),
@@ -254,8 +253,7 @@ export function StepShell({
     // die Zurück-Taste des Browsers spränge danach eine Stelle zu weit.
     if (kannVerlaufZurueck()) verlaufZurueck()
     // Im Skip führt jeder Rückweg aus dem Abstecher heraus, nicht durch die
-    // Historie: „ein Tap rein, ein Tap raus, exakt an dieselbe Stelle“
-    // (ui-shell 6).
+    // Historie: ein Tap rein, ein Tap raus, exakt an dieselbe Stelle.
     else if (imSkip) beendeKarriereSkip()
     else if (kannZurueck) geheZurueck()
   }, [imSkip, kannZurueck])
@@ -401,7 +399,7 @@ export function StepShell({
         data-step={id}
         data-testid="step"
       >
-        {/* Reihenfolge im DOM: Inhalt vor Navigation (flow 8.5). Die Leiste
+        {/* Reihenfolge im DOM: Inhalt vor Navigation. Die Leiste
             liegt per `absolute` optisch oben, Screenreader und Tastatur
             beginnen aber nicht mit „zurück“. */}
         <main ref={flaeche} className="relative min-h-0 flex-1">
@@ -419,8 +417,8 @@ export function StepShell({
           {imSkip ? (
             <RueckkehrLeiste ziel={fortschritt.detourReturnTo as StepId} />
           ) : (
-            // 60-px-Ziele mit 12 px Abstand (flow 8.5 — „entschieden: 60×60 pt,
-            // nicht 44×44“). Das kostet Fläche und ist es wert: hier tippt
+            // 60-px-Ziele mit 12 px Abstand, nicht die üblichen 44×44 pt.
+            // Das kostet Fläche und ist es wert: hier tippt
             // jemand im Stehen, mit ausgestrecktem Arm, auf ein
             // festgeschraubtes iPad.
             <header className="kh-leiste absolute inset-x-0 top-0 z-20 flex shrink-0 items-center gap-2 px-2 sm:gap-3 sm:px-3">
@@ -508,7 +506,7 @@ export function StepShell({
 }
 
 /**
- * Die persistente Leiste des Karriere-Skips (khpl-ui-shell.md 6). Ein Tap rein,
+ * Die persistente Leiste des Karriere-Skips. Ein Tap rein,
  * ein Tap raus, exakt an dieselbe Stelle — damit ist der neugierige Tap
  * folgenlos. Sie ersetzt die normale Leiste: Rail und Fortschritt gehören zum
  * Tag, nicht zum Abstecher.

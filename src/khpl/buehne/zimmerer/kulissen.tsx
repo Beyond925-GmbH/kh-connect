@@ -31,7 +31,7 @@ import type { Elementlage, Elementlicht, Fensterausschnitt } from './Wandelement
 
 /**
  * `halle`: kaltes Oberlicht, tiefe Schatten. `nachmittag`: warm und weicher —
- * nicht Abendlicht, der Tag endet um vier (khpl-tag-zimmerer.md 7). Keine
+ * nicht Abendlicht, der Tag endet um vier. Keine
  * echten Schattenkarten: die Bühne arbeitet wie `Zuschnitt3D` mit
  * Kontaktschatten-Quads, das spart auf dem iPad die halbe Füllrate.
  */
@@ -83,7 +83,7 @@ export function huelle(
 
 /**
  * Kamerafahrt nach dem Vorbild von `Zuschnitt3D`, aber mit trägerem Nachlauf:
- * das Bewegungsgefühl dieses Tages ist **Masse** (khpl-tage.md 2), und die
+ * das Bewegungsgefühl dieses Tages ist **Masse**, und die
  * Drehung von Draufsicht auf Untersicht bei C6 ist die visuelle Signatur des
  * ganzen Tages — sie darf nicht schnippen.
  */
@@ -196,7 +196,7 @@ function Kontaktschatten({
  * **`mitTor` stellt hinter die Stützen eine Rückwand mit offenem Hallentor.**
  * Für die Zäsur in C5: nach der Abfahrt blieb dort nur der leere Tisch in
  * strukturlosem Braun zurück, und die erzählte Leere las sich wie ein
- * unbespielter Screen (Designregel R1). Die Wand macht die Halle als Raum
+ * unbespielter Screen. Die Wand macht die Halle als Raum
  * lesbar, und das warm erleuchtete Tor sagt ohne ein Wort, wo das Gespann
  * geblieben ist — die Leere wird Kameraeinstellung statt Ladefehler.
  */
@@ -437,7 +437,7 @@ const SCHWEBE_MIN_Y = 0.35
 const SCHWEBE_Y = 2.3
 /**
  * Wie träge die Last der Hakenlage folgt. Das ist das **Bewegungsgefühl Masse**
- * (khpl-tage.md 2): der Wechsel von Beat 1 auf Beat 2 versetzt das Ziel um rund
+ * dieses Tages: der Wechsel von Beat 1 auf Beat 2 versetzt das Ziel um rund
  * 1,4 m seitlich — ungefiltert wäre das ein Sprung in einem einzigen Frame, kein
  * Fahren. Die Pendelphysik hängt an derselben Größe und würde von einem Sprung
  * sofort in die Klemmung geschlagen.
@@ -459,7 +459,7 @@ function naechsteHalbe(winkel: number, geradzahlig: boolean): number {
  * (Gieren = welche Seite nach außen, Rollen = wo ist oben); ein Tap hält es an
  * und meldet die nächstliegende Lage. Beat 2: Pendelphysik im Frame-Loop —
  * Trägheit, Nachlauf, Ausschwingen. Kein `motion`-Spring: die Last hängt in
- * der Szene, nicht im DOM (khpl-tag-zimmerer.md 6, C6).
+ * der Szene, nicht im DOM.
  *
  * `abgesetzt` ist der dritte Zustand und **kein Beat**: das Element steht schon.
  * Ohne ihn hinge es beim Wiedereinstieg wieder 2,3 m über der Bodenplatte,

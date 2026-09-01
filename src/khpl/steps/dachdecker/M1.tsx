@@ -13,8 +13,8 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 /**
  * M1 — Der erste Termin.
  *
- * Übung: Checkliste zum Abhaken (khpl-flow.md 7 M1). Zehn Punkte, sechs
- * gehören dazu. Ankreuzen, nicht ziehen — schnell und eindeutig.
+ * Übung: Checkliste zum Abhaken. Zehn Punkte, sechs gehören dazu. Ankreuzen,
+ * nicht ziehen — schnell und eindeutig.
  *
  * Der grüne Board-Sticky trägt den Step: „Ortstermin ist halbe Detektivarbeit.“
  * Das ist die Haltung, die die Liste braucht — es geht nicht ums Abhaken,
@@ -22,13 +22,14 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * Sicherheit über seinem Kopf“ geht als Aha-Karte so aufs Deck, wie er
  * dasteht.
  *
- * Bewusst weggelassen (flow 7 M1, `ENTSCHEIDUNG – kann die KHPL kippen`):
- * „Anfahrt und Beratung sind meist unbezahlte Zeit.“ Für Betriebsinhaber
- * interessant, für eine 15-Jährige am Messestand ein Grund abzuschalten.
+ * Bewusst weggelassen — die KHPL kann das kippen: „Anfahrt und Beratung sind
+ * meist unbezahlte Zeit.“ Für Betriebsinhaber interessant, für eine 15-Jährige
+ * am Messestand ein Grund abzuschalten.
  */
 
 // ---------------------------------------------------------------------------
-// Text — gebündelt oben in der Datei (flow 8.4). Tabelle wörtlich aus flow 11.
+// Text — gebündelt oben in der Datei. Die Tabelle ist sprachlich
+// vereinfacht (keine unerklärten Fachwörter in der Übung).
 // ---------------------------------------------------------------------------
 
 /**
@@ -43,7 +44,7 @@ interface Punkt {
   id: string
   text: string
   richtig: boolean
-  /** Begründung im Feedback — je Punkt einer, wörtlich aus flow 11 (M1). */
+  /** Begründung im Feedback — je Punkt eine. */
   grund: string
 }
 
@@ -56,7 +57,8 @@ const PUNKTE: Punkt[] = [
   },
   {
     id: 'fotos',
-    text: 'Fotos vom Bestand',
+    // „vom Bestand" wäre hier Fachsprache — gemeint ist schlicht das, was da ist.
+    text: 'Fotos vom alten Dach',
     richtig: true,
     grund: 'Im Betrieb erinnert sich niemand an das, was du gesehen hast. Fotos schon.',
   },
@@ -76,11 +78,13 @@ const PUNKTE: Punkt[] = [
     id: 'preis',
     text: 'Einen Preis nennen',
     richtig: false,
-    grund: 'Aus dem Bauch? Das kostet dich den Auftrag oder die Marge.',
+    grund: 'Aus dem Bauch? Das kostet dich den Auftrag — oder deinen Gewinn.',
   },
   {
     id: 'termin',
-    text: 'Aufrichtetermin zusagen',
+    // Nicht „Aufrichtetermin": das Wort fällt erst in M5/M7, hier wäre es ein
+    // unerklärtes Kompositum in einer Übung ohne Glossar-Chip.
+    text: 'Einen festen Termin zusagen',
     richtig: false,
     grund: 'Ohne Kran, Wetter und Lieferzeiten ist jedes Datum geraten.',
   },
@@ -89,7 +93,7 @@ const PUNKTE: Punkt[] = [
 /**
  * **Zwei hat der Chef schon gesagt** — sie stehen beim Ankommen angehakt da.
  *
- * Das ist die Vorführung vor der Abfrage (khpl-vereinfachung.md R1). Vorher
+ * Das ist die Vorführung vor der Abfrage. Vorher
  * lagen hier zehn leere Kästchen und die Aufforderung, aus dem Nichts eine
  * Ortstermin-Checkliste zu erinnern — freies Erinnern von etwas, das man nie
  * gelernt hat. Mit zwei gesetzten Beispielen ist dieselbe Übung
@@ -103,8 +107,8 @@ const VORGABE = ['aufmass', 'fotos']
 const RICHTIGE = PUNKTE.filter((p) => p.richtig).length
 
 /**
- * Anzeigereihenfolge, richtig und falsch verschränkt. In der Reihenfolge der
- * Spec-Tabelle stehen erst alle sechs richtigen, dann alle vier falschen — im
+ * Anzeigereihenfolge, richtig und falsch verschränkt. In `PUNKTE` stehen erst
+ * alle sechs richtigen, dann alle vier falschen — im
  * Zweispalter wären die Fallen dann die letzten beiden Zeilen, und die Übung
  * ließe sich an der Position lösen statt am Inhalt.
  *
@@ -148,26 +152,29 @@ export function M1() {
   return (
     <StepShell
       id="M1"
-      auftrag={ausgewertet ? null : 'Was klärst du beim Ortstermin vor Ort?'}
+      auftrag={ausgewertet ? null : 'Was klärst du beim Termin vor Ort?'}
       // Antippen erklärt sich selbst (`komponenten/gesten.ts`).
       ansage={null}
       // Das breite Panel: zehn Chips plus Auswertung brauchen die Fläche in
       // der Breite, sonst holen sie sie sich in der Höhe — und dann scrollt
-      // der Screen, was flow 5 ausschließt.
+      // der Screen, und das darf hier nicht passieren.
       karteBreit
       interaktionOffen={!ausgewertet}
       // Endlich der Ortstermin selbst: zwei Leute im Gespräch auf der
       // Baustelle, Klemmbrett in der Hand. Vorher lief hier das Aufmaß am
-      // Sparren als Notbehelf (flow 13, Priorität 2 der Fotoliste).
+      // Sparren als Notbehelf.
       buehne={<StepFoto id="M1" />}
       // Nach der Auswertung fällt der Einstiegstext weg — er ist dann gelesen,
       // und die drei Zeilen fehlen sonst genau der Auswertung, die ohne
       // Scrollen auf den Screen passen muss. M2 macht es genauso.
       warum={
+        // Der Chip sitzt auf „Aufmaß" und nicht mehr auf „Angebot": vorher
+        // erklärte das Popover unter „Angebot" ausgerechnet das Aufmaß — Wort
+        // und Erklärung gehören zusammen.
         <p>
-          Ein Anruf, eine Adresse, ein altes Dach. Du misst, fotografierst und hörst zu.
-          Was du hier übersiehst, fehlt dir später im{' '}
-          <Begriff id="aufmass">Angebot</Begriff>.
+          Ein Anruf, eine Adresse, ein altes Dach. Du machst das{' '}
+          <Begriff id="aufmass">Aufmaß</Begriff> — du misst alles aus. Und du
+          fotografierst und hörst zu. Was du hier übersiehst, fehlt dir später im Angebot.
         </p>
       }
       interaktion={
@@ -260,8 +267,7 @@ function Liste({
                 // limetter Rand, kaum Füllung: „du hast getippt, geprüft ist
                 // noch nichts“ (siehe `Wahlflaeche`). Die satte Signal-Füllung
                 // bleibt der Auswertung vorbehalten, die danach die echten
-                // Treffer färbt. Orange gehört nach R3 der Welt, nicht der
-                // Wahl.
+                // Treffer färbt. Orange gehört der Welt, nicht der Wahl.
                 className={`${wahlflaeche({ ton: 'vorlaeufig', gewaehlt: an })} max-sm:min-h-[44px] max-sm:gap-2 max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.9375rem] max-sm:leading-tight`}
               >
                 <span
@@ -283,15 +289,16 @@ function Liste({
 }
 
 /**
- * Auswertung am Ende der Liste (flow 6.5 — hier lehrt nicht die Einzelaktion,
- * sondern das Gesamtbild).
+ * Auswertung am Ende der Liste — hier lehrt nicht die Einzelaktion, sondern
+ * das Gesamtbild.
  *
  * Ausgeschrieben wird nur, was danebenging: was gefehlt hat und was zu viel
  * war. Die Treffer stehen als Zeile darunter, ihre Begründung liegt einen Tap
- * entfernt. Zehn Begründungen gleichzeitig passen weder auf den Screen (flow 5,
- * „kein Scrollen“) noch in die Aufmerksamkeit von jemandem, der im Stehen liest.
+ * entfernt. Zehn Begründungen gleichzeitig passen weder auf den Screen, der
+ * nicht scrollen darf, noch in die Aufmerksamkeit von jemandem, der im Stehen
+ * liest.
  *
- * Kein Punktestand, keine Prozentzahl, keine Note (flow 6.6).
+ * Kein Punktestand, keine Prozentzahl, keine Note.
  */
 function Auswertung({
   treffer,
@@ -331,8 +338,8 @@ function Auswertung({
 
       {/* Zwei Spalten wie die Frage selbst. Untereinander passten schon vier
           Karten weder ins Hoch- noch ins Querformat — und ein `overflow-y-auto`
-          macht daraus eine Scrollfläche, also genau das, was flow 5
-          ausschließt, statt es zu lösen.
+          macht daraus eine Scrollfläche, also genau das, was hier nicht
+          passieren darf, statt es zu lösen.
 
           Die Farbe sagt hier, welche Sorte Fehler es war: was gefehlt hat,
           trägt einen orangen Rand („das hättest du mitnehmen sollen“), was zu
@@ -387,9 +394,9 @@ function Auswertung({
       {/* Die Treffer als Zeile aus Marken, nicht als zweite Kartenliste: sie
           brauchen keine Begründung mehr, sie waren richtig. Wer sie trotzdem
           lesen will, tippt eine an — dann steht sie in dem Feld darunter, das
-          immer dieselbe Höhe hat, damit nichts springt. So bleibt „mit kurzer
-          Begründung je Punkt“ (flow 7 M1) für alle zehn erreichbar, ohne dass
-          zehn Begründungen gleichzeitig auf dem Screen stehen. */}
+          immer dieselbe Höhe hat, damit nichts springt. So bleibt die kurze
+          Begründung je Punkt für alle zehn erreichbar, ohne dass zehn
+          Begründungen gleichzeitig auf dem Screen stehen. */}
       {treffer.length > 0 && (
         <motion.div
           variants={{

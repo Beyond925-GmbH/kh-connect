@@ -7,10 +7,10 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  * Graphen des jeweiligen Berufs (`graph.angebote`, `graph.weiterTexte`) — sie
  * standen hier als Tabellen nach StepId, und jeder Beruf hat ein B3.1.
  *
- * khpl-ui-shell.md 5: „Hat ein Step mehrere Abstecher (M3 → B3.1, B3.2), werden
- * beide als Karten angeboten; nach dem ersten steht die zweite weiterhin zur
- * Wahl.“ Ein Abstecher mündet trotzdem immer vorwärts (Board-Regel 3) — der
- * Rückweg auf M3 existiert nicht, das Angebot wandert mit.
+ * Hat ein Step mehrere Abstecher (M3 → B3.1, B3.2), werden beide als Karten
+ * angeboten; nach dem ersten steht die zweite weiterhin zur Wahl. Ein
+ * Abstecher mündet trotzdem immer vorwärts — der Rückweg auf M3 existiert
+ * nicht, das Angebot wandert mit.
  */
 
 export function einladung(graph: StepGraph, id: StepId): string {
@@ -31,8 +31,8 @@ export function weiterText(graph: StepGraph, id: StepId): string {
  *
  * Die Ausnahme sind die drei Karrierekarten. Ohne sie verschwindet eine Karte,
  * sobald sie einmal geöffnet wurde: wer im Skip „Studium“ liest und später
- * regulär auf M9 landet, bekäme dort nur noch zwei Karten zu sehen — und flow 7
- * M9 verlangt das Gegenteil.
+ * regulär auf M9 landet, bekäme dort nur noch zwei Karten zu sehen. Alle drei
+ * müssen jederzeit erreichbar bleiben.
  */
 export function offeneAbstecher(
   graph: StepGraph,
@@ -46,7 +46,7 @@ export function offeneAbstecher(
   )
 }
 
-/** Marke eines Steps im Sheet „Dein Weg“ (khpl-ui-shell.md 4). */
+/** Marke eines Steps im Sheet „Dein Weg“. */
 export type Wegzustand = 'aktuell' | 'besucht' | 'offen'
 
 /**

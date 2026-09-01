@@ -6,8 +6,8 @@ import { Begriff } from './Begriff'
 import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
 
 /**
- * C5.1 — Warum niemand unter der Last steht. Abstecher von C5, mündet in C6
- * (khpl-tag-zimmerer.md 6, C6 und 11).
+ * C5.1 — Warum niemand unter der Last steht. Abstecher von C5, mündet in
+ * C6.
  *
  * **Ein Satz trägt diesen Abstecher allein**, und er ist der beste einzelne aus
  * allen 25 Gesprächen: *Routine ist der größte Feind der Sicherheit.* Er ist
@@ -16,7 +16,7 @@ import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
  * Jahrzehnten macht. Er ersetzt jede Aufzählung von Vorschriften.
  *
  * ⚠️ **Deshalb steht er hier als Zitat mit Sprecher und nicht als Merksatz.**
- * Die Recherche (`belege/zimmerer.md` 7) findet ihn **nicht** als etabliertes
+ * Die Recherche findet ihn **nicht** als etabliertes
  * Sprichwort des Arbeitsschutzes: der *Gedanke* dahinter ist gut belegt
  * (Routine senkt die Aufmerksamkeit), die *Formulierung* ist die dieses
  * Zimmerers. Ohne Zuschreibung wäre er eine Behauptung über den Arbeitsschutz,
@@ -31,16 +31,15 @@ import { Klappliste, type Abschnitt } from '@/khpl/komponenten/Klappliste'
  * Praxis.
  *
  * ⚠️ **Die vier Zimmerleute werden gezeigt, nicht behauptet.** Eine festgelegte
- * Personenzahl fürs Einkranen gibt es nicht (`NICHT BELEGBAR`,
- * `belege/zimmerer.md` 6); die vier sind die Praxis *eines* Betriebs aus dem
- * `INTERVIEW` und werden auch so benannt.
+ * Personenzahl fürs Einkranen gibt es nicht; die vier sind die Praxis *eines*
+ * Betriebs aus dem Interview und werden auch so benannt.
  *
  * **Kein Übungselement** — ein Lesescreen mit Begriffs-Popovern, wie B5.1 beim
  * Dachdecker.
  *
- * ⚠️ **Die Bühne ist ein Platzhalter.** Die Medienliste
- * (khpl-tag-zimmerer.md 10) führt für diesen Screen kein Motiv, und ein
- * 3D-Element am Haken nähme C6 seinen Auftritt vorweg — deshalb hatte er
+ * ⚠️ **Die Bühne ist ein Platzhalter.** Für diesen Screen liegt kein eigenes
+ * Motiv im Bestand, und ein 3D-Element am Haken nähme C6 seinen Auftritt
+ * vorweg — deshalb hatte er
  * zunächst gar keine Bühne. Hochkant ist das ein schwarzes Feld über zwei
  * Dritteln der Höhe, ausgerechnet unter dem stärksten Zitat des Tages. Bis ein
  * eigenes Motiv da ist, steht hier `quiz-abbund.webp`: Maßnehmen am Sparren,
@@ -65,7 +64,7 @@ const AM_KRAN: Abschnitt[] = [
   {
     frage: 'Wer am Kran wo steht',
     antwort:
-      'Einer hängt die Last an und hat den Kranführer im Blick, die anderen nehmen sie oben in Empfang. Vorgeschrieben ist nur eines: keiner steht darunter.',
+      'Einer hängt die Wand an den Haken und behält den Kranführer im Blick. Die anderen nehmen sie oben in Empfang. Vorgeschrieben ist nur eines: keiner steht darunter.',
   },
 ]
 export function C51() {
@@ -82,10 +81,10 @@ export function C51() {
       buehne={<StepFoto id="C5.1" />}
       warum={
         <p>
-          Wer die <Begriff id="anschlagmittel">Anschlagmittel</Begriff> einhängt, arbeitet
-          seitlich und führt das Element erst kurz vor dem Absetzen an seinen Platz. Unter
-          der Last steht niemand. Nie — auch nicht kurz, auch nicht, wenn es schneller
-          ginge.
+          Wer die <Begriff id="anschlagmittel">Anschlagmittel</Begriff> einhängt, steht
+          daneben. Erst kurz vor dem Absetzen schiebt er das Element an seinen Platz.
+          Unter der schwebenden Wand steht niemand. Nie — auch nicht kurz, auch nicht,
+          wenn es schneller ginge.
         </p>
       }
       interaktion={

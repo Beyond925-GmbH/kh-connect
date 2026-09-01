@@ -12,8 +12,7 @@
     "format:check": "prettier --check .",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check",
     "preview": "vite preview",
-    "pruefe:kamera": "jiti src/drei/kamera.pruefung.ts",
-    "pruefe:sprache": "jiti src/khpl/sprache.pruefung.ts"
+    "pruefe:kamera": "jiti src/drei/kamera.pruefung.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

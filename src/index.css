@@ -78,7 +78,7 @@
   --animate-pop: pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   /* Der Ring, der unter einem wartenden Ziel nach aussen laeuft. */
   --animate-puls: puls-ring 2s ease-out infinite;
-  /* Ein Pegelbalken des Baustellenradios (S2). Dauer und Versatz setzt die
+  /* Ein Pegelbalken des Baustellenradios. Dauer und Versatz setzt die
      Stelle je Balken, sonst pumpen fuenf Balken im Gleichtakt. */
   --animate-eq: eq-balken 0.8s ease-in-out infinite;
 
@@ -325,7 +325,7 @@
   padding-right: env(safe-area-inset-right);
 }
 
-/* Die persistente Leiste. 60-px-Ziele brauchen 68 px Hoehe (flow 8.5). */
+/* Die persistente Leiste. 60-px-Ziele brauchen 68 px Hoehe. */
 @utility kh-leiste {
   height: 68px;
 }
@@ -339,7 +339,7 @@
    einen Ring — er ist auf diesem Screen das Einzige, was man anfassen
    kann, und soll auch so aussehen. Er ist limette, nicht orange: der
    Griff traegt den **eigenen** Schaetzwert des Besuchers, und Limette
-   heisst „du“ (R3) — Orange gehoert den echten Werten der Welt.
+   heisst „du“ — Orange gehoert den echten Werten der Welt.
 ------------------------------------------------------------------ */
 @utility kh-regler {
   -webkit-appearance: none;
@@ -399,7 +399,7 @@
 }
 
 /* ------------------------------------------------------------------
-   Kiosk-Verhalten (khpl-ui-shell.md 8).
+   Kiosk-Verhalten.
 
    Kein Zoom, kein Bounce, keine Textauswahl. Pinch-Zoom haengt zusaetzlich
    an `maximum-scale=1` im Viewport-Meta; `touch-action: manipulation` nimmt

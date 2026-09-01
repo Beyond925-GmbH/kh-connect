@@ -16,11 +16,10 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
 /**
- * C4 — Hier kommt das Fenster hin. **Der Fehler mit Preis**
- * (khpl-tage.md 1, Mechanismus 5; khpl-tag-zimmerer.md 6, C4).
+ * C4 — Hier kommt das Fenster hin. **Der Fehler mit Preis.**
  *
- * **Die Übung ist eine Wahl, kein Zug — und das ist eine Korrektur.** Die
- * Spec-Zeile lautet „der Besucher zieht den Ausschnitt auf dem liegenden
+ * **Die Übung ist eine Wahl, kein Zug — und das ist eine Korrektur.** Der
+ * erste Entwurf lautete „der Besucher zieht den Ausschnitt auf dem liegenden
  * Element auf“. So gebaut war es der schwächste Screen der vier Tage, und zwar
  * aus vier Gründen, die sich gegenseitig verstärkt haben:
  *
@@ -62,7 +61,7 @@ import { Begriff } from './Begriff'
  * kippt die Ansicht kurz in die Senkrechte (`aufrichtenZeigen`) und zeigt das
  * Element stehend, mit dem Fenster an seinem Platz. Ohne das ist die Frage in
  * C6 ein Ratespiel; mit ihr ist sie eine Erinnerungsleistung — und genau darum
- * geht es beim Vorstellungsvermögen (khpl-tag-zimmerer.md 1).
+ * geht es beim Vorstellungsvermögen.
  *
  * `answers.c4`
  * `{ getroffen: boolean; versuche: number; abweichungMm?: number; ausschnitt?: Fensterausschnitt }`
@@ -76,12 +75,12 @@ import { Begriff } from './Begriff'
 const Wandelement3D = lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))
 
 // ---------------------------------------------------------------------------
-// Maße — abgeleitet, nicht notiert (flow 8.4).
+// Maße — abgeleitet, nicht notiert.
 // ---------------------------------------------------------------------------
 
 /**
- * **Die einzige belegte Zahl dieses Screens** (`belege/zimmerer.md` 5,
- * RAL-Montageleitfaden / ift Rosenheim): Holzfenster brauchen mit spritzbarem
+ * **Die einzige belegte Zahl dieses Screens** (RAL-Montageleitfaden /
+ * ift Rosenheim): Holzfenster brauchen mit spritzbarem
  * Dichtstoff **mindestens 10 mm Fuge umlaufend**.
  *
  * ⚠️ Der Screen sagt **Holzfenster**. Kunststofffenster brauchen deutlich
@@ -93,9 +92,9 @@ const FUGE_MIN_MM = 10
 /**
  * Ab hier ist die Fuge zu weit fürs Dichtband. **Spielgrenze, keine
  * Vorschrift** — deshalb steht die Zahl nirgends als Regel auf dem Screen: sie
- * taucht nur als Folge auf, wenn jemand sie überzieht. Der Beleg gibt für
+ * taucht nur als Folge auf, wenn jemand sie überzieht. Die Quellen geben für
  * Holzfenster eine Untergrenze her, keine Obergrenze; eine erfundene Obergrenze
- * als Regel hinzuschreiben wäre genau das, was khpl-tage.md verbietet.
+ * als Regel hinzuschreiben wäre eine Behauptung ohne Grundlage.
  */
 const FUGE_MAX_MM = 30
 
@@ -152,7 +151,7 @@ const RICHTIG = ANGEBOTE[1]
 const HEIMWEG_NACH_MS = 2400
 
 const TREFFER_TEXT =
-  'Passt. Zehn Millimeter rundum — Platz für Dämmung und Dichtstoff. Das ist jetzt dein Element.'
+  'Passt. Zehn Millimeter Luft rundum — Platz für Dämmung und Dichtmasse. Das ist jetzt dein Element.'
 
 const m = (mm: number) => `${(mm / 1000).toFixed(2).replace('.', ',')} m`
 
@@ -242,7 +241,7 @@ export function C4() {
         Ist der Rahmen drin, wird sie `null` — dann rückt die Rückmeldung an
         ihre Stelle. Der Kasten bewegt sich nicht, er füllt sich um.
       */
-      auftrag={geloest ? null : 'Wähl den Rahmen, der in den Ausschnitt passt.'}
+      auftrag={geloest ? null : 'Wähl den Rahmen, der in die Öffnung passt.'}
       /*
         Antippen erklärt sich selbst (`gesten.ts`). Das ist eine Entscheidung
         und keine Lücke — genau dafür ist die Angabe erforderlich.
@@ -280,7 +279,7 @@ export function C4() {
         ist zu, bis jemand es aufmacht. Geblieben ist die kürzere Fassung —
         sie war ohnehin die bessere.
 
-        Ein Fachwort, nicht zwei (Regel R2): „Wechselholz" wird in der
+        Ein Fachwort, nicht zwei: „Wechselholz" wird in der
         Aha-Karte erklärt, und der Alltagssatz steht davor.
       */
       warum={
@@ -346,28 +345,31 @@ export function C4() {
 
               Der Chip für „Dichtstoff" sitzt hier, nicht im Treffertext:
               `Rueckmeldung` nimmt nur Klartext, und diese Karte steht im
-              selben Takt direkt darunter (Designregel R10). */}
-          <AhaKarte sichtbar={geloest} eyebrow="Wozu überhaupt eine Fuge?">
-            Der Rahmen ist {m(RICHTIG.breiteMm)} breit, der Ausschnitt{' '}
-            {m(AUSSCHNITT_BREITE_MM)}. Die {FUGE_MIN_MM} Millimeter dazwischen werden
-            gedämmt, mit <Begriff id="dichtstoff">Dichtstoff</Begriff> verschlossen — und
-            sie fangen die Bewegung des Materials auf. Ein Fenster, das passgenau in die
-            Öffnung geklemmt wird, ist falsch eingebaut — und das{' '}
-            <Begriff id="wechselholz">Wechselholz</Begriff> rundum hält es.
+              selben Takt direkt darunter. */}
+          <AhaKarte sichtbar={geloest} eyebrow="Wozu bleibt rundum ein Spalt?">
+            Der Rahmen ist {m(RICHTIG.breiteMm)} breit, die Öffnung{' '}
+            {m(AUSSCHNITT_BREITE_MM)}. Rundum bleiben also {FUGE_MIN_MM} Millimeter Luft —
+            etwa so dick wie ein Bleistift. Dieser Spalt heißt Fuge. Er wird mit Dämmung
+            gefüllt und mit <Begriff id="dichtstoff">Dichtstoff</Begriff> zugeschmiert.
+            Und er ist nötig, weil Holz je nach Wetter Feuchtigkeit aufnimmt und wieder
+            abgibt — dabei wird es ein bisschen dicker und dünner. Ein Fenster, das genau
+            in die Öffnung geklemmt wird, ist falsch eingebaut. Gehalten wird es vom{' '}
+            <Begriff id="wechselholz">Wechselholz</Begriff> rundum.
           </AhaKarte>
           {/* Zwei Regeln, kein Rechenweg: 1,5 mm/m und die Deckelung auf 3 mm
-              stehen im Beleg nebeneinander (belege/zimmerer.md 5). „1,5 × 3 = 3“
-              wäre ein Rechenfehler — auf einem Präzisionsscreen der teuerste.
+              gelten nebeneinander. „1,5 × 3 = 3“ wäre ein Rechenfehler — auf
+              einem Präzisionsscreen der teuerste.
 
-              Ab dem zweiten Einwurf zugeklappt (R5): drei zugleich offene
+              Ab dem zweiten Einwurf zugeklappt: drei zugleich offene
               Karten wären eine Textwand unter der Aha-Karte zur Fuge. */}
           <AhaKarte
             sichtbar={geloest}
             zugeklappt
             eyebrow="Wie genau muss so ein Ausschnitt sitzen?"
           >
-            Wasserwaagengenauigkeit: höchstens anderthalb Millimeter Abweichung je Meter —
-            und bei Elementen bis drei Meter nie mehr als drei Millimeter insgesamt.
+            So genau wie mit der Wasserwaage: pro Meter darf es höchstens anderthalb
+            Millimeter schief sein — etwas dünner als eine Ein-Cent-Münze. Bei einem drei
+            Meter langen Teil nie mehr als drei Millimeter insgesamt.
           </AhaKarte>
           <AhaKarte
             sichtbar={geloest}
@@ -418,7 +420,7 @@ function Planmass() {
       data-testid="c4-plan"
       className="kh-feld px-3.5 py-2.5 text-[1rem] leading-snug text-kh-mute tabular-nums"
     >
-      <span className="text-kh-paper/55">Ausschnitt laut Plan:</span>{' '}
+      <span className="text-kh-paper/55">Öffnung laut Plan:</span>{' '}
       <span className="text-kh-paper">{m(AUSSCHNITT_BREITE_MM)}</span> breit · Unterkante{' '}
       <span className="text-kh-paper">{m(AUSSCHNITT_Y_MM)}</span>
     </p>
@@ -436,11 +438,11 @@ function Planmass() {
  */
 function fehlertext(breiteMm: number): string {
   if (beurteile(breiteMm) === 'zu-gross') {
-    return 'Passgenau heißt: geht nicht rein. Er setzt auf und bleibt liegen. Nachschneiden kostet Zeit — um elf steht der Lkw.'
+    return 'Passgenau heißt: geht nicht rein. Er setzt oben auf und bleibt liegen. Nachschneiden kostet Zeit — um elf steht der Lkw.'
   }
   // „Zu breit zum Abdichten", nicht „fürs Dichtband": ein zweiter, hier
-  // unerklärbarer Fachbegriff neben „Dichtstoff" (Designregel R10) — und
+  // unerklärbarer Fachbegriff neben „Dichtstoff" — und
   // `Rueckmeldung` kann keinen Glossar-Chip tragen.
   const f = fuge(breiteMm)
-  return `${f} mm Luft je Seite — er fällt durch. Zu breit zum Abdichten: Element auf, neues Wechselholz, eine Stunde weg.`
+  return `${f} mm Luft je Seite — er fällt durch. So einen breiten Spalt kriegst du nicht mehr dicht: Wand wieder aufmachen, neues Holz einbauen, eine Stunde weg.`
 }

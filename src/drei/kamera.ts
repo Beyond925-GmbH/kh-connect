@@ -1,6 +1,6 @@
 import type { Huelle } from '../dachstuhl/mass'
 
-/** Feste Kamerapositionen der Debug-Schnittstelle (Bauplan 6.2). */
+/** Feste Kamerapositionen der Debug-Schnittstelle. */
 
 export type Ansicht = 'iso' | 'front' | 'seite' | 'oben' | 'traufe'
 

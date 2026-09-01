@@ -10,8 +10,7 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
 /**
- * C1 — Der Stapel steht schon da. Einstieg, Suchen
- * (khpl-tag-zimmerer.md 6, C1).
+ * C1 — Der Stapel steht schon da. Einstieg, Suchen.
  *
  * **Suchen, nicht Sortieren.** Auf dem Abbundtisch liegen zwölf nummerierte
  * Hölzer, die Stückliste verlangt Nr. 47. Zwei sehen fast gleich aus und
@@ -27,10 +26,10 @@ import { Begriff } from './Begriff'
  * Stückliste.
  *
  * **Kein Fehlerzähler auf dem Screen.** `versuche` läuft mit, weil der Store
- * ihn führt und weil nach zwei Fehlgriffen die Hilfe dazukommt (flow 6.6) —
+ * ihn führt und weil nach zwei Fehlgriffen die Hilfe dazukommt —
  * gezeigt wird die Zahl nie.
  *
- * **Nach zwei Fehlgriffen bietet die App die Lösung an** (khpl-tage.md 3):
+ * **Nach zwei Fehlgriffen bietet die App die Lösung an:**
  * neben der Hinweiszeile kommt „Zeig mir wie“ in den Fuß, und die Bühne hebt
  * das gesuchte Holz an und markiert es — angetippt wird es trotzdem selbst,
  * die Bühne bleibt die Übung.
@@ -41,19 +40,19 @@ import { Begriff } from './Begriff'
 const Wandelement3D = lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))
 
 // ---------------------------------------------------------------------------
-// Text und Zahlen — gebündelt oben (flow 8.4).
+// Text und Zahlen — gebündelt oben in der Datei.
 // ---------------------------------------------------------------------------
 
-/** Die Nummer, die die Stückliste verlangt. Wörtlich aus der Spec. */
+/** Die Nummer, die die Stückliste verlangt. */
 const GESUCHT = 47
 
 /**
- * Der Verwechsler: gleiche Länge, keine Ausklinkung. Die Spec gibt für ihn als
- * einzigen einen ausformulierten Satz vor — er ist die Pointe des Screens.
+ * Der Verwechsler: gleiche Länge, keine Ausklinkung. Als einziges Holz bekommt
+ * er einen eigenen ausformulierten Satz — er ist die Pointe des Screens.
  */
 const VERWECHSLER = 44
 
-/** Nach zwei Fehlversuchen bietet die App die Lösung an (flow 6.6). */
+/** Nach zwei Fehlversuchen bietet die App die Lösung an. */
 const HILFE_AB = 2
 
 const TREFFER_TEXT = 'Nr. 47. Genau die.'
@@ -61,7 +60,7 @@ const TREFFER_TEXT = 'Nr. 47. Genau die.'
 /**
  * Warum das angetippte Holz nicht passt. Die Bühne legt die zwölf Nummern aus
  * (`Wandelement3D`, `gesuchteNummer`); ausformuliert ist hier nur der eine
- * Fall, den die Spec ausformuliert. Für alles andere trägt der Satz die
+ * Fall des Verwechslers. Für alles andere trägt der Satz die
  * angetippte Nummer — er soll erklären, nicht tadeln.
  */
 // „Die braucht die Schwelle" war grammatisch zweideutig (wer braucht was?)
@@ -70,13 +69,13 @@ const TREFFER_TEXT = 'Nr. 47. Genau die.'
 // bzw. das Warum — `Rueckmeldung` nimmt nur Klartext, keine Glossar-Chips.
 const GRUENDE: Record<number, string> = {
   [VERWECHSLER]:
-    'Nr. 44 — gleiche Länge, aber ohne Ausklinkung. Die Schwelle braucht die Kerbe, damit das Holz sauber sitzt.',
+    'Nr. 44 — gleich lang, aber ohne Kerbe am Ende. Ohne die Kerbe sitzt das Holz unten nicht fest.',
 }
 
 function grund(nummer: number) {
   return (
     GRUENDE[nummer] ??
-    `Nr. ${nummer} steht nicht auf deiner Liste. Gesucht ist die ${GESUCHT}.`
+    `Nr. ${nummer} steht nicht auf deiner Liste. Du suchst die ${GESUCHT}.`
   )
 }
 
@@ -128,9 +127,9 @@ export function C1() {
       warum={
         <p>
           Die <Begriff id="abbundanlage">Abbundanlage</Begriff> hat über Nacht gearbeitet:
-          jedes Holz ist auf Länge, jede <Begriff id="ausklinkung">Ausklinkung</Begriff>{' '}
-          gefräst, jedes Teil nummeriert. Du baust nicht aus dem Kopf, du baust nach
-          Stückliste.
+          Jedes Holz ist auf die richtige Länge gesägt, jede{' '}
+          <Begriff id="ausklinkung">Ausklinkung</Begriff> gefräst, jedes Teil hat eine
+          Nummer — wie Trikotnummern. Du baust nicht aus dem Kopf. Du baust nach Liste.
         </p>
       }
       interaktion={
@@ -148,7 +147,7 @@ export function C1() {
                   Nr. {GESUCHT}
                 </p>
                 <p className="mt-1.5 text-[1.0625rem] leading-snug text-kh-mute">
-                  Nicht die Länge unterscheidet die beiden Hölzer — die Bearbeitung.
+                  Beide Hölzer sind gleich lang. Der Unterschied ist die Kerbe am Ende.
                 </p>
               </div>
             </div>
@@ -167,7 +166,7 @@ export function C1() {
       aha={
         /*
           Nicht „Wer hat das alles geschnitten?“: der Abstecher-Knopf desselben
-          Screens fragt laut Spec „Wer hat das alles zugeschnitten?“, und zwei
+          Screens fragt bereits „Wer hat das alles zugeschnitten?“, und zwei
           fast gleiche Fragen nebeneinander verraten nichts Eigenes. Der
           Einwurf dreht deshalb auf das *Wann* — den Inhalt der Karte.
         */
@@ -221,7 +220,8 @@ function Stueckliste({ hilfe, hinweis }: { hilfe: boolean; hinweis: boolean }) {
           Nr. {GESUCHT}
         </span>
         <span className="text-[1.0625rem] text-kh-paper/85">
-          Ständer, mit <Begriff id="ausklinkung">Ausklinkung</Begriff>
+          <Begriff id="staenderwerk">Ständer</Begriff>, mit{' '}
+          <Begriff id="ausklinkung">Ausklinkung</Begriff>
         </span>
       </div>
       {/* Keine Aufforderung mehr an dieser Stelle: „Such dein Holz … tipp es

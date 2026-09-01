@@ -9,31 +9,30 @@ import { Fachwort } from './Fachwort'
 /**
  * A3.1 — Wärmepumpe gegen Ölkessel. Abstecher von A3, mündet in A4.
  *
- * Die Rechnung ausführlicher: Anschaffung, Betrieb, Förderung, Amortisation
- * (Spec 6, A3.1).
+ * Die Rechnung ausführlicher: Anschaffung, Betrieb, Förderung, Amortisation.
  *
- * ⚠️ **Dieser Abstecher nennt keine Fördersätze — das ist eine Entscheidung
- * der Spec, kein Versehen.** Die KfW-Konditionen haben sich am 21.07.2026
+ * **Dieser Abstecher nennt keine Fördersätze — bewusst, nicht aus
+ * Versehen.** Die KfW-Konditionen haben sich am 21.07.2026
  * geändert, die nächste Absenkung ist für den 01.02.2027 angekündigt, und
- * dieses Gerät läuft an vielen Tagen über Monate. Die Spec wählt ausdrücklich
- * Weg 1: der Screen erklärt, *dass* gefördert wird und dass die Sätze sich
- * ändern, und sagt, wo man nachsieht. Ein Vierzehnjähriger trifft keine
+ * dieses Gerät läuft an vielen Tagen über Monate. Deshalb erklärt der Screen,
+ * *dass* gefördert wird und dass die Sätze sich ändern, und sagt, wo man
+ * nachsieht. Ein Vierzehnjähriger trifft keine
  * Förderentscheidung, und ein Kiosk mit veralteten Fördersätzen schadet der
  * Kreishandwerkerschaft mehr, als der Screen nützt.
  *
- * **Belegt und deshalb genannt** (`belege/anlagenmechanik.md` 4, Marktstand
+ * **Recherchiert und deshalb nennbar** (Marktstand
  * 2026): Anschaffung mit Einbau 27.000–40.000 €, Mittel rund 36.300 € aus der
  * Auswertung von 160 realen Angeboten durch die Verbraucherzentrale. Und der
  * Satz, um den es diesem Tag geht: **das Gerät ist nur ein gutes Drittel bis
  * knapp die Hälfte davon, der Rest ist Handwerksleistung** — dieselbe Aussage,
  * die beim Dachdecker M2 trägt, hier in der Währung dieses Gewerks.
  *
- * Die Amortisation steht als **gekennzeichnete Beispielrechnung**, wie es die
- * Spec verlangt, und nicht als Zusage: sie hängt an Öl- und Strompreis und an
+ * Die Amortisation steht als **gekennzeichnete Beispielrechnung** und nicht
+ * als Zusage: sie hängt an Öl- und Strompreis und an
  * der Förderquote, die gerade gilt.
  *
  * Bühne: `gallery-1.webp` — Wärmepumpe im Garten. Sie löst nebenbei den
- * schwachen `draussen`-Wert dieses Berufs ein (Spec 8).
+ * schwachen `draussen`-Wert dieses Berufs ein.
  */
 
 export function A31() {
@@ -61,7 +60,7 @@ export function A31() {
             hat 160 echte Angebote ausgewertet und kommt im Mittel auf rund 36.300 Euro.
           </p>
           {/*
-            **Wortbudget (R5): sichtbar bleibt nur der erste Absatz.** Offen
+            **Wortbudget: sichtbar bleibt nur der erste Absatz.** Offen
             standen hier drei Absätze plus Aha-Karte — rund 140 Wörter auf
             einem Lese-Step. Geräteanteil und Förderung liegen jetzt hinter
             dieser Klappzeile; die Frage macht neugierig, gestrichen ist
@@ -90,10 +89,10 @@ export function A31() {
                 Das Gerät ist davon nur gut ein Drittel. Der Rest ist Arbeit: Speicher,
                 Leitungen, oft größere Heizkörper — und jemand, der es ausrechnet.
               </p>
-              {/* „KfW" fällt nicht mehr unerklärt (R10): der Halbsatz sagt,
+              {/* „KfW" fällt nicht mehr unerklärt: der Halbsatz sagt,
                   was das ist — ein Chip wäre für eine Behörde zu viel. */}
               <p className="mt-3">
-                Gefördert wird der Umbau, und zwar erheblich. Wie viel genau, ändert sich
+                Der Staat zahlt beim Umbau kräftig mit. Wie viel genau, ändert sich
                 mehrmals im Jahr — zuletzt im Juli 2026. Deshalb steht hier keine
                 Prozentzahl. Wer es genau wissen will, sieht bei der KfW nach — der
                 staatlichen Förderbank.
@@ -104,10 +103,11 @@ export function A31() {
       }
       aha={
         <AhaKarte sichtbar={aha} eyebrow="Wann hat sich das bezahlt gemacht?">
-          Eine Beispielrechnung, kein Versprechen: Zieht man die Förderung ab und rechnet
-          die jährliche Ersparnis dagegen, ist ein Haus wie dieses nach etwa zwölf bis
-          sechzehn Jahren heraus. Steigt der Ölpreis, geht es schneller; fällt er, dauert
-          es länger. Genau deshalb rechnet man es für jedes Haus einzeln.
+          Eine Beispielrechnung, kein Versprechen: Zieht man das Geld vom Staat ab und
+          rechnet dagegen, was das Haus jedes Jahr an Heizkosten spart, hat sich der Umbau
+          nach etwa zwölf bis sechzehn Jahren bezahlt gemacht. Steigt der Ölpreis, geht es
+          schneller; fällt er, dauert es länger. Genau deshalb rechnet man es für jedes
+          Haus einzeln.
         </AhaKarte>
       }
       fuss={<StepFuss id="A3.1" />}

@@ -24,15 +24,15 @@ import { cn } from '@/lib/utils'
  * Inhalt und teilen sich den Grund.
  *
  * **Der gewählte Zustand ist Signalfarbe — als Fläche nur, wo die Wahl auch
- * gilt.** Limette heißt „du“ (R3): jede Wahl ist eine Handlung des Besuchers
+ * gilt.** Limette heißt „du“: jede Wahl ist eine Handlung des Besuchers
  * und trägt darum seine Farbe. Aber die satte Füllung sieht nach „richtig“
  * aus — und wo das Antippen **vorläufig** ist (M1, M4: die Prüfung danach
  * färbt erst die echten Treffer), wäre das ein Versprechen, das die
  * Auswertung noch einlösen muss. Dafür gibt es `ton="vorlaeufig"`: limetter
  * Rand, kaum Füllung, helle Schrift — „du hast getippt, geprüft ist noch
  * nichts“. `ton="orange"` ist der alte Ausweg für dieselben Stellen und
- * bleibt funktionsfähig, bis die Aufrufer migriert sind (Orange gehört nach
- * R3 der Welt, nicht der Wahl).
+ * bleibt funktionsfähig, bis die Aufrufer migriert sind (Orange gehört der
+ * Welt, nicht der Wahl).
  */
 export const wahlflaeche = cva(
   [

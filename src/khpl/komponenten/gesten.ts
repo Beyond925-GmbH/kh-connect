@@ -60,11 +60,12 @@ export function brauchtAnsage(geste: Geste): boolean {
 /**
  * Der feste Wortlaut für die Rate-Regler (M2, C2).
  *
- * ⚠️ **Es waren einmal mehr.** A3 hat seinen Regler beim Umbau verloren und
- * lässt jetzt die Verlustflächen des Hauses suchen. Der Grund steht im Step —
+ * ⚠️ **Es waren einmal mehr.** A3 hat seinen Regler beim Umbau verloren —
  * ein Schätzmoment lebt davon, dass eine Vorstellung widerlegt wird, und „14
- * Kilowatt“ ist für Sechzehnjährige keine Vorstellung. Der Mechanismus bleibt
- * der Anwendung erhalten, aber nur noch dort, wo er trägt.
+ * Kilowatt“ ist für Sechzehnjährige keine Vorstellung. Inzwischen schätzt A3
+ * wieder, aber per Antippen und in Wasserkochern statt Kilowatt: `tippen`
+ * braucht keine Ansage, sein Raten-Haken steht als Panelzeile im Step. Der
+ * Wortlaut hier bleibt den Reglern vorbehalten.
  *
  * Diese Screens fragen nach einer Zahl, die niemand wissen kann — und
  * genau das ist ihre Pointe. Ohne Ansage ist das eine verdeckte Prüfung, die

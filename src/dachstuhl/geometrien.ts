@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import type { DachstuhlMasse } from './mass'
 
 /**
- * Die vier geteilten Geometrien (Bauplan 3): ein Einheitswuerfel fuer rund
+ * Die vier geteilten Geometrien: ein Einheitswuerfel fuer rund
  * 110 Boxen plus drei extrudierte Profile.
  *
  * Alle Profile werden in Weltkoordinaten (z, y) gezeichnet und entlang X

@@ -5,7 +5,7 @@ import { ANSICHTEN } from '@/drei/kamera'
 import { klemme } from './zeitachse'
 
 /**
- * Debug-Schnittstelle (Bauplan 6). Unbekannte Werte fallen still auf den
+ * Debug-Schnittstelle. Unbekannte Werte fallen still auf den
  * Default zurueck — ein Tippfehler in der URL darf die Seite nicht zerlegen.
  */
 

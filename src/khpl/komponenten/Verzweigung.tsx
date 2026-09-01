@@ -13,7 +13,7 @@ import { beschreibung, einladung, weiterText } from '@/khpl/flow/uebergaenge'
 import { useAktiverBeruf, useGraph } from '@/khpl/store/fortschritt'
 
 /**
- * Der Fuß eines Step-Screens (khpl-ui-shell.md 5).
+ * Der Fuß eines Step-Screens.
  *
  * **Der wichtigste Knopf ist der, der die Aufgabe löst — nicht der, der sie
  * verlässt.** Solange eine Übung offen ist, sitzt die `aktion` unten rechts
@@ -21,7 +21,7 @@ import { useAktiverBeruf, useGraph } from '@/khpl/store/fortschritt'
  * „Überspringen“. Vorher stand auf jedem Screen ein oranger Weiter-Knopf an
  * der Primärposition — auf einem Übungs-Screen war damit ausgerechnet der Weg
  * *aus* der Aufgabe die lauteste Handlung darauf. Freigeschaltet bleibt der
- * Ausweg trotzdem; niemand sitzt am Stand fest (flow 6.6).
+ * Ausweg trotzdem; niemand sitzt am Stand fest.
  *
  * **Abstecher werden nicht mehr im Fuß beworben, sondern beim Weitergehen
  * angeboten.** Die Inline-Karten unter „Wie tief willst du rein?“ hat kein
@@ -29,11 +29,11 @@ import { useAktiverBeruf, useGraph } from '@/khpl/store/fortschritt'
  * Übung und Knopf, und die Kopfzeile darüber las niemand. Jetzt öffnet der Weg
  * nach vorn ein Fenster mit genau einer Frage: „Wohin als Nächstes?“ — die
  * Abstecher als Karten, der Hauptweg als gefüllter Knopf darunter. Eine
- * Entscheidung, ein Moment. Flow 6.7 („echte Wahl, sichtbar als Baum“) wird
- * damit wörtlicher erfüllt als vorher: die Wahl hat ihren eigenen Augenblick,
- * statt als Dauerwerbung am Fußrand mitzulaufen.
+ * Entscheidung, ein Moment. Die Wahl ist damit echt und als Verzweigung
+ * sichtbar: sie hat ihren eigenen Augenblick, statt als Dauerwerbung am
+ * Fußrand mitzulaufen.
  *
- * Farbregel (R3/R8): **Orange = die Welt** (Fakten, Maße, Zeichnung),
+ * Farbregel: **Orange = die Welt** (Fakten, Maße, Zeichnung),
  * **Limette = du.** Gefüllt ist Limette genau einmal pro Screen und heißt
  * „hier geht's weiter“ (`weiter`); die Handlung *in* der Übung (`aktion`:
  * prüfen, auflösen) trägt dieselbe Farbe als Kontur.
@@ -107,7 +107,7 @@ export function Verzweigung({
           // Eine Statuszeile, kein Knopf: Haken und Versaltext in der
           // Signalfarbe, ohne Füllfläche und ohne Pillenform. Als gefüllte
           // Pille sah sie dem limetten Weiter-Knopf daneben zum Verwechseln
-          // ähnlich — und gefüllte Limette heißt „hier geht's weiter“ (R8),
+          // ähnlich — und gefüllte Limette heißt „hier geht's weiter“,
           // nicht „das ist fertig“.
           className="mr-auto flex items-center gap-2 text-[0.9375rem] font-bold text-kh-signal uppercase"
         >
@@ -170,14 +170,14 @@ export function Verzweigung({
  * **Der Hauptweg ist eine Karte wie die anderen — nur limette.** Er war vorher
  * die einzige Fläche mit Farbe und stand als Knopf unter einem Trennstrich;
  * die Abstecher sahen daneben aus wie Kleingedrucktes. Gleiche Bauform,
- * gleiche Größe, unterschiedliche Lautstärke: das ist die echte Wahl aus
- * flow 6.7, und die Vorgabe („einer geht geradeaus weiter“) bleibt an der
- * Farbe ablesbar — Limette, weil der Hauptweg der Weiter-Knopf dieses
- * Fensters ist (R8), nicht Orange: das gehört der Welt.
+ * gleiche Größe, unterschiedliche Lautstärke: das ist die echte Wahl, und
+ * dass einer geradeaus weitergeht, bleibt an der Farbe ablesbar — Limette,
+ * weil der Hauptweg der Weiter-Knopf dieses Fensters ist, nicht Orange: das
+ * gehört der Welt.
  *
  * Zwei Wege stehen nebeneinander, drei füllen zwei Reihen — die ungerade Karte
  * ist immer der Hauptweg und nimmt die volle Breite. Bei den drei
- * Karrierekarten (flow 7 M9) ergibt das ein 2 × 2-Feld.
+ * Karrierekarten ergibt das ein 2 × 2-Feld.
  *
  * Kein X und kein Abbrechen-Knopf: jede Option führt vorwärts. Der
  * Backdrop-Tap schließt für den seltenen Fall, dass jemand doch noch einmal

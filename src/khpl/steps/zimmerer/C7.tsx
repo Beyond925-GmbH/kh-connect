@@ -8,8 +8,7 @@ import { StepShell } from '@/khpl/shell/StepShell'
 import type { Fortschritt } from '@/khpl/store/fortschritt'
 
 /**
- * C7 — Heute früh war da eine Betonplatte. **Rückblick statt Punkte**
- * (khpl-tag-zimmerer.md 6, C7; khpl-tage.md 1, Mechanismus 6).
+ * C7 — Heute früh war da eine Betonplatte. **Rückblick statt Punkte.**
  *
  * Kein Score, kein Prozentwert, keine Note — die Aufzählung dessen, was der
  * Besucher getan hat, mit **zwei Fassungen je Eintrag**. Wer die Übung gelöst
@@ -18,11 +17,11 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  * steht vielleicht jemand daneben, und sich vor Publikum dumm zu fühlen ist das
  * Gegenteil des Ziels.
  *
- * **Die fünf Einträge stehen so in der Spec und werden nicht ergänzt.** M8
- * führt beim Dachdecker auch besuchte Abstecher auf; die Tabelle in
- * khpl-tag-zimmerer.md 6 ist `VALIDIERT` und nennt C1, C2, C3, C4 und C6.
- * Zeilen dazuzuerfinden wäre eine Gestaltungsentscheidung an einer Stelle, die
- * abgenommen ist.
+ * **Fünf Einträge, und sie werden nicht ergänzt.** M8 führt beim Dachdecker
+ * auch besuchte Abstecher auf; hier stehen genau die fünf Steps mit eigener
+ * Übung: C1, C2, C3, C4 und C6. Ein Abstecher ist etwas Gesehenes, keine Tat —
+ * beides in dieselbe Liste zu schreiben verwischte den Unterschied, von dem
+ * der Rückblick lebt.
  *
  * **Bühne.** Das fertige Haus im Nachmittagslicht — und zwar **das Element, das
  * der Besucher gebaut hat**, als Westwand darin, mit seinem Fenster
@@ -31,9 +30,9 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  *
  * **Nicht abends.** Der Dachdecker endet im Abendlicht und legt dafür in M8
  * eigens zwei Verläufe über die Szene. Hier passiert das ausdrücklich **nicht**:
- * der Zustand `haus` bringt sein Nachmittagslicht selbst mit
- * (khpl-tag-zimmerer.md 7), dieser Tag endet um vier, weil vorgefertigt gebaut
- * wird, damit ein Haus an einem Tag dicht ist. Zwei Feierabende dürfen nicht
+ * der Zustand `haus` bringt sein Nachmittagslicht selbst mit, dieser Tag endet
+ * um vier, weil vorgefertigt gebaut wird, damit ein Haus an einem Tag dicht
+ * ist. Zwei Feierabende dürfen nicht
  * dasselbe Licht haben.
  */
 
@@ -48,7 +47,11 @@ interface Tat {
   geloest: (f: Fortschritt) => boolean
 }
 
-/** Reihenfolge = Tagesablauf. Formulierungen wörtlich aus der Spec-Tabelle. */
+/**
+ * Reihenfolge = Tagesablauf. Je ein Eintrag für die fünf Steps mit Übung; die
+ * Formulierung ist auf Alltagssprache gebracht, damit die Zeilen ohne
+ * Fachwort lesbar sind (kein Eintrag kommt dazu, keiner fällt weg).
+ */
 const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'C1',
@@ -61,8 +64,8 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'C2',
     tat: {
-      erledigt: 'ein Ständerwerk ins Raster gesetzt',
-      gesehen: 'gesehen, woher das Raster kommt',
+      erledigt: 'die Ständer in den richtigen Abstand gesetzt',
+      gesehen: 'gesehen, woher dieser Abstand kommt',
       geloest: (f) => !!f.answers.c2?.aufgeloest,
     },
   },
@@ -85,8 +88,8 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'C6',
     tat: {
-      erledigt: 'ein Wandelement versetzt',
-      gesehen: 'beim Versetzen zugesehen',
+      erledigt: 'eine ganze Wand am Kran abgesetzt',
+      gesehen: 'zugesehen, wie eine Wand am Kran abgesetzt wird',
       geloest: (f) => !!f.answers.c6?.versetzt,
     },
   },
@@ -113,9 +116,9 @@ export function C7() {
       buehne={
         <Suspense fallback={<Dachstuhl3DFallback text="Das Haus steht" />}>
           {/*
-            Der Ausschnitt aus C4: „In C7 ist die Wand mit dem Fenster
-            identifizierbar“ (khpl-tag-zimmerer.md 2) — mit einem fremden
-            Fenster wäre sie das nicht.
+            Der Ausschnitt aus C4: die Wand mit dem Fenster muss hier
+            wiedererkennbar sein — mit einem fremden Fenster wäre sie das
+            nicht.
           */}
           <Wandelement3D
             zustand="haus"
@@ -126,8 +129,8 @@ export function C7() {
       }
       warum={
         <p>
-          Vier Uhr. Vorgefertigt wird gebaut, damit ein Haus an einem Tag dicht ist — und
-          heute ist es das.
+          Vier Uhr. Die Wände werden in der Halle fertig gebaut, damit ein Haus an einem
+          Tag steht und dicht ist. Heute ist es so weit.
         </p>
       }
       interaktion={

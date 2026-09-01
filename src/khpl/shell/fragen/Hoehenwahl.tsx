@@ -7,8 +7,9 @@ import type { Frage } from '@/khpl/match/fragen'
 import { useSitzung } from '@/khpl/store/fortschritt'
 
 /**
- * Die Höhenfrage als Handgriff: der eigene Helm — in der Farbe von S1 —
- * wird am Maßband nach oben gezogen. Wo er losgelassen wird, ist die Antwort.
+ * Die Höhenfrage als Handgriff: der eigene Helm — in der Farbe aus der
+ * Helmwahl — wird am Maßband nach oben gezogen. Wo er losgelassen wird, ist
+ * die Antwort.
  *
  * **Warum ein Regler und keine drei Zeilen.** „Zehn Meter über dem Boden“
  * ist als Text eine Mutprobe zum Ankreuzen; als Griff ist es dieselbe
@@ -194,9 +195,9 @@ export function Hoehenwahl({
               />
             ))}
 
-            {/* Der Helm — die Farbe aus S1. Bis zum ersten Griff pulsiert ein
-                Ring darunter: „hier anfassen“, dieselbe Sprache wie der
-                Splash. */}
+            {/* Der Helm — die Farbe aus der Helmwahl. Bis zum ersten Griff
+                pulsiert ein Ring darunter: „hier anfassen“, dieselbe Sprache
+                wie der Splash. */}
             <div
               className="absolute left-1/2 -translate-x-1/2 translate-y-1/2"
               style={{ bottom: `${(meter / MAX_M) * 100}%` }}

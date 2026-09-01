@@ -8,9 +8,9 @@ import { Hoehenwahl } from './fragen/Hoehenwahl'
 import { Radio } from './fragen/Radio'
 
 /**
- * S2 — die vier Stationen. Eine pro Screen; dieser Rahmen trägt nur noch
- * Kerben und „Überspringen“ und reicht den Rest an die Bauform der Station
- * weiter (`fragen.ts`: `bilder`, `hoehe`, `radio`).
+ * Die Fragen — die vier Stationen. Eine pro Screen; dieser Rahmen trägt nur
+ * noch Kerben und „Überspringen“ und reicht den Rest an die Bauform der
+ * Station weiter (`fragen.ts`: `bilder`, `hoehe`, `radio`).
  *
  * **Zwei Quittungsarten, ein Grundsatz.** Bei der Bildfrage ist der Tap die
  * Entscheidung — kein zweiter Tap zum Bestätigen, die gewählte Kachel bleibt

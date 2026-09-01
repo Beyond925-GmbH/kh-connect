@@ -5,7 +5,7 @@ import type { Einheit } from './teileliste'
 import { fortschritt, sichtbar } from './zeitachse'
 
 /**
- * Der Animationstreiber (Bauplan 4). Liest nur `fortschritt`, schreibt nie
+ * Der Animationstreiber. Liest nur `fortschritt`, schreibt nie
  * React-State. Alles, was hier passiert, ist eine reine Funktion von t —
  * darum liefert derselbe t-Wert immer dasselbe Bild.
  */

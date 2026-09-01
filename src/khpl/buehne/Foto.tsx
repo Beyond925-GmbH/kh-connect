@@ -72,7 +72,7 @@ export function Foto({
  * in der Datei. Das ging genau so lange gut, wie es einen gebauten Beruf gab:
  * vier Berufe haben vier verschiedene `M1`, und ein gemeinsamer Record darüber
  * ist keine Übersicht, sondern eine Kollision. Die Liste hängt deshalb am
- * Beruf (`BerufDef.bilder`, khpl-tage.md §6.1 V3), und diese Datei bleibt, was
+ * Beruf (`BerufDef.bilder`), und diese Datei bleibt, was
  * sie war: die eine Stelle, an der ein Motiv in den Screen kommt.
  *
  * Ohne aktiven Beruf oder ohne Eintrag: `undefined`. Beides ist kein Fehler,

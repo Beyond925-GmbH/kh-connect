@@ -8,18 +8,18 @@ import { StepShell } from '@/khpl/shell/StepShell'
 import { KARRIEREWEGE } from './karrierewege'
 
 /**
- * C8 — Und danach? Der Karrierebereich (khpl-tag-zimmerer.md 6, C8).
+ * C8 — Und danach? Der Karrierebereich.
  *
- * **Struktur unverändert vom gebauten Tag übernommen**, wie die Spec es
- * verlangt: drei antippbare Karten nebeneinander, alle drei `immerOffen` im
+ * **Struktur unverändert vom gebauten Tag übernommen:** drei antippbare
+ * Karten nebeneinander, alle drei `immerOffen` im
  * Graphen — sie verschwinden nicht, sobald eine davon geöffnet wurde. „Der
  * eigentliche Überraschungsinhalt: dass Handwerk auch Studium heißen kann.
  * Diese Karte darf sich nicht hinter den anderen verstecken.“ Gleiche Größe,
  * gleiche Farbe, gleiche Nummerngröße ist die Umsetzung davon.
  *
  * **Neu sind die Inhalte, und zwar bis auf die letzte Zahl.**
- * `steps/zimmerer/karrierewege.ts` ist eine eigene Datei (khpl-tage.md §6.1
- * V2), weil sich die vier Berufe in *jeder* untersuchten Dimension
+ * `steps/zimmerer/karrierewege.ts` ist eine eigene Datei, weil sich die vier
+ * Berufe in *jeder* untersuchten Dimension
  * unterscheiden: zwischen 937 € und 1.243 € im ersten Lehrjahr liegt ein
  * Drittel, zwischen 5.600 € und 13.500 € Meisterkosten mehr als das Doppelte.
  * Dieselbe Zahl für alle vier zu zeigen wäre nicht ungenau, sondern falsch.
@@ -28,9 +28,9 @@ import { KARRIEREWEGE } from './karrierewege'
  * *sind* das Angebot. Beides nebeneinander wären dieselben drei Wege zweimal
  * auf einem Screen.
  *
- * ⚠️ **Für die Übersicht selbst liegt kein eigenes Motiv im Repo.** Die
- * Medienliste (khpl-tag-zimmerer.md 10) führt unter „vorhanden“ nur `b91`–`b93`
- * für C8.**x**. Der Screen trägt deshalb einen **Platzhalter** aus demselben
+ * ⚠️ **Für die Übersicht selbst liegt kein eigenes Motiv im Repo.** Der
+ * Bildbestand führt nur `b91`–`b93` für C8.**x**. Der Screen trägt deshalb
+ * einen **Platzhalter** aus demselben
  * gemeinsamen `schritte/`-Bestand: `m9-karriere.webp`, Blick von unten ins
  * Sparrenwerk. Ohne Eintrag rendert `StepFoto` nichts, und der Einstieg in den
  * Karrierebereich fing hochkant mit einem schwarzen Feld an — auf der Stele
@@ -47,7 +47,10 @@ export function C8() {
       interaktionOffen={false}
       buehne={<StepFoto id="C8" />}
       warum={
-        <p>Drei Jahre Ausbildung, dann Geselle. Danach drei Wege — alle drei offen.</p>
+        <p>
+          Drei Jahre Ausbildung, dann bist du Geselle — fertig ausgebildet. Danach drei
+          Wege, alle drei offen.
+        </p>
       }
       interaktion={
         <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">

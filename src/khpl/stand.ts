@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 /**
- * Wer heute am Stand steht (khpl-flow.md 7 M10).
+ * Wer heute am Stand steht — der Name für den letzten Screen.
  *
  * Der Name für „Sprich jetzt mit [Name] am Stand“ steht in
  * `public/stand.json` und wird beim Start geladen — **kein Rebuild, kein

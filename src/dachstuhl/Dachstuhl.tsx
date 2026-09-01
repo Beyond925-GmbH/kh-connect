@@ -199,7 +199,7 @@ function SparrenMarke({ masse }: { masse: DachstuhlMasse }) {
       ]}
       rotation={[a, 0, 0]}
     >
-      {/* Bewusst breiter als der Sparren selbst (R11): im M8-Maßstab misst das
+      {/* Bewusst breiter als der Sparren selbst: im M8-Maßstab misst das
           Modell ~320 px, ein sparrenbreites Band (0,13 m) wäre dort ein
           2-px-Punkt. 0,24 m quer und 0,20 m längs füllen den lattenfreien
           Traufstreifen (0,312 m, je ±1,6 cm Luft zu den Nachbarlatten) und

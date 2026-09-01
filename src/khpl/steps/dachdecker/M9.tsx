@@ -10,7 +10,7 @@ import { KARRIEREWEGE } from './karrierewege'
 /**
  * M9 — Und danach?
  *
- * Drei antippbare Karten nebeneinander (khpl-flow.md 7 M9). Jede öffnet kurze
+ * Drei antippbare Karten nebeneinander. Jede öffnet kurze
  * Infos; **alle drei bleiben jederzeit erreichbar** — deshalb sind B9.1–B9.3
  * im Graphen als `immerOffen` markiert und verschwinden nicht, sobald sie
  * einmal geöffnet wurden.
@@ -49,7 +49,7 @@ export function M9() {
                 Wahl aussieht wie eine Wahl und nicht wie drei Listeneinträge —
                 und die Ziffer oben rechts macht aus drei gleich aussehenden
                 Kacheln drei unterscheidbare Ziele. „Studium“ darf sich nicht
-                hinter den anderen verstecken (flow 7 M9); gleiche Größe,
+                hinter den anderen verstecken; gleiche Größe,
                 gleiche Farbe, gleiche Nummerngröße ist die Umsetzung davon.
               */}
               <motion.button

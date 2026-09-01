@@ -14,7 +14,7 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Begriff } from './Begriff'
 
 /**
- * C6 — Am Haken. **Der Signaturscreen** (khpl-tag-zimmerer.md 6, C6).
+ * C6 — Am Haken. **Der Signaturscreen.**
  * Was ein Besucher von diesem Beruf mitnimmt, entsteht hier.
  *
  * **Zwei Beats auf einem Screen.**
@@ -28,9 +28,9 @@ import { Begriff } from './Begriff'
  * **Das ist die Abfrage zu C3 und C4 zugleich, und sie ist kein
  * Reihenfolge-Rätsel.** M7 fragt „in welcher Reihenfolge“; hier wird abgefragt,
  * ob man sich das Liegende stehend denken kann — die Kompetenz, die ein
- * Zimmerer selbst als das Schwierigste seines Berufs nennt (`INTERVIEW`,
- * khpl-tag-zimmerer.md 1). Zwei Tage dürfen nicht dieselbe Hauptübung haben
- * (khpl-tage.md 4); diese hier hat kein Gegenstück in den anderen drei.
+ * Zimmerer selbst im Interview als das Schwierigste seines Berufs nennt. Zwei
+ * Tage dürfen nicht dieselbe Hauptübung haben; diese hier hat kein Gegenstück
+ * in den anderen drei.
  *
  * **Falsch gewählt kostet Zeit, nicht Material.** Das Element setzt nicht ab,
  * es dreht sich zurück in die Luft, und ein Satz erklärt, was in fünf Jahren in
@@ -49,9 +49,9 @@ import { Begriff } from './Begriff'
  * steht sie zum ersten Mal am Boden und schaut hinauf. Das ist die visuelle
  * Signatur des ganzen Tages, und sie kostet nichts: dasselbe Modell, andere
  * Kamera. Der Zustand `haken` leitet Blick und Licht selbst ab — die Steps
- * setzen hier bewusst keine Zahl (khpl-tag-zimmerer.md 7).
+ * setzen hier bewusst keine Zahl.
  *
- * ⚠️ Die Spec möchte in der Aha-Karte zusätzlich C5.1 anbieten, falls es
+ * ⚠️ Naheliegend wäre, in der Aha-Karte zusätzlich C5.1 anzubieten, falls es
  * übersprungen wurde. Das ginge nur mit einer Schleife im Graphen; der
  * Widerspruch ist in `berufe/zimmerer.ts` gemeldet. Die Karte **nennt** den
  * Inhalt, sie verlinkt ihn nicht.
@@ -61,7 +61,7 @@ import { Begriff } from './Begriff'
 
 const Wandelement3D = lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))
 
-/** Nach zwei Fehlversuchen bietet die App die Lösung an (khpl-tage.md 3). */
+/** Nach zwei Fehlversuchen bietet die App die Lösung an. */
 const HILFE_AB = 2
 
 /**
@@ -76,8 +76,8 @@ const RICHTIG: Elementlage = { aussenseite: 'holzfaser', oben: 'raehm' }
  * zweimal derselbe Block.
  *
  * `warum` ist der Satz für den Fehlversuch: **was in fünf Jahren in dieser Wand
- * passiert wäre**, nicht „falsch“. Der Aufbau-Grund steht in C3 (`BELEGT`,
- * belege/zimmerer.md 2), der Lastweg über die Schwelle im Glossar.
+ * passiert wäre**, nicht „falsch“. Der Aufbau-Grund steht in C3, der Lastweg
+ * über die Schwelle im Glossar.
  *
  * `warumKurz` ist derselbe Satz fürs Handy, auf die Hälfte gekürzt: dort steht
  * die Rückmeldung über den Kacheln, und jede Zeile schiebt die Wahl weiter
@@ -112,7 +112,7 @@ const ACHSEN = [
     warum:
       'Dann läge die dichte Folie außen. Die Feuchte aus dem Raum bliebe in der Wand stehen — in fünf Jahren ist die Dämmung nass und das Holz faul.',
     warumKurz:
-      'Nach außen käme die Dampfbremse. In fünf Jahren ist die Dämmung nass und das Holz faul.',
+      'Dann läge die dichte Folie außen. In fünf Jahren ist die Dämmung nass und das Holz faul.',
   },
   {
     id: 'oben',
@@ -136,7 +136,7 @@ const ACHSEN = [
     warum:
       'Dann hinge es auf dem Kopf. Der unterste Balken trägt die Last der ganzen Wand — er gehört nach unten. Und dein Fenster säße falsch.',
     warumKurz:
-      'Verkehrt herum — die Schwelle trägt die Last nach unten, und dein Fenster säße falsch.',
+      'Verkehrt herum — das untere Holz trägt das Gewicht der Wand und gehört nach unten. Und dein Fenster säße falsch.',
   },
 ] as const
 
@@ -220,7 +220,7 @@ export function C6() {
       text: falsch.map((a) => (schmal ? a.warumKurz : a.warum)).join(' '),
       ok: false,
     })
-    // Der Bühnen-Beat der Spec: das Element setzt nicht ab, es dreht sich
+    // Der Bühnen-Beat: das Element setzt nicht ab, es dreht sich
     // zurück in die Luft. Die Wahl im Panel bleibt dabei stehen — siehe
     // `verworfen` oben.
     setVerworfen(true)
@@ -230,7 +230,7 @@ export function C6() {
   const zeigMirWie = () => {
     uebernimm(RICHTIG)
     setMeldung({
-      text: 'Raue Platte nach außen, Rähm nach oben. Die Wand muss nach außen offen bleiben, und die Last will nach unten.',
+      text: 'Raue Platte nach außen, Rähm nach oben. Nach außen muss die Wand offen bleiben, und das Gewicht der Wand muss nach unten.',
       ok: true,
     })
     setTakt('einweisen')
@@ -264,7 +264,7 @@ export function C6() {
         takt === 'fertig'
           ? null
           : takt === 'einweisen'
-            ? 'Führ das Element über die Schwelle und lass es ab.'
+            ? 'Schieb das Element über seinen Platz und lass es herunter.'
             : 'Wähl aus, wie herum das Element stehen muss.'
       }
       /*
@@ -286,8 +286,8 @@ export function C6() {
                 geste: 'ziehen-frei' as const,
                 // Nicht die Wiederholung des Auftrags („Führ das Element über
                 // die Schwelle …"): die Ansage sagt, was gerade passiert.
-                text: 'Das Element schwebt über der Schwelle — die letzten Meter führst du selbst.',
-                haken: 'Eine hängende Last pendelt. Zieh langsam.',
+                text: 'Das Element schwebt über seinem Platz — die letzten Meter führst du selbst.',
+                haken: 'Was am Kran hängt, pendelt wie eine Schaukel. Zieh langsam.',
               }
             : null
       }
@@ -321,13 +321,13 @@ export function C6() {
       warum={
         takt === 'fertig' ? (
           <p>
-            Steht. Das ist die Westwand des Hauses — heute früh lag sie noch flach auf dem
-            Abbundtisch.
+            Steht. Das ist die Westwand des Hauses — heute früh lag sie noch flach in der
+            Halle.
           </p>
         ) : takt === 'einweisen' ? (
           <p>
-            Seite stimmt, oben stimmt. Jetzt über die Schwelle — langsam. Die Last hat
-            Masse: zu schnell gezogen, und sie schwingt über das Ziel hinaus.
+            Seite stimmt, oben stimmt. Jetzt langsam an seinen Platz. Die Wand wiegt
+            Tonnen: Wenn du zu schnell ziehst, schwingt sie über das Ziel hinaus.
           </p>
         ) : // Sobald der Fehlertext steht, weicht die Einleitung: sie hat ihre
         // Arbeit dann getan, und ihre Zeilen sind genau die, die der Meldung
@@ -337,7 +337,7 @@ export function C6() {
         // ist weg: der Auftrag steht im Band, und „Rähm" und „Schwelle"
         // stehen an den Antwortknöpfen, wo sie gebraucht werden.
         meldung ? undefined : (
-          // Zwei Fachwörter in einem Satz waren eines zu viel (Regel R2), und
+          // Zwei Fachwörter in einem Satz waren eines zu viel, und
           // was zu tun ist, steht jetzt im Auftragsband. Übrig bleibt der
           // Grund, warum es überhaupt schwer ist.
           <p>
@@ -366,7 +366,7 @@ export function C6() {
                 {/* Die Anweisung steht einmal, im Auftragsband (vgl. M7) —
                     hier bleibt der Status, der sagt, warum es zügig weitergeht. */}
                 <span className="kh-etikett min-w-0 text-kh-paper/50">
-                  Einweisen — die Kolonne unten wartet
+                  Einweisen — die Leute unten warten
                 </span>
               </div>
             </div>
@@ -400,7 +400,7 @@ export function C6() {
                   <div className="grid grid-cols-2 gap-2">
                     {achse.optionen.map((o) => (
                       // `ton="vorlaeufig"`: das Antippen ist die eigene Wahl
-                      // (Limette = du, Designregel R3), aber erst die Prüfung
+                      // (Limette = du), aber erst die Prüfung
                       // „So absetzen“ färbt — deshalb limetter Rand ohne
                       // Füllung statt der satten Fläche, die nach „richtig“
                       // aussähe, bevor geprüft ist.
@@ -434,7 +434,7 @@ export function C6() {
           eyebrow="Wer steht eigentlich unter der Last?"
         >
           Niemand. Nie. Wer die <Begriff id="anschlagmittel">Anschlagmittel</Begriff>{' '}
-          einhängt, arbeitet seitlich und führt das Element erst kurz vor dem Absetzen an
+          einhängt, steht daneben. Erst kurz vor dem Absetzen schiebt er das Element an
           seinen Platz.
         </AhaKarte>
       }
@@ -447,7 +447,7 @@ export function C6() {
           // Handlung — siehe oben.
           //
           // „Zeig mir wie“ steht **neben** „So absetzen“ und nicht in der
-          // scrollenden Fläche (khpl-tage.md 3, wie in C4): im Hochformat läge
+          // scrollenden Fläche (wie in C4): im Hochformat läge
           // es dort unter zwei Optionsgruppen und der Rückmeldung, also
           // womöglich unter der Scrollkante — ausgerechnet das Angebot nach
           // zwei Fehlversuchen.

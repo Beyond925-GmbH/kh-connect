@@ -1,7 +1,7 @@
 import type { MerkmalGewichte } from './merkmale'
 
 /**
- * S1 „Dein Helm“ — die Personalisierung.
+ * „Dein Helm“ — die Personalisierung.
  *
  * **Warum keine Farbwahl für die App.** Das Designsystem hält genau eine
  * gefüllte orange Fläche pro Screen frei, und die heißt *Weiter*; Gelbgrün

@@ -10,7 +10,7 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
 /**
  * M8 — Feierabend.
  *
- * **Rückblick statt Punkte** (khpl-flow.md 6.8): keine Note, kein Score, keine
+ * **Rückblick statt Punkte:** keine Note, kein Score, keine
  * Prozentangabe, sondern eine Aufzählung dessen, was der Besucher tatsächlich
  * getan hat — inklusive der besuchten Abstecher. Wer durchgeklickt hat, bekommt
  * eine kürzere Liste, aber nie eine Bewertung.
@@ -19,12 +19,12 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  * „einen Balken zugeschnitten“; wer weitergegangen ist, „an einem Balken Maß
  * genommen“. Beides ist wahr, keins ist ein Tadel. Am Messestand steht
  * vielleicht jemand daneben — sich vor Publikum dumm zu fühlen ist das
- * Gegenteil vom Ziel (flow 6.6).
+ * Gegenteil vom Ziel.
  *
  * Visual: das fertige Dach im Abendlicht — und zwar **das Dach, das der
  * Besucher in M7 selbst aufgerichtet hat**, nicht ein Foto von irgendeinem.
- * Für den Feierabend gibt es im Bestand ohnehin kein Motiv (flow 13, „fehlt
- * vollständig“, Priorität 1 der Fotoliste); das Modell ist hier nicht Ersatz,
+ * Für den Feierabend gibt es im Bestand ohnehin gar kein Motiv; das Modell
+ * ist hier nicht Ersatz,
  * sondern die stärkere Antwort. Der Bogen zum Anfang schließt sich: heute
  * Morgen war da nur ein Grundriss.
  */
@@ -41,10 +41,11 @@ interface Tat {
 }
 
 /**
- * Reihenfolge = Tagesablauf. Formulierungen nach flow 11 (M8):
- * „ein Dach aufgemessen · ein Angebot kalkuliert · Material bestellt · einen
- * Plan in 3D gelesen · einen Balken zugeschnitten · einen Transporter beladen ·
- * einen Dachstuhl aufgerichtet“.
+ * Reihenfolge = Tagesablauf. Die Formulierungen sind sprachlich vereinfacht
+ * („kalkuliert“ → „durchgerechnet“): „ein Dach aufgemessen · ein
+ * Angebot durchgerechnet · Material bestellt · einen Plan in 3D gelesen ·
+ * einen Balken zugeschnitten · einen Transporter beladen · einen Dachstuhl
+ * aufgerichtet“.
  */
 const TATEN: { id: StepId; tat: Tat }[] = [
   {
@@ -58,7 +59,7 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'M2',
     tat: {
-      erledigt: 'ein Angebot kalkuliert',
+      erledigt: 'ein Angebot durchgerechnet',
       gesehen: 'gesehen, was ein Dachstuhl kostet',
       geloest: (f) => !!f.answers.m2?.aufgeloest,
     },

@@ -1,7 +1,7 @@
 import type { MerkmalGewichte } from './merkmale'
 
 /**
- * S2 — vier Stationen, jede überspringbar. Keine davon ist ein Formular.
+ * Vier Stationen, jede überspringbar. Keine davon ist ein Formular.
  *
  * **Warum vier und nicht acht.** Zwischen „Tippen zum Starten“ und dem ersten
  * Inhalt liegen mit dem Trichter drei Screens. Das Budget dafür sind 45

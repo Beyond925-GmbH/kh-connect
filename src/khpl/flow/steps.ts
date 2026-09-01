@@ -1,19 +1,18 @@
 /**
- * Die **Form** eines Berufs-Graphen aus khpl-flow.md 2–4 — nicht mehr seine
- * Daten.
+ * Die **Form** eines Berufs-Graphen — nicht mehr seine Daten.
  *
  * Bis zur Einführung der vier Berufe stand hier der Zimmerer-Graph als
  * Konstante. Er liegt jetzt in `berufe/zimmerer.ts`, und diese Datei trägt nur
  * noch die Typen und die Rechenregeln, die für **jeden** Beruf gelten. Was
  * dabei ausdrücklich erhalten bleibt:
  *
- * - Regel 3 des Boards: ein Abstecher springt nicht zurück, sondern mündet in
- *   denselben nächsten Hauptschritt wie sein Elternschritt. Deshalb trägt jeder
- *   Step nur ein `weiter` — der Unterschied zwischen Haupt und Abstecher steckt
- *   allein in `art`.
- * - Die Rail zählt `graph.haupt.length`, nie eine Konstante: khpl-ui-shell.md 9
- *   hält ausdrücklich fest, dass die Segmentzahl datengetrieben bleiben muss.
- *   Mit vier Berufen ist sie zusätzlich pro Beruf verschieden.
+ * - Ein Abstecher springt nicht zurück, sondern mündet in denselben
+ *   nächsten Hauptschritt wie sein Elternschritt. Deshalb trägt jeder
+ *   Step nur ein `weiter` — der Unterschied zwischen Haupt und Abstecher
+ *   steckt allein in `art`.
+ * - Die Rail zählt `graph.haupt.length`, nie eine Konstante: Die Segmentzahl
+ *   muss datengetrieben bleiben. Mit vier Berufen ist sie zusätzlich pro Beruf
+ *   verschieden.
  *
  * **`StepId` ist jetzt `string`, und das ist kein Nachlassen.** Die
  * Ausschöpfungsprüfung, die die Vorfassung über eine geschlossene Union hatte,
@@ -30,18 +29,18 @@ export type StepArt = 'haupt' | 'abstecher'
 export interface StepDef {
   id: StepId
   /**
-   * Die Überschrift des Screens — die Pointe aus flow 11. „Halb zwölf“,
+   * Die Überschrift des Screens — die Pointe des Schritts. „Halb zwölf“,
    * „Jetzt du“. Gehört ins `<h1>` und sonst nirgendwohin.
    */
   titel: string
   /**
-   * Der Name des Schritts, wie ihn das Board führt (flow 2 und 3).
+   * Der Name des Schritts, wie ihn das Board führt.
    *
    * Zwei Felder, weil sie zwei Aufgaben haben. „Jetzt du“ ist als Überschrift
    * richtig und als Zeile in einer Liste sinnlos — erst recht als gesperrter
    * Zukunftsschritt. Das Sheet „Dein Weg“ beantwortet „Was habe ich bisher
-   * gemacht?“ und braucht Etiketten, keine Pointen; ui-shell 4 zeigt in seinem
-   * Beispiel genau diese Board-Namen.
+   * gemacht?“ und braucht Etiketten, keine Pointen — dort stehen genau diese
+   * Board-Namen.
    */
   kurz: string
   art: StepArt
@@ -54,10 +53,10 @@ export interface StepDef {
   /**
    * Bleibt immer im Angebot, auch wenn er schon besucht wurde.
    *
-   * Nur die drei Karrierekarten: flow 7 M9 verlangt „alle drei bleiben
-   * jederzeit erreichbar“, und die Studium-Karte „darf sich nicht hinter den
-   * anderen verstecken“. Ein gewöhnlicher Abstecher verschwindet dagegen,
-   * sobald er genommen wurde.
+   * Nur die drei Karrierekarten: Alle drei müssen jederzeit erreichbar
+   * bleiben, und die Studium-Karte darf sich nicht hinter den anderen
+   * verstecken. Ein gewöhnlicher Abstecher verschwindet dagegen, sobald er
+   * genommen wurde.
    */
   immerOffen?: boolean
 }
@@ -67,7 +66,7 @@ export interface StepDef {
  *
  * Er steht am Graphen und nicht am Step, weil ein Abstecher von zwei Stellen
  * aus angeboten wird: von seinem Elternschritt **und** von seinem
- * Geschwister-Abstecher (khpl-ui-shell.md 5).
+ * Geschwister-Abstecher.
  */
 export interface Angebot {
   /** Das, was auf dem Button steht. */
@@ -92,7 +91,7 @@ export interface StepGraph {
   haupt: readonly StepDef[]
   erster: StepId
   /**
-   * Hauptschritte, auf denen der Karriere-Link erscheint (khpl-ui-shell.md 6).
+   * Hauptschritte, auf denen der Karriere-Link erscheint.
    *
    * Stand vorher als `SKIP_AUF` in `StepShell` — also in der Hülle, obwohl es
    * eine Aussage über den Tagesablauf eines bestimmten Berufs ist. Ein Beruf
@@ -208,7 +207,7 @@ export function bezugsHauptschritt(graph: StepGraph, id: StepId): StepId {
 
 /**
  * Position in der Rail. Ein Abstecher hat kein eigenes Segment und zählt
- * deshalb wie sein Elternschritt (khpl-ui-shell.md 4).
+ * deshalb wie sein Elternschritt.
  */
 export function railIndex(graph: StepGraph, id: StepId): number {
   const bezug = bezugsHauptschritt(graph, id)

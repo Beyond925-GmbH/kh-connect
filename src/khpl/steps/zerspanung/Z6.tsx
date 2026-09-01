@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
 import { StepFoto } from '@/khpl/buehne/Foto'
-import { mm } from '@/khpl/buehne/zerspanung/kanon'
+import { mm, STAHL, TEIL } from '@/khpl/buehne/zerspanung/kanon'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
@@ -52,6 +52,13 @@ const SCHICHT_ENDE = 154
 
 const SERIE = 200
 
+/**
+ * Takt des Zählers in Millisekunden — ein Stück pro Tick. Von 110 auf 92
+ * gestrafft (~16 % schneller): flott genug, dass die Serie sich als Belohnung
+ * anfühlt, langsam genug, dass die Zahl noch lesbar hochzählt.
+ */
+const TAKT_MS = 92
+
 type Phase =
   'laufen1' | 'probe1' | 'weiter1' | 'laufen2' | 'probe2' | 'trend' | 'kippt' | 'stabil'
 
@@ -85,7 +92,10 @@ export function Z6() {
       setStueck(ziel)
       return
     }
-    const takt = window.setInterval(() => setStueck((s) => Math.min(ziel, s + 1)), 110)
+    const takt = window.setInterval(
+      () => setStueck((s) => Math.min(ziel, s + 1)),
+      TAKT_MS,
+    )
     return () => window.clearInterval(takt)
   }, [stueck, ziel, reduziert])
 
@@ -111,6 +121,7 @@ export function Z6() {
   const laesstLaufen = () => setPhase('kippt')
 
   const stabil = phase === 'stabil'
+  const laeuft = stueck < ziel
 
   return (
     <StepShell
@@ -128,7 +139,15 @@ export function Z6() {
       }
       ansage={null}
       interaktionOffen={!stabil}
-      buehne={<StepFoto id="Z6" />}
+      buehne={
+        <div className="relative size-full">
+          <StepFoto id="Z6" />
+          {/* Solange die Maschine läuft, fallen fertige Bolzen über das Motiv
+              in die Kiste — unter Reduced Motion springt der Zähler sofort auf
+              sein Ziel, aber die Bedingung sagt es trotzdem ausdrücklich. */}
+          <AnimatePresence>{laeuft && !reduziert && <Teileregen />}</AnimatePresence>
+        </div>
+      }
       warum={
         <p>
           Serienfertigung heißt: die Maschine macht die Wiederholung, du machst die
@@ -138,7 +157,7 @@ export function Z6() {
       }
       interaktion={
         <div className="flex flex-col gap-3">
-          <Zaehler stueck={stueck} laeuft={stueck < ziel} />
+          <Zaehler stueck={stueck} laeuft={laeuft} />
 
           <Wechsel takt={phase}>
             {phase === 'probe1' || phase === 'laufen1' ? (
@@ -253,6 +272,220 @@ export function Z6() {
         />
       }
     />
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Der Teileregen — die Bühne zeigt, was der Zähler zählt
+// ---------------------------------------------------------------------------
+
+/**
+ * Ein fallender Bolzen: wo er fällt, wie groß er ist, wie er taumelt.
+ * Feste Werte statt `Math.random`, damit der Regen bei jedem Rendern gleich
+ * aussieht und nichts neu gewürfelt wird — die ungleichen Dauern sorgen von
+ * selbst dafür, dass sich das Muster nie sichtbar wiederholt.
+ */
+interface RegenTeil {
+  /** Horizontale Position der Fallspur, in Prozent der Bühnenbreite. */
+  links: number
+  /** Breite der Silhouette in Pixeln — Tiefe durch Größenstreuung. */
+  breite: number
+  /**
+   * Ein voller Fall von oben nach unten, in Sekunden. Kurz gehalten, weil die
+   * Produktionsfenster kurz sind: das kürzeste (laufen1) dauert bei
+   * `TAKT_MS = 92` nur knapp zwei Sekunden, und ein Teil, das darin nicht
+   * unten ankommt, sieht nie jemand fallen.
+   */
+  dauer: number
+  /**
+   * Startversatz in Sekunden — er staffelt die Teile und hält den Versatz
+   * über alle Umläufe (Motions `delay` gilt einmalig vor dem ersten, ein
+   * Takt *zwischen* den Umläufen wäre `repeatDelay`). Klein gehalten, weil
+   * der Regen bei jedem Phasenwechsel neu montiert wird und die Verzögerung
+   * dann von vorn zählt.
+   */
+  verzoegerung: number
+  /** Drehung beim Eintritt bzw. Austritt, in Grad — das Taumeln. */
+  drehStart: number
+  drehEnde: number
+  /** Wie präsent das Teil wird — die Silhouetten bleiben Hintergrund. */
+  deckkraft: number
+}
+
+const REGEN_TEILE: readonly RegenTeil[] = [
+  {
+    links: 8,
+    breite: 34,
+    dauer: 2.4,
+    verzoegerung: 0,
+    drehStart: -20,
+    drehEnde: 50,
+    deckkraft: 0.55,
+  },
+  {
+    links: 24,
+    breite: 26,
+    dauer: 3.0,
+    verzoegerung: 0.5,
+    drehStart: 40,
+    drehEnde: -30,
+    deckkraft: 0.4,
+  },
+  {
+    links: 38,
+    breite: 40,
+    dauer: 2.1,
+    verzoegerung: 1.0,
+    drehStart: 10,
+    drehEnde: 80,
+    deckkraft: 0.6,
+  },
+  {
+    links: 52,
+    breite: 30,
+    dauer: 2.8,
+    verzoegerung: 0.3,
+    drehStart: -60,
+    drehEnde: 10,
+    deckkraft: 0.45,
+  },
+  {
+    links: 66,
+    breite: 36,
+    dauer: 2.3,
+    verzoegerung: 0.8,
+    drehStart: 25,
+    drehEnde: -45,
+    deckkraft: 0.55,
+  },
+  {
+    links: 79,
+    breite: 28,
+    dauer: 3.2,
+    verzoegerung: 0.15,
+    drehStart: -10,
+    drehEnde: 60,
+    deckkraft: 0.4,
+  },
+  {
+    links: 90,
+    breite: 32,
+    dauer: 2.6,
+    verzoegerung: 1.2,
+    drehStart: 55,
+    drehEnde: -15,
+    deckkraft: 0.5,
+  },
+  {
+    links: 16,
+    breite: 30,
+    dauer: 2.9,
+    verzoegerung: 0.65,
+    drehStart: -35,
+    drehEnde: 35,
+    deckkraft: 0.45,
+  },
+]
+
+/**
+ * Die Seitenansicht des Bolzens aus `TEIL` — dieselbe Geometrie wie Zeichnung,
+ * Werkzeugweg und Messschraube, nur als kleine Fallfigur: vorn der Lagersitz
+ * Ø 25 mit Fase 1 × 45°, dahinter der Absatz Ø 20. Nicht irgendein Klotz,
+ * sondern erkennbar das Teil, das die Maschine gerade macht.
+ */
+const BOLZEN_PFAD = (() => {
+  const R = TEIL.sitzDurchmesser / 2
+  const r = TEIL.schaftDurchmesser / 2
+  const s = TEIL.sitzLaenge
+  const L = TEIL.gesamt
+  const f = TEIL.fase
+  return (
+    `M ${f} 0 H ${s} V ${R - r} H ${L} V ${R + r} H ${s} ` +
+    `V ${2 * R} H ${f} L 0 ${2 * R - f} V ${f} Z`
+  )
+})()
+
+/**
+ * Fertige Bolzen fallen über das Motiv, solange der Zähler läuft — die Bühne
+ * zeigt, was die Zahl behauptet. **Reine Ausschmückung, keine Information:**
+ * `aria-hidden`, keine Treffer für Taps, und unter Reduced Motion wird die
+ * Ebene gar nicht erst gerendert (der Aufrufer prüft das).
+ *
+ * Performance: jede Fallspur ist ein bühnenhoher Streifen, der sich per
+ * Transform von −8 % auf 104 % seiner eigenen Höhe schiebt — so sind Fallweg
+ * und Bühnenhöhe ohne Messung identisch, und es animieren ausschließlich
+ * `transform` und `opacity`. Die Ebene liegt unter dem Scrim der `StepShell`,
+ * damit Titel und Verlauf ungestört bleiben.
+ */
+function Teileregen() {
+  return (
+    <motion.div
+      aria-hidden
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.4 }}
+      className="pointer-events-none absolute inset-0 overflow-hidden"
+    >
+      {REGEN_TEILE.map((t, i) => (
+        <motion.div
+          key={i}
+          className="absolute inset-y-0"
+          style={{ left: `${t.links}%`, width: t.breite }}
+          initial={{ y: '-8%', opacity: 0 }}
+          animate={{
+            // `easeIn` auf dem Fall: das Teil beschleunigt wie unter
+            // Schwerkraft, statt gleichmäßig zu schweben.
+            y: ['-8%', '104%'],
+            // Oben weich einblenden, unten ausblenden — die Teile „landen“
+            // im Verlauf am unteren Rand statt hart abzuschneiden.
+            opacity: [0, t.deckkraft, t.deckkraft, 0],
+          }}
+          transition={{
+            duration: t.dauer,
+            delay: t.verzoegerung,
+            repeat: Infinity,
+            ease: 'easeIn',
+            opacity: {
+              duration: t.dauer,
+              delay: t.verzoegerung,
+              repeat: Infinity,
+              ease: 'linear',
+              times: [0, 0.06, 0.88, 1],
+            },
+          }}
+        >
+          <motion.svg
+            viewBox={`0 0 ${TEIL.gesamt} ${TEIL.sitzDurchmesser}`}
+            // Explizite Höhe aus Breite × Seitenverhältnis des Teils: ohne
+            // sie fiele der Browser auf das intrinsische 300 × 150 zurück
+            // und zentrierte den Bolzen in einer viel zu hohen Box — der
+            // Fallweg säße dann sichtbar neben der Spur.
+            style={{ height: t.breite * (TEIL.sitzDurchmesser / TEIL.gesamt) }}
+            preserveAspectRatio="xMidYMid meet"
+            className="block w-full"
+            initial={{ rotate: t.drehStart }}
+            animate={{ rotate: [t.drehStart, t.drehEnde] }}
+            transition={{
+              duration: t.dauer,
+              delay: t.verzoegerung,
+              repeat: Infinity,
+              // Das Taumeln bleibt linear — nur der Fall beschleunigt.
+              ease: 'linear',
+            }}
+          >
+            <path d={BOLZEN_PFAD} fill={STAHL.blank} />
+            {/* Das Glanzlicht auf dem Lagersitz — die Kante, an der frisch
+                gedrehtes Metall blank wird. */}
+            <path
+              d={`M ${TEIL.fase} 1 H ${TEIL.sitzLaenge}`}
+              stroke={STAHL.glanz}
+              strokeWidth={1.4}
+              strokeLinecap="round"
+              fill="none"
+            />
+          </motion.svg>
+        </motion.div>
+      ))}
+    </motion.div>
   )
 }
 

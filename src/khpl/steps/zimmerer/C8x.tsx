@@ -9,17 +9,17 @@ import { Klappliste } from '@/khpl/komponenten/Klappliste'
 
 /**
  * C8.1 / C8.2 / C8.3 — Meister · Techniker · Studium.
- * Abstecher von C8, münden in C9 (khpl-tag-zimmerer.md 6, C8).
+ * Abstecher von C8, münden in C9.
  *
  * Je eine Info-Karte mit gleichem Aufbau, `Info only` auf dem Board: keine
  * Interaktion, keine Aha-Karte. Die Inhalte stehen vollständig in
- * `karrierewege.ts` und sind belegt (`belege/ausbildung-karriere.md`, Spalte
- * Zimmerer, Stand 24.08.2026).
+ * `karrierewege.ts` und sind für den Zimmerer recherchiert (Stand
+ * 24.08.2026).
  *
  * **Warum die Abschnitte nicht überall vier sind.** Der Dachdecker-Bestand
  * fragt viermal dasselbe ab — Was ist das · Wie lange · Was es kostet · Was du
- * verdienst. khpl-tage.md 0 hält fest, dass in 25 Gesprächen **niemand** von
- * sich aus über Geld gesprochen hat, und die Karrierekarten des Bestands tragen
+ * verdienst. In 25 Gesprächen hat **niemand** von sich aus über Geld
+ * gesprochen, und die Karrierekarten des Bestands tragen
  * fast nur Zahlen. Deshalb steht auf jeder Karte dieses Tages zuerst, was man in
  * diesem Weg **tut**, und erst danach, was er kostet und bringt; die Meisterkarte
  * hat dafür einen Abschnitt mehr. Die Reihenfolge ist die Aussage — sie kommt
@@ -32,7 +32,7 @@ import { Klappliste } from '@/khpl/komponenten/Klappliste'
  * nicht umgebaut, sondern umgangen: `merkeAntwort('c8', …)` tut dasselbe im
  * eigenen Abschnitt. **Gemeldet** — `merkeKarriereweg` ist berufsspezifisch,
  * obwohl es in der gemeinsamen Hälfte des Stores steht, und alle vier Tage
- * brauchen es (khpl-tage.md §6.2).
+ * brauchen es.
  */
 export function C8x({ id }: { id: StepId }) {
   const weg = karriereweg(id)
@@ -67,9 +67,9 @@ export function C8x({ id }: { id: StepId }) {
       interaktionOffen={false}
       buehne={<StepFoto id={id} />}
       // Kein Fachtext. Der Köder der Karte steht schon in C8, und ausgerechnet
-      // der der Meisterkarte („Eigener Betrieb, eigene Azubis“) ist der Satz,
-      // den khpl-tag-zimmerer.md 6 als Besitzstand-Sprache benennt — ihn hier
-      // zu wiederholen verdoppelte genau das, was die Abschnitte korrigieren.
+      // der der Meisterkarte („Eigener Betrieb, eigene Azubis“) ist reine
+      // Besitzstand-Sprache — ihn hier zu wiederholen verdoppelte genau das,
+      // was die Abschnitte korrigieren.
       // Hochkant klappen die Abschnitte, quer liegen sie zweispaltig: fünf
       // ausgeschriebene Abschnitte sind auf dem Handy rund 380 px höher als das
       // Panel, und was darunter lag, war „Was es kostet“ und „Was du verdienst“

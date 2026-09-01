@@ -16,7 +16,7 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 /**
  * M4 — Ein Balken, ein Maß.
  *
- * Übung: Maß ablesen, Schnitt setzen (khpl-flow.md 7 M4) — jetzt auf einer
+ * Übung: Maß ablesen, Schnitt setzen — jetzt auf einer
  * 3D-Bühne: der Balken liegt auf Böcken im Hof, die Schnittlinie wird direkt
  * am Holz gezogen, die drei Winkel-Knöpfe kippen die Schnittebene sichtbar.
  * Trifft der Schnitt, fährt die Säge, der Verschnitt fällt ab, und der Sparren
@@ -57,12 +57,12 @@ const MAX_MM = Math.ceil((ZIEL_MM + 1000) / 1000) * 1000
 /** Deutlich zu lang: der erste Zug geht nach links, Richtung Maß. */
 const START_MM = MAX_MM - 600
 /**
- * Was noch als Treffer gilt. 3 cm sind im Feedbacktext der Spec die Grenze zum
+ * Was noch als Treffer gilt. 3 cm sind im Feedbacktext die Grenze zum
  * Ausschuss („Drei Zentimeter zu kurz“) — also ist alles darunter ein Treffer.
  */
 const TOLERANZ_MM = 30
 
-/** Nach zwei Fehlversuchen bietet die App die Lösung an (flow 6.6). */
+/** Nach zwei Fehlversuchen bietet die App die Lösung an. */
 const HILFE_AB = 2
 
 type Phase = Zuschnitt3DProps['phase']
@@ -118,7 +118,8 @@ export function M4() {
       ansage={{
         geste: 'ziehen-frei',
         text: 'Jetzt schneidest du einen Balken zu, der später ins Dach kommt.',
-        haken: 'Zu kurz geschnitten ist Ausschuss — das Maß holst du nicht zurück.',
+        haken:
+          'Zu kurz geschnitten, und der Balken ist hin — dann taugt er nur noch als Brennholz.',
       }}
       buehneInteraktiv
       interaktionOffen={!geloest}
@@ -146,7 +147,7 @@ export function M4() {
       }
       warum={
         <p>
-          Plan lesen, anzeichnen, ablängen. Die großen Serien macht die{' '}
+          Plan lesen, anzeichnen, auf Länge sägen. Die vielen gleichen Teile macht die{' '}
           <Begriff id="abbundanlage">Abbundanlage</Begriff>, die Sonderteile macht jemand
           von Hand. Jedes Stück bekommt seine Nummer.
         </p>
@@ -185,7 +186,10 @@ export function M4() {
 
               <div className="flex shrink-0 flex-col gap-1.5 max-sm:gap-1">
                 <p className="text-[1.0625rem] text-kh-mute max-sm:text-[0.9375rem]">
-                  Und der Winkel am First:
+                  {/* Der Chip sitzt hier und nicht an der Werkzeichnung darüber: die
+                      wiederholt das Wort nur noch. (Zuerst fällt „First" schon in M2,
+                      wo er ebenfalls angetippt werden kann.) */}
+                  Und der Winkel am <Begriff id="first">First</Begriff>:
                 </p>
                 <div className="flex gap-2">
                   {WINKEL.map((w) => (
@@ -205,7 +209,7 @@ export function M4() {
                       // macht. Der vorläufige Ton (limetter Rand, kaum Füllung)
                       // sagt „getippt, noch nicht geprüft“; die satte Füllung
                       // trägt der Fuß, wenn der Schnitt sitzt. Orange gehört
-                      // nach R3 der Welt, nicht der Wahl.
+                      // der Welt, nicht der Wahl.
                       ton="vorlaeufig"
                       className="flex-1 justify-center gap-2 font-semibold max-sm:min-h-[44px]"
                     >
@@ -267,8 +271,7 @@ export function M4() {
                   data-testid="m4-verladen-zeile"
                   className="text-[1.0625rem] text-kh-mute"
                 >
-                  Ab auf den Anhänger. Die übrigen Teile hat der Abbund-Betrieb schon
-                  vorbereitet.
+                  Ab auf den Anhänger. Die übrigen Teile sind schon zugeschnitten.
                 </p>
               )}
             </div>
@@ -334,9 +337,9 @@ interface Rueckmeldung {
  * Halbsatz zum Winkel, wenn einer gewählt und falsch ist; die Erklärung, was
  * ein falscher Winkel am First anrichtet, bleibt dem eigenen Takt vorbehalten.
  *
- * Texte aus flow 11 (M4); der Zu-kurz-Fall ist zahlenfrei formuliert — die
- * alte Euro-Angabe war auf den früheren 4820-mm-Balken gemünzt und wäre für
- * diesen Balken erfunden (NICHT-ERFINDEN-Policy).
+ * Der Zu-kurz-Fall ist zahlenfrei formuliert — die alte Euro-Angabe war auf
+ * den früheren 4820-mm-Balken gemünzt und wäre für diesen Balken frei
+ * erfunden.
  */
 function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
   const ab = laenge - ZIEL_MM
@@ -348,7 +351,7 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
     const cm = Math.round(-ab / 10)
     return {
       treffer: false,
-      text: `${cm} Zentimeter zu kurz. Der Balken ist Ausschuss — das Maß holst du nicht zurück.${auchWinkel}`,
+      text: `${cm} Zentimeter zu kurz. Der Balken ist hin — abgesägtes Holz bekommst du nicht zurück.${auchWinkel}`,
     }
   }
   if (ab > TOLERANZ_MM) {
@@ -363,7 +366,7 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
   if (winkel !== ZIEL_WINKEL) {
     return {
       treffer: false,
-      text: 'Der Winkel stimmt nicht. Oben am First klafft es, und der Sparren liegt nicht auf.',
+      text: 'Der Winkel stimmt nicht. Oben am First bleibt eine Lücke, und der Sparren liegt nicht richtig an.',
     }
   }
   return { treffer: true, text: TREFFER_TEXT }
@@ -380,7 +383,7 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
  * aus `mass.ts` abgeleitet, nicht getippt.
  *
  * Bleibt die flache 44-px-Variante: das Panel ist mit `buehneInteraktiv`
- * schmal (38 rem quer), und hochkant darf nichts scrollen (R9).
+ * schmal (38 rem quer), und hochkant darf nichts scrollen.
  *
  * Unterhalb `sm` fällt die Zeichnung weg und die beiden Sollwerte rücken zum
  * Etikett in eine Zeile: auf dem Handy hochkant verdoppelte der Block nur,
@@ -390,12 +393,12 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
 function Werkzeichnung() {
   return (
     <div className="kh-feld flex w-full flex-col gap-1.5 px-3.5 py-2.5 max-sm:flex-row max-sm:flex-wrap max-sm:items-baseline max-sm:gap-x-4 max-sm:gap-y-0.5">
-      <p className="kh-etikett">Soll laut Plan</p>
+      <p className="kh-etikett">So soll es sein</p>
       <svg
         viewBox="10 80 310 60"
         className="h-[44px] w-full max-sm:hidden"
         role="img"
-        aria-label={`Werkzeichnung: Länge ${mm(ZIEL_MM)}, Winkel ${ZIEL_WINKEL} Grad`}
+        aria-label={`Zeichnung: Länge ${mm(ZIEL_MM)}, Winkel ${ZIEL_WINKEL} Grad`}
       >
         <path
           d="M20 96 L280 96 L262 130 L20 130 Z"

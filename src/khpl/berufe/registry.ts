@@ -8,14 +8,14 @@ import type { BerufDef, BerufId } from './typen'
  * Das Angebot. Die Reihenfolge hier **ist** die Reihenfolge in der
  * Berufsliste — sortiert wird sie dort nur, wenn ein Vorschlag vorliegt.
  *
- * **Vier Dateien, eine je Beruf, und diese Liste wird nicht mehr angefasst**
- * (khpl-tage.md §6.1 V6). Solange drei Tage gleichzeitig entstehen, ist jede
- * Zeile hier ein Merge-Konflikt zwischen Leuten, die nichts voneinander
- * wissen — der Import steht deshalb schon da, bevor der Beruf etwas kann.
+ * **Vier Dateien, eine je Beruf, und diese Liste wird nicht mehr angefasst.**
+ * Als die Tage gleichzeitig entstanden, war jede Zeile hier ein
+ * Merge-Konflikt zwischen Leuten, die nichts voneinander wissen — der Import
+ * steht deshalb schon da, bevor der Beruf etwas kann.
  *
- * Der Dachdecker steht vorn, weil er als einziger einen Tag hat. Sobald ein
- * zweiter fertig ist, gehört die Reihenfolge auf den Prüfstand: an einem Stand
- * ist die erste Karte die, die am häufigsten getippt wird.
+ * Der Dachdecker steht vorn, weil er der erste fertige Tag war. Inzwischen
+ * haben alle vier einen, und damit gehört die Reihenfolge auf den Prüfstand:
+ * an einem Stand ist die erste Karte die, die am häufigsten getippt wird.
  */
 export const BERUFE: readonly BerufDef[] = [
   DACHDECKER,

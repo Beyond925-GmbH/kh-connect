@@ -9,7 +9,7 @@ import { StepShell } from '@/khpl/shell/StepShell'
 /**
  * M6 — Halb zwölf.
  *
- * **Verschnaufpause mit Inhalt** (khpl-flow.md 7 M6). Ruhiger Screen,
+ * **Verschnaufpause mit Inhalt.** Ruhiger Screen,
  * Brotzeit-Motiv, keine Aufgabe. Der Regiehinweis vom Board gibt die Haltung
  * vor: „Schau einmal vom iPad hoch.“ Dieser Screen darf langsamer sein als alle
  * anderen — kein Drängen, kein Fortschrittsdruck.
@@ -37,18 +37,17 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * `KioskGuard`): ein Overlay, das nach einer Minute fragt, ob man noch da ist,
  * wäre genau der Druck, den dieser Screen nicht ausüben soll.
  *
- * Arbeitszeiten `GEPRÜFT` — BRTV Bau § 3 (flow 10). Der Text sagt bewusst „wer
+ * Die Arbeitszeiten sind geprüft — BRTV Bau § 3. Der Text sagt bewusst „wer
  * um sieben anfängt“ und nicht „Arbeitsbeginn ist sieben Uhr“: der BRTV regelt
  * nur, dass die Arbeitszeit **an der Arbeitsstelle** beginnt; sieben Uhr ist
- * betriebsüblich, nicht tariflich. Diese Unterscheidung bleibt auch nach der
- * Freigabe bestehen (flow 7 M6) — und sie ist jetzt selbst eine der drei
+ * betriebsüblich, nicht tariflich. Diese Unterscheidung bleibt
+ * bestehen — und sie ist jetzt selbst eine der drei
  * Fragen, statt in einer Fußnote zu stehen.
  */
 
 /**
  * Die drei Fragen. Alle Zahlen darin kommen aus derselben geprüften Quelle
- * (BRTV Bau § 3, Tabelle in flow 7 M6); die Formulierungen sind
- * `ENTWURF – UNGEPRÜFT` wie der übrige Copy-Bestand.
+ * (BRTV Bau § 3).
  *
  * Bewusst drei und nicht sechs: mehr Karten heißt hier nicht mehr Inhalt,
  * sondern eine Liste — und eine Liste tippt niemand durch, der gerade Pause
@@ -65,13 +64,13 @@ const FRAGEN = [
     id: 'winter',
     frage: 'Und im Winter?',
     antwort:
-      'Dezember bis März sind es 38 Stunden die Woche statt 41. Die Differenz läuft über ein Arbeitszeitkonto — das ist keine Kürzung, sondern eine andere Verteilung. Im Jahresschnitt bleiben 40.',
+      'Dezember bis März sind es 38 Stunden die Woche statt 41. Im Sommer sammelst du die Mehrstunden auf einem Arbeitszeitkonto an — wie auf einem Sparbuch, nur für Stunden —, im Winter werden sie wieder abgebaut. Gekürzt wird nichts: Übers ganze Jahr sind es im Schnitt 40 Stunden die Woche.',
   },
   {
     id: 'beginn',
     frage: 'Ab wann zählt die Arbeitszeit?',
     antwort:
-      'Ab der Baustelle, nicht ab der Werkstatt — so steht es im Tarifvertrag. Dass es um sieben losgeht, ist betriebsüblich, nicht vorgeschrieben.',
+      'Ab der Baustelle, nicht ab der Werkstatt. So steht es im Tarifvertrag — das sind die Regeln, die für alle Baubetriebe gelten. Dass es um sieben losgeht, machen die meisten Betriebe so. Vorgeschrieben ist es nicht.',
   },
 ] as const
 
@@ -100,8 +99,8 @@ export function M6() {
       warum={
         <>
           <p>
-            Brotzeit auf dem Rohbau. Von hier siehst du, was heute Morgen noch nicht da
-            war. Kein Bildschirm, keine Aufgabe. Zehn Minuten.
+            Brotzeit oben auf dem halbfertigen Haus. Von hier siehst du, was heute Morgen
+            noch nicht da war. Kein Bildschirm, keine Aufgabe. Zehn Minuten.
           </p>
           <motion.p
             initial={{ opacity: 0 }}

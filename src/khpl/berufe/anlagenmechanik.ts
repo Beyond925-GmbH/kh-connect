@@ -4,10 +4,7 @@ import type { BerufDef, StepBild } from './typen'
 /**
  * Anlagenmechaniker/-mechanikerin SHK — der Tag als Route.
  *
- * Neun Hauptschritte, sechs Abstecher. Struktur, Reihenfolge, Übungen und
- * Texte stehen in `khpl-tag-anlagenmechanik.md` und sind dort am 24.08.2026
- * **abgenommen** (`VALIDIERT`); der Wortlaut unten ist von dort übernommen und
- * wird nicht neu erfunden.
+ * Neun Hauptschritte, sechs Abstecher.
  *
  * **Was diesen Tag von den anderen drei unterscheidet:** er wechselt den Ort.
  * Morgens eine Störung bei Frau Osei, danach die große Sanierung, dazwischen
@@ -15,16 +12,16 @@ import type { BerufDef, StepBild } from './typen'
  * Weiter-Text der vier Tage, der einen Ortswechsel ankündigt — das ist die Form
  * dieses Tages in vier Wörtern.
  *
- * **Sein Id-Präfix ist `A`** (khpl-tage.md §6.1 V4): `A1`–`A9` auf der
- * Hauptlinie, Abstecher mit `.`-Suffix (`A8.1`).
+ * **Sein Id-Präfix ist `A`**: `A1`–`A9` auf der Hauptlinie, Abstecher mit
+ * `.`-Suffix (`A8.1`).
  *
- * **Dieser Tag hat kein `three`** (Spec 7). Seine Bühnen sind Zeichnungen —
+ * **Dieser Tag hat kein `three`.** Seine Bühnen sind Zeichnungen —
  * Anlagenausschnitt, Kellerschnitt, Gebäudeschnitt — und liegen unter
  * `buehne/anlagenmechanik/`.
  *
- * ⚠️ **Die Merkmale sind gesetzt, nicht recherchiert** und werden hier nicht
- * geändert (khpl-tage.md 5): wer einen Vektor anfasst, verschiebt die
- * Empfehlung für alle vier Berufe.
+ * **Die Merkmale sind gesetzt, nicht recherchiert**, und werden hier nicht
+ * geändert: wer einen Vektor anfasst, verschiebt die Empfehlung für alle vier
+ * Berufe.
  */
 
 /**
@@ -58,10 +55,9 @@ type AnlagenmechanikStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher
 }
 
 /**
- * Die Hauptlinie mit ihren Abstechern, Reihenfolge = Board-Reihenfolge.
- * Titel sind die Pointen aus Spec 3 und 4, `kurz` die Board-Namen aus
- * derselben Tabelle und aus dem Gesamtdiagramm (Spec 5). Zwei Titel weichen
- * von der Spec ab (A3, A4) — Begründung am Eintrag.
+ * Die Hauptlinie mit ihren Abstechern, Reihenfolge = Board-Reihenfolge. Der
+ * Titel ist die Pointe des Screens, `kurz` sein Board-Name. Zwei Titel nennen
+ * bewusst nur die Tätigkeit (A3, A4) — Begründung am Eintrag.
  */
 const STEPS = [
   {
@@ -85,7 +81,7 @@ const STEPS = [
   {
     id: 'A2',
     titel: 'Vierzig Jahre Keller',
-    kurz: 'Bestandsaufnahme',
+    kurz: 'Alter Keller',
     art: 'haupt',
     weiter: 'A3',
     abstecher: [],
@@ -93,11 +89,14 @@ const STEPS = [
   },
   {
     id: 'A3',
-    // Die Spec-Pointe („Wie viel Wärme braucht ein Haus?") stand fast
+    // Die frühere Pointe („Wie viel Wärme braucht ein Haus?") stand fast
     // wortgleich noch einmal im Auftragsband darunter — dieselbe Dopplung wie
     // beim Dachdecker M2. Die Headline nennt jetzt die Tätigkeit.
     titel: 'Wärmebedarf schätzen',
-    kurz: 'Heizlast',
+    // „Heizlast" stand hier als Board-Name, seit der Screen das Wort trug —
+    // seit dem Schätz-Umbau kommt es auf keinem Screen mehr vor, und ein
+    // Fachwort, das nur auf dem Board steht, erklärt niemand.
+    kurz: 'Wärmebedarf',
     art: 'haupt',
     weiter: 'A4',
     abstecher: ['A3.1'],
@@ -114,11 +113,11 @@ const STEPS = [
   },
   {
     id: 'A4',
-    // Die Spec-Pointe („Der kürzeste Weg ist nicht der richtige") nahm dem
+    // Die frühere Pointe („Der kürzeste Weg ist nicht der richtige") nahm dem
     // Haken der Ansage das Wort vorweg — er sagt denselben Satz. Die Headline
     // nennt jetzt die Tätigkeit; die Pointe bleibt der Übung.
     titel: 'Leitung verlegen',
-    kurz: 'Leitungsführung',
+    kurz: 'Weg der Rohre',
     art: 'haupt',
     weiter: 'A5',
     abstecher: ['A4.1'],
@@ -127,7 +126,7 @@ const STEPS = [
   {
     id: 'A4.1',
     titel: 'Löten, pressen, stecken',
-    kurz: 'Verbindungstechniken',
+    kurz: 'Rohrverbindungen',
     art: 'abstecher',
     weiter: 'A5',
     abstecher: [],
@@ -145,7 +144,7 @@ const STEPS = [
   {
     id: 'A6',
     titel: 'Es läuft',
-    kurz: 'Inbetriebnahme',
+    kurz: 'Erster Start',
     art: 'haupt',
     weiter: 'A7',
     abstecher: [],
@@ -217,7 +216,7 @@ export const ANLAGENMECHANIKER: BerufDef = {
   name: 'Anlagenmechaniker/-mechanikerin SHK',
   kurz: 'Anlagenmechanik',
   zeile: 'Wärmepumpe statt Ölkessel. Du baust die Energiewende ein.',
-  // Unverändert aus `berufe/angekuendigt.ts` übernommen (Spec 8). `sinn: 1` ist
+  // Der Merkmalsvektor bleibt, wie er war. `sinn: 1` ist
   // der höchste Sinnwert im ganzen Angebot; A1 und A3 lösen ihn ein — zuerst
   // ein Mensch, dem geholfen wurde, dann die Bilanz.
   merkmale: {
@@ -233,26 +232,26 @@ export const ANLAGENMECHANIKER: BerufDef = {
     karte: '/medien/media/anlagenmechaniker/card.webp',
     heroPoster: '/medien/media/anlagenmechaniker/hero-poster.webp',
     hero: '/medien/media/anlagenmechaniker/hero.mp4',
-    // **Kein `szenario`.** Für die Auftragsannahme gibt es kein eigenes Video
-    // (Spec 10); `Auftragsannahme` fällt von selbst auf Hero-Poster und
-    // Hero-Loop zurück. Ein Eintrag auf eine Datei, die es nicht gibt, wäre ein
-    // schwarzer Screen am Stand.
+    // **Kein `szenario`.** Für die Auftragsannahme gibt es kein eigenes Video;
+    // `Auftragsannahme` fällt von selbst auf Hero-Poster und Hero-Loop zurück.
+    // Ein Eintrag auf eine Datei, die es nicht gibt, wäre ein schwarzer Screen
+    // am Stand.
   },
   /**
-   * Die Motivliste dieses Tages — am Stück, wie es die Redaktionsentscheidung
-   * verlangt (typen.ts, `bilder`). Sie ist kurz, und das ist Absicht: **der Tag
-   * ist überwiegend gezeichnet**, Fotos trägt er nur an wenigen Stellen
-   * (Spec 7 und 10). Wo hier nichts steht, ist die Bühne eine Zeichnung — oder
+   * Die Motivliste dieses Tages — am Stück, damit die Redaktionsentscheidung
+   * an einer einzigen Stelle fällt (`typen.ts`, `bilder`). Sie ist kurz, und das
+   * ist Absicht: **der Tag ist überwiegend gezeichnet**, Fotos trägt er nur an
+   * wenigen Stellen. Wo hier nichts steht, ist die Bühne eine Zeichnung — oder
    * es fehlt ein Motiv, und dann steht das unten.
    *
    * Jeder Eintrag zeigt auf eine Datei, die unter `public/medien/` **wirklich
    * liegt**; geprüft am 24.08.2026.
    *
-   * ⚠️ **Drei Motive fehlen** (Spec 10): A1.1 (Notdienst), A5 (im Transporter)
-   * und das Szenario-Video der Auftragsannahme. A1.1 und A5 tragen deshalb
-   * **die Transporter-Zeichnung** statt eines geliehenen Fotos — für A5 nennt
-   * Spec 6 die Zeichnung ausdrücklich als gleichwertige Alternative, und A1.1
-   * bekommt dieselbe bei Nacht. Kommen die Fotos, treten sie an ihre Stelle;
+   * **Drei Motive fehlen:** A1.1 (Notdienst), A5 (im Transporter) und das
+   * Szenario-Video der Auftragsannahme. A1.1 und A5 tragen deshalb **die
+   * Transporter-Zeichnung** statt eines geliehenen Fotos — für A5 trägt die
+   * Zeichnung den Screen genauso gut wie ein Foto, und A1.1 bekommt dieselbe
+   * bei Nacht. Kommen die Fotos, treten sie an ihre Stelle;
    * ein Eintrag hier reicht dafür nicht mehr aus, die beiden Steps rufen die
    * Zeichnung direkt auf.
    *
@@ -260,37 +259,36 @@ export const ANLAGENMECHANIKER: BerufDef = {
    * Regelung — **GRUNDFOS und POTTERTON sind darauf lesbar**) und
    * `quiz-waermepumpe.webp` (Wärmepumpe an der Fassade — **„alpha innotec"
    * formatfüllend lesbar**). Beide fallen unter das Ausschlusskriterium
-   * „kein lesbares Firmenlogo im Bild" (Spec 10, MEDIEN-INVENTAR).
+   * „kein lesbares Firmenlogo im Bild" (MEDIEN-INVENTAR).
    */
   bilder: {
     /*
       Wärmepumpe im Garten — der Abstecher rechnet sie gegen den Ölkessel.
 
-      ⚠️ **Widerspruch in der Vorlage, gemeldet und behoben.** Spec 10 empfiehlt
-      genau dieses Motiv für A3.1 und nennt in derselben Tabelle „kein lesbares
-      Firmenlogo im Bild" als Ausschlusskriterium — auf dem Gerät stand
-      formatfüllend „alpha innotec". Am Stand hätte die Kreishandwerkerschaft
-      damit ausgesehen wie ein Herstellerwerbeträger. `pos` verschieben half
-      nicht, das Logo saß mittig auf dem Gerät.
+      **Retuschiert, weil ein Firmenlogo drauf stand.** Das Motiv passt inhaltlich
+      genau auf A3.1, trug aber formatfüllend „alpha innotec" auf dem Gerät. Am
+      Stand hätte die Kreishandwerkerschaft damit ausgesehen wie ein
+      Herstellerwerbeträger. `pos` verschieben half nicht, das Logo saß mittig
+      auf dem Gerät.
 
       Deshalb ist die Datei **retuschiert** (Schriftzug und das kleine Emblem
       auf der schwarzen Seite herausgerechnet, Umgebung interpoliert);
       `public/medien/media/anlagenmechaniker/**` liegt in der Hoheit dieses
-      Tages. Der Widerspruch selbst gehört trotzdem der Redaktion gemeldet: er
-      steht so in der Vorlage und trifft beim nächsten Motiv wieder zu.
+      Tages. Das Ausschlusskriterium gilt beim nächsten Motiv genauso — es ist
+      keine Einzelfallentscheidung.
     */
     'A3.1': { src: '/medien/media/anlagenmechaniker/gallery-1.webp', pos: '50% 50%' },
-    // Rohrverteiler. ⚠️ Passt nur halb (Spec 10): der Abstecher handelt von
+    // Rohrverteiler. Passt nur halb: der Abstecher handelt von
     // Löten, Pressen und Stecken, das Motiv zeigt das Ergebnis, nicht den
     // Handgriff. Bis ein besseres da ist, trägt es den Screen.
     'A4.1': { src: '/medien/media/anlagenmechaniker/gallery-2.webp', pos: '50% 50%' },
     // Die drei Karriere-Motive sind gewerkeneutral und gehören allen vier
-    // Tagen gemeinsam (khpl-tage.md §6.1 V2).
+    // Tagen gemeinsam.
     'A8.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
     'A8.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
     'A8.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },
     /*
-      A9 — der CTA. Spec 10 vergibt für ihn kein Motiv, und ohne Eintrag stand
+      A9 — der CTA. Für ihn gibt es kein eigenes Motiv, und ohne Eintrag stand
       auf der hochkanten Stele unter der Paderborner Silhouette rund ein Drittel
       Bildhöhe reines Orange (Abnahme, A9). Eine leere Farbfläche fordert
       niemanden auf, mit einem Menschen zu sprechen.
@@ -298,7 +296,7 @@ export const ANLAGENMECHANIKER: BerufDef = {
       Deshalb **das Kartenmotiv dieses Berufs** auf dem letzten Screen: das
       einzige verbliebene SHK-Foto ohne lesbares
       Firmenlogo — gallery-3 und quiz-waermepumpe scheiden dafür aus
-      (MEDIEN-INVENTAR, Spec 10), gallery-1 und gallery-2 tragen bereits A3.1
+      (MEDIEN-INVENTAR), gallery-1 und gallery-2 tragen bereits A3.1
       und A4.1. Es zeigt einen Menschen bei der Arbeit an einer Anlage; genau
       darum geht es auf diesem Screen.
 
@@ -312,30 +310,51 @@ export const ANLAGENMECHANIKER: BerufDef = {
     A9: { src: '/medien/media/anlagenmechaniker/card.webp', pos: '65% 45%' },
   } satisfies Partial<Record<Id, StepBild>>,
   /**
-   * S5 — die Auftragsannahme, in-fiction, ohne Meta-Erklärung. Wortlaut aus
-   * Spec 6, `VALIDIERT`.
+   * Takt 1 und 2 der Auftragsannahme (`typen.ts`, `vorstellung`).
+   * Aus dem Tag destilliert: Rohre (A4/A4.1), Störung (A1),
+   * Kesseltausch (A2–A6), Übergabe (A7). Die Umgebung erzählt die Form dieses
+   * Tages — er wechselt den Ort, und am Ende steht ein Mensch, dem geholfen
+   * wurde (`sinn: 1`) — und beschreibt ihn, ohne die Rolle vorwegzunehmen:
+   * das „Du bist Azubi“ gehört dem Fiktions-Takt.
+   */
+  vorstellung: {
+    titel: ['Du hast dir', 'die Anlagenmechanik ausgesucht.'],
+    was: 'Anlagenmechaniker sorgen dafür, dass in Häusern das Wasser läuft und die Heizung warm wird.',
+    aufgaben: [
+      'Rohre so verlegen, dass nichts tropft',
+      'Eine kaputte Heizung wieder zum Laufen bringen',
+      'Alten Ölkessel raus, neue Wärmepumpe rein',
+      'Den Leuten erklären, wie ihre neue Anlage funktioniert',
+    ],
+    umgebung: {
+      titel: ['Jeden Tag', 'eine andere Adresse.'],
+      text: 'Unterwegs sein gehört dazu — mit dem Transporter voller Werkzeug. Gearbeitet wird bei den Leuten zu Hause: im Keller, im Bad, an der Heizung. Oft sagt am Ende jemand danke, weil das Wasser wieder warm ist.',
+    },
+  },
+  /**
+   * Takt 3 der Auftragsannahme — ab hier spricht die Geschichte.
    *
-   * ⚠️ Der Name „Frau Osei" ist laut Spec ein Platzhalter und gehört mit der
-   * Copy abgenommen. **Was nicht verhandelbar ist:** hier steht ein Mensch am
-   * anderen Ende, kein „der Kunde".
+   * **Was nicht verhandelbar ist:** hier steht ein Mensch am anderen Ende,
+   * kein „der Kunde".
    */
   auftrag: {
     etikett: 'Deine erste Adresse',
     titel: ['Zwei Adressen.', 'Ein Tag.'],
-    text: 'Du bist Azubi im SHK-Betrieb. Sieben Uhr, der Transporter ist gepackt. Der Chef gibt dir einen Zettel: erst zu Frau Osei, da kommt kein warmes Wasser mehr. Danach die Große — Ölkessel raus, Wärmepumpe rein.',
+    text: 'Du bist Azubi in einem SHK-Betrieb — Sanitär, Heizung, Klima. Sieben Uhr, der Transporter ist gepackt. Der Chef gibt dir einen Zettel: erst zu Frau Osei, da kommt kein warmes Wasser mehr. Danach die Große — Ölkessel raus, Wärmepumpe rein.',
     knopf: 'Einsteigen',
   },
   graph: baueGraph(STEPS, {
     erster: 'A1',
     /**
-     * Einladungstexte wörtlich aus Spec 4 (`VALIDIERT`). Jeder Abstecher ist
-     * einzeln getextet — nie eine „Mehr erfahren"-Schablone
-     * (khpl-tage.md 1, Mechanismus 7).
+     * Jeder Abstecher ist einzeln getextet — nie eine „Mehr
+     * erfahren"-Schablone. Die Einladung muss den Inhalt versprechen, sonst
+     * tippt man sie nur der Vollständigkeit halber an.
      */
     angebote: {
       'A1.1': {
         einladung: 'Und wenn samstags die Heizung ausfällt?',
-        beschreibung: 'Notdienst — wer fährt, und wie das bezahlt wird.',
+        beschreibung:
+          'Wer nachts und am Wochenende rausfährt — und was man dafür bekommt.',
       },
       'A3.1': {
         einladung: 'Lohnt sich das überhaupt?',
@@ -348,18 +367,16 @@ export const ANLAGENMECHANIKER: BerufDef = {
       'A8.1': { einladung: 'Meister', beschreibung: 'Eigener Betrieb, eigene Azubis.' },
       'A8.2': {
         einladung: 'Techniker',
-        beschreibung: 'Planen und auslegen statt in den Keller.',
+        beschreibung: 'Planen und berechnen statt in den Keller.',
       },
       'A8.3': { einladung: 'Studium', beschreibung: 'Ja, das geht — auch ohne Abitur.' },
     } satisfies Partial<Record<Id, Angebot>>,
     /**
-     * Weiter-Texte aus Spec 4 (`VALIDIERT`).
-     *
      * Die drei Abstecher tragen **denselben** Text wie ihr Elternschritt und
      * nicht einen eigenen: sie münden in denselben nächsten Hauptschritt, und
      * wer den Notdienst-Abstecher gelesen hat, fährt danach genauso „zur
-     * zweiten Adresse" wie der, der ihn übersprungen hat. Neue Formulierungen
-     * wären an dieser Stelle erfundene Copy.
+     * zweiten Adresse" wie der, der ihn übersprungen hat. Ein eigener Text
+     * wäre hier ein Unterschied ohne Anlass.
      */
     weiterTexte: {
       A1: 'Weiter zur zweiten Adresse',
@@ -373,7 +390,7 @@ export const ANLAGENMECHANIKER: BerufDef = {
       A6: 'Weiter nach oben',
     } satisfies Partial<Record<Id, string>>,
     /**
-     * Der Karriere-Link (Spec 4): `['A2', 'A4', 'A6']`.
+     * Der Karriere-Link steht auf jedem zweiten Hauptschritt.
      *
      * **Nicht auf A7** — A8 ist der nächste Schritt danach, und ein Abstecher,
      * der einen Schritt vor sein Ziel abkürzt, schickt den Besucher durch

@@ -13,20 +13,20 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * von selbst sagt, ist glaubwürdiger als zehn, die es weglassen. Vgl. den
  * Dachdecker-Umgang mit Absturz: die Zahlen bleiben draußen, die Sache nicht.
  *
- * ⚠️ **Dieser Screen nennt keinen Betrag** (Spec 6 und 11, `TEILWEISE
- * BELEGT`). Es gibt **keinen bundesweiten SHK-Tarifvertrag**; belegt ist ein
+ * **Dieser Screen nennt keinen Betrag.** Es gibt **keinen bundesweiten
+ * SHK-Tarifvertrag**; nachschlagbar ist ein
  * Beispiel aus Niedersachsen, und dieser Kiosk steht in NRW — die NRW-Sätze
- * konnten nicht belegt werden. Gesagt wird deshalb nur die Sache: dass es
+ * ließen sich nicht recherchieren. Gesagt wird deshalb nur die Sache: dass es
  * Bereitschaft gibt, dass sie reihum geht und dass sie zusätzlich vergütet
  * wird. Wer die Zahl will, fragt den Fachverband SHK NRW.
  *
- * Belegt und deshalb sagbar (`belege/anlagenmechanik.md` 7): dass die Rotation
+ * Recherchiert und deshalb sagbar: dass die Rotation
  * **betrieblich** und nicht tariflich geregelt ist, dass in kleinen Betrieben
  * oft der Chef selbst fährt, und dass Bereithalten und Einsatz getrennt
  * vergütet werden — der Einsatz als Arbeitszeit mit Zuschlägen.
  *
- * **Bühne: dieselbe Zeichnung wie A5, nur nachts.** Spec 7 vergibt diesen
- * Screen an ein Foto, Spec 10 hält fest, dass es fehlt — und `StepFoto`
+ * **Bühne: dieselbe Zeichnung wie A5, nur nachts.** Vorgesehen war für diesen
+ * Screen ein Foto, das es aber nicht gibt — und `StepFoto`
  * rendert ohne Eintrag in der Motivliste nichts, der Screen war leer. Der
  * Transporter bei Nacht sagt dasselbe wie der Text: eine Straße, eine
  * Laterne, ein Fenster, in dem noch Licht brennt. **Eine Welt, zwei
@@ -57,7 +57,7 @@ export function A11() {
             jeden Tag, und es wird bezahlt.
           </p>
           {/*
-            **Wortbudget (R5): offen steht nur der erste Absatz.** Vier
+            **Wortbudget: offen steht nur der erste Absatz.** Vier
             Absätze gleichzeitig — Warum-Block plus Aha — waren ~106 Wörter
             auf einem Lese-Step. Rotation und Bezahlung kommen auf Tipp;
             gestrichen ist nichts, die Ehrlichkeit des ersten Satzes bleibt
@@ -84,13 +84,13 @@ export function A11() {
               <p>
                 Wenn samstags die Heizung ausfällt, ruft niemand eine Zentrale an — es
                 fährt jemand aus dem Team. Wer dran ist, wechselt reihum, meist
-                wochenweise. Wie die Rotation läuft, legt der Betrieb fest und kein
-                Tarifvertrag; in kleinen Betrieben fährt oft der Chef selbst.
+                wochenweise. Wie das genau läuft, macht jeder Betrieb selbst aus; in
+                kleinen Betrieben fährt oft der Chef selbst.
               </p>
               <p className="mt-3">
-                Bezahlt wird beides getrennt: das Erreichbarsein und der Einsatz. Der
-                Einsatz zählt als Arbeitszeit, mit Zuschlägen. Wie viel, regelt jedes
-                Bundesland selbst.
+                Bezahlt wird beides getrennt: dass du erreichbar bist, und der Einsatz
+                selbst. Der Einsatz zählt als Arbeitszeit, mit Zuschlag — also mit extra
+                Geld obendrauf. Wie viel, ist von Region zu Region verschieden.
               </p>
             </>
           )}

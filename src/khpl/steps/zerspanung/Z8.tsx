@@ -32,8 +32,9 @@ export function Z8() {
         // 3,5 Jahre: Verordnung über die Berufsausbildung in den
         // industriellen Metallberufen (42 Monate), zeitstabil.
         <p>
-          Dreieinhalb Jahre Ausbildung, IHK-Prüfung, Facharbeiterbrief. Danach hört es
-          nicht auf — es fängt an. Drei Wege, alle offen.
+          Dreieinhalb Jahre Ausbildung, dann die Prüfung bei der IHK, der Industrie- und
+          Handelskammer. Danach bist du Facharbeiter:in — und danach fängt es erst an.
+          Drei Wege, alle drei offen.
         </p>
       }
       interaktion={

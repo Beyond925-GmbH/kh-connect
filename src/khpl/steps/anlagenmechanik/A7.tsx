@@ -20,7 +20,7 @@ import { VLIES_MARKE } from './A2'
  *
  * **Beat 1 — die Abfrage.** Drei Fragen, je drei Antworten, und die Achse ist
  * nicht *richtig* und *falsch*, sondern **verständlich** und **nicht
- * verständlich** (Spec 6, A7). Jede Frage hat deshalb dieselben drei Sorten
+ * verständlich**. Jede Frage hat deshalb dieselben drei Sorten
  * Antwort:
  *
  *  - die **gute**: fachlich korrekt *und* verstehbar. Beides, nicht eins.
@@ -39,11 +39,10 @@ import { VLIES_MARKE } from './A2'
  * richtige Antwort von **Sprache** abhängt und nicht von Technik — und das ist
  * für ein kundenzugewandtes Gewerk die wahrste Prüfung, die es gibt.
  *
- * **Beat 2 — Rückblick statt Punkte** (khpl-tage.md 1, Mechanismus 6): keine
+ * **Beat 2 — Rückblick statt Punkte:** keine
  * Note, kein Score, sondern eine Aufzählung dessen, was der Besucher
  * tatsächlich getan hat, mit **zwei Fassungen je Eintrag**. Wer durchgeklickt
- * hat, bekommt die kürzere Fassung, aber nie eine Bewertung. Die Formulierungen
- * stehen wörtlich in Spec 6 (A7) und sind `VALIDIERT`.
+ * hat, bekommt die kürzere Fassung, aber nie eine Bewertung.
  *
  * **Bühne.** Der Keller, warm — und darüber, angeschnitten, das Haus aus A3 in
  * der anderen Farbe. **Feierabend im Hellen**: dieser Tag endet nachmittags im
@@ -72,10 +71,9 @@ interface Kundenfrage {
 }
 
 /**
- * Die drei Fragen stehen wörtlich in Spec 6 (A7). Die Antworten sind Copy und
- * `ENTWURF – UNGEPRÜFT`; ihr **fachlicher** Gehalt kommt aus den Belegen:
- * Wärmepumpe bei Minusgraden aus `belege/anlagenmechanik.md` 3, die
- * Größe des Geräts aus derselben Quelle (Luft ist der Wärmeträger).
+ * Die Antworten sind Copy und gehören gegengelesen; ihr **fachlicher** Gehalt
+ * ist recherchiert: die Wärmepumpe bei Minusgraden und die Größe des Geräts
+ * (Luft ist der Wärmeträger).
  *
  * Reihenfolge der Antworten je Frage bewusst gemischt — die gute steht nicht
  * immer oben.
@@ -168,9 +166,13 @@ interface Tat {
 }
 
 /**
- * Reihenfolge = Tagesablauf. Beide Fassungen wörtlich aus Spec 6 (A7),
- * `VALIDIERT`. **A5 und die Abstecher kommen nicht vor** — die Tabelle der
- * Spec hat fünf Zeilen, und eine sechste wäre erfundene Copy.
+ * Reihenfolge = Tagesablauf. Eine Fassung ist gegenüber dem Entwurf
+ * geändert: Bei A6 stand „bei einer Inbetriebnahme
+ * dabei gewesen“, und das Wort kam im ganzen Rückblick unerklärt vor. Jetzt
+ * steht dort in Alltagswörtern, was dabei passiert.
+ *
+ * **A5 und die Abstecher kommen nicht vor** — der Rückblick hat fünf
+ * Zeilen, und eine sechste wäre erfundene Copy.
  */
 const TATEN: { id: StepId; tat: Tat }[] = [
   {
@@ -194,9 +196,10 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'A3',
     tat: {
-      erledigt: 'die Heizlast eines Hauses geschätzt',
+      erledigt: 'geschätzt, wie viel Wärme ein Haus braucht',
       gesehen: 'gesehen, wie viel Wärme ein Haus braucht',
-      geloest: (f) => !!f.answers.a3?.aufgeloest,
+      // Ein Tipp löst in A3 sofort auf — `tipp` ist damit das ganze Signal.
+      geloest: (f) => !!f.answers.a3?.tipp,
     },
   },
   {
@@ -211,7 +214,7 @@ const TATEN: { id: StepId; tat: Tat }[] = [
     id: 'A6',
     tat: {
       erledigt: 'eine Wärmepumpe in Betrieb genommen',
-      gesehen: 'bei einer Inbetriebnahme dabei gewesen',
+      gesehen: 'dabei gewesen, wie eine Wärmepumpe zum ersten Mal anläuft',
       geloest: (f) => !!f.answers.a6?.druckGetroffen,
     },
   },
@@ -277,7 +280,7 @@ export function A7() {
       id="A7"
       /*
         Die beste Übung der Anwendung: dem Kunden erklären, was du gebaut hast.
-        Sie trainiert genau das, worum es in `khpl-vereinfachung.md` geht —
+        Sie trainiert das Vereinfachen selbst —
         deshalb sagt der Auftrag „so, dass sie es versteht", nicht „wähle eine
         Antwort".
       */
@@ -311,9 +314,9 @@ export function A7() {
               */}
               {index === 0 && (
                 <Lage>
-                  Die Bauherrin steht neben dir im Keller. Sie hat die neue Anlage
-                  bezahlt, gesehen hat sie davon zwei Rohre und einen Kasten — und jetzt
-                  fragt sie dich.
+                  Die Bauherrin — ihr gehört das Haus — steht neben dir im Keller. Sie hat
+                  die neue Anlage bezahlt, gesehen hat sie davon zwei Rohre und einen
+                  Kasten. Und jetzt fragt sie dich.
                 </Lage>
               )}
 
@@ -462,7 +465,7 @@ function Feierabend({ liste }: { liste: string[] }) {
         ))}
       </ul>
       {/* Der Bogen zum Anfang — das Fadenobjekt dieses Tages ist das Haus, das
-          vorher kalt war und nachher warm ist (Spec 2). */}
+          vorher kalt war und nachher warm ist. */}
       <motion.p
         variants={{ aus: { opacity: 0 }, an: { opacity: 1 } }}
         transition={{ duration: 0.8 }}

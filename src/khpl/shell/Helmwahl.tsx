@@ -17,7 +17,7 @@ import { HELM_FARBEN, WERKZEUGE, type WerkzeugIcon } from '@/khpl/match/helm'
 import { merkeHelm, useSitzung, zeigeFragen } from '@/khpl/store/fortschritt'
 
 /**
- * S1 — „Dein Helm“. Der erste Screen nach dem Tap auf den Splash.
+ * „Dein Helm“ — der erste Screen nach dem Tap auf den Splash.
  *
  * Zwei Wahlen, zehn Sekunden. Er hat drei Aufgaben, und die dritte ist die,
  * an der er hängt:
@@ -165,7 +165,7 @@ export function Helmwahl() {
                   <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
                   Bevor du anfängst
                 </span>
-                <h1 className="kh-titel">Dein Equipment</h1>
+                <h1 className="kh-titel">Deine Ausrüstung</h1>
               </header>
 
               <section>

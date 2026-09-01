@@ -40,8 +40,7 @@ import type { Rahmenangebot, Rahmenurteil } from './element'
 export type { Rahmenangebot, Rahmenurteil }
 
 /**
- * Das Wandelement als Bühne — **ein Objekt, sieben Zustände**
- * (khpl-tag-zimmerer.md 2 und 7).
+ * Das Wandelement als Bühne — **ein Objekt, sieben Zustände**.
  *
  * Das ist der längste Faden der vier Tage und der Grund, warum dieser Tag ohne
  * einen zweiten Dachstuhl auskommt: dasselbe Element erscheint als Stapel
@@ -55,7 +54,7 @@ export type { Rahmenangebot, Rahmenurteil }
  * lebt in `element.tsx`, die Umgebung in `kulissen.tsx`; beides läuft nur in
  * diesem Lazy-Chunk.
  *
- * **Das Bewegungsgefühl ist Masse** (khpl-tage.md 2): die Kamera fährt mit
+ * **Das Bewegungsgefühl ist Masse**: die Kamera fährt mit
  * trägem Nachlauf statt zu schnippen, die Last in C6 pendelt über einen
  * Frame-Loop mit Dämpfung (`PENDEL_DAEMPFUNG`), nichts rastet hart.
  *
@@ -66,7 +65,7 @@ export type { Rahmenangebot, Rahmenurteil }
  * Dieses Modul zieht `three` nach. Es darf deshalb **nur** über
  * `lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))` eingebunden
  * werden, nie statisch — sonst landet `three` im Erststart-Bündel und reißt die
- * 1,5-MB-Grenze (khpl-tage.md 3). Als Ladezustand dient
+ * 1,5-MB-Grenze. Als Ladezustand dient
  * `Dachstuhl3DFallback` mit eigenem `text`; er ist three-frei und gewerkeneutral.
  *
  * **Keine Wert-Exporte neben der Default-Komponente.** Laufzeitkonstanten
@@ -75,17 +74,16 @@ export type { Rahmenangebot, Rahmenurteil }
  * ## Wiederverwendet aus `src/drei/`
  *
  * `kamera.ts` (`passeEin`, `FOV`), `useTapErkennung`, `fahrzeug.tsx`
- * (`Gespann`, C5) — nur additiv änderbar (khpl-tage.md §6.1 V7).
- * `src/dachstuhl/**` bleibt unangetastet.
+ * (`Gespann`, C5) — nur additiv änderbar, damit die anderen Tage nichts davon
+ * merken. `src/dachstuhl/**` bleibt unangetastet.
  */
 
 /**
  * Die sieben Zustände des Fadenobjekts, je einer je Step.
  *
- * Bewusst benannt und nicht als Zahl auf einer Zeitachse: khpl-tag-zimmerer.md
- * 7 verlangt, dass der Zustand „als benannter Zustand ins Modell“ gehört und
- * nicht als Zahl in die Steps — dieselbe Regel, die beim Dachdecker das
- * Phasenlabel statt einer Zeitzahl durchsetzt.
+ * Bewusst benannt und nicht als Zahl auf einer Zeitachse: der Zustand gehört
+ * als benannter Zustand ins Modell und nicht als Zahl in die Steps — dieselbe
+ * Regel, die beim Dachdecker das Phasenlabel statt einer Zeitzahl durchsetzt.
  */
 export type Elementzustand =
   /** C1 — ein Stapel nummerierter Hölzer auf dem Abbundtisch. */
@@ -104,7 +102,7 @@ export type Elementzustand =
   | 'haus'
 
 /**
- * Die Kamera. **Die Umschaltung ist der Tag** (khpl-tag-zimmerer.md 7): bis C5
+ * Die Kamera. **Die Umschaltung ist der Tag**: bis C5
  * liegt alles flach unter einer Draufsicht, ab C6 steht die Kamera am Boden und
  * schaut hinauf. Ein einziger Screen dreht den Tag um 90°.
  *
@@ -115,7 +113,7 @@ export type Blick = 'draufsicht' | 'untersicht'
 
 /**
  * Die Lichtstimmung. Beide innerhalb des bestehenden Dunkelzweigs von
- * `SZENE_FARBEN` — **kein neuer Tokensatz** (khpl-tage.md 3).
+ * `SZENE_FARBEN` — **kein neuer Tokensatz**.
  *
  * - `halle` — kaltes Oberlicht, tiefe Schatten, Staub in der Luft.
  * - `nachmittag` — warm und weicher. Nicht Abendlicht: dieser Tag endet um
@@ -165,7 +163,7 @@ export interface Wandelement3DProps {
    */
   gesuchteNummer?: number
   /**
-   * „Zeig mir wie“ (khpl-tage.md 3): das gesuchte Holz hebt sich an und bleibt
+   * „Zeig mir wie“: das gesuchte Holz hebt sich an und bleibt
    * markiert oben, bis es angetippt ist — die Lösung wird gezeigt, nicht
    * ausgeführt.
    */
@@ -186,7 +184,7 @@ export interface Wandelement3DProps {
    * Auflösung läuft: die Bauplatte legt sich als halbtransparente Fläche über
    * das Ständerwerk, die Stoßkante rastet sichtbar auf einem Ständer ein, die
    * übrigen Ständer fliegen ins Raster. **Keine Dämmmatte** — das Raster kommt
-   * vom Plattenformat (belege/zimmerer.md 1).
+   * vom Plattenformat.
    */
   aufgeloest?: boolean
 
@@ -307,7 +305,7 @@ function waehleBlickfang(
             // bleibt fünfzehn Zentimeter darüber liegen, der zu kleine fällt
             // durch. Von genau oben ist das alles derselbe Umriss. Der Blick
             // steht deshalb schräg — flach genug, dass es eine Draufsicht
-            // bleibt (Spec: „Draufsicht C1–C4“), steil genug, dass man sieht,
+            // bleibt — C1 bis C4 sind Draufsicht —, steil genug, dass man sieht,
             // ob etwas aufliegt oder drinsteckt.
             richtung: blick === 'untersicht' ? [6.5, -2.6, 9.5] : [0.01, 8.5, 5.6],
             // Eng an der Tafel (x ±4, liegend z −3…0) plus der Reihe Rahmen
@@ -343,8 +341,8 @@ export default function Wandelement3D(props: Wandelement3DProps) {
   const { zustand, blick, licht } = props
   const gezeigterBlick =
     blick ?? (zustand === 'haken' || zustand === 'haus' ? 'untersicht' : 'draufsicht')
-  // Der Bruch sitzt bei C5, aber *hinter* ihm: „Bis dahin: Halle, Kunstlicht …
-  // Ab C6: draußen, Nachmittagslicht“ (khpl-tag-zimmerer.md 3). `verladen`
+  // Der Bruch sitzt bei C5, aber *hinter* ihm: bis dahin Halle und Kunstlicht,
+  // ab C6 draußen im Nachmittagslicht. `verladen`
   // spielt um elf in der Halle und trägt deshalb noch Hallenlicht — sonst
   // nimmt die warme Stimmung der Drehung bei C6 ihre Wirkung.
   const gezeigtesLicht =
@@ -501,7 +499,7 @@ export default function Wandelement3D(props: Wandelement3DProps) {
                 las sich ohne Bodenkontakt als Renderfehler (Abnahme-Befund
                 C5). `mitTor`: nach der Abfahrt bleibt sonst nur strukturloses
                 Braun zurück — Rückwand und offenes Tor machen die leere Halle
-                als Raum lesbar (Designregel R1). */}
+                als Raum lesbar. */}
             <Halle ohneVordereStuetzen mitTor />
             {/* x = −2,8 zentriert das Gespann in der Kamerahülle (±7,6 m):
                 der Anhänger trägt die Ladung um x = 0, der Transporter ragt

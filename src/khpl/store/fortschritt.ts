@@ -8,12 +8,11 @@ import { istGeste, type Geste } from '@/khpl/komponenten/gesten'
 import { aktiviereVolleAnalytik, erfasse, neueAnalytikSitzung } from '@/lib/analytik'
 
 /**
- * Sitzungszustand nach khpl-ui-shell.md 7, erweitert um die vier Berufe.
+ * Sitzungszustand, je Beruf getrennt.
  *
- * Bewusst gegen khpl-flow.md 5 entschieden. Die Flow-Spec verlangt „kein Zustand
- * überlebt einen Reset“, die UI-Shell-Spec löst genau diesen Widerspruch später
- * und ausdrücklich auf: Idle **löscht nichts**, es bringt die App nur auf den
- * Splash zurück. Der nächste Besucher wählt dort „Neu starten“, wer nur kurz
+ * **Idle löscht nichts.** Ein naheliegender Reflex wäre „kein Zustand überlebt
+ * einen Reset“ — der Leerlauf bringt die App aber nur auf den Splash zurück und
+ * wirft nichts weg. Der nächste Besucher wählt dort „Neu starten“, wer nur kurz
  * abgelenkt war „Weitermachen“. Die 30-Minuten-Verfallszeit sorgt dafür, dass
  * ein Stand von heute früh niemandem mehr gehört.
  *
@@ -30,17 +29,17 @@ import { aktiviereVolleAnalytik, erfasse, neueAnalytikSitzung } from '@/lib/anal
 
 const SPEICHER_SCHLUESSEL = 'khpl-progress'
 
-/** Älter als das, gehört der Stand niemandem mehr (khpl-ui-shell.md 7). */
+/** Älter als das, gehört der Stand niemandem mehr. */
 export const VERFALL_MS = 30 * 60 * 1000
 
 /**
  * Welcher Screen gerade läuft — **und der wird mitgespeichert**.
  *
- * Die ersten vier sind der Trichter (S0–S4), danach beginnt die Anwendung, die
+ * Die ersten vier sind der Trichter, danach beginnt die Anwendung, die
  * es vorher schon gab. `bald` ist der Ausgang für einen Beruf ohne Graph.
  *
- * `vorschlag` ist entfallen (`khpl-vereinfachung.md` §5): der Vorschlag ist
- * jetzt die hervorgehobene erste Karte der Berufsliste, kein eigener Screen.
+ * `vorschlag` ist entfallen: der Vorschlag ist jetzt die hervorgehobene erste
+ * Karte der Berufsliste, kein eigener Screen.
  *
  * **Warum das jetzt in der Sitzung liegt.** Bis hierher war der Screen bewusst
  * flüchtig — mit der Folge, dass ein versehentlicher Reload jeden Besucher auf
@@ -68,14 +67,14 @@ export type Bildschirm = (typeof BILDSCHIRME)[number]
 /**
  * Typisierte Sicht auf `answers`. Bleibt zur Laufzeit ein reines JSON-Objekt.
  *
- * **Ein Abschnitt je gebautem Beruf** (khpl-tage.md §6.1 V5). Der Fortschritt
- * liegt zwar schon je Beruf (`berufe: Partial<Record<BerufId, Fortschritt>>`),
- * zur Laufzeit kollidiert also nichts — das *Interface* ist aber gemeinsam,
- * und drei Tage entstehen gleichzeitig. Die Abschnitte sind die Naht, an der
- * drei Agenten dieselbe Datei anfassen können, ohne einander zu überschreiben:
- * **jeder trägt nur in seinem Abschnitt ein.**
+ * **Ein Abschnitt je gebautem Beruf.** Der Fortschritt liegt zwar schon je
+ * Beruf (`berufe: Partial<Record<BerufId, Fortschritt>>`), zur Laufzeit
+ * kollidiert also nichts — das *Interface* ist aber gemeinsam, und drei Tage
+ * entstehen gleichzeitig. Die Abschnitte sind die Naht, an der drei Agenten
+ * dieselbe Datei anfassen können, ohne einander zu überschreiben: **jeder
+ * trägt nur in seinem Abschnitt ein.**
  *
- * Die Schlüssel selbst sind dank der Id-Präfixe aus V4 disjunkt — `m*` gehört
+ * Die Schlüssel selbst sind dank der Id-Präfixe je Beruf disjunkt — `m*` gehört
  * dem Dachdecker, `c*` dem Zimmerer, `a*` der Anlagenmechanik, `z*` der
  * Zerspanung (siehe `berufe/typen.ts`).
  */
@@ -120,8 +119,8 @@ export interface Antworten {
    * nicht, und die Anzeige hängt allein an `getroffen`.
    *
    * `ausschnitt` trägt den **vollen** Ausschnitt in Millimetern, weil er das
-   * Fadenobjekt ab C4 kennzeichnet: „Ab C4 gehört das Element dem Besucher —
-   * der Ausschnitt ist deiner“ (khpl-tag-zimmerer.md 2). C5, C6 und C7 zeigen
+   * Fadenobjekt ab C4 kennzeichnet: Ab C4 gehört das Element dem Besucher —
+   * der Ausschnitt ist seiner. C5, C6 und C7 zeigen
    * dasselbe Fenster wieder, und C6 fragt an ihm ab, wo oben ist — mit einem
    * anderen Fenster als in C4 wäre das keine Erinnerungsleistung, sondern eine
    * Falle. Ebenfalls optional: alte Stände und ein übersprungenes C4 kennen ihn
@@ -155,8 +154,8 @@ export interface Antworten {
   // -------------------------------------------------------------------------
   // Anlagenmechanik — Schlüssel `a*`
   //
-  // Formen wörtlich aus khpl-tag-anlagenmechanik.md 6, je Step am Ende seines
-  // Abschnitts. Alles, was der Rückblick in A7 aufzählt, kommt von hier.
+  // Formen je Step am Ende seines Abschnitts. Alles, was der Rückblick in A7
+  // aufzählt, kommt von hier.
   // -------------------------------------------------------------------------
 
   /**
@@ -170,17 +169,18 @@ export interface Antworten {
   a1?: { geprueft: string[]; ursache: string | null; richtig: boolean }
   /** A2 — welche der sechs Bauteile im Keller angetippt wurden. */
   a2?: { angetippt: string[] }
-  /** A3 — geschätzte Heizlast in kW, und ob die Auflösung schon stand. */
   /**
-   * A3 — welche Verlustflächen gefunden wurden, und ob die Heizlast schon
-   * stand.
+   * A3 — welche Wasserkocher-Antwort getippt wurde. Der Tipp löst sofort auf,
+   * ein eigenes `aufgeloest`-Flag trüge nichts; der Rückblick in A7 liest
+   * direkt `tipp`.
    *
-   * ⚠️ **Die Form hat sich mit dem Umbau geändert** (vorher
-   * `{ schaetzung, aufgeloest }`, ein Reglerwert in kW). Ein alter Stand fällt
-   * in `pruefeAntworten` von selbst auf den Boden — `verluste` fehlt, der
-   * Eintrag wird verworfen, A3 startet neu.
+   * ⚠️ **Die Form hat sich mit jedem Umbau geändert** (erst
+   * `{ schaetzung, aufgeloest }`, ein Reglerwert in kW; dann
+   * `{ verluste, aufgeloest }`, die Flächensuche). Ein alter Stand fällt in
+   * `pruefeAntworten` von selbst auf den Boden — `tipp` fehlt, der Eintrag
+   * wird verworfen, A3 startet neu.
    */
-  a3?: { verluste: string[]; aufgeloest: boolean }
+  a3?: { tipp: string }
   /**
    * A4 — der Weg der Leitung durch das Kellerraster.
    *
@@ -205,12 +205,12 @@ export interface Antworten {
   /**
    * A8 — angesehene Karrierewege, in Reihenfolge des Öffnens.
    *
-   * ⚠️ **Noch ohne Schreiber, und das ist gemeldet** (khpl-tage.md 6.2):
-   * `merkeKarriereweg` unten schreibt fest verdrahtet nach `answers.m9`, einem
-   * Dachdecker-Schlüssel. Zur Laufzeit kollidiert das nicht, weil der
-   * Fortschritt je Beruf liegt — V5 verlangt aber disjunkte Schlüssel, und der
-   * dieses Tages ist `a8`. Die Auflösung ist ein Parameter an der Funktion und
-   * gehört in die Hülle, nicht in einen einzelnen Tag.
+   * ⚠️ **Noch ohne Schreiber, und das ist gemeldet:** `merkeKarriereweg` unten
+   * schreibt fest verdrahtet nach `answers.m9`, einem Dachdecker-Schlüssel.
+   * Zur Laufzeit kollidiert das nicht, weil der Fortschritt je Beruf liegt —
+   * die Schlüssel sollen aber je Beruf disjunkt bleiben, und der dieses Tages
+   * ist `a8`. Die Auflösung ist ein Parameter an der Funktion und gehört in
+   * die Hülle, nicht in einen einzelnen Tag.
    */
   a8?: { angesehen: StepId[] }
 
@@ -228,7 +228,11 @@ export interface Antworten {
    * aufgelöst. `schaetzung` ist der Reglerwert in U/min.
    */
   z2?: { gespannt: boolean; versuche: number; schaetzung: number; aufgeloest: boolean }
-  /** Z3 — angesehene NC-Sätze, und ob der Fasen-Satz gefunden wurde. */
+  /**
+   * Z3 — besuchte Kapitel (`maschine`, `befehle`, `programm`); `gefunden`
+   * heißt: das Programm bis zum Ende laufen gesehen. `versuche` ist ein
+   * Altfeld aus der Quiz-Fassung und bleibt 0.
+   */
   z3?: { gesehen: string[]; gefunden: boolean; versuche: number }
   /**
    * Z4 — das Probeteil: Serie freigegeben, Zahl der Nachdreh-Versuche und
@@ -251,8 +255,8 @@ export interface Fortschritt {
   /**
    * Der weiteste erreichte Hauptschritt — die Hochwassermarke.
    *
-   * Nicht in der Spec, aber ohne sie bricht ein Versprechen aus ui-shell 4:
-   * ein ✓ im Sheet ist antippbar, „springt zum Schritt zurück“. Leitet man
+   * Ohne sie bricht ein Versprechen des Sheets „Dein Weg“: ein ✓ dort ist
+   * antippbar und springt zum Schritt zurück. Leitet man
    * „besucht“ allein aus der aktuellen Position ab, entwerten sich beim
    * Zurückspringen alle Häkchen dahinter, die Rail schrumpft, und es gibt
    * keinen Weg zurück nach vorn außer mehrfach *Weiter*. Die Marke wächst
@@ -344,8 +348,8 @@ function leereSitzung(): Sitzung {
  * einzeln raus statt den ganzen Stand mitzureißen.
  *
  * **Vier Abschnitte, einer je Beruf** — dieselbe Naht wie im Interface
- * `Antworten` (khpl-tage.md §6.1 V5). Jeder Agent prüft nur seine eigenen
- * Schlüssel; dank der Id-Präfixe aus V4 überschneiden sie sich nicht. Ein
+ * `Antworten`. Jeder Agent prüft nur seine eigenen Schlüssel; dank der
+ * Id-Präfixe je Beruf überschneiden sie sich nicht. Ein
  * Beruf, der hier nichts stehen hat, hat schlicht noch keine Interaktion.
  */
 function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
@@ -477,8 +481,8 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
     a.a2 = { angetippt: stringListe(a2.angetippt) as string[] }
   }
   const a3 = q.a3 as Antworten['a3']
-  if (a3 && stringListe(a3.verluste)) {
-    a.a3 = { verluste: stringListe(a3.verluste) as string[], aufgeloest: !!a3.aufgeloest }
+  if (a3 && typeof a3.tipp === 'string') {
+    a.a3 = { tipp: a3.tipp }
   }
   const a4 = q.a4 as Antworten['a4']
   if (a4 && stringListe(a4.pfad)) {
@@ -850,7 +854,7 @@ function marke(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId {
  * Verlässt ein Zug den Karriere-Bereich, ist der Skip vorbei — egal ob über
  * die Rückkehr-Leiste, über ← oder über einen Wisch. Bliebe `detourReturnTo`
  * stehen, zeigte die App für den Rest der Sitzung die Skip-Leiste statt der
- * Rail, und ui-shell 4 („auf **jedem** S2-Screen“) wäre gebrochen.
+ * Rail — die Rail gehört aber auf **jeden** Step-Screen.
  */
 function skipStand(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId | null {
   if (alt.detourReturnTo === null) return null
@@ -858,16 +862,16 @@ function skipStand(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId | n
 }
 
 // ---------------------------------------------------------------------------
-// Trichter (S0–S4)
+// Trichter — Splash bis Berufsliste
 // ---------------------------------------------------------------------------
 
-/** S0 → S1. Verwirft einen alten Stand vollständig. */
+/** Splash → Helmwahl. Verwirft einen alten Stand vollständig. */
 export function starteNeu() {
   vergiss('helm')
   erfasse('sitzung_gestartet')
 }
 
-/** S0 → dorthin, wo der letzte Besucher aufgehört hat. */
+/** Vom Splash dorthin, wo der letzte Besucher aufgehört hat. */
 export function machWeiter() {
   if (pruefeVerfall()) return
   erfasse('sitzung_fortgesetzt', { beruf: sitzung.aktiverBeruf })
@@ -953,7 +957,7 @@ function merkeAngesehen(id: BerufId) {
   aendere((s) => (s.angesehenerBeruf === id ? s : { ...s, angesehenerBeruf: id }))
 }
 
-/** S5 → S6. „Auftrag annehmen“ ist der erste Besuch des ersten Steps. */
+/** Intro → erster Step. „Auftrag annehmen“ ist der erste Besuch des ersten Steps. */
 export function nimmAuftragAn() {
   const id = sitzung.aktiverBeruf
   if (!id || !beruf(id).graph) return
@@ -979,7 +983,7 @@ export function nimmAuftragAn() {
   setzeBildschirm('step')
 }
 
-/** Idle-Rückfall: zurück auf S0, **ohne** zu löschen. */
+/** Idle-Rückfall: zurück auf den Splash, **ohne** zu löschen. */
 export function zumSplash() {
   erfasse('idle_zurueckgefallen', { bildschirm: sitzung.bildschirm })
   setzeBildschirm('splash')
@@ -1105,7 +1109,7 @@ export function geheZu(ziel: StepId) {
   aendereFortschritt((alt, graph) => {
     const def = step(graph, ziel)
     // `immerOffen` sind die drei Karrierekarten. Sie zählen nicht als
-    // genommener Abstecher: sie sollen im Angebot bleiben (flow 7 M9), und sie
+    // genommener Abstecher: alle drei sollen jederzeit im Angebot bleiben, und sie
     // gehören nicht in den Rückblick von M8 — „du hast heute … eine Info-Seite
     // gelesen“ ist keine Tageleistung. Angesehen wird in `answers.m9` vermerkt.
     const zaehlt = def.art === 'abstecher' && !def.immerOffen
@@ -1141,7 +1145,7 @@ export function merkeKarriereweg(ziel: StepId) {
       answers: {
         ...alt.answers,
         // Reihenfolge des Öffnens; der zuletzt geöffnete Weg speist den
-        // personalisierten Aufhänger in M10 (flow 11, M10).
+        // personalisierten Aufhänger in M10.
         m9: { angesehen: [...bisher.filter((x) => x !== ziel), ziel] },
       },
     }
@@ -1205,7 +1209,7 @@ export function starteKarriereSkip() {
  * fortgeschrieben. Sonst endet sie auf `[…, M2, M9, B9.3, M10, M2]`, und ein
  * einziger Druck auf ← nach der Rückkehr wirft den Besucher auf den
  * CTA-Screen — mit voller Rail und ohne Rückkehr-Leiste. Der Skip ist ein
- * Abstecher: danach soll alles aussehen wie davor (ui-shell 6).
+ * Abstecher: danach soll alles aussehen wie davor.
  */
 export function beendeKarriereSkip() {
   aendereFortschritt((alt) => {
@@ -1303,7 +1307,7 @@ const LEER_ERSATZ: Fortschritt = {
   detourReturnTo: null,
 }
 
-/** Für S0: gibt es überhaupt etwas zum Weitermachen? */
+/** Für den Splash: gibt es überhaupt etwas zum Weitermachen? */
 export function useWiedereinstieg(): { beruf: BerufId; fortschritt: Fortschritt } | null {
   const s = useSitzung()
   const moeglich = useSyncExternalStore(abonniere, () => hatWiedereinstieg)

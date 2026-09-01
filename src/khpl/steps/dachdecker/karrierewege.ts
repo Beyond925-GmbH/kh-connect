@@ -1,48 +1,48 @@
 import type { StepId } from '@/khpl/flow/steps'
 
 /**
- * Die drei Karrierewege (khpl-flow.md 7 B9.1–B9.3 und 11).
+ * Die drei Karrierewege.
  *
  * **Die Meister-Karte trägt seit dem 25.08.2026 Dachdecker-Zahlen.** Vorher
  * standen dort die Werte des Zimmererhandwerks unter einer
- * Dachdecker-Überschrift — khpl-tage.md 0c weist sie einzeln als falsch nach,
- * und die drei neuen Tage führen längst ihren eigenen Spaltensatz. Ersetzt
+ * Dachdecker-Überschrift; sie sind einzeln als falsch nachgewiesen, und die
+ * drei neuen Tage führen längst ihren eigenen Spaltensatz. Ersetzt
  * wurden: „1.120 Stunden, in Vollzeit etwa ein Jahr“ → rund 1.530 Stunden,
  * August bis Mai; „8.000 bis 10.000 Euro“ → rund 13.500 Euro; „rund 45.000 Euro
  * im Jahr“ → rund 54.000 Euro.
  *
- * **Diese Zahlen stammen aus `belege/ausbildung-karriere.md`, Spalte
- * Dachdecker**, recherchiert am 24.08.2026. Verdikt und Quelle stehen je
- * Abschnitt im Kommentar:
+ * **Diese Zahlen sind eigens für den Dachdecker recherchiert**, Stand
+ * 24.08.2026. Die Quelle steht je Abschnitt im Kommentar:
  *
- * | Aussage | Verdikt |
+ * | Aussage | Quelle |
  * | --- | --- |
- * | Lehrgang 12.000 € + Prüfung 1.550 € ≈ 13.500 €, ca. 1.530 h, Aug–Mai | `BELEGT` (Lorenz-Burmann-Schule Eslohe, HWK Südwestfalen, Kursjahr 2026/27) |
- * | Aufstiegs-BAföG → höchstens rund ein Viertel Eigenanteil | `BELEGT` (AFBG, Sätze seit 8/2024) |
- * | NRW-Meisterprämie 2.500 € | `BELEGT` — gilt hier, weil Handwerk |
- * | Meister Ø rund 54.000 €/Jahr | `TEILWEISE BELEGT` (Stepstone 10/2025: 4.541 €/Monat) |
- * | Studium ohne Abitur nach BBHZVO, TH OWL Detmold | `BELEGT` — Detmold/Holzbau passt für dieses Gewerk |
+ * | Lehrgang 12.000 € + Prüfung 1.550 € ≈ 13.500 €, ca. 1.530 h, Aug–Mai | Lorenz-Burmann-Schule Eslohe, HWK Südwestfalen, Kursjahr 2026/27 |
+ * | Aufstiegs-BAföG → höchstens rund ein Viertel Eigenanteil | AFBG, Sätze seit 8/2024 |
+ * | NRW-Meisterprämie 2.500 € | Land NRW — gilt hier, weil Handwerk |
+ * | Meister Ø rund 54.000 €/Jahr | Stepstone 10/2025: 4.541 €/Monat — Portaldaten |
+ * | Studium ohne Abitur nach BBHZVO, TH OWL Detmold | BBHZVO — Detmold/Holzbau passt für dieses Gewerk |
  *
- * Es bleibt eine Formulierungsregel, die auch nach einer Freigabe gilt: was aus
- * Gehalts- und Handwerkerportalen stammt, erscheint **nur als Spanne oder mit
- * „rund“**, nie als exakter Wert und nie als Versprechen. Die Texte unten
- * halten das ein — beim Ändern mitdenken. Was `NICHT BELEGBAR` war, steht nicht
- * da: der Bestandssatz „mit Erfahrung deutlich mehr“ ist ersatzlos entfallen,
- * für das Dachdeckerhandwerk gibt es dazu keinen Wert im Beleg.
+ * Es bleibt eine Formulierungsregel: was aus Gehalts- und Handwerkerportalen
+ * stammt, erscheint **nur als Spanne oder mit „rund“**, nie als exakter Wert
+ * und nie als Versprechen. Die Texte unten halten das ein — beim Ändern
+ * mitdenken. Was sich nicht belegen ließ, steht nicht da: der Bestandssatz
+ * „mit Erfahrung deutlich mehr“ ist ersatzlos entfallen, für das
+ * Dachdeckerhandwerk gibt es dazu keinen belastbaren Wert.
  *
  * Die Meistergründungsprämie NRW (seit 1.1.2025 11.500 €, im Einzelfall bis
  * 16.000 € — nicht „bis 15.000“, das war die Deckelung des Aufstiegs-BAföG)
- * ist bewusst **nicht** aufgenommen: flow 7 stellt selbst die Frage, ob das an
- * einem Schüler:innen-Stand die richtige Botschaft ist. Für begleitende Eltern
+ * ist bewusst **nicht** aufgenommen: ob eine Gründungsprämie an einem
+ * Schüler:innen-Stand die richtige Botschaft ist, ist offen. Für begleitende
+ * Eltern
  * wäre sie eine — das entscheidet die Kreishandwerkerschaft, nicht der Code.
  *
  * B9.2 nannte als Technikerfachrichtung „Holztechnik oder Bautechnik“ und
- * B9.3 das Biberacher Modell — der Beleg (6 und 7) weist beides dem Zimmerer
- * zu. Aufgelöst nach der Regel „streichen statt weichzeichnen“: Holztechnik
- * entfällt (für Dachdecker steht im Beleg allenfalls Bautechnik), das
+ * B9.3 das Biberacher Modell — die Recherche weist beides dem Zimmerer zu.
+ * Aufgelöst nach der Regel „streichen statt weichzeichnen“: Holztechnik
+ * entfällt (für Dachdecker kommt allenfalls Bautechnik in Frage), das
  * Biberacher Modell entfällt ersatzlos (ein reines Zimmerer-Modell; einen
  * belegten Dachdecker-Ersatz gibt es nicht). Der Detmold-Anker in B9.3 ist
- * für Dachdecker ausdrücklich belegt (Beleg 7) und bleibt.
+ * für Dachdecker ausdrücklich belegt und bleibt.
  */
 
 export interface Karriereweg {
@@ -52,7 +52,7 @@ export interface Karriereweg {
   /** Der eine Satz auf der Karte in M9. */
   koeder: string
   abschnitte: { frage: string; antwort: string }[]
-  /** Der personalisierte Aufhänger in M10 (flow 11, M10). */
+  /** Der personalisierte Aufhänger in M10. */
   aufhaenger: string
 }
 
@@ -64,45 +64,42 @@ export const KARRIEREWEGE: Karriereweg[] = [
     abschnitte: [
       {
         frage: 'Was ist das',
-        // Der Titel heißt im Dachdeckerhandwerk „Dachdeckermeister/in“
-        // (belege 5, Spalte Dachdecker). `BELEGT`.
+        // Der Titel heißt im Dachdeckerhandwerk „Dachdeckermeister/in“.
         antwort:
           'Der Meisterbrief im Dachdeckerhandwerk. Damit darfst du einen eigenen Betrieb führen und selbst ausbilden.',
       },
       {
         frage: 'Wie lange',
         // Vollzeit ca. 8 Monate von August bis Mai, ca. 1.530 h
-        // (Lorenz-Burmann-Schule Eslohe); berufsbegleitend 2–3 Jahre
-        // (belege 5, Spalte Dachdecker). `BELEGT` für diesen Anbieter.
+        // (Lorenz-Burmann-Schule Eslohe); berufsbegleitend 2–3 Jahre. Die
+        // Stundenzahl gilt für diesen Anbieter.
         antwort:
-          'Teil I und II sind rund 1.530 Stunden — in Vollzeit von August bis Mai, neben dem Beruf zwei bis drei Jahre.',
+          'Rund 1.530 Stunden Unterricht — mehr, als du in einem Schuljahr in der Schule sitzt. In Vollzeit dauert das von August bis Mai, neben dem Beruf zwei bis drei Jahre.',
       },
       {
         frage: 'Was es kostet',
         // 12.000 € Lehrgang (Eslohe) + 1.550 € Prüfungsgebühr (HWK
         // Südwestfalen, alle vier Teile) ≈ 13.500 €, zzgl. Teil III/IV.
-        // `BELEGT` für diesen Anbieter. Aufstiegs-BAföG: 50 % Zuschuss auf
-        // Lehrgangs- und Prüfungskosten, dazu 50 % Darlehenserlass bei
-        // bestandener Prüfung → höchstens rund ein Viertel Eigenanteil.
-        // Der Körper-Anker (R12): ein Viertel ≈ 3.400 €, Azubi-Vergütung
-        // 3. Lehrjahr Dachdecker 1.400 €/Monat (belege 1, Spalte Dachdecker)
-        // → knapp zweieinhalb Monatslöhne. Die Beleg-Details (Name
-        // Aufstiegs-BAföG, NRW-Meisterprämie 2.500 € — beides `BELEGT`) sind
-        // im Review als R5-Kürzung aus dem Screentext gefallen; sie bleiben
-        // hier dokumentiert, falls ein Eltern-Handout sie braucht.
+        // Die Preise gelten für diesen Anbieter. Aufstiegs-BAföG: 50 %
+        // Zuschuss auf Lehrgangs- und Prüfungskosten, dazu 50 %
+        // Darlehenserlass bei bestandener Prüfung → höchstens rund ein
+        // Viertel Eigenanteil. Der Körper-Anker: ein Viertel ≈ 3.400 €,
+        // Azubi-Vergütung 3. Lehrjahr Dachdecker 1.400 €/Monat → knapp
+        // zweieinhalb Monatslöhne. Die Details (Name Aufstiegs-BAföG,
+        // NRW-Meisterprämie 2.500 €) sind im Review aus dem Screentext
+        // gekürzt worden; sie bleiben hier dokumentiert, falls ein
+        // Eltern-Handout sie braucht.
         antwort:
-          'Rund 13.500 Euro für Lehrgang und Prüfung. Die staatliche Förderung übernimmt den größten Teil — wer besteht, zahlt am Ende etwa ein Viertel selbst: knapp zweieinhalb Azubi-Monatslöhne.',
+          'Rund 13.500 Euro für Kurs und Prüfung. Der Staat zahlt den größten Teil dazu. Wer besteht, zahlt am Ende etwa ein Viertel selbst — das sind knapp zweieinhalb Monatslöhne eines Azubis.',
       },
       {
         frage: 'Was du verdienst',
         // Ø ca. 4.500 €/Monat (Stepstone 10/2025: 4.541 €) → rund 54.000 €/Jahr
-        // (belege 5 und khpl-tage.md 0c, Spalte Dachdecker).
-        // `TEILWEISE BELEGT` — Portaldaten, deshalb nur mit „rund“ und ohne
-        // Zusatz nach oben: eine Erfahrungsspanne steht für dieses Gewerk in
-        // keinem Beleg. Der Körper-Anker (R12): 4.500 €/Monat gegen 1.400 €
-        // Azubi-Vergütung im 3. Lehrjahr (belege 1, Spalte Dachdecker) ≈
-        // Faktor 3,2 — „etwa dreimal“ hält auch nach der Tariferhöhung
-        // 10/2026 (1.460 €, Faktor 3,1).
+        // Portaldaten, deshalb nur mit „rund“ und ohne Zusatz nach oben:
+        // eine belastbare Erfahrungsspanne gibt es für dieses Gewerk nicht.
+        // Der Körper-Anker: 4.500 €/Monat gegen 1.400 € Azubi-Vergütung im
+        // 3. Lehrjahr ≈ Faktor 3,2 — „etwa dreimal“ hält auch nach der
+        // Tariferhöhung 10/2026 (1.460 €, Faktor 3,1).
         antwort:
           'Als Dachdeckermeister:in im Schnitt rund 54.000 Euro im Jahr — etwa dreimal so viel wie ein Azubi im dritten Lehrjahr.',
       },
@@ -118,7 +115,7 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Was ist das',
         antwort:
-          'Staatlich geprüfte:r Techniker:in, Fachrichtung Bautechnik. Du planst, rechnest und leitest, statt selbst auf dem Dach zu stehen.',
+          'Ein zweiter Abschluss nach der Ausbildung: staatlich geprüfte:r Techniker:in für Bautechnik. Du planst, rechnest und leitest, statt selbst auf dem Dach zu stehen.',
       },
       {
         frage: 'Wie lange',
@@ -145,12 +142,12 @@ export const KARRIEREWEGE: Karriereweg[] = [
       {
         frage: 'Warum erst eine Ausbildung?',
         antwort:
-          'Weil sie den Weg nicht zumacht, sondern aufmacht. In Nordrhein-Westfalen berechtigt der Meisterbrief — und auch der Techniker — zur Einschreibung in jeden Studiengang an jeder Hochschule des Landes. Ohne Abitur, ohne Aufnahmeprüfung.',
+          'Weil sie den Weg nicht zumacht, sondern aufmacht. Mit dem Meisterbrief darfst du in Nordrhein-Westfalen jedes Fach an jeder Hochschule studieren. Als Techniker:in genauso. Ohne Abitur, ohne Aufnahmeprüfung.',
       },
       {
         frage: 'Und das geht hier',
         antwort:
-          'Die TH OWL hat ihren Fachbereich Bauingenieurwesen in Detmold, mit einem eigenen Fachgebiet Holzbau. Bachelor, sieben Semester, 30 Kilometer von hier.',
+          'Die Hochschule TH OWL bildet in Detmold Bauingenieure aus, mit einem eigenen Schwerpunkt Holzbau. Bachelor, dreieinhalb Jahre, 30 Kilometer von hier.',
       },
     ],
     aufhaenger:
@@ -162,6 +159,6 @@ export function karriereweg(id: StepId): Karriereweg | undefined {
   return KARRIEREWEGE.find((k) => k.id === id)
 }
 
-/** Fällt zurück, wenn in M9 nichts angesehen wurde (flow 11, M10). */
+/** Fällt zurück, wenn in M9 nichts angesehen wurde. */
 export const AUFHAENGER_OHNE =
   'Vielleicht war heute etwas dabei, das du nicht erwartet hast.'

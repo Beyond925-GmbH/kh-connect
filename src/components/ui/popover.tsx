@@ -27,7 +27,7 @@ import { cn } from '@/lib/utils'
  *  - **Derselbe Grund wie das Panel** — dunkel, Lichtkante oben — aber
  *    **deckend** statt der 90 % + Blur von `kh-panel`: unter dem
  *    halbtransparenten Grund schimmerten Textfetzen der Karte durch, die das
- *    Popover gerade erklärt (R2).
+ *    Popover gerade erklärt.
  *  - **Ein Schließer.** Am Messestand probiert niemand aus, ob ein Tap
  *    daneben etwas schließt.
  */

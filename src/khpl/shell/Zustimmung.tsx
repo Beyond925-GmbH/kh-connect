@@ -33,9 +33,9 @@ export function Zustimmung() {
       <div className="flex w-[min(30rem,92vw)] flex-col gap-4 rounded-kh-lg border-t-4 border-kh-orange bg-kh-raised p-7 shadow-[0_28px_80px_rgba(0,0,0,0.7)]">
         <h2 className="kh-titel-klein">Kurz vorweg</h2>
         <p className="text-[1.0625rem] text-kh-mute">
-          Wir zählen anonym und ohne Cookies mit, wie dieser Stand genutzt wird. Dürfen
-          wir zusätzlich für deine Sitzung die Bedienung aufzeichnen — nur Taps und
-          Screens, ohne Namen — damit wir die App besser machen können?
+          Wir zählen anonym mit, wie viele Leute diesen Stand nutzen — ohne Namen, ohne
+          Cookies. Dürfen wir zusätzlich aufzeichnen, was du hier antippst — nur Taps und
+          Screens, keine Namen —, damit wir die App besser machen können?
         </p>
         <div className="flex flex-col items-stretch gap-2 sm:flex-row">
           <Button

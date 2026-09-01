@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 /**
- * Der Staff-Ausgang (khpl-ui-shell.md 8): fünf schnelle Taps, dann „Neu starten
+ * Der Staff-Ausgang: fünf schnelle Taps, dann „Neu starten
  * / App neu laden“. Für den Fall, dass etwas hängt und der nächste Besucher
  * schon wartet.
  *
@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef } from 'react'
  * unsichtbare 48-px-Fläche über die linke obere Ecke — quer über den
  * Zurück-Button. Zwei Folgen, beide schlecht: die linke Hälfte von „Zurück“
  * reagierte nicht mehr, und fünf Taps darauf öffneten das Personalmenü
- * ausgerechnet dem Jugendlichen, den ui-shell 8 davor bewahren will.
+ * ausgerechnet dem Jugendlichen, der davon nichts sehen soll.
  *
  * Es gibt keine Bildschirmecke, die auf allen Screens frei ist: oben links
  * sitzt Zurück, oben rechts der Karriere-Link, unten rechts *Weiter*, unten

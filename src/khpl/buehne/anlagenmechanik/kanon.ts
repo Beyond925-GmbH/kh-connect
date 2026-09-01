@@ -5,15 +5,15 @@
  * Warum eine eigene Datei neben `Schnitt.tsx`: dieselbe Trennung wie bei
  * `buehne/kanon.ts`. Steps importieren Laufzeitwerte der Bühne ausschließlich
  * von hier, aus dem Bühnenmodul selbst nur `import type`. Dieser Tag zieht zwar
- * kein `three` nach (Spec 7 — „dieser Tag hat kein `three`", und das ist der
- * Beweis, dass die Hülle nicht am 3D hängt), aber die Regel hält die Grenze
+ * kein `three` nach — und das ist der Beweis, dass die Hülle nicht am 3D
+ * hängt —, aber die Regel hält die Grenze
  * zwischen „was der Screen weiß" und „was die Zeichnung malt" trotzdem sauber.
  *
- * **Die Farbregel steht hier und nirgends sonst** (Spec 7):
+ * **Die Farbregel steht hier und nirgends sonst:**
  *
  * > Kalt und Warm leben ausschließlich auf der Bühne, nie in der Bedienung.
  * > Es bleibt bei genau einer gefüllten orangen Fläche pro Screen, und das ist
- * > *Weiter*. `src/index.css` wird nicht angefasst (khpl-tage.md 3).
+ * > *Weiter*. `src/index.css` wird nicht angefasst.
  */
 
 // ---------------------------------------------------------------------------
@@ -41,7 +41,7 @@ export const KALT = {
   wahl: '#a8c0d4',
   /**
    * **Das Fadenobjekt des Tages, als Farbe:** die Leitung, die der Besucher in
-   * A4 selbst zieht („ab hier ist der Weg deiner", Spec 2 und 6 A4).
+   * A4 selbst zieht — ab hier ist der Weg deiner.
    *
    * Zwei Anläufe hat sie gebraucht. Zuerst lag sie in `linie` — dieselbe Farbe
    * wie Kellerwände, Hülle und Bestand, nur breiter. Dann in `wahl`, und das
@@ -51,8 +51,8 @@ export const KALT = {
    *
    * Jetzt ein **gebürstetes Metallweiß** — die Materialfarbe eines blanken
    * Rohrs, nicht die nächste Graustufe. Innerhalb der Bühne ist eine
-   * Materialfarbe ausdrücklich erlaubt; die Farbregel („Kalt und Warm leben nur
-   * auf der Bühne, nie in der Bedienung", Spec 7) bleibt unberührt, und Orange
+   * Materialfarbe ausdrücklich erlaubt; die Farbregel — Kalt und Warm leben nur
+   * auf der Bühne, nie in der Bedienung — bleibt unberührt, und Orange
    * bleibt dem Moment in A6 vorbehalten. Den Rest macht die Zeichnung: dunkler
    * Mantel, heller Kern, Dämmschlauch drumherum — ein Rohr sieht anders aus als
    * eine Wandlinie, nicht nur heller (`Haus.tsx`, `Leitung`).
@@ -87,11 +87,11 @@ export const WAERMELAUF_DAUER = 3.2
  * Eine der sechs Prüfungen aus A1.
  *
  * **Absichtlich `string` und keine Union.** Die Störung, die Prüfschritte und
- * die richtige Ursache sind laut Spec 11 noch **fachlich abzunehmen** — „eine
- * plausible, aber falsche Fehlersuche vor einem interessierten Publikum ist die
- * schlechteste Sorte Fehler". Eine Union hier hieße, sechs Prüfschritte zu
- * erfinden und sie durch den Typ zu zementieren. Die Liste gehört in den Step,
- * bis ein Mensch aus dem Gewerk sie bestätigt hat.
+ * die richtige Ursache sind noch **fachlich abzunehmen**: eine plausible, aber
+ * falsche Fehlersuche vor einem interessierten Publikum ist die schlechteste
+ * Sorte Fehler. Eine Union hier hieße, sechs Prüfschritte zu erfinden und sie
+ * durch den Typ zu zementieren. Die Liste gehört in den Step, bis ein Mensch
+ * aus dem Gewerk sie bestätigt hat.
  */
 export type PruefungId = string
 
@@ -100,9 +100,8 @@ export type BauteilId =
   'kessel' | 'tank' | 'verteiler' | 'pumpe' | 'ausdehnungsgefaess' | 'thermostatventile'
 
 /**
- * Die sechs Bauteile aus Spec 6 (A2) — **namentlich dort genannt**, deshalb
- * stehen sie hier fest. Was jedes tut und ob es bleibt, ist Text des Steps und
- * nicht Sache der Zeichnung.
+ * Die sechs Bauteile, die A2 im Keller zeigt. Was jedes tut und ob es bleibt,
+ * ist Text des Steps und nicht Sache der Zeichnung.
  */
 export const BAUTEILE: readonly { id: BauteilId; label: string }[] = [
   { id: 'kessel', label: 'Ölkessel' },
@@ -120,8 +119,8 @@ export const BAUTEILE: readonly { id: BauteilId; label: string }[] = [
 /**
  * Ein Knoten im Kellerraster, als `"spalte,zeile"`. Ein String und kein
  * Tupel, weil der Pfad in `answers.a4.pfad` als `string[]` gespeichert wird
- * (Spec 6, A4) und beim Laden aus dem `localStorage` durch dieselbe
- * String-Prüfung läuft wie alles andere.
+ * und beim Laden aus dem `localStorage` durch dieselbe String-Prüfung läuft
+ * wie alles andere.
  */
 export type KnotenId = string
 
@@ -145,7 +144,7 @@ export function zerlegeKnoten(id: KnotenId): { spalte: number; zeile: number } |
  *
  * Das ist die eine Zahl, die A4 sichtbar macht: „der kürzeste Weg hat vier
  * Bögen und einen Durchbruch durch eine tragende Wand; der richtige ist zwei
- * Meter länger und hat zwei Bögen" (Spec 6).
+ * Meter länger und hat zwei Bögen."
  */
 export function zaehleBoegen(pfad: readonly KnotenId[]): number {
   let boegen = 0
@@ -166,8 +165,8 @@ export function zaehleBoegen(pfad: readonly KnotenId[]): number {
  * Bögen.
  *
  * ⚠️ **Kein Bar, kein Pascal, keine Zahl auf dem Screen.** „Jeder Bogen kostet
- * Druck" stimmt, aber ein fester Wert je Bogen ist `NICHT BELEGBAR` (Spec 11):
- * der Druckverlust rechnet sich über ζ · ρ/2 · v² und hängt an Durchmesser,
+ * Druck" stimmt, aber ein fester Wert je Bogen lässt sich nicht seriös
+ * angeben: der Druckverlust rechnet sich über ζ · ρ/2 · v² und hängt an Durchmesser,
  * Strömungsgeschwindigkeit und Bogenform. Für die Spielmechanik ist das
  * folgenlos — der Balken misst einen Verlust, keine Einheit. Für den Fachtext
  * ist es entscheidend.
@@ -191,27 +190,75 @@ export function druckverlust(pfad: readonly KnotenId[]): number {
 // ---------------------------------------------------------------------------
 
 /**
- * Das Zielfenster des Fülldrucks für ein Einfamilienhaus, `BELEGT`
- * (`belege/anlagenmechanik.md` 5, zeitstabil).
+ * Das Zielfenster des Fülldrucks für ein Einfamilienhaus. Ein zeitstabiler
+ * Praxiswert, keine Gestaltungsgröße.
  */
 export const FUELLDRUCK = { min: 1.2, max: 1.8 } as const
 
-/** Ab hier öffnet das Sicherheitsventil und lässt ab. `BELEGT`, ebenda. */
+/** Ab hier öffnet das Sicherheitsventil und lässt ab. */
 export const SICHERHEITSVENTIL_BAR = 2.5
+
+// ---------------------------------------------------------------------------
+// Das Manometer — eine Skala, zwei Uhren
+// ---------------------------------------------------------------------------
+
+/**
+ * Vollausschlag der Manometer-Skala: 4 bar — eine Zeichenentscheidung, so
+ * sieht ein Heizungsmanometer aus. Sie steht hier und nicht in der Zeichnung,
+ * weil **zwei** Uhren sie teilen: die kleine im Kellerschnitt (`Haus.tsx`,
+ * `Manometer`) und die große im Panel von A6
+ * (`steps/anlagenmechanik/A6.tsx`). Zwei Zeiger, die aus zwei Kopien
+ * derselben Zahl rechnen, wären irgendwann zwei Zeiger, die sich
+ * widersprechen — genau die Sorte Drift, für die es diese Datei gibt
+ * (`druckverlust`, `zaehleBoegen`).
+ */
+export const SKALA_MAX = 4
+
+/**
+ * Der Winkel eines Druckwerts auf dieser Skala: 0 bar zeigt nach links unten
+ * (135°), der Zeiger wandert 270° über den Scheitel bis rechts unten (405°).
+ */
+export function winkel(barWert: number): number {
+  return 135 + (Math.min(Math.max(barWert, 0), SKALA_MAX) / SKALA_MAX) * 270
+}
+
+/** Ein Punkt auf dem Kreis um `cx`/`cy` — Zeigerspitze, Strichende. */
+export function amKreis(
+  cx: number,
+  cy: number,
+  r: number,
+  grad: number,
+): { x: number; y: number } {
+  const rad = (grad * Math.PI) / 180
+  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) }
+}
+
+/** Ein Kreisbogen als SVG-Pfad, im Uhrzeigersinn von `von` nach `bis`. */
+export function bogen(
+  cx: number,
+  cy: number,
+  r: number,
+  von: number,
+  bis: number,
+): string {
+  const a = amKreis(cx, cy, r, von)
+  const b = amKreis(cx, cy, r, bis)
+  const gross = bis - von > 180 ? 1 : 0
+  return `M${a.x} ${a.y} A${r} ${r} 0 ${gross} 1 ${b.x} ${b.y}`
+}
 
 // ---------------------------------------------------------------------------
 // Was die Bühne je Step zeigt
 // ---------------------------------------------------------------------------
 
 /**
- * **Eine Welt, viele Zustände** (khpl-tage.md 1, Mechanismus 2) — nur
- * gezeichnet statt gebaut. Die Union unten ist der Vertrag zwischen den Steps
+ * **Eine Welt, viele Zustände** — nur gezeichnet statt gebaut. Die Union unten ist der Vertrag zwischen den Steps
  * und der Zeichnung: jeder Fall ist genau ein Screen, und was er trägt, steht
  * dabei.
  *
- * | Szene | Step | Zeichnung (Spec 7) |
+ * | Szene | Step | Zeichnung |
  * | --- | --- | --- |
- * | `anlage` | A1 | Anlagenausschnitt, antippbar |
+ * | `anlage` | A1 | Anlagenausschnitt, führt Protokoll |
  * | `keller` | A2 | Kellerschnitt, kalt und alt |
  * | `haus` | A3 | Gebäudeschnitt |
  * | `raster` | A4 | Kellerschnitt als Raster |
@@ -219,14 +266,13 @@ export const SICHERHEITSVENTIL_BAR = 2.5
  * | `uebergabe` | A7 | Keller warm, darüber das Haus angeschnitten |
  * | `transporter` | A5, A1.1 | Blick über das Armaturenbrett, mittags und nachts |
  *
- * **Warum `transporter` dazugekommen ist.** Spec 7 vergibt A5 und A1.1 an
- * Fotos, Spec 10 hält für beide fest: **das Motiv fehlt.** Ohne Eintrag in der
+ * **Warum `transporter` dazugekommen ist.** A5 und A1.1 waren als Fotos
+ * geplant, und für beide **fehlt das Motiv**. Ohne Eintrag in der
  * Motivliste rendert `StepFoto` nichts, und die Zäsur des Tages sowie der
- * ehrlichste Screen des Tages standen auf schwarzem Grund. Spec 6 (A5) erlaubt
- * für die Zäsur ausdrücklich die Alternative — „Foto **oder eine ruhige
- * Zeichnung**. Warmes Licht durch die Windschutzscheibe … auf dem
- * Armaturenbrett liegt ein iPad" —, und das Medium der Bühne entscheidet
- * ohnehin jeder Tag selbst (khpl-tage.md 4). A1.1 bekommt dieselbe Zeichnung
+ * ehrlichste Screen des Tages standen auf schwarzem Grund. Statt eines Fotos
+ * tut es für die Zäsur auch eine ruhige Zeichnung: warmes Licht durch die
+ * Windschutzscheibe, auf dem Armaturenbrett liegt ein iPad. Welches Medium
+ * seine Bühne trägt, entscheidet ohnehin jeder Tag selbst. A1.1 bekommt dieselbe Zeichnung
  * bei Nacht: **eine Welt, zwei Zustände**, und die Frage „wer fährt eigentlich
  * nachts?" hat damit ein Bild statt einer leeren Fläche.
  *
@@ -236,7 +282,10 @@ export const SICHERHEITSVENTIL_BAR = 2.5
 export type BuehnenZustand =
   /**
    * A1 — der Anlagenausschnitt: Speicher, Zirkulation, Mischer, Umwälzpumpe.
-   * Vektor und kein Foto, weil man antippen können muss, was man prüft.
+   * Geprüft wird seit dem Kachel-Umbau auf Foto-Kacheln im Panel
+   * (`steps/anlagenmechanik/PruefKacheln.tsx`); die Zeichnung führt Protokoll —
+   * Haken an den geprüften Punkten, Puls am zuletzt angefassten, der warme
+   * Ring beim Treffer.
    */
   | {
       szene: 'anlage'
@@ -254,7 +303,7 @@ export type BuehnenZustand =
    *
    * `vlies` ist der Handgriff, mit dem der Screen anfängt und den keiner der
    * anderen drei Tage hat: bevor irgendetwas ausgebaut wird, wird die fremde
-   * Wohnung geschützt (Spec 6, `INTERVIEW`).
+   * Wohnung geschützt — genau so fängt der Handgriff im Betrieb auch an.
    */
   | {
       szene: 'keller'
@@ -267,19 +316,23 @@ export type BuehnenZustand =
    * A3 — der Gebäudeschnitt. Dasselbe Haus, das ab hier den ganzen Tag trägt.
    *
    * **Beim Auflösen färbt es sich zum ersten Mal** — und zwar in der
-   * Reihenfolge aus Spec 1: zuerst das warme Haus, dann die Bilanz.
+   * Reihenfolge: zuerst das warme Haus, dann die Bilanz.
    */
   | {
       szene: 'haus'
       /**
-       * Welche Verlustflächen schon angetippt wurden.
+       * Welche Verlustpfeile die Zeichnung zeigt.
        *
-       * ⚠️ **Ersetzt den früheren `schaetzungKw`.** A3 war der dritte
-       * Rate-Regler der Anwendung; der Screen sucht die Heizlast jetzt, statt
-       * sie raten zu lassen (siehe `steps/anlagenmechanik/A3.tsx`).
+       * ⚠️ **Zweimal umgebaut:** erst ersetzte eine Flächensuche den
+       * kW-Regler `schaetzungKw`, inzwischen ist A3 wieder ein Schätzmoment
+       * und auf einen Bogen gekürzt (siehe `steps/anlagenmechanik/A3.tsx`).
+       * Der Step reicht keinen Tipp-Handler mehr herein: vor der Auflösung
+       * ist die Liste leer, danach stehen alle vier — die Pfeile sind Bild,
+       * keine Aufgabe. Das Feld bleibt generisch, die Bühne schreibt dem
+       * Step nicht vor, wie er es fährt.
        */
       verluste: readonly string[]
-      /** Die zuletzt angetippte Fläche — sie hebt sich heraus. */
+      /** Hervorgehobene Fläche — seit dem Umbau fährt A3 hier stets `null`. */
       offen: string | null
       aufgeloest: boolean
     }
@@ -333,7 +386,7 @@ export type BuehnenZustand =
    * ein einzelnes Fenster ist.
    *
    * Das iPad auf dem Armaturenbrett steht in beiden Fällen da. Es ist keine
-   * Requisite, sondern Arbeitsalltag (`INTERVIEW`, Spec 6 A5) — und der
+   * Requisite, sondern Arbeitsalltag — und der
    * billigste Beleg dafür, dass dieses Handwerk kein Beruf von gestern ist.
    * `technik: 0.85` wird damit nebenbei mit eingelöst.
    */

@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/popover'
 
 /**
- * Fachbegriff im Fließtext (khpl-flow.md 6.3). Antippbar, in Markerfarbe
+ * Fachbegriff im Fließtext. Antippbar, in Markerfarbe
  * unterlegt und dick unterstrichen — wer weitergehen will, geht weiter; wer
  * stolpert, bekommt die Antwort an Ort und Stelle.
  *
@@ -16,9 +16,9 @@ import {
  * dunklem Grund, hinter einer Fensterscheibe aus Hallenlicht, war die feine
  * Variante als antippbar nicht zu erkennen.
  *
- * Trefferfläche: khpl-flow.md 8.5 setzt 60 pt für diskrete Ziele. Ein Begriff
- * mitten im Satz kann das nicht einhalten, ohne den Absatz zu zerreißen — die
- * Regel gilt unverändert für alles, was für sich allein steht.
+ * Trefferfläche: Für diskrete Ziele gelten 60 pt. Ein Begriff mitten im Satz
+ * kann das nicht einhalten, ohne den Absatz zu zerreißen — die Regel gilt
+ * unverändert für alles, was für sich allein steht.
  *
  * Innen- und Außenabstand sind bewusst knapp. Mit `mx` und großzügigem `px`
  * schob der Chip jedes folgende Satzzeichen weg, und die Sätze lasen sich als

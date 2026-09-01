@@ -11,14 +11,13 @@ import {
 import { useStaffDialogAnmeldung } from './staffAusgang'
 
 /**
- * Kiosk-Verhalten nach khpl-flow.md 5 und khpl-ui-shell.md 7 + 8.
+ * Das Kiosk-Verhalten: Idle-Rückfall, Reset und Staff-Ausgang.
  *
  * **Idle.** 2 min ohne Berührung → „Bist du noch da?“, weitere 2 min → zurück
  * auf den Attract-Loop.
  *
- * Die Spec nennt 60 s / 15 s (flow 5 und flow 11; ui-shell 7 nennt 90/60 und
- * bezeichnet es selbst als gesetzte Annahme, ui-shell 9.3). Beides ist zu kurz,
- * und zwar aus einem Grund, der erst in der Benutzung sichtbar wurde: Eine
+ * Frühere Fassungen lagen bei 60 s bis 90 s Vorlauf. Das ist zu kurz, und
+ * zwar aus einem Grund, der erst in der Benutzung sichtbar wurde: Eine
  * Minute ohne Tap heißt an diesem Stand meistens nicht „weg“, sondern
  * „redet gerade mit jemandem über das, was auf dem Screen steht“ — genau das
  * Gespräch, für das der Stand da ist. Wer dabei aus seinem Tag geworfen wird,
@@ -30,9 +29,9 @@ import { useStaffDialogAnmeldung } from './staffAusgang'
  * ist, gibt es jetzt den ausdrücklichen Reset — hier im Dialog und unten im
  * Sheet „Dein Weg“.
  *
- * **Was der Reset tut, kommt dagegen aus ui-shell 7: er löscht nichts.** Er
- * bringt die App nur auf S0; der nächste Besucher wählt dort „Neu starten“, wer
- * kurz abgelenkt war „Weitermachen“. Den Rest erledigt die 30-Minuten-Frist.
+ * **Der Reset löscht nichts.** Er bringt die App nur auf den Splash; der
+ * nächste Besucher wählt dort „Neu starten“, wer kurz abgelenkt war
+ * „Weitermachen“. Den Rest erledigt die 30-Minuten-Frist.
  *
  * **Theme.** Es gibt keins mehr. Das Designsystem „Baustelle“ ist einfarbig
  * dunkel (siehe `index.css`), und damit entfallen Schalter, Pinnen und der
@@ -47,16 +46,16 @@ const IDLE_RESET_MS = 120_000
  * Frage „Bist du noch da?“ eine Unterbrechung, keine Hilfe. Der Faktor
  * multipliziert den Vorlauf, ein `3` sind also sechs Minuten.
  *
- * M6 ist die Mittagspause: der Regiehinweis vom Board lautet „Schau einmal vom
- * iPad hoch“, und die Umsetzung verlangt ausdrücklich kein Drängen (flow 7 M6).
+ * M6 ist die Mittagspause: der Screen sagt „Schau einmal vom iPad hoch“ — dort
+ * zu drängen wäre das Gegenteil dessen, was er erzählt.
  * M5 ist eine halbe Minute Zuschauen plus eine Karte, die gelesen werden will.
  * M8 ist der Rückblick, und B9.1–B9.3 sind vier Faktenblöcke am Stück — genau
  * die Stellen, an denen jemand liest, statt zu tippen.
  *
  * C5, A5 und Z5 sind die Zäsuren der anderen Tage (die Fahrt mit dem
  * Element, der Mittag im Transporter, die Frühstückspause am Hallenfenster)
- * — alle mit demselben Argument wie M6, von den Tagen gemeldet statt gebaut
- * (khpl-tage.md 6.2). Z7 ist der Rückblick der Zerspanung (wie M8), die
+ * — alle mit demselben Argument wie M6. Z7 ist der Rückblick der Zerspanung
+ * (wie M8), die
  * Z8.x sind ihre Karriere-Faktenblöcke (wie B9.x).
  */
 const GEDULD: Partial<Record<string, number>> = {

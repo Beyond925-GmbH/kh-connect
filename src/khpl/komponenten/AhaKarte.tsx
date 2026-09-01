@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useId, useRef } from 'react'
 
 /**
- * Der Einwurf aus khpl-flow.md 6.4 — jetzt **im Panel, nach dem Lösen**,
+ * Der fachliche Einwurf zum Screen — **im Panel, nach dem Lösen**,
  * nicht mehr als Banner, das sich auf einer Uhr meldet.
  *
  * **Warum der dritte Umbau.** Die Vorfassung tippte dem Besucher oben rechts
@@ -29,7 +29,7 @@ export interface Einwurf {
   /**
    * Zugeklappt starten: nur die Frage steht da, der Inhalt kommt auf Tipp
    * (Akkordeon in `Warum.tsx`). Für Steps mit mehr als einem Einwurf — zwei
-   * automatisch ausgeschriebene Karten sprengen das Wortbudget (R5). Der
+   * automatisch ausgeschriebene Karten sprengen das Wortbudget. Der
    * erste Einwurf hat sein Akkordeon ohnehin schon: die Klappzeile selbst.
    */
   zugeklappt: boolean

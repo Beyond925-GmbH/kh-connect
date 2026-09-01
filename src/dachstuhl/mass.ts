@@ -1,7 +1,7 @@
 import type { DachstuhlParameter } from './parameter'
 
 /**
- * Abgeleitete Masse (Bauplan 1.4). Rein rechnerisch, kein three-Import —
+ * Abgeleitete Masse. Rein rechnerisch, kein three-Import —
  * die Datei ist damit ohne Renderer pruefbar.
  */
 export interface DachstuhlMasse {
@@ -66,7 +66,7 @@ export interface DachstuhlMasse {
   bundbalkenJ: number[]
 
   /**
-   * Dachflaechen-Frame (Bauplan 2.1): lokale z-Werte, an denen die
+   * Dachflaechen-Frame: lokale z-Werte, an denen die
    * Sparrenoberkante beginnt (First) und endet (Traufe). Der Versatz
    * `-hS * tanA` kommt vom lotrechten First- und Traufschnitt: die
    * Sparren-OK ragt am First darueber hinaus und endet an der Traufe
@@ -280,7 +280,7 @@ export function berechneMasse(p: DachstuhlParameter): DachstuhlMasse {
   return masse
 }
 
-/** Kontrollwerte aus Bauplan 1.4 — schlagen nur im Standardparametersatz an. */
+/** Nachgerechnete Kontrollwerte — schlagen nur im Standardparametersatz an. */
 function pruefeKontrollwerte(m: DachstuhlMasse): void {
   const p = m.p
   const istStandard =

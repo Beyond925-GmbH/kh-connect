@@ -16,8 +16,7 @@ import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
 /**
  * M10 — CTA. Der Endpunkt.
  *
- * **Ein Abschluss-Screen, zweiteilig** statt zwei getrennter Screens
- * (khpl-flow.md 7 M10):
+ * **Ein Abschluss-Screen, zweiteilig** statt zwei getrennter Screens:
  *
  *  1. Personalisierter Aufhänger — greift auf, was in M9 angesehen wurde.
  *     Genau die `XYZ`-Logik des Boards.
@@ -37,7 +36,7 @@ import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
  * sonst nur auf dem Splash zeigt.
  *
  * Wer im Karriere-Skip bis hierher durchgeht, bekommt zusätzlich
- * **[ Zurück zu deinem Tag ]** (ui-shell 6) — der Skip bleibt ein Abstecher,
+ * **[ Zurück zu deinem Tag ]** — der Skip bleibt ein Abstecher,
  * auch wenn er bis ans Ende führt.
  *
  * **Mit vier Berufen ist das Ende kein Ende mehr.** Der Weg nach vorn heißt

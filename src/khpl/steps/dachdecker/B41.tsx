@@ -24,11 +24,11 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 /**
  * B4.1 — Beladen. Abstecher von M4, mündet in M5.
  *
- * **Bewusst reduziert auf die Materialauswahl** (khpl-flow.md 7 B4.1). Kein
+ * **Bewusst reduziert auf die Materialauswahl.** Kein
  * Stapeln, keine Gewichtsverteilung, keine Ladungssicherung — das sprengt das
  * Zeitbudget von drei bis fünf Minuten für den ganzen Durchlauf.
  *
- * **Feedback sofort pro Teil, nicht am Ende** (flow 6.5): jedes Teil wird
+ * **Feedback sofort pro Teil, nicht am Ende:** jedes Teil wird
  * angenommen oder abgelehnt, mit einem Satz dazu, wofür es gebraucht wird.
  * Die Übung *ist* die Erklärung.
  *
@@ -49,7 +49,7 @@ interface Teil {
   id: string
   text: string
   mit: boolean
-  /** Der eine Satz, der beim Ablegen erscheint. Wörtlich aus flow 11 (B4.1). */
+  /** Der eine Satz, der beim Ablegen erscheint. */
   grund: string
 }
 
@@ -72,13 +72,14 @@ const TEILE: Teil[] = [
     // Begründung schickte ihn zu sich selbst — bei einer *gewerteten* Aufgabe
     // die schlimmste Sorte Fehler. Der neue Grund gilt für jedes Gewerk:
     // heute steht das Tragwerk, gedeckt wird später.
-    grund: 'Heute wird aufgerichtet, nicht gedeckt. Die kommen, wenn das Tragwerk steht.',
+    grund:
+      'Heute wird erst das Holzgerippe des Dachs aufgestellt. Die Ziegel kommen später, wenn es steht.',
   },
   {
     id: 'anker',
     text: 'Schrauben und Metallwinkel',
     mit: true,
-    grund: 'Ohne Verbindungsmittel ist ein Dachstuhl ein Stapel Holz.',
+    grund: 'Ohne Schrauben und Winkel ist ein Dachstuhl nur ein Stapel Holz.',
   },
   {
     id: 'daemmung',
@@ -108,7 +109,7 @@ const TEILE: Teil[] = [
     id: 'mischer',
     text: 'Betonmischer',
     mit: false,
-    grund: 'Nicht euer Gewerk — der steht beim Maurer.',
+    grund: 'Das ist der Job der Maurer, nicht eurer.',
   },
   {
     id: 'leiter',
@@ -390,10 +391,13 @@ function Ladeflaeche({
 function Ladefortschritt({ geladen, fertig }: { geladen: number; fertig: boolean }) {
   return (
     <div className="shrink-0" data-testid="b41-fortschritt">
+      {/* Kontext statt zweiter Anweisung (geführte Abstecher-Form, sinngemäß):
+          „Zieh auf den Anhänger“ stand wortgleich schon im Auftragsband — die
+          Zeile sagt jetzt, warum die Wahl zählt, ohne Höhe zu kosten. */}
       <p className="flex flex-wrap items-baseline gap-x-2.5 text-[1.0625rem] font-medium text-kh-paper max-sm:text-[1rem]">
         {fertig
           ? 'Vollständig. Alles drauf, was heute gebraucht wird.'
-          : 'Zieh auf den Anhänger, was mit muss.'}
+          : 'Was du vergisst, fehlt morgen früh auf der Baustelle.'}
         <span className="font-display text-[1.5rem] leading-none text-kh-paper/60 tabular-nums">
           {geladen}/{NOETIG}
         </span>

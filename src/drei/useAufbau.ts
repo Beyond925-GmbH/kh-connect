@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { RefObject } from 'react'
 
 /**
- * rAF-Treiber fuer den Aufbau-Fortschritt (Bauplan 4.1).
+ * rAF-Treiber fuer den Aufbau-Fortschritt.
  *
  * Der Fortschritt lebt in einem Ref, nicht im State: `useFrame` liest ihn
  * jeden Frame, ohne dass React neu rendert — und ein fester Wert aus der

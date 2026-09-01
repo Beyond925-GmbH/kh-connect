@@ -22,9 +22,9 @@ import { motion } from 'motion/react'
  * beim Lösen — es wurde also genau in dem Moment größer, in dem der Screen
  * fertig war.
  *
- * **Höchstens zwölf Wörter, Imperativ, ein Verb.** `pruefe:sprache` bricht ab,
- * wenn das nicht eingehalten wird — das ist die einzige Durchsetzung, die über
- * vier parallel entstehende Tage hinweg trägt.
+ * **Kurz, Imperativ, ein Verb.** Eine Auftragszeile nennt eine Aufgabe, keine
+ * Beschreibung: „Miss die Wand aus", nicht „Die Wand wird ausgemessen". Wie
+ * lang sie sein darf, entscheidet der Screen und nicht eine Wortzahl.
  */
 export function Auftragsband({ children }: { children: React.ReactNode }) {
   return (

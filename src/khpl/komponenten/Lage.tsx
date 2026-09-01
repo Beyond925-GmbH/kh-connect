@@ -15,12 +15,13 @@ import type { ReactNode } from 'react'
  *
  * Auf A7 hieß das konkret: „Erklär es so, dass sie es versteht" — und wer
  * *sie* ist, stand ausschließlich im unsichtbaren `warum`. Auf A2:
- * „Entscheide: fliegt raus oder bleibt?" — ohne ein Wort darüber, dass hier
- * gerade eine Anlage geplant wird und die Entscheidung ins Angebot geht.
+ * „Was schätzt du: fliegt raus oder bleibt?" — ohne ein Wort darüber, dass
+ * hier gerade eine Anlage geplant wird und die Entscheidung ins Angebot geht.
  *
  * **Das ist eine Lücke im Ablauf, nicht in der Copy.** Ein Auftrag sagt, *was*
  * zu tun ist; er kann nicht auch noch sagen, *wo man ist* und *für wen*, ohne
- * gegen R4 zu verstoßen (ein Anweisungssatz pro Screen). Also braucht es eine
+ * die Regel zu brechen, dass auf einem Screen genau ein Anweisungssatz
+ * steht. Also braucht es eine
  * zweite, leisere Zeile — und die steht hier.
  *
  * **Regeln für diesen Satz:**

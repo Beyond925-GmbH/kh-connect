@@ -7,15 +7,15 @@ import { StepShell } from '@/khpl/shell/StepShell'
 /**
  * B3.1 — Bestellt wird nach Plan. Abstecher von M3, mündet in M4.
  *
- * Kurzer Info-Abstecher ohne Übung (khpl-flow.md 7 B3.1).
+ * Kurzer Info-Abstecher ohne Übung.
  *
- * Der stärkste Inhalt steht nach flow 7 B3.1 nicht im Einkauf selbst, sondern
- * daneben: **Planen und Materialauswahl sind offiziell Teil des
- * Ausbildungsberufs** — „das überrascht, weil kaum jemand Zimmerei mit Einkauf
- * verbindet“. Die Spec nennt die Neuordnung ausdrücklich „ein besserer
- * Aufhänger als der Einkauf“. Deshalb trägt die erste Aha-Karte genau das.
+ * Der stärkste Inhalt steht nicht im Einkauf selbst, sondern daneben:
+ * **Planen und Materialauswahl sind offiziell Teil des Ausbildungsberufs** —
+ * „das überrascht, weil kaum jemand Zimmerei mit Einkauf verbindet“. Das ist
+ * der bessere Aufhänger als der Einkauf selbst, und deshalb trägt die erste
+ * Aha-Karte genau das.
  *
- * Wortwahl `GEPRÜFT`: „Bedarfsplanung“ ist **kein** Begriff der
+ * Zur Wortwahl: „Bedarfsplanung“ ist **kein** Begriff der
  * Ausbildungsordnung — belastbar ist der Wortlaut des amtlichen Berufsprofils
  * („Arbeiten planen“, „Baustoffe auswählen“). Und seit dem 1. August 2026 gilt
  * die AusbauBAusbV, nicht mehr die BauWiAusbV von 1999.
@@ -23,20 +23,20 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * ⚠️ Die zweite Aha-Karte trägt eine **Korrektur am Board**. Der grüne Sticky
  * sagt, Holz sei „der einzige Baustoff, der nachwächst“ — das ist falsch:
  * Stroh, Hanf, Flachs, Schilf, Kork und Bambus wachsen ebenfalls nach. Der
- * Satz darf so nicht an den Stand. Hier steht die Neuformulierung aus flow 11.
+ * Satz darf so nicht an den Stand. Hier steht die korrigierte Fassung.
  *
  * Die Formulierung „etwa fünf Tonnen“ ist Pflicht, nicht Stil: das
  * Öko-Institut beziffert den tatsächlichen Speichersaldo auf 600–1.700 kg CO₂
  * je geerntetem Kubikmeter, „rund fünf Tonnen“ bleibt damit im belegten
- * Rahmen, „genau fünf Tonnen“ wäre zu viel behauptet (flow 7 B3.1).
+ * Rahmen, „genau fünf Tonnen“ wäre zu viel behauptet.
  *
- * **Nur die erste Aha-Karte öffnet sich von selbst** (Design-Review, R5): mit
+ * **Nur die erste Aha-Karte öffnet sich von selbst** (Design-Review): mit
  * beiden Karten plus Warum-Absatz standen ~85 Wörter gleichzeitig auf dem
- * Screen. Die Ausbildungsordnung ist laut Spec der stärkere Aufhänger — sie
+ * Screen. Die Ausbildungsordnung ist der stärkere Aufhänger — sie
  * bleibt automatisch offen, die CO₂-Karte startet als Klappzeile
  * (`zugeklappt`) und kommt auf Tipp.
  *
- * **Kein Glossar-Chip mehr auf „Holz“** (Design-Review, R10): der Chip
+ * **Kein Glossar-Chip mehr auf „Holz“** (Design-Review): der Chip
  * verlinkte auf `brettschichtholz` — der Satz redet aber von gewachsenem
  * Holz, der Eintrag erklärt verleimte Bretter. Das Wort „Holz“ braucht am
  * Messestand keine Erklärung.
@@ -66,18 +66,18 @@ export function B31() {
       aha={
         <>
           <AhaKarte sichtbar={aha} eyebrow="Einkaufen — gehört das wirklich zum Beruf?">
-            Ja. „Arbeiten planen“ und „Baustoffe auswählen“ stehen wörtlich im
-            Ausbildungsberufsbild — seit dem 1. August 2026 in einer neuen
-            Ausbildungsordnung.
+            Ja. Seit dem 1. August 2026 gibt es neue Ausbildungsregeln. Darin steht
+            wörtlich: „Arbeiten planen“ und „Baustoffe auswählen“.
           </AhaKarte>
           <AhaKarte
             sichtbar={aha}
             zugeklappt
             eyebrow="Wie viel CO₂ steckt in diesem Dach?"
           >
-            In diesem Dachstuhl stecken rund fünf Kubikmeter Holz — und damit etwa fünf
-            Tonnen CO₂, die dort hundert Jahre bleiben. Holz wächst nach. Kein anderer
-            tragender Baustoff tut das.
+            In diesem Dachstuhl stecken rund fünf Kubikmeter Holz — fünf Würfel mit je
+            einem Meter Kantenlänge. Darin sind etwa fünf Tonnen CO₂ gebunden, und die
+            bleiben dort hundert Jahre. Holz wächst nach. Kein anderer tragender Baustoff
+            tut das.
           </AhaKarte>
         </>
       }

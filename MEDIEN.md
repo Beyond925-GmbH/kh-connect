@@ -1,12 +1,16 @@
 # Medien — `public/medien/schritte/`
 
 Die Motive, die die Step-Screens tragen. Zugekauft wurde nichts: alles Pexels,
-heruntergeladen am 2026-08-18.
+heruntergeladen am 2026-08-18 — mit **einer Ausnahme**: die sechs
+A1-Bauteilfotos der Anlagenmechanik stammen von Wikimedia Commons und sind
+teils CC BY-SA, also **namensnennungspflichtig**. Ihre Quellen stehen im
+Abschnitt „Anlagenmechanik“ unten, die Namensnennung in der App im Sheet
+„Dein Weg“ (Bildnachweis).
 
-**Lizenz:** [Pexels-Lizenz](https://www.pexels.com/license/) — kostenlos,
-kommerziell nutzbar, keine Namensnennung nötig. Die Urheber:innen stehen
-trotzdem unten, weil eine Datei ohne Herkunft in zwei Jahren niemand mehr
-zuordnen kann.
+**Lizenz (Pexels-Bestand):** [Pexels-Lizenz](https://www.pexels.com/license/)
+— kostenlos, kommerziell nutzbar, keine Namensnennung nötig. Die
+Urheber:innen stehen trotzdem unten, weil eine Datei ohne Herkunft in zwei
+Jahren niemand mehr zuordnen kann.
 
 **Technisch:** WebP, 1600 px breit, Qualität 82. Zusammen 1,9 MB. Die Bühne
 eines Steps lädt `eager`, weil sie das Wichtigste auf dem Screen ist; ins
@@ -53,22 +57,56 @@ behauptet, wäre der Fehler, nicht die Lösung. `b91-meister.webp` (Karriere,
 Holzwerkstatt) ist für diesen Metallberuf bewusst nicht verwendet; Z8.1 trägt
 das eigene Meister-Motiv.
 
-### Anlagenmechanik: bewusst keine neuen Fotos
+### Anlagenmechanik: Bauteilfotos für A1, sonst gezeichnet
 
-Für A1, A2 und A3 wurde gesucht und **nichts eingebaut**. Der Bestand an
+Für A2 und A3 wurde gesucht und **nichts eingebaut**. Der Bestand an
 SHK-Motiven auf Pexels zeigt Fußbodenheizungs-Verteiler und
-Wärmepumpen-Außeneinheiten; die drei Screens brauchen aber einen Kessel, einen
+Wärmepumpen-Außeneinheiten; diese Screens brauchen aber einen Kessel, einen
 Speicher, eine Regelung und vier benannte Verlustflächen an **einem** Haus —
 und zwar an Stellen, die man treffen kann. Ein Foto, das etwas anderes zeigt
 als der Text daneben behauptet, ist genau der Fehler, der bei der Zerspanung
-schon einmal korrigiert wurde. Die drei Tage bleiben deshalb gezeichnet; besser
-lesbar sind sie trotzdem geworden (Namen an den Prüfpunkten, Pfeile an den
-Verlustflächen).
+schon einmal korrigiert wurde. Diese Screens bleiben deshalb gezeichnet;
+besser lesbar sind sie trotzdem geworden (Namen an den Prüfpunkten, Pfeile an
+den Verlustflächen).
 
 Gesucht und für später notiert, falls doch ein Foto gewünscht ist:
 Pexels 7937299, 7937300 und 7937309 (Pavel Danilyuk, Heizkreisverteiler mit
 Pumpe und Manometer), 12644994 (Boom, Hand am Thermostatventil), 5640691
 (Tima Miroshnichenko, Manometer in der Hand).
+
+#### A1: sechs Bauteilfotos (Stand 2026-08-31)
+
+**A1 ist seit dem Kachel-Umbau die Ausnahme.** Die Fehlersuche läuft über
+sechs Foto-Kacheln (`steps/anlagenmechanik/PruefKacheln.tsx`), und jede zeigt
+**ein einzelnes Bauteil**, kein Anlagenschema — genau der Zuschnitt, an dem
+das Argument oben nicht zieht: ein Foto, das nur eine Pumpe zeigt, kann über
+die Anlage daneben nichts Falsches behaupten.
+
+Quelle ist **Wikimedia Commons** (nicht Pexels), heruntergeladen am
+2026-08-31, beschnitten und als WebP unter
+`public/medien/media/anlagenmechaniker/` abgelegt (970–1200 px breit,
+zusammen ~340 KB). Anders als bei der Pexels-Lizenz verlangt CC BY-SA die
+**Namensnennung im Medium selbst** — die App trägt sie deshalb im Sheet
+„Dein Weg“ unter „Bildnachweis“ (`src/khpl/shell/DeinWeg.tsx`); wer ein Foto
+tauscht, zieht beide Stellen nach. Die Ausschnitte von `pruefung-kessel`,
+`pruefung-speicher`, `pruefung-regelung`, `pruefung-ladepumpe` und
+`pruefung-zirkulation` sind Bearbeitungen und stehen als solche **selbst
+unter der jeweiligen CC BY-SA-Lizenz** (ShareAlike); nur `pruefung-mischer`
+kommt aus einer CC0-Aufnahme.
+
+| Datei | Prüfpunkt | Quelle (Commons) | Urheber:in | Lizenz | Motiv |
+| --- | --- | --- | --- | --- | --- |
+| `pruefung-kessel.webp` | Kessel | [Vitodens 200 condensing boiler.JPG](https://commons.wikimedia.org/wiki/File:Vitodens_200_condensing_boiler.JPG) | Boulderhydronics | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | Wandhängender Gaskessel, Kupferrohre (Ausschnitt) |
+| `pruefung-speicher.webp` | Speicher | [Hot water storage.jpg](https://commons.wikimedia.org/wiki/File:Hot_water_storage.jpg) | Julie Anne Workman | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | Weißer Warmwasserspeicher mit Kupferrohren (Ausschnitt) |
+| `pruefung-regelung.webp` | Regelung | [Dornbirn-Montfortstraße-KOeB Hackschnitzelheizung-Steuerung-02ASD.jpg](https://commons.wikimedia.org/wiki/File:Dornbirn-Montfortstra%C3%9Fe-KOeB_Hackschnitzelheizung-Steuerung-02ASD.jpg) | Asurnipal | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | Schaltfeld einer Heizungssteuerung: Lampen, beschriftete Schalter, Schaltuhren (Ausschnitt) |
+| `pruefung-ladepumpe.webp` | Speicherladepumpe | [Dornbirn-Montfortstraße-Grundfos-Umwaelzpumpe-01ASD (cropped).jpg](https://commons.wikimedia.org/wiki/File:Dornbirn-Montfortstra%C3%9Fe-Grundfos-Umwaelzpumpe-01ASD_(cropped).jpg) | Asurnipal | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | Rote Grundfos-Umwälzpumpe an dickem Rohr (Ausschnitt) |
+| `pruefung-zirkulation.webp` | Zirkulationspumpe | [Trinkwasser-Zirkulationspumpe.jpeg](https://commons.wikimedia.org/wiki/File:Trinkwasser-Zirkulationspumpe.jpeg) | wiDaki | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | Kleine Trinkwasser-Zirkulationspumpe (Wilo Star Z) an Messingrohren (Ausschnitt) |
+| `pruefung-mischer.webp` | Mischer | [Regelung Vorlauftemperatur Fußbodenheizung.jpg](https://commons.wikimedia.org/wiki/File:Regelung_Vorlauftemperatur_Fu%C3%9Fbodenheizung.jpg) | SchmiAlf | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) | Schwarzer Mischer-Drehgriff mit roter Skala an einem Rohr (Ausschnitt) |
+
+Hinweis für die Abnahme: Auf den Fotos sind Herstellernamen lesbar
+(Viessmann, Ariston, Grundfos, KÖB, Wilo, ESBE). Das ist bei echten
+Bauteilen kaum zu vermeiden und hier Alltag statt Werbung — wer es dennoch
+stört, tauscht das Motiv, nicht das Konzept.
 
 Aus dem Altbestand (`public/medien/media/`) wird weiterhin benutzt:
 

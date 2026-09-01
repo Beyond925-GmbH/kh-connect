@@ -13,7 +13,7 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 /**
  * B3.2 — Vom Plan in den Kopf. Abstecher von M3, mündet in M4.
  *
- * Das echte, drehbare 3D-Modell (khpl-flow.md 7 B3.2). Auf dem Board selbst als
+ * Das echte, drehbare 3D-Modell. Auf dem Board selbst als
  * **(difficult)** markiert; technisch das teuerste Element der App und zugleich
  * das, weswegen jemand am Stand stehen bleibt.
  *
@@ -22,7 +22,12 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * erscheint deshalb erst, wenn zwei Bauteile angetippt wurden — nicht nach
  * einer Uhr, sondern nach dem Erlebnis, das sie kommentiert.
  *
- * `three` hängt hinter `lazy` (flow 8.5): es darf nie im Erststart landen.
+ * **Die Aufforderung trägt den Kontext selbst** (geführte Abstecher-Form,
+ * sinngemäß): das `warum` ist auf Übungs-Steps ausgeblendet, und ohne den
+ * Satz „auf dem Papier lag alles flach“ war das Modell nur ein Spielzeug —
+ * der eine Halbsatz davor sagt, warum sich das Drehen lohnt.
+ *
+ * `three` hängt hinter `lazy`: es darf nie im Erststart landen.
  */
 
 const Dachstuhl3D = lazy(() => import('@/khpl/buehne/Dachstuhl3D'))
@@ -54,7 +59,7 @@ export function B32() {
       ansage={null}
       buehneInteraktiv
       // Das Modell will jede Geste selbst: Drehen darf nie den Step wechseln
-      // (flow 6.1 — Drag-Gesten haben Vorrang vor Swipe-Navigation).
+      // (Drag-Gesten haben Vorrang vor Swipe-Navigation).
       interaktionOffen={!genug}
       buehne={
         <Suspense fallback={<Dachstuhl3DFallback />}>
@@ -99,9 +104,9 @@ export function B32() {
       }
       aha={
         <AhaKarte sichtbar={genug} eyebrow="Muss man dafür räumlich denken können?">
-          Räumliches Vorstellungsvermögen ist kein Talent. Es ist Training — und es steht
-          im Lehrplan der Berufsschule. Kehlbalken-Geometrie ist echte 3D-Mathematik, und
-          die lernt man dort systematisch.
+          Räumlich denken ist kein Talent, das man hat oder nicht hat. Man lernt es — in
+          der Berufsschule steht es im Lehrplan. Auszurechnen, wie ein Balken schräg im
+          Dach sitzt, ist echte Mathematik in drei Dimensionen. Genau das wird dort geübt.
         </AhaKarte>
       }
       fuss={
@@ -135,7 +140,8 @@ function Aufforderung({ gefunden }: { gefunden: number }) {
         <RotateCw className="size-6" strokeWidth={2.25} />
       </motion.span>
       <p className="text-[1.125rem] font-medium text-kh-paper">
-        Dreh das Dach. Tipp an, was du wissen willst.
+        Auf dem Papier lag alles flach — das hier ist derselbe Dachstuhl. Dreh ihn, und
+        tipp an, was du wissen willst.
         {gefunden > 0 && (
           <span className="font-normal text-kh-paper/55">
             {' '}

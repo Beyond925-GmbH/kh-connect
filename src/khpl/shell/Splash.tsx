@@ -1,14 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Hand, RotateCcw } from 'lucide-react'
+import { buttonVariants } from '@/components/ui/button'
 import { Logo } from '@/components/ui/logo'
+import { cn } from '@/lib/utils'
 import { step } from '@/khpl/flow/steps'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
 import { machWeiter, starteNeu, useWiedereinstieg } from '@/khpl/store/fortschritt'
 import { useStaffAusgang } from './staffAusgang'
 
 /**
- * S0 — Splash / Attract (khpl-ui-shell.md 2). Der Ruhezustand des Standes.
+ * Splash / Attract — der Ruhezustand des Standes.
  *
  * Der Screen hat genau eine Aufgabe: jemanden, der drei Meter entfernt
  * vorbeigeht, dazu bringen, den Kopf zu drehen. Deshalb ist er der einzige im
@@ -26,7 +28,7 @@ import { useStaffAusgang } from './staffAusgang'
  * einer Zimmerei“) ist je Beruf ein anderes — es kann nicht auf einem Screen
  * stehen, der für alle vier wirbt.
  *
- * Erststart-Budget: bis „Tippen zum Starten“ ≤ 1,5 MB (flow 8.5). Deshalb trägt
+ * Erststart-Budget: bis „Tippen zum Starten“ ≤ 1,5 MB. Deshalb trägt
  * der Screen zuerst nur das Poster; der Loop wird erst **nach** dem ersten Frame
  * nachgeladen und blendet sich darüber. Wer sofort tippt, hat schon gestartet,
  * bevor das Video da ist.
@@ -38,12 +40,12 @@ import { useStaffAusgang } from './staffAusgang'
  * `start-loop.mp4`. Ein Poster aus einer anderen Aufnahme macht aus der
  * Überblendung einen harten Schnitt zwischen zwei fremden Bildern.
  *
- * ⚠️ **Der Loop deckt drei Gewerke ab, nicht vier**, und er ist mit 13 s kurz
+ * **Der Loop deckt drei Gewerke ab, nicht vier**, und er ist mit 13 s kurz
  * für das, was er leisten soll. Was er braucht:
  *
  *  - **Dachdecker fehlt** — im ganzen Repo liegt dazu kein Bewegtbild.
  *  - **30–60 s statt 13.** Der Erststart trägt das: der Loop lädt erst 400 ms
- *    nach dem ersten Frame, bis dahin steht das Poster (flow 8.5).
+ *    nach dem ersten Frame, bis dahin steht das Poster.
  *  - **Die ersten acht Sekunden entscheiden.** Nur so lange schaut jemand hin,
  *    der vorbeigeht; alle vier Gewerke müssen darin vorkommen. Was danach
  *    kommt, darf ruhiger werden. Dazu: jeder Idle-Rückfall startet das Video
@@ -62,6 +64,7 @@ const LOOP = '/medien/media/shared/start-loop.mp4'
 
 export function Splash() {
   const wiedereinstieg = useWiedereinstieg()
+  const reduziert = useReducedMotion() ?? false
   const [videoBereit, setVideoBereit] = useState(false)
   const video = useRef<HTMLVideoElement>(null)
   const staffTap = useStaffAusgang()
@@ -104,12 +107,16 @@ export function Splash() {
       onClick={starteNeu}
       className="kh-screen flex flex-col overflow-hidden bg-kh-ink"
     >
+      {/* Der Ken-Burns-Zug über das Poster. Bei `prefers-reduced-motion`
+          bleibt das Bild auf dem Startwert stehen — eine endlos zoomende
+          Vollbildfläche ist genau die Bewegung, die diese Einstellung
+          abschalten soll. */}
       <motion.img
         src={POSTER}
         alt=""
         aria-hidden
         initial={{ scale: 1.06 }}
-        animate={{ scale: 1.16 }}
+        animate={reduziert ? { scale: 1.06 } : { scale: 1.16 }}
         transition={{
           duration: 24,
           ease: 'linear',
@@ -151,9 +158,9 @@ export function Splash() {
 
       <div className="relative flex min-h-0 flex-1 flex-col justify-between p-6 landscape:p-10">
         <div className="flex min-w-0 flex-wrap items-center gap-2.5">
-          {/* Auf dem Logo liegt der Staff-Ausgang — fünf schnelle Taps, wie in
-              ui-shell 8 beschrieben. `stopPropagation`, sonst startet der Tap
-              zugleich eine neue Sitzung. */}
+          {/* Auf dem Logo liegt der Staff-Ausgang — fünf schnelle Taps.
+              `stopPropagation`, sonst startet der Tap zugleich eine neue
+              Sitzung. */}
           <button
             type="button"
             onClick={(e) => {
@@ -224,24 +231,55 @@ export function Splash() {
             animate={{ opacity: 1, transform: 'translateY(0px)' }}
             transition={{ duration: 0.5, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
             data-testid="tippen-zum-starten"
-            className="flex items-center gap-3.5"
+            className="relative"
           >
-            {/* Die pulsierende Hand ist die Einladung. Vorher pulsierte die
-                Textzeile selbst zwischen 55 % und 100 % Deckkraft — aus drei
-                Metern ist eine blinkende Zeile nicht von einer flackernden zu
-                unterscheiden. Ein Ziel, das atmet, liest sich als „hier
-                anfassen“. */}
-            <motion.span
-              aria-hidden
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              className="grid size-14 shrink-0 place-items-center rounded-full bg-kh-orange text-[#0E0D0B] animate-puls"
+            {/* Der Einstieg als gefüllte Limette-Pille — die eine pro Screen,
+                die „hier geht's weiter“ heißt (die Farbregel steht in
+                `button.tsx`). Vorher: eine kleine orange Hand neben einer
+                Textzeile in Fließtextgröße. Orange gehört aber der Welt, und
+                auf diesem Screen ist alles orange — Verlauf, Titelakzent,
+                Warnband. Die Einladung ging in ihrer eigenen Umgebung unter.
+                Limette kommt sonst nirgends auf dem Splash vor; die Pille ist
+                damit aus drei Metern das einzige, was „drück mich“ sagt.
+
+                Gestylt über `buttonVariants({ variant: 'weiter' })`, nicht
+                nachgebaut: Tastenschatten, Einsinken beim Drücken und die
+                Farben kommen aus einer Quelle. Ein `<Button>` ist sie
+                trotzdem nicht — der ganze Screen ist das Tippziel (`onClick`
+                auf dem Wurzelelement), ein eigener Handler würde die Sitzung
+                doppelt starten. Das `:active`-Einsinken greift dennoch, weil
+                der Finger beim Tippen auf der Pille selbst landet.
+
+                Sie atmet ruhig (Skalierung, kein Blinken — ein Ziel, das
+                atmet, liest sich als „hier anfassen“); dahinter läuft ein
+                leiser Lichtring nach außen. Skaliert wird der Rahmen, nicht
+                die Pille — sonst bliebe ihr `active:translate-y` gegen die
+                Animation wirkungslos (wie in `Auftragsannahme`). Beides steht
+                bei `prefers-reduced-motion` still — Größe und Kontrast tragen
+                die Botschaft dann allein. */}
+            {!reduziert && (
+              <motion.span
+                aria-hidden
+                animate={{ scale: [1, 1.16], opacity: [0.4, 0] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeOut' }}
+                className="absolute inset-0 rounded-kh-pill bg-kh-signal"
+              />
+            )}
+            <motion.div
+              animate={reduziert ? { scale: 1 } : { scale: [1, 1.035, 1] }}
+              transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              className="relative"
             >
-              <Hand className="size-7" strokeWidth={2.25} />
-            </motion.span>
-            <span className="text-[clamp(1.25rem,1.05rem+0.8vw,1.75rem)] font-semibold text-kh-paper">
-              Tippen zum Starten
-            </span>
+              <div
+                className={cn(
+                  buttonVariants({ variant: 'weiter' }),
+                  'h-auto gap-4 px-8 py-4 text-[clamp(1.25rem,1.05rem+1.4vw,2.25rem)] landscape:px-10 landscape:py-5',
+                )}
+              >
+                <Hand className="size-9 shrink-0 landscape:size-10" strokeWidth={2.25} />
+                <span>Tippen zum Starten</span>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

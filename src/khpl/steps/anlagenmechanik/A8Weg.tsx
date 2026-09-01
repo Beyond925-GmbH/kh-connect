@@ -11,7 +11,7 @@ import { karriereweg } from './karrierewege'
  * A8.1 / A8.2 / A8.3 — Meister · Techniker · Studium. Abstecher von A8,
  * münden in A9.
  *
- * Je eine Info-Karte mit gleichem Aufbau (Spec 6, A8): die Abschnitte des
+ * Je eine Info-Karte mit gleichem Aufbau: die Abschnitte des
  * Weges als Frage und Antwort. Keine Übung und keine Aha-Karte — dieselbe Form
  * wie `B9` beim Dachdecker, anderer Inhalt.
  *
@@ -21,11 +21,11 @@ import { karriereweg } from './karrierewege'
  *
  * ⚠️ **Vermerkt wird über `merkeAntwort('a8', …)` und nicht über
  * `merkeKarriereweg`** — und der Grund ist eine Naht in der Hülle, die
- * gemeldet und nicht repariert wird (khpl-tage.md 6.2):
+ * gemeldet und nicht im Vorbeigehen repariert wird:
  * `store/fortschritt.ts` schreibt in `merkeKarriereweg` **fest verdrahtet**
  * nach `answers.m9`, einem Dachdecker-Schlüssel. Zur Laufzeit kollidiert
- * nichts (der Fortschritt liegt je Beruf), aber V5 verlangt disjunkte
- * Schlüssel je Beruf, und `a8` ist der dieses Tages. Bis die Funktion einen
+ * nichts (der Fortschritt liegt je Beruf), aber die Antwortschlüssel sollen
+ * je Beruf disjunkt bleiben, und `a8` ist der dieses Tages. Bis die Funktion einen
  * Schlüssel entgegennimmt, schreibt dieser Screen ihn selbst — dieselbe Logik,
  * nur in den eigenen Abschnitt.
  */
@@ -67,7 +67,7 @@ export function A8Weg({ id }: { id: StepId }) {
         Fassung — genau die Doppelung, die der Kopf der `Klappliste` als zur
         Migration gemeldet führt. Und die eigene Fassung schrieb quer alle
         fünf Antworten gleichzeitig aus: ~90–110 Wörter ohne einen
-        hervorgehobenen Kernfakt (R5/R10). Die Klappliste hält das Wortbudget
+        hervorgehobenen Kernfakt. Die Klappliste hält das Wortbudget
         in beiden Formaten — der erste Block kommt offen an, die übrigen
         Fragen bleiben als Verzeichnis stehen, gekürzt ist nichts.
       */

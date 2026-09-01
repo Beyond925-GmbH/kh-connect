@@ -11,14 +11,14 @@ import { PHASEN } from '@/dachstuhl/zeitachse'
  * Aufrichtfolge ist fachlich festgelegt, ihre Namen ändern sich nicht.
  *
  * **Der Schnitt liegt vor den Sparren.** M5 zeigt den Unterbau und hält genau
- * dort an, wo flow 7 M5 den Aha-Moment setzt — „bevor der erste Sparren
- * fliegt, steht die Sicherung“. Damit ist der Satz beim Anhalten wörtlich wahr,
- * und M7 („Jetzt du“) löst das Versprechen aus M5 ein: „Schau zu — gleich bist
- * du dran.“ Der Besucher fliegt die Sparren selbst ein.
+ * dort an, wo der Aha-Moment sitzt: bevor der erste Sparren fliegt, steht die
+ * Sicherung. Damit ist der Satz beim Anhalten wörtlich wahr, und M7 („Jetzt
+ * du“) löst das Versprechen aus M5 ein: „Schau zu — gleich bist du dran.“ Der
+ * Besucher fliegt die Sparren selbst ein.
  *
- * Nebeneffekt, der die Entscheidung trägt: nur so ist die Rückmeldung aus
- * flow 11 („Der Kehlbalken hängt in der Luft. Erst die Sparren, dann das, was
- * sie verbindet.“) überhaupt erreichbar. Läge der Schnitt hinter den Sparren,
+ * Nebeneffekt, der die Entscheidung trägt: nur so ist die Rückmeldung „Der
+ * Kehlbalken hängt in der Luft. Erst die Sparren, dann das, was sie
+ * verbindet.“ überhaupt erreichbar. Läge der Schnitt hinter den Sparren,
  * wäre der Kehlbalken immer die erste richtige Antwort.
  */
 
@@ -56,9 +56,8 @@ export const M7_START = M5_ENDE
  * vorgegeben. Genau das ist der Unterschied zu M7, wo dieselbe Reihenfolge
  * ohne Ansage abgefragt wird — geführt üben, dann aus dem Kopf.
  *
- * Die Sätze sind aus `dachstuhl/bauteil-texte.ts` auf eine Zeile gekürzt
- * (`ENTWURF – UNGEPRÜFT`, wie das übrige Glossar): auf einer Karte, die man
- * antippt, um weiterzukommen, liest niemand vier Zeilen.
+ * Die Sätze sind aus `dachstuhl/bauteil-texte.ts` auf eine Zeile gekürzt: auf
+ * einer Karte, die man antippt, um weiterzukommen, liest niemand vier Zeilen.
  */
 export interface Lehrschritt {
   /** Phasenlabel in `zeitachse.ts`. */
@@ -75,7 +74,7 @@ export const M5_SCHRITTE: Lehrschritt[] = [
   {
     label: 'Fußpfetten',
     name: 'Fußpfetten',
-    was: 'Das unterste Holz, direkt auf der Mauerkrone. Darauf sitzt später jeder Sparrenfuß.',
+    was: 'Das unterste Holz, direkt oben auf der Mauer. Darauf sitzt später jeder Sparren mit seinem Fuß.',
     zielT: phase('Fußpfetten').bis - HAARBREIT,
   },
   {
@@ -87,19 +86,19 @@ export const M5_SCHRITTE: Lehrschritt[] = [
   {
     label: 'Stuhlschwellen',
     name: 'Stuhlschwellen',
-    was: 'Die liegenden Hölzer unter den Säulen. Sie verteilen die Last auf mehrere Deckenbalken.',
+    was: 'Die liegenden Hölzer unter den Säulen. Sie verteilen das Gewicht, das von oben kommt, auf mehrere Deckenbalken.',
     zielT: phase('Stuhlschwellen').bis - HAARBREIT,
   },
   {
     label: 'Stuhlsäulen',
     name: 'Stuhlsäulen',
-    was: 'Die Pfosten, die die Pfetten tragen. Sie leiten die Last nach unten in die Decke.',
+    was: 'Die Pfosten, die die Längsbalken tragen. Über sie geht das Gewicht des ganzen Dachs nach unten in die Decke.',
     zielT: phase('Stuhlsäulen').bis - HAARBREIT,
   },
   {
     label: 'Mittelpfetten',
     name: 'Mittelpfetten',
-    was: 'Der Längsbalken auf halber Dachfläche. Er halbiert, was ein Sparren frei überspannen muss.',
+    was: 'Der Längsbalken auf halber Höhe der Dachfläche. Er halbiert die Strecke, die ein Sparren ohne Stütze überbrücken muss.',
     zielT: phase('Mittelpfetten').bis - HAARBREIT,
   },
   {
@@ -123,10 +122,10 @@ export interface Bauschritt {
   name: string
   /**
    * Der eine Satz, der den Begriff erklärt — wie `Lehrschritt.was` in M5.
-   * Erscheint in der Vorführung und unter dem Kartennamen (Design-Review,
-   * R10: M7 fragte fünf Fachbegriffe ab, von denen drei in M5 nie vorkamen —
-   * „Windrispenbänder“ als nacktes Wort auf einer Zieh-Karte ist eine
-   * Vokabelfrage, kein Bau-Verständnis).
+   * Erscheint in der Vorführung und unter dem Kartennamen: M7 fragte fünf
+   * Fachbegriffe ab, von denen drei in M5 nie vorkamen — „Windrispenbänder“
+   * als nacktes Wort auf einer Zieh-Karte ist eine Vokabelfrage, kein
+   * Bau-Verständnis.
    */
   was: string
   /** Warum es genau jetzt dran ist — erscheint nach dem richtigen Ablegen. */
@@ -138,9 +137,8 @@ export interface Bauschritt {
 }
 
 /**
- * Die Reihenfolge, die M7 abfragt. Texte für „richtig“ und „zu früh“ folgen
- * flow 11 (M7), wo die Spec sie vorgibt; die übrigen sind im selben Ton
- * ergänzt (`ENTWURF – UNGEPRÜFT`). Die `was`-Sätze sind wie in M5 aus
+ * Die Reihenfolge, die M7 abfragt. Die Texte für „richtig“ und „zu früh“
+ * halten alle denselben Ton. Die `was`-Sätze sind wie in M5 aus
  * `dachstuhl/bauteil-texte.ts` auf eine Zeile gekürzt.
  */
 export const M7_SCHRITTE: Bauschritt[] = [

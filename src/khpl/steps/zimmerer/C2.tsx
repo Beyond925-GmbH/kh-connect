@@ -18,9 +18,9 @@ import { Begriff } from './Begriff'
 
 /**
  * C2 — Das Raster, das keiner sich ausdenkt. **Der eine Schätzmoment dieses
- * Tages** (khpl-tage.md 1, Mechanismus 3; khpl-tag-zimmerer.md 6, C2).
+ * Tages.**
  *
- * **Der Titel nennt das Thema, nie den Wert** (Designregel R6). Die frühere
+ * **Der Titel nennt das Thema, nie den Wert.** Die frühere
  * Überschrift „Zweiundsechzig Komma fünf" stand ausgeschrieben über dem
  * laufenden Schätz-Regler und war die Lösung; sie steht jetzt als Titel der
  * Auflösung — dort, wo die Überraschung hingehört.
@@ -34,8 +34,8 @@ import { Begriff } from './Begriff'
  * kommt nicht vom Zimmerer, es kommt vom Plattenformat. Im Bau hängt alles an
  * etwas anderem.
  *
- * ⚠️ **Die Begründung ist die Korrektur** (`belege/zimmerer.md` 1). Die erste
- * Fassung der Spec ließ C2 mit der **Dämmstoffbreite** auflösen — das stimmt
+ * ⚠️ **Die Begründung ist eine Korrektur.** Der erste Entwurf ließ C2 mit der
+ * **Dämmstoffbreite** auflösen — das stimmt
  * nicht, und zwar genau andersherum: die Dämmung richtet sich nach dem Raster.
  * Klemmfilze sind schmaler als 62,5 cm, weil sie ins lichte Gefach passen
  * müssen. Beim Auflösen legt sich deshalb eine **Bauplatte** auf, keine
@@ -138,11 +138,11 @@ export function C2() {
             sichtbar={aufgeloest}
             eyebrow="Und die Dämmung — richtet die sich nicht danach?"
           >
-            Andersherum. Die Dämmfilze werden passend zum Raster hergestellt: sie sind
-            schmaler als 62,5 Zentimeter, weil sie zwischen die Ständer klemmen müssen.
-            Das Maß kommt von der Platte, nicht von der Wolle.
+            Andersherum. Die Dämmung wird passend zum Raster hergestellt. Die Matten sind
+            etwas schmaler als 62,5 Zentimeter, damit sie sich zwischen die Ständer
+            klemmen lassen. Das Maß kommt von der Platte, nicht von der Dämmung.
           </AhaKarte>
-          {/* Ab dem zweiten Einwurf zugeklappt (R5): unter der Auflösung
+          {/* Ab dem zweiten Einwurf zugeklappt: unter der Auflösung
               stehen schon Zahl, Abstand und Herleitung — zwei offene Karten
               dazu sprengen das Wortbudget. */}
           <AhaKarte
@@ -150,8 +150,8 @@ export function C2() {
             zugeklappt
             eyebrow="Warum entscheidet das nicht der Zimmerer?"
           >
-            Weil im Bau alles an etwas anderem hängt. Das Skelett der Wand steht in dem
-            Abstand, in dem das gemessen ist, was sie später zudeckt.
+            Weil im Bau alles an etwas anderem hängt. Das Skelett der Wand richtet sich
+            nach dem Maß der Platten, die später darauf kommen.
           </AhaKarte>
         </>
       }
@@ -226,7 +226,7 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
   return (
     <div className="flex flex-col gap-3">
       {/* Die ausgeschriebene Zahl ist der Titel der Auflösung — hier löscht
-          sie keinen Aha-Moment mehr, hier ist sie er (Designregel R6). */}
+          sie keinen Aha-Moment mehr, hier ist sie er. */}
       <div>
         <motion.p
           initial={{ opacity: 0, transform: 'translateY(10px)' }}
@@ -297,18 +297,18 @@ function Aufloesung({ schaetzung }: { schaetzung: number }) {
         <p className="kh-etikett">Woher das Maß kommt</p>
         <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/90">
           Eine Bauplatte ist {cm(PLATTENBREITE_CM)} breit. Die Hälfte davon ist{' '}
-          {cm(ACHSMASS_CM)} — so trifft jeder Plattenstoß genau die Mitte eines Ständers,
-          und es bleibt fast kein Verschnitt übrig. Das heißt{' '}
+          {cm(ACHSMASS_CM)} — so endet jede Platte genau auf der Mitte eines Ständers, und
+          es bleibt fast kein Rest zum Wegwerfen. Das heißt{' '}
           <Begriff id="achsmass">Achsmaß</Begriff>: von Ständermitte zu Ständermitte.
         </p>
-        {/* Der Körper-Anker (Designregel R12): die Regel nennt genau diese
-            Zahl als Referenzbeispiel — 62,5 cm muss man fühlen können. */}
+        {/* Der Körper-Anker: eine Zahl bleibt nur haften, wenn man sie am
+            eigenen Körper nachfühlen kann — 62,5 cm ist genau so ein Fall. */}
         <p className="text-[1.0625rem] leading-snug text-kh-paper/90">
           {cm(ACHSMASS_CM)} — ungefähr deine eigene Schulterbreite.
         </p>
         <p className="text-[1rem] leading-snug text-kh-mute">
           Meist. Nicht immer — 83,3 und {cm(PLATTENBREITE_CM)} kommen auch vor, und rund
-          um Öffnungen gibt die Statik das Maß vor.
+          um Fenster und Türen gibt die <Begriff id="statik">Statik</Begriff> das Maß vor.
         </p>
       </motion.div>
     </div>

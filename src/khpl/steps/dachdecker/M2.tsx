@@ -20,21 +20,20 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 /**
  * M2 — Was kostet dieses Dach?
  *
- * Übung in drei Phasen (khpl-flow.md 7 M2): Vorgaben zeigen → schätzen →
- * auflösen. Die Übung steht bewusst **vor** der Erklärung; die Überraschung
- * ist der Lerneffekt.
+ * Übung in drei Phasen: Vorgaben zeigen → schätzen → auflösen. Die Übung steht
+ * bewusst **vor** der Erklärung; die Überraschung ist der Lerneffekt.
  *
  * Der Aha-Moment ist nicht der Preis, sondern der Arbeitsanteil: 6.800 von
  * 12.000 € sind Arbeitszeit, nicht Holz. Genau das raten Besucher falsch, und
  * genau das ist die Botschaft eines Ausbildungsberufs — bezahlt wird das Können.
  *
- * Alle Zahlen `FREIGEGEBEN` (flow 7 M2, Quellen in flow 10). Die 12.000 € sind
- * die einzige Zahl im Produkt, die als exakter Wert erscheinen darf — dort ist
- * die runde Zahl der Punkt der Übung, und die Herleitung steht direkt darunter.
+ * Alle Zahlen sind recherchiert, Stand 24.08.2026. Die 12.000 € sind die
+ * einzige Zahl im Produkt, die als exakter Wert erscheinen darf — dort ist die
+ * runde Zahl der Punkt der Übung, und die Herleitung steht direkt darunter.
  */
 
 // ---------------------------------------------------------------------------
-// Text und Zahlen — gebündelt oben (flow 8.4).
+// Text und Zahlen — gebündelt oben in der Datei.
 // ---------------------------------------------------------------------------
 
 const MIN = 2000
@@ -44,14 +43,14 @@ const START = 12000 - 2500 // bewusst nicht auf der Lösung, aber auch nicht am 
 const ECHT = 12000
 
 /**
- * `label` nur, wo eine Zeile einen Glossar-Chip trägt (R10: kein unerklärter
+ * `label` nur, wo eine Zeile einen Glossar-Chip trägt (kein unerklärter
  * Fachbegriff auf dem Screen — „Abbund“ hat einen Eintrag im Glossar).
  * `was` bleibt String und dient als Schlüssel.
  */
 const POSTEN: { was: string; label?: React.ReactNode; detail: string; betrag: number }[] =
   [
     { was: 'Holz', detail: 'ca. 5 m³ Fichte', betrag: 3600 },
-    { was: 'Schrauben, Beschläge, Folien', detail: '', betrag: 600 },
+    { was: 'Schrauben, Metallteile, Folien', detail: '', betrag: 600 },
     {
       was: 'Abbund und Aufrichten',
       label: (
@@ -71,7 +70,7 @@ export function M2() {
   // Der naechste Step (M3) ist der erste mit dem `three`-Buendel. Wer hier
   // schaetzt, laedt es nebenbei schon — sonst steht er auf M3 sekundenlang
   // vor dem Suspense-Fallback statt vor dem Abbundplan. Das Ergebnis wird
-  // verworfen; an der Lazy-Grenze (flow 8.5) aendert ein dynamic import
+  // verworfen; an der Lazy-Grenze aendert ein dynamic import
   // nichts, der Chunk bleibt derselbe.
   useEffect(() => {
     void import('@/khpl/buehne/Dachstuhl3D')
@@ -112,8 +111,10 @@ export function M2() {
       buehne={<StepFoto id="M2" />}
       warum={
         <p>
-          Einfamilienhaus, Satteldach, 45 Grad, 120 Quadratmeter. Fichte, keine{' '}
-          <Begriff id="gaube">Gaube</Begriff> — also der einfache Fall.
+          Einfamilienhaus, Satteldach — zwei schräge Flächen, oben der{' '}
+          <Begriff id="first">First</Begriff>. 45 Grad steil, 120 Quadratmeter Dachfläche
+          — etwa zwei Klassenzimmer. Fichte, keine <Begriff id="gaube">Gaube</Begriff>:
+          also der einfache Fall.
         </p>
       }
       interaktion={<Schaetzung wert={wert} onWert={setWert} aufgeloest={aufgeloest} />}
@@ -123,10 +124,11 @@ export function M2() {
             sichtbar={aufgeloest}
             eyebrow="Warum ist Holz nicht der teuerste Posten?"
           >
-            Mehr als die Hälfte ist Arbeitszeit. Bezahlt wird nicht das Material — bezahlt
-            wird, dass jemand weiß, wie es zusammengehört.
+            Mehr als die Hälfte ist Arbeitszeit — rund 105 Stunden, fast drei Wochen
+            Arbeit für einen Menschen. Bezahlt wird nicht das Material — bezahlt wird,
+            dass jemand weiß, wie es zusammengehört.
           </AhaKarte>
-          <AhaKarte sichtbar={aufgeloest} eyebrow="Und wenn der Bauherr nein sagt?">
+          <AhaKarte sichtbar={aufgeloest} eyebrow="Und wenn der Kunde nein sagt?">
             Viele Angebote führen nie zu einem Auftrag. Gerechnet hast du trotzdem.
           </AhaKarte>
         </>
@@ -142,7 +144,7 @@ export function M2() {
               </Button>
             )
           }
-          geschafft={aufgeloest ? 'Kalkuliert' : null}
+          geschafft={aufgeloest ? 'Durchgerechnet' : null}
         />
       }
     />
@@ -285,16 +287,17 @@ function Schaetzung({
  * hier ist eine Skala mit zwei Marken und einer Strecke dazwischen. Die
  * Strecke ist die Aussage des Screens.
  *
- * Der Abstand bekommt eine Einordnung, die auf ihn reagiert (R11: Daneben-
- * liegen ist Inhalt, nie Versagen — die Abweichung wird zum Kompliment an den
- * Beruf umgemünzt, statt als nackter Fehlbetrag stehen zu bleiben). Die
+ * Der Abstand bekommt eine Einordnung, die auf ihn reagiert: Danebenliegen
+ * ist Inhalt, nie Versagen — die Abweichung wird zum Kompliment an den Beruf
+ * umgemünzt, statt als nackter Fehlbetrag stehen zu bleiben. Die
  * Schwellen: bis 2.000 € (vier Reglerschritte) ist das ein guter Schuss, ab
  * der halben echten Summe ist es der Normalfall, für den es den Beruf gibt.
  */
 function einordnung(abstand: number): string {
   if (abstand === 0)
-    return 'Auf den Euro getroffen. Kalkuliert wird trotzdem — Glück ist kein Angebot.'
-  if (abstand <= 2000) return 'Nah dran — gutes Auge. Den Rest holt die Kalkulation.'
+    return 'Auf den Euro getroffen. Gerechnet wird trotzdem — Glück ist kein Angebot.'
+  if (abstand <= 2000)
+    return 'Nah dran — gutes Auge. Der Rest wird sauber durchgerechnet.'
   if (abstand >= ECHT / 2)
     return 'Genau deshalb braucht’s dafür eine Ausbildung — kein Bauchgefühl.'
   return 'Daneben ist hier der Normalfall. Deshalb wird gerechnet, nicht geraten.'
@@ -359,7 +362,7 @@ function Vergleich({
   )
 }
 
-/** Antippbar, nicht aufgedrängt (flow 11, M2 „Mathe-Einblendung“). */
+/** Antippbar, nicht aufgedrängt. */
 function Mathe() {
   return (
     <Dialog>
@@ -369,8 +372,9 @@ function Mathe() {
       <DialogContent>
         <DialogTitle>Achte Klasse</DialogTitle>
         <DialogDescription>
-          Die 120 Quadratmeter hat niemand gemessen. Das Haus ist 85 groß, das Dach 45
-          Grad schräg — daraus rechnet man die Dachfläche. Pythagoras, achte Klasse.
+          Die 120 Quadratmeter hat niemand gemessen. Der Boden vom Haus hat 85
+          Quadratmeter, das Dach ist 45 Grad schräg — daraus rechnet man die Dachfläche
+          aus. Pythagoras, achte Klasse.
         </DialogDescription>
       </DialogContent>
     </Dialog>

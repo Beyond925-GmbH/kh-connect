@@ -1,17 +1,50 @@
-import { motion } from 'motion/react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
 import { Bild } from './Bild'
-import { STAHL, TEIL, WARM, type SatzId, type WegZustand } from './kanon'
+import {
+  PROGRAMM_SAETZE,
+  STAHL,
+  TEIL,
+  UEBUNGS_SAETZE,
+  WARM,
+  type Kapitel,
+  type NcSatz,
+  type WegZustand,
+} from './kanon'
 
 /**
- * Z3 — **der Werkzeugweg.** Dasselbe Teil wie auf der Zeichnung (Z1), jetzt
- * in der Maschine: Futter links, Bolzen gespannt, und über der Kontur die
- * Bahn des Drehmeißels — vier NC-Sätze, vier Stücke Weg.
+ * Z3 — **die Bühne, auf der Code zu Bewegung wird.** Futter links, Teil
+ * gespannt, das Werkzeug wartet — und auf „Abspielen“ fährt es die Sätze des
+ * Kapitels **von selbst nacheinander** ab: Eilgang gestrichelt und kalt,
+ * Vorschub warm, und wo wirklich geschnitten wird, verschwindet das
+ * Material sichtbar unter der Schneide.
  *
- * Die Bühne führt vor, das Panel bedient: tippt der Besucher einen Satz an,
- * fährt das Werkzeug hier genau dieses Stück. Eilgang (`G0`) ist gestrichelt
- * und kalt — er schneidet nichts. Vorschub (`G1`) ist warm: da läuft der
- * Span. Die Bahn liegt **auf der Kontur**, weil der Schlichtgang genau sie
- * abfährt — die Zeichnung wird zur Bewegung.
+ * **Warum die Fahrt am Stück läuft und nicht mehr Satz für Satz auf Tipp:**
+ * die Vorfassung ließ den Besucher jeden Satz einzeln antippen und fragte
+ * danach ab — das war zu schnell und zu viel auf einmal.
+ * Jetzt entscheidet der Besucher nur noch *wann* gefahren wird und wie oft;
+ * die Reihenfolge ist Sache des Programms. Genau das ist die Lektion: eine
+ * Liste Befehle, einer nach dem anderen.
+ *
+ * **Wie die Fahrt technisch läuft:** `schritt` zählt den Satz, der gerade
+ * fährt. Das Werkzeug ist pro Satz eine eigene Fahrt (Schlüssel am
+ * `schritt`), `onAnimationComplete` schaltet weiter — so behält jeder Satz
+ * seine eigene Dauer und sein eigenes Easing (Eilgang federt aus, Schnitt
+ * läuft linear, wie eine echte Vorschubfahrt). Gefahrene Bahnstücke bleiben
+ * stehen; die Materialstreifen der Schnitte schrumpfen synchron zur
+ * Werkzeugspitze, weil beide dieselbe Dauer linear abfahren.
+ *
+ * **Material als Schichten:** unter allem liegt die fertige Kontur — vor der
+ * Fahrt schaut sie als Linie durch die Rohmaterial-Streifen hindurch, wie
+ * auf einer Zeichnung: „in der Stange steckt das Teil schon drin“. Jeder
+ * Streifen gehört zu genau einem Schnitt-Satz und verschwindet mit ihm.
+ * Er schrumpft oben **und** unten, obwohl das Werkzeug nur oben ansetzt —
+ * das ist kein Fehler, sondern das Drehen selbst: das Teil rotiert, also
+ * trägt jede Umdrehung rundum ab. Z3 sagt das im Panel dazu.
+ *
+ * Unter „Bewegung reduzieren“ springt die Fahrt in ihren Endzustand und
+ * meldet sich sofort fertig — die Information (Bahn, fertiges Teil) bleibt,
+ * nur die Bewegung entfällt, wie beim Zähler in Z6.
  */
 
 /** Maßstab: Millimeter → Zeicheneinheiten. */
@@ -20,14 +53,19 @@ const S = 3.2
 /** Drehachse des Teils. */
 const MITTE = 150
 
-/** Linke Kante des Teils (im Futter). */
+/** Linke Kante des sichtbaren Rohteils (im Futter). */
 const LINKS = 80
 
-const schaftR = (TEIL.schaftDurchmesser / 2) * S
-const sitzR = (TEIL.sitzDurchmesser / 2) * S
-const schulter = LINKS + TEIL.schaftLaenge * S
-const stirn = schulter + TEIL.sitzLaenge * S
-const fase = TEIL.fase * S
+/** Wo die Stirnfläche liegt — Z-Nullpunkt beider Kapitel. */
+const SCHULTER = LINKS + TEIL.schaftLaenge * S
+const STIRN = SCHULTER + TEIL.sitzLaenge * S
+
+/** Z-Position (mm ab Stirn) → Bühnen-x. */
+const pxZ = (z: number) => STIRN + z * S
+
+/** Durchmesser (mm) → Bühnen-y der oberen bzw. unteren Mantellinie. */
+const pxOben = (d: number) => MITTE - (d / 2) * S
+const pxUnten = (d: number) => MITTE + (d / 2) * S
 
 /** Ein Punkt der Bahn: `x` = Z-Achse (Länge), `y` = X-Achse (Durchmesser). */
 interface P {
@@ -35,55 +73,197 @@ interface P {
   y: number
 }
 
-/** Radius von Durchmesser 23 — der Startdurchmesser der Fase. */
-const fasenAnsatz = 11.5 * S
-
-/** Wo das Werkzeug wartet, bevor der erste Satz läuft. */
-const PARK: P = { x: 252, y: 72 }
+/** Wo das Werkzeug wartet: X44 Z16 — frei über dem Teil, rechts vor der Stirn. */
+const PARK_MM = { x: 44, z: 16 } as const
 
 /**
- * Die vier Sätze als Bahnstücke. Zahlen aus dem Programm in Z3:
- * X ist ein **Durchmesser** (Drehmaschinen-Konvention), Z die Länge ab
- * Stirnfläche — deshalb rechnet `y` mit dem halben X.
+ * Die Sätze eines Kapitels als Punktfolge, ab Parkposition. Fehlt eine
+ * Achse im Satz, bleibt ihr Wert stehen — dieselbe Regel, nach der eine
+ * Steuerung liest.
  */
-const BAHN: Record<SatzId, { von: P; bis: P; schnitt: boolean; dauer: number }> = {
-  // N10 G0 X23 Z2 — Eilgang vor die Stirn.
-  n10: {
-    von: PARK,
-    bis: { x: stirn + 2 * S, y: MITTE - fasenAnsatz },
-    schnitt: false,
-    dauer: 0.7,
+function bahn(saetze: readonly NcSatz[]): P[] {
+  const punkte: P[] = []
+  let d: number = PARK_MM.x
+  let z: number = PARK_MM.z
+  punkte.push({ x: pxZ(z), y: pxOben(d) })
+  for (const s of saetze) {
+    if (s.x !== undefined) d = s.x
+    if (s.z !== undefined) z = s.z
+    punkte.push({ x: pxZ(z), y: pxOben(d) })
+  }
+  return punkte
+}
+
+/**
+ * Ein Streifen Rohmaterial, den genau ein Satz wegnimmt. Er liegt zwischen
+ * zwei Durchmessern und schrumpft während „seines“ Satzes von rechts nach
+ * links — die rechte Kante folgt der Werkzeugspitze.
+ */
+interface Streifen {
+  /** Index des Satzes, der ihn abträgt. */
+  satz: number
+  /** Linke Kante (Bühnen-x) — hier endet der Schnitt. */
+  x: number
+  breite: number
+  /** Oberkante des oberen Streifens. */
+  oben: number
+  /** Oberkante des unteren Spiegel-Streifens. */
+  unten: number
+  hoehe: number
+}
+
+function streifen(
+  satz: number,
+  vonZ: number,
+  bisZ: number,
+  aussenD: number,
+  innenD: number,
+): Streifen {
+  return {
+    satz,
+    x: pxZ(bisZ),
+    breite: pxZ(vonZ) - pxZ(bisZ),
+    oben: pxOben(aussenD),
+    unten: pxUnten(innenD),
+    hoehe: ((aussenD - innenD) / 2) * S,
+  }
+}
+
+/** Alles, was ein Kapitel an Geometrie mitbringt. */
+interface Szene {
+  saetze: readonly NcSatz[]
+  /** Rohdurchmesser — er bestimmt, wo die Spannbacken greifen. */
+  rohD: number
+  /** Die fertige Kontur, die unter den Streifen liegt. */
+  kontur: string
+  streifen: readonly Streifen[]
+  /** Die blanke, frisch gedrehte Fläche — erscheint nach dem letzten Schnitt. */
+  glanz: string
+  /** Ab welchem Schritt der Glanz steht (Index nach dem letzten Span-Satz). */
+  glanzAb: number
+}
+
+/**
+ * Kapitel „befehle“: die Übungs-Stange Ø 24, drei Sätze drehen einen Absatz
+ * Ø 20 × 30. Kapitel „programm“: der Bolzen des Tages — Schruppen bis Z −34
+ * (davor bleibt ein Bund für die Spannbacken stehen), dann der Schlichtgang
+ * mit Fase. Beide Konturen sind aus denselben Zahlen gerechnet wie die Sätze
+ * in `kanon.ts`.
+ */
+const SZENEN: Record<Kapitel, Szene> = {
+  befehle: {
+    saetze: UEBUNGS_SAETZE,
+    rohD: 24,
+    kontur: [
+      `M ${LINKS} ${pxOben(24)}`,
+      `H ${pxZ(-30)}`,
+      `V ${pxOben(20)}`,
+      `H ${STIRN}`,
+      `V ${pxUnten(20)}`,
+      `H ${pxZ(-30)}`,
+      `V ${pxUnten(24)}`,
+      `H ${LINKS}`,
+      'Z',
+    ].join(' '),
+    streifen: [streifen(2, 0, -30, 24, 20)],
+    glanz: `M ${pxZ(0)} ${pxOben(20)} H ${pxZ(-30)}`,
+    glanzAb: 3,
   },
-  // N20 G1 Z0 — mit Vorschub an die Kante.
-  n20: {
-    von: { x: stirn + 2 * S, y: MITTE - fasenAnsatz },
-    bis: { x: stirn, y: MITTE - fasenAnsatz },
-    schnitt: true,
-    dauer: 0.9,
-  },
-  // N30 G1 X25 Z-1 — die Fase, schräg über die Kante.
-  n30: {
-    von: { x: stirn, y: MITTE - fasenAnsatz },
-    bis: { x: stirn - fase, y: MITTE - sitzR },
-    schnitt: true,
-    dauer: 0.9,
-  },
-  // N40 G1 Z-22 — die Mantellinie entlang, bis zur Schulter.
-  n40: {
-    von: { x: stirn - fase, y: MITTE - sitzR },
-    bis: { x: schulter, y: MITTE - sitzR },
-    schnitt: true,
-    dauer: 2.2,
+  programm: {
+    saetze: PROGRAMM_SAETZE,
+    rohD: 28,
+    kontur: [
+      `M ${LINKS} ${pxOben(28)}`,
+      `H ${pxZ(-34)}`,
+      `V ${pxOben(20)}`,
+      `H ${SCHULTER}`,
+      `V ${pxOben(25)}`,
+      `H ${pxZ(-1)}`,
+      `L ${STIRN} ${pxOben(23)}`,
+      `V ${pxUnten(23)}`,
+      `L ${pxZ(-1)} ${pxUnten(25)}`,
+      `H ${SCHULTER}`,
+      `V ${pxUnten(20)}`,
+      `H ${pxZ(-34)}`,
+      `V ${pxUnten(28)}`,
+      `H ${LINKS}`,
+      'Z',
+    ].join(' '),
+    streifen: [
+      // N20: die ganze Länge von Ø 28 auf Ø 26.
+      streifen(1, 0, -34, 28, 26),
+      // N60/N100: der Schaft in zwei Schnitten auf Ø 23, dann Ø 20.
+      streifen(5, -22, -34, 26, 23),
+      streifen(9, -22, -34, 23, 20),
+      // N160: der Schlichtgang nimmt am Sitz das letzte halbe Millimeter.
+      streifen(15, -1, -22, 26, 25),
+    ],
+    glanz: `M ${pxZ(0)} ${pxOben(23)} L ${pxZ(-1)} ${pxOben(25)} H ${SCHULTER}`,
+    glanzAb: 16,
   },
 }
 
-export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
-  const { aktiv, gesehen, geloest } = zustand
-  const werkzeugZiel = aktiv
-    ? BAHN[aktiv].bis
-    : gesehen.length > 0
-      ? letzterPunkt(gesehen)
-      : PARK
+export function Werkzeugweg({
+  zustand,
+  onSchritt,
+  onGefahren,
+}: {
+  zustand: WegZustand
+  /**
+   * Meldet den Satz, der gerade fährt (Index), sonst `null` — das Panel
+   * hebt damit die laufende Programmzeile hervor: Code und Bewegung sind
+   * dieselbe Sache, und genau das soll man sehen.
+   */
+  onSchritt?: (satz: number | null) => void
+  /** Die Fahrt ist durch — der Step schaltet seine Rückmeldung frei. */
+  onGefahren?: () => void
+}) {
+  const { kapitel, markiert, fahrt, gefahren } = zustand
+  const ruhig = useReducedMotion() ?? false
+  const szene = SZENEN[kapitel]
+  const { saetze } = szene
+  const punkte = bahn(saetze)
+
+  /**
+   * Der Satz, der gerade fährt. `-1` = noch nie gefahren (Werkzeug parkt),
+   * `saetze.length` = Fahrt zu Ende (alles steht, das Teil ist fertig).
+   */
+  const [schritt, setSchritt] = useState(() => (gefahren ? saetze.length : -1))
+  const laeuft = fahrt > 0 && schritt >= 0 && schritt < saetze.length
+
+  // Jede neue Fahrt beginnt vorn — unter „Bewegung reduzieren“ direkt am Ende.
+  // Layout-Effekt, kein passiver: beim „Nochmal abspielen“ stünde sonst für
+  // einen gemalten Frame noch der alte Endzustand da, bevor die Bahn leert.
+  useLayoutEffect(() => {
+    if (fahrt > 0) setSchritt(ruhig ? saetze.length : 0)
+  }, [fahrt, ruhig, saetze.length])
+
+  /**
+   * Fertig gemeldet wird je Fahrt genau einmal — über eine Ref statt über
+   * Effekt-Abhängigkeiten, weil der Callback im Step bei jedem Render neu
+   * entsteht und ein Effekt daran sonst mehrfach feuern würde.
+   */
+  const gemeldet = useRef(0)
+  useEffect(() => {
+    if (fahrt > 0 && schritt >= saetze.length && gemeldet.current !== fahrt) {
+      gemeldet.current = fahrt
+      onGefahren?.()
+    }
+  })
+  // Der Step reicht `onSchritt` memoisiert herein (`useCallback`) — sonst
+  // liefe dieser Effekt bei jedem Render statt bei jedem Schritt.
+  useEffect(() => {
+    onSchritt?.(laeuft ? schritt : null)
+  }, [laeuft, schritt, onSchritt])
+
+  const werkzeug =
+    schritt >= saetze.length
+      ? punkte[saetze.length]
+      : schritt >= 0
+        ? punkte[schritt + 1]
+        : punkte[0]
+
+  const rohS = (szene.rohD / 2) * S
 
   return (
     <Bild testid="werkzeugweg-buehne">
@@ -93,7 +273,9 @@ export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
           preserveAspectRatio="xMidYMid meet"
           className="size-full"
         >
-          {/* Futter: Körper und zwei sichtbare Backen, die den Schaft greifen. */}
+          {/* Futter: Körper und zwei sichtbare Backen, die das Rohteil greifen.
+              Schmaler als früher (24 statt 34), damit die Schnitte bis Z −34
+              sichtbar vor den Backen enden statt in ihnen. */}
           <rect
             x="16"
             y={MITTE - 62}
@@ -106,8 +288,8 @@ export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
           />
           <rect
             x="60"
-            y={MITTE - schaftR - 16}
-            width="34"
+            y={MITTE - rohS - 16}
+            width="24"
             height="16"
             rx="2"
             fill={STAHL.flaeche}
@@ -116,8 +298,8 @@ export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
           />
           <rect
             x="60"
-            y={MITTE + schaftR}
-            width="34"
+            y={MITTE + rohS}
+            width="24"
             height="16"
             rx="2"
             fill={STAHL.flaeche}
@@ -129,33 +311,50 @@ export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
           <line
             x1="20"
             y1={MITTE}
-            x2={stirn + 28}
+            x2={STIRN + 28}
             y2={MITTE}
             stroke={STAHL.linieMatt}
             strokeWidth="1"
             strokeDasharray="10 3 2 3"
           />
 
-          {/* Das Teil — dieselbe Kontur wie auf der Zeichnung. */}
+          {/* Die fertige Kontur — sie liegt unter dem Rohmaterial und schaut
+              als Linie hindurch: das Teil steckt schon in der Stange. */}
           <path
-            d={[
-              `M ${LINKS} ${MITTE - schaftR}`,
-              `H ${schulter}`,
-              `V ${MITTE - sitzR}`,
-              `H ${stirn - fase}`,
-              `L ${stirn} ${MITTE - sitzR + fase}`,
-              `V ${MITTE + sitzR - fase}`,
-              `L ${stirn - fase} ${MITTE + sitzR}`,
-              `H ${schulter}`,
-              `V ${MITTE + schaftR}`,
-              `H ${LINKS}`,
-              'Z',
-            ].join(' ')}
+            d={szene.kontur}
             fill="rgb(198 210 220 / 0.08)"
             stroke={STAHL.linie}
             strokeWidth="2"
             strokeLinejoin="round"
           />
+
+          {/* Das Rohmaterial über der Kontur, je Schnitt ein Streifenpaar.
+              `key={fahrt}`: jede neue Fahrt beginnt mit vollem Material. */}
+          <g key={`material-${fahrt}`}>
+            {szene.streifen.map((st) => {
+              /*
+                Der Schnitt-Satz kann rechts vom Material beginnen (N20
+                startet bei Z+2, der Streifen bei Z0): der Streifen wartet
+                dann genau die Zeit, die die Schneide bis zu seiner rechten
+                Kante braucht — sonst liefe die Materialkante der
+                Werkzeugspitze ein Stück voraus.
+              */
+              const von = punkte[st.satz].x
+              const bis = punkte[st.satz + 1].x
+              const rechts = st.x + st.breite
+              const anteil = Math.min(1, Math.max(0, (von - rechts) / (von - bis)))
+              const dauer = saetze[st.satz].dauer
+              return (
+                <Materialstreifen
+                  key={st.satz}
+                  streifen={st}
+                  schritt={schritt}
+                  verzoegerung={dauer * anteil}
+                  dauer={dauer * (1 - anteil)}
+                />
+              )
+            })}
+          </g>
 
           {/* Achsenkreuz der Drehmaschine: Z längs, X quer. */}
           <g
@@ -176,26 +375,64 @@ export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
             </text>
           </g>
 
-          {/* Schon gefahrene Bahnstücke bleiben stehen. */}
-          {gesehen.map((id) => (
-            <Bahnstueck key={id} id={id} betont={geloest && id === 'n30'} />
-          ))}
+          {/* Die Bahn: gefahrene Stücke bleiben stehen, das laufende zeichnet
+              sich in Satz-Geschwindigkeit. */}
+          <g key={`bahn-${fahrt}`}>
+            {saetze.map((s, i) =>
+              i < schritt ? (
+                <Bahnstueck key={s.code} von={punkte[i]} bis={punkte[i + 1]} satz={s} />
+              ) : i === schritt ? (
+                <Bahnstueck
+                  key={s.code}
+                  von={punkte[i]}
+                  bis={punkte[i + 1]}
+                  satz={s}
+                  animiert
+                />
+              ) : null,
+            )}
+          </g>
 
-          {/* Das gerade angetippte Stück fährt sichtbar. */}
-          {aktiv && (
-            <Bahnstueck id={aktiv} animiert betont={geloest && aktiv === 'n30'} />
+          {/* Die frisch gedrehte Fläche glänzt, sobald der letzte Schnitt
+              durch ist — dieselbe blanke Kante wie an den Bolzen in Z6. */}
+          {schritt >= szene.glanzAb && (
+            <motion.path
+              d={szene.glanz}
+              fill="none"
+              stroke={STAHL.glanz}
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.9 }}
+              transition={{ duration: 0.6 }}
+              data-testid="weg-glanz"
+            />
           )}
 
-          {/* Das Werkzeug: Halter von oben, Schneidplatte als Spitze. Es
-              springt an den Anfang seines Satzes und fährt dann — deshalb
-              der `key`: jeder Satz ist eine eigene Fahrt. */}
+          {/* Vorschau des angetippten Befehls: sein Stück Bahn pulsiert, ein
+              Ring markiert, wo die Fahrt endet. Während einer Fahrt zeigt die
+              Bühne nur die Fahrt selbst. */}
+          {markiert !== null && !laeuft && markiert < saetze.length && (
+            <Vorschau
+              von={punkte[markiert]}
+              bis={punkte[markiert + 1]}
+              satz={saetze[markiert]}
+              ruhig={ruhig}
+            />
+          )}
+
+          {/* Das Werkzeug: Halter von oben, Schneidplatte als Spitze. Jeder
+              Satz ist eine eigene Fahrt — deshalb der `key` am Schritt. */}
           <motion.g
-            key={aktiv ?? 'park'}
-            initial={aktiv ? { x: BAHN[aktiv].von.x, y: BAHN[aktiv].von.y } : false}
-            animate={{ x: werkzeugZiel.x, y: werkzeugZiel.y }}
+            key={`werkzeug-${fahrt}-${schritt}`}
+            initial={laeuft ? { x: punkte[schritt].x, y: punkte[schritt].y } : false}
+            animate={{ x: werkzeug.x, y: werkzeug.y }}
             transition={{
-              duration: aktiv ? BAHN[aktiv].dauer : 0.4,
-              ease: aktiv && BAHN[aktiv].schnitt ? 'linear' : [0.22, 1, 0.36, 1],
+              duration: laeuft ? saetze[schritt].dauer : 0.4,
+              ease: laeuft && saetze[schritt].g === 1 ? 'linear' : [0.22, 1, 0.36, 1],
+            }}
+            onAnimationComplete={() => {
+              if (laeuft) setSchritt((s) => s + 1)
             }}
           >
             {/* Koordinatenursprung der Gruppe ist die Werkzeugspitze. */}
@@ -217,7 +454,7 @@ export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
                 strokeWidth="1"
               />
               {/* Der Span: nur, solange wirklich geschnitten wird. */}
-              {aktiv && BAHN[aktiv].schnitt && (
+              {laeuft && saetze[schritt].span && (
                 <motion.circle
                   r="4"
                   fill={WARM.heiss}
@@ -233,43 +470,144 @@ export function Werkzeugweg({ zustand }: { zustand: WegZustand }) {
   )
 }
 
-/** Wo das Werkzeug nach den bisher gefahrenen Sätzen steht. */
-function letzterPunkt(gesehen: readonly SatzId[]): P {
-  const reihenfolge: SatzId[] = ['n10', 'n20', 'n30', 'n40']
-  const letzter = [...reihenfolge].reverse().find((id) => gesehen.includes(id))
-  return letzter ? BAHN[letzter].bis : PARK
+/**
+ * Ein Streifenpaar Rohmaterial. Solange sein Satz nicht dran war, steht es
+ * voll; während des Satzes folgt seine rechte Kante der Werkzeugspitze
+ * (beide fahren dieselbe Dauer linear); danach ist es weg.
+ */
+function Materialstreifen({
+  streifen: st,
+  schritt,
+  verzoegerung,
+  dauer,
+}: {
+  streifen: Streifen
+  schritt: number
+  /** Anlaufzeit, bis die Schneide die rechte Materialkante erreicht. */
+  verzoegerung: number
+  dauer: number
+}) {
+  if (schritt > st.satz) return null
+  const faehrt = schritt === st.satz
+
+  return (
+    <g data-testid={`weg-material-${st.satz}`}>
+      {[st.oben, st.unten].map((y) => (
+        <motion.rect
+          key={y}
+          x={st.x}
+          y={y}
+          height={st.hoehe}
+          fill={STAHL.flaeche}
+          stroke={STAHL.linieMatt}
+          strokeWidth="1"
+          opacity="0.9"
+          initial={{ width: st.breite }}
+          animate={{ width: faehrt ? 0 : st.breite }}
+          transition={{
+            duration: faehrt ? dauer : 0,
+            delay: faehrt ? verzoegerung : 0,
+            ease: 'linear',
+          }}
+        />
+      ))}
+    </g>
+  )
 }
 
+/**
+ * Ein gefahrenes Stück Bahn: Eilgang gestrichelt und kalt, Schnitt warm.
+ *
+ * Zwei Zeichenwege, mit Absicht: der Schnitt wächst über `pathLength`, der
+ * Eilgang über seinen **Endpunkt**. Sobald `pathLength` animiert, setzt
+ * motion nämlich selbst ein auf die Pfadlänge normiertes `strokeDasharray`
+ * — und überschriebe damit die Strichelung, die den Eilgang als „schnell,
+ * schneidet nichts“ lesbar macht.
+ */
 function Bahnstueck({
-  id,
+  von,
+  bis,
+  satz,
   animiert = false,
-  betont = false,
 }: {
-  id: SatzId
+  von: P
+  bis: P
+  satz: NcSatz
   animiert?: boolean
-  betont?: boolean
 }) {
-  const b = BAHN[id]
-  const farbe = b.schnitt ? (betont ? WARM.heiss : WARM.linie) : STAHL.linie
+  const schnitt = satz.g === 1
+  const stil = {
+    stroke: schnitt ? WARM.linie : STAHL.linie,
+    strokeWidth: schnitt ? 3 : 2,
+    strokeLinecap: 'round',
+    opacity: schnitt ? 0.95 : 0.7,
+    'data-testid': `weg-satz-${satz.code}`,
+  } as const
+
+  if (!schnitt) {
+    return (
+      <motion.line
+        x1={von.x}
+        y1={von.y}
+        strokeDasharray="6 5"
+        initial={animiert ? { x2: von.x, y2: von.y } : false}
+        animate={{ x2: bis.x, y2: bis.y }}
+        transition={{ duration: animiert ? satz.dauer : 0, ease: [0.22, 1, 0.36, 1] }}
+        {...stil}
+      />
+    )
+  }
 
   return (
     <motion.line
-      x1={b.von.x}
-      y1={b.von.y}
-      x2={b.bis.x}
-      y2={b.bis.y}
-      stroke={farbe}
-      strokeWidth={betont ? 4 : b.schnitt ? 3 : 2}
-      strokeLinecap="round"
-      strokeDasharray={b.schnitt ? undefined : '6 5'}
+      x1={von.x}
+      y1={von.y}
+      x2={bis.x}
+      y2={bis.y}
       initial={animiert ? { pathLength: 0 } : false}
       animate={{ pathLength: 1 }}
-      transition={{
-        duration: animiert ? b.dauer : 0,
-        ease: b.schnitt ? 'linear' : [0.22, 1, 0.36, 1],
-      }}
-      opacity={b.schnitt ? 0.95 : 0.7}
-      data-testid={`weg-${id}`}
+      transition={{ duration: animiert ? satz.dauer : 0, ease: 'linear' }}
+      {...stil}
     />
+  )
+}
+
+/**
+ * Die Vorschau eines angetippten Befehls: das Bahnstück pulsiert, ein Ring
+ * zeigt den Zielpunkt — „fahr an **diese** Stelle“. Unter „Bewegung
+ * reduzieren“ steht beides ruhig da.
+ */
+function Vorschau({
+  von,
+  bis,
+  satz,
+  ruhig,
+}: {
+  von: P
+  bis: P
+  satz: NcSatz
+  ruhig: boolean
+}) {
+  const schnitt = satz.g === 1
+  const farbe = schnitt ? WARM.heiss : STAHL.blank
+
+  return (
+    <motion.g
+      animate={ruhig ? { opacity: 0.9 } : { opacity: [0.45, 1, 0.45] }}
+      transition={ruhig ? undefined : { duration: 1.4, repeat: Infinity }}
+      data-testid="weg-vorschau"
+    >
+      <line
+        x1={von.x}
+        y1={von.y}
+        x2={bis.x}
+        y2={bis.y}
+        stroke={farbe}
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeDasharray={schnitt ? undefined : '6 5'}
+      />
+      <circle cx={bis.x} cy={bis.y} r="6" fill="none" stroke={farbe} strokeWidth="2" />
+    </motion.g>
   )
 }

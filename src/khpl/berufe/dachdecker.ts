@@ -15,14 +15,13 @@ import type { BerufDef, StepBild } from './typen'
  * wo der Karriere-Link auftaucht, was zum Karriere-Bereich gehört, wo der Skip
  * landet.
  *
- * ⚠️ **Die Recherche darunter ist auf Zimmerer/Zimmerin geschrieben.**
- * `khpl-flow.md` führt in §1 den Ausbildungsberuf Zimmerer/Zimmerin, und die
- * belegten Zahlen in §10 hängen daran: Ausbildungsvergütung nach Holzbau
+ * **Die Recherche darunter ist auf Zimmerer/Zimmerin geschrieben.** Die
+ * Zahlen hängen an diesem Ausbildungsberuf: Ausbildungsvergütung nach Holzbau
  * Deutschland, die AusbauBAusbV von 2026, „Zimmerermeister:in" als
  * Aufstiegstitel, der Stundensatz „im Zimmererhandwerk". Was davon für
  * Dachdecker:innen anders ist, ist **noch nicht nachgezogen** — die Stellen
- * stehen in `steps/dachdecker/karrierewege.ts` und `glossar/begriffe.ts` und sind dort
- * markiert. Bis dahin trägt dieser Beruf einen Dachdecker-Namen über
+ * stehen in `steps/dachdecker/karrierewege.ts` und `glossar/begriffe.ts` und
+ * sind dort markiert. Bis dahin trägt dieser Beruf einen Dachdecker-Namen über
  * Zimmerer-Zahlen.
  */
 
@@ -66,6 +65,14 @@ type ZimmererStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher'> & {
   abstecher: readonly Id[]
 }
 
+/**
+ * In `kurz` steht bewusst kein Fachwort: die Zeile wird an genau einer Stelle
+ * gerendert (`shell/DeinWeg.tsx`), und dort nur auf den **noch gesperrten**
+ * Zeilen — also ausgerechnet da, wo jemand den Screen noch nicht gesehen hat
+ * und das Wort ohne jede Erklärung lesen muss. „Kalkulation“ oder
+ * „3D-Visualisierung“ trug dort niemand; deshalb heißt es „Preis rechnen,
+ * Vertrag“ und „Der Plan in 3D“. Die Titel selbst sind davon unberührt.
+ */
 const STEPS = [
   {
     id: 'M1',
@@ -79,7 +86,7 @@ const STEPS = [
   {
     id: 'M2',
     titel: 'Preis schätzen',
-    kurz: 'Angebots-Kalkulation, Vertrag',
+    kurz: 'Preis rechnen, Vertrag',
     art: 'haupt',
     weiter: 'M3',
     abstecher: [],
@@ -106,7 +113,7 @@ const STEPS = [
   {
     id: 'B3.2',
     titel: 'Vom Plan in den Kopf',
-    kurz: '3D-Visualisierung',
+    kurz: 'Der Plan in 3D',
     art: 'abstecher',
     weiter: 'M4',
     abstecher: [],
@@ -251,9 +258,10 @@ export const DACHDECKER: BerufDef = {
     szenarioPoster: '/medien/media/zimmerer/szenario-poster.webp',
   },
   /**
-   * Die Motivliste dieses Tages — am Stück, wie es eine Redaktionsentscheidung
-   * verlangt. Steps ohne Eintrag tragen keine Foto-Bühne, sondern das
-   * 3D-Modell: B3.2, M5, M7. Dort *ist* die Bühne die Interaktion.
+   * Die Motivliste dieses Tages — am Stück, damit die Redaktionsentscheidung
+   * an einer einzigen Stelle fällt. Steps ohne Eintrag tragen keine
+   * Foto-Bühne, sondern das 3D-Modell: B3.2, M5, M7. Dort *ist* die Bühne die
+   * Interaktion.
    */
   bilder: {
     // Der Einstieg bleibt beim Werkstatt-Standbild: der Text dort handelt vom
@@ -289,9 +297,31 @@ export const DACHDECKER: BerufDef = {
     // spiegeln, sondern auseinanderliegen.
     M10: { src: '/medien/schritte/intro-aufrichten.webp', pos: '50% 45%' },
   } satisfies Partial<Record<Id | 'intro', StepBild>>,
-  // TEXT: `ENTWURF`. Der Wortlaut war am 24.08.2026 abgenommen — aber für eine
-  // Zimmerei („Du bist Azubi in einer Zimmerei"). Der Betrieb ist hier
-  // ausgetauscht, der Rest steht unverändert; damit ist die Abnahme offen.
+  /**
+   * Takt 1 und 2 der Auftragsannahme (`typen.ts`, `vorstellung`).
+   *
+   * Die Aufgaben beschreiben **das Dachdecker-Handwerk, nicht diesen Tag**:
+   * der Tag ist ein umetikettierter Zimmerer-Ablauf (siehe Kopf der Datei),
+   * aber Takt 1 ist die App in eigener Stimme — sie darf keine Zimmerer-Arbeit
+   * als Dachdecker-Alltag ausgeben. Deshalb Ziegel, Dämmung, Dachfenster
+   * statt Balken und CAD.
+   */
+  vorstellung: {
+    titel: ['Du hast dir', 'den Dachdecker ausgesucht.'],
+    was: 'Dachdecker machen Häuser oben dicht. Sie bauen Dächer — damit es drinnen trocken und warm bleibt.',
+    aufgaben: [
+      'Ziegel so verlegen, dass kein Tropfen durchkommt',
+      'Folie und Dämmung unters Dach packen, damit keine Wärme entwischt',
+      'Ein Dachfenster einbauen — und zwar dicht',
+      'Oben im Team anpacken — einer allein deckt kein Dach',
+    ],
+    umgebung: {
+      titel: ['Der Arbeitsplatz liegt', 'über der Straße.'],
+      text: 'Gearbeitet wird draußen, bei Sonne und bei Wind. Mal auf einem Wohnhaus, mal auf einer Schule — jede Baustelle ist woanders. Von oben sieht man die ganze Stadt. Und ohne Sicherung geht niemand aufs Dach.',
+    },
+  },
+  // Der Text stammt aus dem Zimmerer-Tag („Du bist Azubi in einer Zimmerei").
+  // Der Betrieb ist hier ausgetauscht, der Rest steht unverändert.
   auftrag: {
     etikett: 'Dein erster Auftrag',
     titel: ['Bau heute', 'ein Dach.'],
@@ -301,8 +331,9 @@ export const DACHDECKER: BerufDef = {
   graph: baueGraph(STEPS, {
     erster: 'M1',
     /**
-     * Buttontexte wörtlich aus khpl-flow.md 11. „Keine generische
-     * ‚Mehr erfahren‘-Schablone“ (6.7).
+     * Jeder Abstecher ist einzeln getextet — nie eine generische
+     * „Mehr erfahren“-Schablone. Die Einladung muss den Inhalt versprechen,
+     * sonst tippt man sie nur der Vollständigkeit halber an.
      */
     angebote: {
       'B3.1': {
@@ -338,15 +369,15 @@ export const DACHDECKER: BerufDef = {
       'B5.1': 'Weiter zur Pause',
     } satisfies Partial<Record<Id, string>>,
     /**
-     * Der Karriere-Link taucht auf S5 und danach auf jedem zweiten
-     * Hauptschritt auf (khpl-ui-shell.md 6). Nie auf Abstecher-Screens, nie
-     * während eine Interaktion offen ist. So begegnet er jedem Besucher
-     * mehrfach, ohne je zu drängen.
+     * Der Karriere-Link taucht in der Auftragsannahme und danach auf jedem
+     * zweiten Hauptschritt auf. Nie auf Abstecher-Screens, nie während eine
+     * Interaktion offen ist. So begegnet er jedem Besucher mehrfach, ohne je
+     * zu drängen.
      *
-     * **M8 fehlt hier bewusst**, obwohl ui-shell 6 ihn aufzählt: M9 *ist* der
-     * nächste Schritt nach M8. Ein Abstecher, der einen Schritt vor sein Ziel
-     * abkürzt, schickt den Besucher über M9 → M10 → zurück auf M8 → weiter zu
-     * M9 — derselbe Bereich zweimal, mit einer Rückkehr-Leiste dazwischen.
+     * **M8 fehlt hier bewusst**: M9 *ist* der nächste Schritt nach M8. Ein
+     * Abstecher, der einen Schritt vor sein Ziel abkürzt, schickt den Besucher
+     * über M9 → M10 → zurück auf M8 → weiter zu M9 — derselbe Bereich zweimal,
+     * mit einer Rückkehr-Leiste dazwischen.
      */
     karriereSkipAuf: ['M2', 'M4', 'M6'],
     karriereBereich: ['M9', 'B9.1', 'B9.2', 'B9.3', 'M10'],
