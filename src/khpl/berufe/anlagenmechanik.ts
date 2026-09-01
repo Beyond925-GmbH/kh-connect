@@ -62,7 +62,7 @@ type AnlagenmechanikStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher
 const STEPS = [
   {
     id: 'A1',
-    titel: 'Kein warmes Wasser',
+    titel: 'Es gibt kein warmes Wasser mehr',
     kurz: 'Störungsdienst',
     art: 'haupt',
     weiter: 'A2',
@@ -152,7 +152,7 @@ const STEPS = [
   },
   {
     id: 'A7',
-    titel: 'Jetzt erklärst du es',
+    titel: 'Jetzt bist du dran',
     kurz: 'Übergabe, Feierabend',
     art: 'haupt',
     weiter: 'A8',
@@ -247,13 +247,12 @@ export const ANLAGENMECHANIKER: BerufDef = {
    * Jeder Eintrag zeigt auf eine Datei, die unter `public/medien/` **wirklich
    * liegt**; geprüft am 24.08.2026.
    *
-   * **Drei Motive fehlen:** A1.1 (Notdienst), A5 (im Transporter) und das
-   * Szenario-Video der Auftragsannahme. A1.1 und A5 tragen deshalb **die
-   * Transporter-Zeichnung** statt eines geliehenen Fotos — für A5 trägt die
-   * Zeichnung den Screen genauso gut wie ein Foto, und A1.1 bekommt dieselbe
-   * bei Nacht. Kommen die Fotos, treten sie an ihre Stelle;
-   * ein Eintrag hier reicht dafür nicht mehr aus, die beiden Steps rufen die
-   * Zeichnung direkt auf.
+   * **Ein Motiv fehlt:** das Szenario-Video der Auftragsannahme.
+   *
+   * A1.1 und A5 haben seit dem 01.09. echte Motive und sind deshalb normale
+   * Einträge in dieser Liste; die Transporter-Zeichnung ist auf beiden Screens
+   * abgelöst und hat damit **keinen Aufrufer mehr** (`buehne/anlagenmechanik/
+   * kanon.ts`, Szene `transporter`).
    *
    * Ungenutzt und bewusst nicht vergeben: `gallery-3.webp` (Umwälzpumpe und
    * Regelung — **GRUNDFOS und POTTERTON sind darauf lesbar**) und
@@ -262,6 +261,56 @@ export const ANLAGENMECHANIKER: BerufDef = {
    * „kein lesbares Firmenlogo im Bild" (MEDIEN-INVENTAR).
    */
   bilder: {
+    /*
+      A1.1, der Notdienst — **ein Foto statt der Transporter-Zeichnung bei
+      Nacht.** Der Blick über das Armaturenbrett durch eine nasse
+      Windschutzscheibe, draußen nur Lichter: derselbe Standpunkt, den die
+      Zeichnung eingenommen hat, nur eben echt. Das ist der Grund, warum es
+      sie hier ablöst — die Frage des Screens heißt „Wer fährt eigentlich
+      nachts?", und ein Vektor-Armaturenbrett beantwortet sie mit einem
+      Symbol, ein Foto mit einem Abend.
+
+      Kein Firmenname im Bild: sichtbar sind zwei Runduhren und ein
+      Radiodisplay, dessen Text (Sender, Uhrzeit) in Bühnengröße nicht mehr
+      lesbar ist — geprüft am 100-%-Ausschnitt.
+
+      `pos` sitzt leicht über der Mitte: quer schneidet `cover` oben und
+      unten, und oben liegt die Scheibe mit den Lichtern — sie ist die Nacht.
+      Das Armaturenbrett darunter bleibt in jedem Format angeschnitten im
+      Bild und sagt, dass jemand darin sitzt.
+
+      Die frühere Klammer „eine Welt, zwei Zustände" (A5 mittags, A1.1 nachts)
+      ist damit aufgelöst — sie war eine Tugend aus der Not, dass es für keinen
+      der beiden Screens ein Motiv gab. Beide haben jetzt eins.
+    */
+    'A1.1': {
+      src: '/medien/media/anlagenmechaniker/a11-nachtfahrt.webp',
+      pos: '50% 42%',
+    },
+    /*
+      A5, die Zäsur — **ein Foto statt der Transporter-Zeichnung bei Mittag.**
+      Zwei Männer in Arbeitsjacken sitzen im offenen Laderaum, Brote in
+      Butterbrotpapier in der Hand, einer zeigt dem anderen etwas auf dem
+      Handy. Das ist genau der Satz daneben: „die Brote liegen auf dem Schoß
+      … zwischen zwei Adressen ist das die Pause."
+
+      **Was das Foto nicht zeigt, ist das iPad auf dem Armaturenbrett** — der
+      Screen ist der Laderaum, nicht die Kabine. Der Text nennt es trotzdem
+      weiter, weil es aus dem Interview stammt und `technik: 0.85` einlöst;
+      ein Nebensatz, den das Bild nicht bebildert, ist etwas anderes als ein
+      Bild, das dem Text widerspricht. Die Alternative wäre ein
+      Kabinen-Motiv gewesen, das dafür die Pause verliert — und die Pause ist
+      der ganze Zweck dieses Screens.
+
+      Kein Firmenname im Bild: die Kartons sind blanke Pappe, die Jacken ohne
+      Aufdruck, kein Schriftzug an Wand oder Tür — geprüft am
+      100-%-Ausschnitt beider Bildhälften.
+
+      `pos` mittig: die beiden Köpfe sitzen im oberen Drittel und stehen quer
+      wie hoch über der Textkarte. Weiter nach unten geschoben, schneidet
+      `cover` hochkant die Gesichter ab.
+    */
+    A5: { src: '/medien/media/anlagenmechaniker/a5-pause.webp', pos: '50% 45%' },
     /*
       Wärmepumpe im Garten — der Abstecher rechnet sie gegen den Ölkessel.
 

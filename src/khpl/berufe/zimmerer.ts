@@ -89,7 +89,7 @@ const STEPS = [
     // nahm dem Schätzen damit jeden Sinn. Der Titel nennt jetzt das Thema, nie
     // den gesuchten Wert; die ausgeschriebene Zahl ist als Titel der Auflösung
     // gewandert (C2.tsx).
-    titel: 'Das Raster, das keiner sich ausdenkt',
+    titel: '',
     kurz: 'Abstand der Ständer',
     art: 'haupt',
     weiter: 'C3',
@@ -98,7 +98,7 @@ const STEPS = [
   },
   {
     id: 'C3',
-    titel: 'Eine Wand ist ein Sandwich',
+    titel: 'Eine Wand ist wie ein Sandwich',
     kurz: 'Die Schichten der Wand',
     art: 'haupt',
     weiter: 'C4',
@@ -345,8 +345,8 @@ export const ZIMMERER: BerufDef = {
    * Rolle vorwegzunehmen: das „Du bist Azubi“ gehört dem Fiktions-Takt.
    */
   vorstellung: {
-    titel: ['Du hast dir', 'den Zimmerer ausgesucht.'],
-    was: 'Zimmerer bauen aus Holz die Teile, die ein Haus tragen: Wände, Decken und Dachstühle.',
+    titel: ['', 'Zimmerer'],
+    was: 'Zimmerer bauen aus Holz die Teile, die ein Haus tragen (Wände, Decken und Dachstühle).',
     aufgaben: [
       'Balken auf den Millimeter genau zusägen',
       'Eine ganze Hauswand in der Halle zusammenbauen',
@@ -354,14 +354,14 @@ export const ZIMMERER: BerufDef = {
       'Das fertige Teil am Kran aufs Haus setzen',
     ],
     umgebung: {
-      titel: ['Morgens Halle,', 'mittags Baustelle.'],
+      titel: ['Morgens in der Halle,', 'mittags auf der Baustelle.'],
       text: 'Der Morgen gehört der großen Halle: Es riecht nach Holz, die Säge läuft, auf dem Tisch entsteht eine Wand. Mittags fährt sie auf dem Anhänger zur Baustelle — dort hängt sie am Kran und kommt aufs Haus.',
     },
   },
   auftrag: {
     etikett: 'Dein erster Auftrag',
-    titel: ['Bau heute', 'eine Wand.'],
-    text: 'Du bist Azubi in einer Zimmerei. Sechs Uhr, die Halle ist noch kalt. Auf dem langen Tisch liegt ein Stapel Holz, das gestern noch ein Baum war und heute Nachmittag eine Hauswand ist.',
+    titel: ['Heute baust du', 'eine Wand.'],
+    text: 'Du bist Azubi in einer Zimmerei. Es ist morgens um 6 Uhr, und du kommst in die Halle. Jetzt werden die ersten Arbeitsschritte getan. ',
     knopf: 'Auftrag annehmen',
   },
   graph: baueGraph(STEPS, {

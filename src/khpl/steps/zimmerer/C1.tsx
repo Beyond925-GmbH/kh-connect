@@ -106,7 +106,10 @@ export function C1() {
     <StepShell
       id="C1"
       auftrag={gefunden ? null : 'Such dein Holz im Stapel und tipp es an.'}
-      ansage={null}
+      ansage={{
+        text: "Deine erste Aufgabe ist, einen Holzbalken richtig zuzuschneiden. Dafür musst du erstmal das richtige Stück Holz raussuchen.",
+        geste: "tippen",
+      }}
       buehneInteraktiv
       interaktionOffen={!gefunden}
       buehne={

@@ -1,11 +1,12 @@
 # Medien — `public/medien/schritte/`
 
 Die Motive, die die Step-Screens tragen. Zugekauft wurde nichts: alles Pexels,
-heruntergeladen am 2026-08-18 — mit **einer Ausnahme**: die sechs
-A1-Bauteilfotos der Anlagenmechanik stammen von Wikimedia Commons und sind
-teils CC BY-SA, also **namensnennungspflichtig**. Ihre Quellen stehen im
-Abschnitt „Anlagenmechanik“ unten, die Namensnennung in der App im Sheet
-„Dein Weg“ (Bildnachweis).
+heruntergeladen am 2026-08-18 — mit **einer Ausnahme**: die zwölf
+Bauteilfotos der Anlagenmechanik (sechs in A1, sechs in A2) stammen von
+Wikimedia Commons und sind teils CC BY-SA, also
+**namensnennungspflichtig**. Ihre Quellen stehen im Abschnitt
+„Anlagenmechanik“ unten, die Namensnennung in der App im Sheet „Dein Weg“
+(Bildnachweis).
 
 **Lizenz (Pexels-Bestand):** [Pexels-Lizenz](https://www.pexels.com/license/)
 — kostenlos, kommerziell nutzbar, keine Namensnennung nötig. Die
@@ -57,22 +58,53 @@ behauptet, wäre der Fehler, nicht die Lösung. `b91-meister.webp` (Karriere,
 Holzwerkstatt) ist für diesen Metallberuf bewusst nicht verwendet; Z8.1 trägt
 das eigene Meister-Motiv.
 
-### Anlagenmechanik: Bauteilfotos für A1, sonst gezeichnet
+### Anlagenmechanik: Bauteilfotos für A1 und A2, ein Nachtmotiv für A1.1, sonst gezeichnet
 
-Für A2 und A3 wurde gesucht und **nichts eingebaut**. Der Bestand an
+Für A3 wurde gesucht und **nichts eingebaut**. Der Bestand an
 SHK-Motiven auf Pexels zeigt Fußbodenheizungs-Verteiler und
-Wärmepumpen-Außeneinheiten; diese Screens brauchen aber einen Kessel, einen
-Speicher, eine Regelung und vier benannte Verlustflächen an **einem** Haus —
-und zwar an Stellen, die man treffen kann. Ein Foto, das etwas anderes zeigt
-als der Text daneben behauptet, ist genau der Fehler, der bei der Zerspanung
-schon einmal korrigiert wurde. Diese Screens bleiben deshalb gezeichnet;
-besser lesbar sind sie trotzdem geworden (Namen an den Prüfpunkten, Pfeile an
+Wärmepumpen-Außeneinheiten; dieser Screen braucht aber vier benannte
+Verlustflächen an **einem** Haus — und zwar an Stellen, die man treffen kann.
+Ein Foto, das etwas anderes zeigt als der Text daneben behauptet, ist genau
+der Fehler, der bei der Zerspanung schon einmal korrigiert wurde. A3 bleibt
+deshalb gezeichnet; besser lesbar ist der Screen trotzdem geworden (Pfeile an
 den Verlustflächen).
+
+**A2 hat seine Fotos inzwischen bekommen** — nicht von Pexels, sondern nach
+demselben Muster wie A1: **einzelne Bauteile** von Wikimedia Commons, jedes
+für sich, ohne Anlage drumherum, über die es etwas Falsches behaupten könnte
+(Abschnitt „A2“ unten). Der Einwand oben zieht dort nicht, weil der Screen
+seit dem Kartenstapel kein Anlagenschema mehr zeigt, sondern ein Ding nach
+dem anderen.
 
 Gesucht und für später notiert, falls doch ein Foto gewünscht ist:
 Pexels 7937299, 7937300 und 7937309 (Pavel Danilyuk, Heizkreisverteiler mit
 Pumpe und Manometer), 12644994 (Boom, Hand am Thermostatventil), 5640691
 (Tima Miroshnichenko, Manometer in der Hand).
+
+#### A1.1: der Notdienst (Stand 2026-09-01)
+
+Der Abstecher „Wer fährt eigentlich nachts?" trug bis hierher die
+Transporter-Zeichnung bei Nacht — nicht als erste Wahl, sondern weil es für
+ihn kein Motiv gab. Jetzt hat er eins: derselbe Standpunkt wie die Zeichnung
+(über das Armaturenbrett, durch die Scheibe), nur echt. Auf einem Screen,
+dessen ganze Frage „fährt da wirklich jemand?" lautet, ist genau das der
+Unterschied. **A5 (Mittag im Transporter) behält seine Zeichnung** — die
+frühere Klammer „eine Welt, zwei Zustände" gilt damit nicht mehr.
+
+| Datei | Step | Pexels | Urheber:in | Motiv |
+| --- | --- | --- | --- | --- |
+| `anlagenmechaniker/a11-nachtfahrt.webp` | A1.1 | [1600909](https://www.pexels.com/photo/1600909/) | Lukas Rychvalsky | Blick über das Armaturenbrett durch eine nasse Windschutzscheibe, draußen Lichter im Regen |
+
+WebP, 1600 px breit, **Qualität 74 statt 82** (150 KB): das Motiv ist eine
+Nachtaufnahme mit sichtbarem Filmkorn, und Korn ist für WebP der teuerste
+Bildinhalt überhaupt — bei 82 wog dieselbe Datei 225 KB, ohne dass im
+Bühnenformat ein Unterschied zu sehen wäre.
+
+Pexels-Lizenz, keine Namensnennung nötig — der Bildnachweis im Sheet „Dein
+Weg" bleibt deshalb unverändert (er führt nur die CC-BY-SA-Bauteilfotos).
+Geprüft auf lesbare Fremdmarken: keine. Sichtbar sind zwei Runduhren und ein
+Radiodisplay, dessen Text (Sender, Uhrzeit) schon im 100-%-Ausschnitt kaum
+und in Bühnengröße gar nicht lesbar ist.
 
 #### A1: sechs Bauteilfotos (Stand 2026-08-31)
 
@@ -107,6 +139,68 @@ Hinweis für die Abnahme: Auf den Fotos sind Herstellernamen lesbar
 (Viessmann, Ariston, Grundfos, KÖB, Wilo, ESBE). Das ist bei echten
 Bauteilen kaum zu vermeiden und hier Alltag statt Werbung — wer es dennoch
 stört, tauscht das Motiv, nicht das Konzept.
+
+#### A2: sechs Kellerfotos für den Kartenstapel (Stand 2026-09-01)
+
+A2 sortiert seinen Keller seit dem Umbau als **Wischkarten**
+(`steps/anlagenmechanik/KellerKarten.tsx`): ein Bauteil je Karte, links weg
+heißt „fliegt raus", rechts weg heißt „bleibt". Dafür braucht jede Karte ein
+Foto — ein Wort ist kein Ding, und „Ausdehnungsgefäß" ist für einen
+Vierzehnjährigen genau ein Wort.
+
+Quelle wie bei A1 **Wikimedia Commons**, heruntergeladen am 2026-09-01,
+beschnitten auf **3:2** (die Kartenform) und als WebP unter
+`public/medien/media/anlagenmechaniker/` abgelegt (767–1100 px breit,
+zusammen ~320 KB). Fünf der sechs Ausschnitte stehen als Bearbeitung unter
+der ShareAlike-Lizenz ihres Originals; `keller-kessel` ist CC BY. Die
+Namensnennung steht in der App im Sheet „Dein Weg" (`shell/DeinWeg.tsx`) —
+wer ein Foto tauscht, zieht beide Stellen nach.
+
+| Datei | Karte | Quelle (Commons) | Urheber:in | Lizenz | Motiv |
+| --- | --- | --- | --- | --- | --- |
+| `keller-kessel.webp` | Ölkessel | [Home oil furnace.jpg](https://commons.wikimedia.org/wiki/File:Home_oil_furnace.jpg) | Versageek | [CC BY 2.5](https://creativecommons.org/licenses/by/2.5/) | Alter blauer Ölkessel im Keller, Manometer und angeflanschter Ölbrenner (Ausschnitt) |
+| `keller-tank.webp` | Öltank | [Heizoelkeller.JPG](https://commons.wikimedia.org/wiki/File:Heizoelkeller.JPG) | Flux Garden | [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5/) | Drei Kunststoff-Batterietanks in einem Heizölkeller (Ausschnitt) |
+| `keller-verteiler.webp` | Verteiler | [Heizkreisverteiler.jpg](https://commons.wikimedia.org/wiki/File:Heizkreisverteiler.jpg) | Tetris L | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | Verteilerbalken mit Durchflussmessern, von dem die Heizkreise abgehen (Ausschnitt) |
+| `keller-pumpe.webp` | Umwälzpumpe | [CentralHeatingPump.JPG](https://commons.wikimedia.org/wiki/File:CentralHeatingPump.JPG) | Mariegriffiths | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) | Grüne Wilo-Umwälzpumpe an einem Kupferrohr (Ausschnitt) |
+| `keller-ausdehnungsgefaess.webp` | Ausdehnungsgefäß | [Diaphragm expansion tank, stopcock and drain valve.jpg](https://commons.wikimedia.org/wiki/File:Diaphragm_expansion_tank,_stopcock_and_drain_valve.jpg) | The RedBurn | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | Rotes Membran-Ausdehnungsgefäß an einer Kellerwand (Ausschnitt) |
+| `keller-thermostatventile.webp` | Thermostatventile | [Danfoss thermostatic radiator valve.jpg](https://commons.wikimedia.org/wiki/File:Danfoss_thermostatic_radiator_valve.jpg) | Santeri Viinamäki | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) | Vergilbtes Thermostatventil an einem alten Heizkörper (Ausschnitt) |
+
+⚠️ **Zwei Kompromisse, die zur fachlichen Abnahme gehören:**
+
+1. **Der Verteiler ist ein Fußbodenheizungs-Verteiler**, das Haus in A2 hat
+   aber Heizkörper. Das Foto zeigt richtig, *was ein Verteiler tut* — hier
+   teilt sich die Leitung auf die Kreise auf —, nicht den Verteiler dieses
+   Kellers. Auf Commons gibt es zu „Heizungsverteiler“ nichts Besseres; wer
+   ein Bild eines Verteilerbalkens mit Pumpengruppe hat, tauscht das Motiv.
+2. **Der Ölkessel steht in einem amerikanischen Keller.** Einen deutschen
+   Öl-Heizkessel im Wohnhaus gibt Commons nicht her (gesucht über
+   „Heizkessel“, „Ölheizung“, „Ölbrenner“, Kategorien *Domestic boilers*,
+   *Heating boilers*, *Oil burners*). Der Ausschnitt zeigt, worauf es
+   ankommt: alter Kessel, Manometer, Ölbrenner. Der Rest ist Keller.
+
+Auch hier sind Herstellernamen lesbar (Wilo, Danfoss, Zilmet, Roth) —
+dieselbe Abwägung wie bei A1.
+
+#### A5: ein Pexels-Motiv für die Pause (Stand 2026-09-01)
+
+A5 („Halb eins, im Transporter") trug bis hierher die Transporter-Zeichnung,
+weil es für den Screen kein Motiv gab. Jetzt gibt es eins — und anders als bei
+A2/A3 zieht das Argument oben hier nicht: Die Pause im Transporter behauptet
+keine Anlage, sie zeigt zwei Leute beim Brot. Der Zuschnitt ist damit
+unverfänglich.
+
+| Datei | Step | Pexels | Urheber:in | Motiv |
+| --- | --- | --- | --- | --- |
+| `a5-pause.webp` | A5 | [4487669](https://www.pexels.com/photo/4487669/) | Tiger Lily | Zwei Männer in Arbeitsjacken im offenen Laderaum, Brote in der Hand, einer zeigt etwas auf dem Handy |
+
+WebP, 1600 px breit, Qualität 82 (~140 KB), abgelegt unter
+`public/medien/media/anlagenmechaniker/`. Auf keiner Bildhälfte ist im
+100-%-Ausschnitt ein Firmenname lesbar: blanke Kartons, Jacken ohne Aufdruck.
+
+⚠️ **Ohne Herkunftseintrag:** `a11-nachtfahrt.webp` (A1.1, Blick über das
+Armaturenbrett durch eine nasse Scheibe) liegt im selben Ordner und wird von
+`bilder['A1.1']` benutzt, die Quelle steht hier aber noch nicht. Wer sie kennt,
+trägt sie nach.
 
 Aus dem Altbestand (`public/medien/media/`) wird weiterhin benutzt:
 

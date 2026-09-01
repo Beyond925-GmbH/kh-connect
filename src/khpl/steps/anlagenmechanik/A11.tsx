@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ChevronDown } from 'lucide-react'
-import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
@@ -25,13 +25,15 @@ import { StepShell } from '@/khpl/shell/StepShell'
  * oft der Chef selbst fährt, und dass Bereithalten und Einsatz getrennt
  * vergütet werden — der Einsatz als Arbeitszeit mit Zuschlägen.
  *
- * **Bühne: dieselbe Zeichnung wie A5, nur nachts.** Vorgesehen war für diesen
- * Screen ein Foto, das es aber nicht gibt — und `StepFoto`
- * rendert ohne Eintrag in der Motivliste nichts, der Screen war leer. Der
- * Transporter bei Nacht sagt dasselbe wie der Text: eine Straße, eine
- * Laterne, ein Fenster, in dem noch Licht brennt. **Eine Welt, zwei
- * Zustände** — mittags in A5, nachts hier. Kein fremdes Motiv geliehen und
- * nichts dazuerfunden.
+ * **Bühne: ein Foto.** Der Screen trug lange die Transporter-Zeichnung bei
+ * Nacht — nicht als erste Wahl, sondern weil es für ihn kein Motiv gab. Jetzt
+ * gibt es eins (`bilder['A1.1']`): der Blick über ein Armaturenbrett durch
+ * eine nasse Windschutzscheibe, draußen nur Lichter. Derselbe Standpunkt wie
+ * die Zeichnung, nur echt — und auf einem Screen, dessen ganze Frage
+ * „fährt da wirklich jemand?" lautet, ist genau das der Unterschied.
+ *
+ * A5 (Mittag im Transporter) behält seine Zeichnung; die frühere Klammer
+ * „eine Welt, zwei Zustände" gilt damit nicht mehr.
  */
 
 export function A11() {
@@ -49,7 +51,7 @@ export function A11() {
       id="A1.1"
       auftrag={null}
       ansage={null}
-      buehne={<Schnitt zustand={{ szene: 'transporter', licht: 'nacht' }} />}
+      buehne={<StepFoto id="A1.1" />}
       warum={
         <>
           <p>

@@ -118,13 +118,13 @@ export const M5_SCHRITTE: Lehrschritt[] = [
 export interface Bauschritt {
   /** Phasenlabel in `zeitachse.ts`. */
   label: string
-  /** Was auf der Zieh-Karte steht. */
+  /** Was auf der Karte steht. */
   name: string
   /**
    * Der eine Satz, der den Begriff erklärt — wie `Lehrschritt.was` in M5.
    * Erscheint in der Vorführung und unter dem Kartennamen: M7 fragte fünf
    * Fachbegriffe ab, von denen drei in M5 nie vorkamen — „Windrispenbänder“
-   * als nacktes Wort auf einer Zieh-Karte ist eine Vokabelfrage, kein
+   * als nacktes Wort auf einer Karte ist eine Vokabelfrage, kein
    * Bau-Verständnis.
    */
   was: string
@@ -172,7 +172,11 @@ export const M7_SCHRITTE: Bauschritt[] = [
     name: 'Windrispenbänder',
     was: 'Das gelochte Stahlband, das diagonal über die Sparren läuft.',
     richtig: 'Sitzt. Jetzt kann der Wind das Dach nicht mehr der Länge nach verschieben.',
-    zufrueh: 'Noch nicht. Ein Band diagonal über die Sparren braucht erst mal Sparren.',
+    // Der Satz darf **nicht** voraussetzen, dass die Sparren fehlen: seit M7
+    // je zwei Karten gegeneinander stellt, steht dieses Teil auch dann zur
+    // Wahl, wenn die Sparren längst liegen und der Kehlbalken dran ist.
+    zufrueh:
+      'Noch nicht. Das Band kommt erst, wenn die Sparren untereinander verbunden sind.',
     zielT: phase('Windrispenbänder').bis - HAARBREIT,
   },
   {
@@ -180,8 +184,11 @@ export const M7_SCHRITTE: Bauschritt[] = [
     name: 'Konterlattung',
     was: 'Die Latte längs auf dem Sparren. Sie hebt die Dachlatten an, damit Luft durchzieht.',
     richtig: 'Sitzt. Der Spalt darunter ist Absicht — da zieht Luft durch.',
+    // Auch dieser Satz gilt jetzt für jeden Stand, in dem die Konterlattung
+    // als Gegenkarte auftauchen kann — vom leeren Sparrenfeld bis zum
+    // ausgesteiften Tragwerk.
     zufrueh:
-      'Noch nicht. Die Konterlatte liegt längs auf dem Sparren, und der ist noch nicht da.',
+      'Noch nicht. Die Konterlatte kommt erst obendrauf, wenn das Tragwerk fertig ausgesteift ist.',
     zielT: phase('Konterlattung').bis - HAARBREIT,
   },
   {

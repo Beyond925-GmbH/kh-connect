@@ -84,6 +84,7 @@ export function Haus({
   onVerlust,
   onPfad,
   onAbgewiesen,
+  onFalscherStart,
   onWaermeAngekommen,
 }: {
   /** Das Seitenverhältnis der Bühnenfläche — die `viewBox` richtet sich danach. */
@@ -94,6 +95,8 @@ export function Haus({
   onVerlust?: (id: string) => void
   onPfad?: (pfad: readonly KnotenId[]) => void
   onAbgewiesen?: (knoten: KnotenId) => void
+  /** A4 — jemand fasst irgendwo an, bevor die Leitung an der Pumpe hängt. */
+  onFalscherStart?: () => void
   onWaermeAngekommen?: () => void
 }) {
   const ruhig = useReducedMotion() ?? false
@@ -173,15 +176,36 @@ export function Haus({
     return { x: p.x, y: p.y }
   }
 
-  function beruehre(e: React.PointerEvent<SVGElement>) {
+  /**
+   * Ein Griff auf das Raster.
+   *
+   * `anfang` unterscheidet das Aufsetzen des Fingers vom Ziehen darüber —
+   * **nur beim Aufsetzen** ist ein Griff ins Leere eine Aussage. Während der
+   * Geste landet der Finger dauernd auf Knoten, die gerade nicht dran sind;
+   * daraus jedes Mal einen Hinweis zu machen hieße, den Screen zuzutexten.
+   *
+   * Der Fall, für den das gebaut ist: Es ist noch nichts gezogen, und
+   * jemand fasst weit weg vom Anschluss der Wärmepumpe an — am Stand fast
+   * immer am Verteiler, also am Ende statt am Anfang. Vorher passierte dann
+   * schlicht **nichts**, und ein Screen, der auf eine Berührung gar nicht
+   * antwortet, sieht kaputt aus. Jetzt sagt der Step, wo es losgeht.
+   */
+  function beruehre(e: React.PointerEvent<SVGElement>, anfang = false) {
     if (szene !== 'raster' || zustand.fertig) return
     const p = weltPunkt(e)
     if (!p) return
     const id = knotenBei(p.x, p.y)
-    if (!id) return
+    // Auch der Griff neben jeden Knoten zählt: wer den Verteilerkasten selbst
+    // antippt, liegt ein paar Einheiten neben dessen Rasterpunkt und hätte
+    // sonst wieder eine stumme Berührung.
+    if (!id) {
+      if (anfang && zustand.pfad.length === 0) onFalscherStart?.()
+      return
+    }
     const zug = zieheNach(zustand.pfad, id)
     if (zug.art === 'weiter' || zug.art === 'zurueck') onPfad?.(zug.pfad)
     else if (zug.art === 'wand') onAbgewiesen?.(zug.knoten)
+    else if (anfang && zustand.pfad.length === 0 && id !== START) onFalscherStart?.()
   }
 
   return (
@@ -276,7 +300,7 @@ export function Haus({
             ruhig={ruhig}
             onPointerDown={(e) => {
               e.currentTarget.setPointerCapture(e.pointerId)
-              beruehre(e)
+              beruehre(e, true)
             }}
             onPointerMove={(e) => {
               if (e.buttons === 0 && e.pointerType === 'mouse') return
@@ -1223,6 +1247,12 @@ function Rasterfeld({
     nach Aufmerksamkeit ruft.
   */
   const erreicht = fertig || amZiel(pfad)
+  /*
+    **Hat die Geste schon angefangen?** Solange nicht, gehört die
+    Aufmerksamkeit dem Start und sonst nichts — s. den Kommentar an den beiden
+    Enden.
+  */
+  const begonnen = pfad.length > 1
 
   return (
     <g>
@@ -1254,6 +1284,20 @@ function Rasterfeld({
         schon"), das Ziel als offener Ring mit Fadenkreuz, der pulst, bis der
         Weg angekommen ist. Die Anschlusskästen selbst hebt `Waermepumpe` und
         `VerteilerKasten` im Rasterzustand mit.
+
+        **Und trotzdem fingen am Stand viele am falschen Ende an** — am Ziel,
+        weil der gestrichelte Ring mit Fadenkreuz pulste und damit aussah wie
+        das eine Ding, das man anfassen soll. Das Ziel ist aber das Einzige auf
+        diesem Screen, das man *nicht* anfassen kann: gezogen wird ab der
+        Wärmepumpe, und ein Griff ans andere Ende passiert stumm.
+
+        Deshalb ruft jetzt nur noch **ein** Punkt, und zwar der richtige:
+        solange die Geste nicht angefangen hat, trägt der Start den
+        Signalring der Anwendung — dieselbe Affordanz wie die Prüfpunkte in A1
+        und die Verlustflächen in A3 („die Bühne ist die Interaktion, das
+        antippbare Objekt trägt die Affordanz") — dazu ein Puls und das Wort.
+        Das Ziel wartet in dieser Zeit still; sein Puls setzt erst ein, wenn
+        die Leitung unterwegs ist und die Frage wirklich „wohin" lautet.
       */}
       {start && (
         <g>
@@ -1264,21 +1308,65 @@ function Rasterfeld({
             fill={KALT.rohrMantel}
             opacity={0.8}
           />
+          {!begonnen && !ruhig && (
+            <motion.circle
+              cx={start.x}
+              cy={start.y}
+              r={8.5}
+              fill="none"
+              className="stroke-kh-signal"
+              strokeWidth={2}
+              initial={{ scale: 1, opacity: 0.8 }}
+              animate={{ scale: 2, opacity: 0 }}
+              transition={{ duration: 1.9, repeat: Infinity, ease: 'easeOut' }}
+              style={{ transformOrigin: `${start.x}px ${start.y}px` }}
+            />
+          )}
           <circle
             cx={start.x}
             cy={start.y}
             r={8.5}
             fill="none"
-            stroke={KALT.rohr}
+            stroke={begonnen ? KALT.rohr : undefined}
+            className={begonnen ? undefined : 'stroke-kh-signal'}
             strokeWidth={2.4}
           />
-          <circle cx={start.x} cy={start.y} r={3.6} fill={KALT.rohrGlanz} />
+          <circle
+            cx={start.x}
+            cy={start.y}
+            r={3.6}
+            fill={begonnen ? KALT.rohrGlanz : undefined}
+            className={begonnen ? undefined : 'fill-kh-signal'}
+          />
+          {/*
+            Das Wort dazu, und nur solange es gebraucht wird. Es sitzt über dem
+            Punkt, zwischen Kellerdecke und Wärmepumpe — der einzige Streifen
+            dort, auf dem nichts anderes liegt. Der dunkle Saum unter der
+            Schrift ist derselbe wie bei den Beschriftungen in A3.
+          */}
+          {!begonnen && (
+            <text
+              x={start.x}
+              y={start.y - 17}
+              textAnchor="middle"
+              fontSize={7.5}
+              fontWeight={700}
+              className="fill-kh-signal"
+              stroke="#0E0D0B"
+              strokeWidth={2.6}
+              paintOrder="stroke"
+              strokeLinejoin="round"
+              pointerEvents="none"
+            >
+              Hier starten
+            </text>
+          )}
         </g>
       )}
       {ziel && (
         <g>
           <circle cx={ziel.x} cy={ziel.y} r={9} fill={KALT.rohrMantel} opacity={0.8} />
-          {!erreicht && !ruhig && (
+          {begonnen && !erreicht && !ruhig && (
             <motion.circle
               cx={ziel.x}
               cy={ziel.y}
@@ -1311,8 +1399,10 @@ function Rasterfeld({
         </g>
       )}
 
-      {/* Wo es weitergeht. Ein ruhiger Puls, kein Blinken. */}
-      {kopf && !erreicht && !ruhig && (
+      {/* Wo es weitergeht. Ein ruhiger Puls, kein Blinken — und erst ab dem
+          ersten Schritt: vor dem Start läge er unter dem Signalring auf
+          demselben Punkt, zwei Ringe für eine Aussage. */}
+      {begonnen && kopf && !erreicht && !ruhig && (
         <motion.circle
           cx={kopf.x}
           cy={kopf.y}

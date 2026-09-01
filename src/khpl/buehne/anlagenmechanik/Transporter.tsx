@@ -5,22 +5,21 @@ import { WELT, sichtfeldFuellend, viewBoxVon } from './zeichnung'
  * **Der Transporter** — der Blick über das Armaturenbrett, von innen.
  *
  * Die dritte Zeichnung dieses Tages, und die einzige, die nicht im Haus
- * spielt. Sie trägt zwei Screens:
+ * spielt. Sie trägt **A5, die Zäsur**: „Halb eins, im Transporter." Warmes
+ * Licht durch die Windschutzscheibe — **die erste Wärme des Tages**, noch
+ * bevor die Anlage läuft, als leise Vorbereitung auf A6.
  *
- * - **A5, die Zäsur.** „Halb eins, im Transporter." Warmes Licht durch die
- *   Windschutzscheibe — **die erste Wärme des Tages**, noch bevor die Anlage
- *   läuft, als leise Vorbereitung auf A6.
- * - **A1.1, der Notdienst.** Derselbe Blick, dieselbe Scheibe, nur dass
- *   draußen nichts ist als Straße, eine Laterne und ein einziges Fenster, in
- *   dem noch Licht brennt. „Wer fährt eigentlich nachts?" — das ist die
- *   Antwort als Bild.
+ * **Warum gezeichnet und nicht fotografiert.** Der Screen war als Foto
+ * geplant, und das Motiv *fehlt*. Ohne Eintrag in der Motivliste rendert
+ * `StepFoto` nichts — die Zäsur des Tages stand auf schwarzem Grund. Eine
+ * ruhige Zeichnung ist hier gleichwertig, und welches Medium eine Bühne
+ * benutzt, entscheidet ohnehin jeder Tag selbst.
  *
- * **Warum gezeichnet und nicht fotografiert.** Beide Screens waren als Fotos
- * geplant, und für beide *fehlt das Motiv*. Ohne Eintrag in der
- * Motivliste rendert `StepFoto` nichts — die Zäsur des Tages stand auf
- * schwarzem Grund. Eine ruhige Zeichnung ist für A5 gleichwertig, und
- * welches Medium eine Bühne benutzt, entscheidet ohnehin jeder Tag selbst.
- * A1.1 bekommt dieselbe Zeichnung bei Nacht: eine Welt, zwei Zustände.
+ * **`licht: 'nacht'` hat seit dem 01.09. keinen Aufrufer.** Die Variante trug
+ * A1.1 („Wer fährt eigentlich nachts?"), solange es dafür kein Foto gab;
+ * jetzt gibt es eins, und ein Foto beantwortet diese Frage besser als eine
+ * Zeichnung. Der Nacht-Zweig bleibt fertig stehen — er ist der günstigste
+ * Weg zu einem weiteren Nacht-Screen, und ein Rückbau nähme `kanon.ts` mit.
  *
  * **Das iPad auf dem Armaturenbrett ist keine Requisite**, sondern
  * Arbeitsalltag: Aufträge liegen auf dem iPad, Fotos macht man jederzeit

@@ -78,12 +78,41 @@ const BOEGEN_GUT = 2
 const ABWEISUNG =
   'Da geht nichts durch — diese Wand trägt das Haus. Such einen anderen Weg.'
 
+/**
+ * **Der Satz für das falsche Ende.**
+ *
+ * Am Stand fing ein guter Teil der Besucher am Verteiler an zu ziehen, also
+ * dort, wo die Leitung ankommen soll. Die Zeichnung führt die Geste aber ab
+ * der Wärmepumpe (`zieheNach` kennt nur „einen weiter" vom Kopf des Weges) —
+ * ein Griff ans andere Ende passierte deshalb vollkommen stumm, und ein
+ * Screen, der auf eine Berührung nicht antwortet, sieht kaputt aus.
+ *
+ * Die Zeichnung sagt es seitdem vorweg (Signalring und *Hier starten* am
+ * Anschluss der Wärmepumpe, solange nichts gezogen ist); dieser Satz ist die
+ * Antwort für den, der trotzdem am anderen Ende anfasst. **Er nennt die
+ * Seite** — „rechts" ist auf einem Kellerschnitt schneller gefunden als ein
+ * Bauteilname, den man erst zuordnen muss.
+ */
+const FALSCHER_START =
+  'Die Leitung beginnt rechts an der Wärmepumpe — dort, wo der Punkt leuchtet. Von da ziehst du zum Verteiler.'
+
 export function A4() {
   const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.a4
   const [pfad, setPfad] = useState<KnotenId[]>(() => gespeichert?.pfad ?? [])
   const [fertig, setFertig] = useState(() => !!gespeichert?.fertig)
   const [abgewiesen, setAbgewiesen] = useState<KnotenId | null>(null)
+  const [falscherStart, setFalscherStart] = useState(false)
+
+  /*
+    Eine Meldezeile, zwei Fälle — die tragende Wand und das falsche Ende. Beide
+    sagen dasselbe: „so nicht, und deshalb nicht." Zwei getrennte Zeilen
+    hießen, dass das Panel während der Geste um eine Zeile wachsen kann, und
+    genau das schiebt hochkant das Raster unter dem Finger weg (s. `Neu
+    ziehen`). Die Wand hat Vorrang: sie ist die Antwort auf die jüngere
+    Handlung.
+  */
+  const hinweis = abgewiesen ? ABWEISUNG : falscherStart ? FALSCHER_START : null
 
   const boegen = zaehleBoegen(pfad)
   const verlust = druckverlust(pfad)
@@ -106,6 +135,7 @@ export function A4() {
   const ziehen = (neu: readonly KnotenId[]) => {
     setPfad([...neu])
     setAbgewiesen(null)
+    setFalscherStart(false)
   }
 
   /**
@@ -122,6 +152,7 @@ export function A4() {
   const neu = () => {
     setPfad([])
     setAbgewiesen(null)
+    setFalscherStart(false)
   }
 
   const legen = () => {
@@ -162,7 +193,7 @@ export function A4() {
       */
       ansage={{
         geste: 'ziehen-frei',
-        text: 'Du verlegst die Leitung selbst — mit dem Finger, quer durch den Keller.',
+        text: 'Du verlegst die Leitung selbst — mit dem Finger, quer durch den Keller. Fang rechts an der Wärmepumpe an.',
         haken: 'Der kürzeste Weg ist nicht immer der beste.',
       }}
       buehneInteraktiv
@@ -171,7 +202,15 @@ export function A4() {
         <Schnitt
           zustand={{ szene: 'raster', pfad, verlust, fertig, abgewiesen }}
           onPfad={fertig ? undefined : ziehen}
-          onAbgewiesen={fertig ? undefined : setAbgewiesen}
+          onAbgewiesen={
+            fertig
+              ? undefined
+              : (knoten) => {
+                  setAbgewiesen(knoten)
+                  setFalscherStart(false)
+                }
+          }
+          onFalscherStart={fertig ? undefined : () => setFalscherStart(true)}
         />
       }
       warum={
@@ -214,8 +253,8 @@ export function A4() {
               {/* Schmal steht die Abweisung im Fuß — s. dort. */}
               {!schmal && (
                 <Rueckmeldung
-                  ok={abgewiesen ? false : null}
-                  text={abgewiesen ? ABWEISUNG : null}
+                  ok={hinweis ? false : null}
+                  text={hinweis}
                   testid="a4-rueckmeldung"
                 />
               )}
@@ -256,8 +295,8 @@ export function A4() {
           */}
           {schmal && !fertig && (
             <Rueckmeldung
-              ok={abgewiesen ? false : null}
-              text={abgewiesen ? ABWEISUNG : null}
+              ok={hinweis ? false : null}
+              text={hinweis}
               testid="a4-rueckmeldung"
             />
           )}

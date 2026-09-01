@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Check, ChevronDown } from 'lucide-react'
 import { motion } from 'motion/react'
-import { Schnitt } from '@/khpl/buehne/anlagenmechanik/Schnitt'
+import { StepFoto } from '@/khpl/buehne/Foto'
 import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
@@ -41,13 +41,17 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * Bis sie da ist, fragt der Kiosk nach einer Minute auf ausgerechnet dem
  * Screen nach, der niemanden drängen soll.
  *
- * **Die Bühne ist eine Zeichnung** (`buehne/anlagenmechanik/Transporter.tsx`).
- * Das vorgesehene Foto gibt es nicht, und für genau diesen Screen ist die
- * Alternative die bessere: warmes Licht durch die Windschutzscheibe, auf dem
- * Armaturenbrett ein iPad. Bis hierher trug allein eine Lichtlage über einem
- * leeren `StepFoto`, und der Screen war zu vier Fünfteln schwarz. Die
- * Zeichnung trägt die **erste Wärme des Tages**, noch bevor die Anlage läuft,
- * und das iPad steht darin, wo es im Interview steht: auf dem Armaturenbrett.
+ * **Bühne: ein Foto** (`bilder.A5`). Der Screen trug lange die
+ * Transporter-Zeichnung bei Mittag — nicht als erste Wahl, sondern weil es
+ * für ihn kein Motiv gab. Jetzt gibt es eins: zwei Männer in Arbeitsjacken im
+ * offenen Laderaum, Brote in der Hand, einer zeigt dem anderen etwas auf dem
+ * Handy. Auf einem Screen, dessen ganzer Zweck die Pause ist, ist eine
+ * fotografierte Pause der Unterschied.
+ *
+ * Das iPad ist darauf **nicht zu sehen** — das Foto ist der Laderaum, nicht
+ * die Kabine. Der Nebensatz oben bleibt trotzdem stehen: er kommt aus dem
+ * Interview und löst `technik: 0.85` ein, und ein Detail, das das Bild nicht
+ * bebildert, ist etwas anderes als ein Bild, das dem Text widerspricht.
  */
 
 /**
@@ -118,15 +122,7 @@ export function A5() {
       // Keine Übung, kein Prüfknopf: der Karriere-Link darf hier auftauchen,
       // und *Weiter* bleibt der eine laute Knopf.
       interaktionOffen={false}
-      /*
-        Die Zäsur bekommt statt eines Fotos eine ruhige Zeichnung: warmes
-        Licht durch die Windschutzscheibe, auf dem Armaturenbrett ein iPad.
-        Vorher stand hier `StepFoto` — und weil das Motiv fehlt,
-        rendert es nichts: der wichtigste Screen des Tages war zu vier
-        Fünfteln schwarz. Die Zeichnung löst zugleich das iPad ein und damit
-        `technik: 0.85`.
-      */
-      buehne={<Schnitt zustand={{ szene: 'transporter', licht: 'mittag' }} />}
+      buehne={<StepFoto id="A5" />}
       warum={
         <>
           <p>

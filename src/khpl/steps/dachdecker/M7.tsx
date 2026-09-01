@@ -1,17 +1,5 @@
-import { Suspense, lazy, useMemo, useState } from 'react'
-import { createPortal } from 'react-dom'
-import {
-  DndContext,
-  DragOverlay,
-  MeasuringStrategy,
-  PointerSensor,
-  useDraggable,
-  useDroppable,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
-} from '@dnd-kit/core'
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Check, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import {
@@ -22,7 +10,6 @@ import {
 } from '@/khpl/buehne/aufbauabschnitte'
 import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
 import { DachSchema } from '@/khpl/komponenten/DachSchema'
-import { DND_ANLEITUNG, DND_ANSAGEN } from '@/khpl/komponenten/dndDeutsch'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
@@ -33,36 +20,34 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
  * M7 — Jetzt du.
  *
  * **Zweite Hälfte des Lernpaars.** Gleiche Grafik wie M5,
- * gedrehte Rolle. Der Besucher zieht die Bauteile selbst in der richtigen
- * Reihenfolge an ihren Platz; falsche Reihenfolge lässt das Bauteil
- * zurückrutschen, mit einem Satz dazu, warum es noch nicht drankommt.
+ * gedrehte Rolle. Erst läuft die zweite Hälfte einmal komplett durch, dann
+ * spult sie zurück, dann baut der Besucher sie selbst.
  *
- * **Drei Korrekturen an der letzten Fassung.**
+ * **Was hier zuletzt gekippt wurde: aus fünf Karten wurden zwei.**
  *
- *  1. **Erst wird es vorgeführt, dann abgefragt.** Vorher fing der Screen mit
- *     fünf Karten an, auf denen Wörter standen — „Windrispenbänder“,
- *     „Konterlattung“ —, und verlangte deren Reihenfolge. Drei davon hatte der
- *     Besucher noch nie gesehen: M5 hält vor den Sparren an, und alles, was
- *     hier abgefragt wird, kommt danach. Das war keine Abfrage, das war Raten.
- *     Jetzt läuft die zweite Hälfte einmal komplett durch — Sparren, Kehlbalken,
- *     Bänder, Lattung, fertiges Dach —, spult zurück, und **dann** ist der
- *     Besucher dran. Wer will, lässt es sich noch einmal zeigen.
- *  2. **Jede Karte trägt ihr Bild.** Ein Querschnitt-Schema zeigt, wo das Teil
- *     im Dach sitzt (`DachSchema`). Damit ist die Frage „was kommt als
- *     Nächstes“ eine Frage über den Bau und nicht über Vokabeln.
- *  3. **Das Ziehen ist ruhig geworden.** Die Karten hatten `transition-transform`
- *     — eine CSS-Übergangszeit auf genau der Eigenschaft, die dnd-kit jeden
- *     Frame neu setzt. Jede Fingerbewegung wurde dadurch nachgezogen statt
- *     gefolgt, und das Ergebnis zitterte. Jetzt hängt am Finger eine
- *     `DragOverlay`-Kopie ohne Übergang, die Originalkarte bleibt blass an
- *     ihrem Platz liegen, und das Auto-Scrollen des Panels ist abgeschaltet:
- *     es verschob während des Ziehens den Untergrund.
+ * Der Screen legte alle noch offenen Bauteile gleichzeitig aus und ließ sie in
+ * die richtige Reihenfolge ziehen. Am Stand hieß das: fünf Fachwörter, von
+ * denen ein Fünfzehnjähriger keines kennt, eine Reihenfolge, die sich nach
+ * einer Vorführung niemand merkt, und ein falscher Zug, der das Teil
+ * zurückschnappen lässt, ohne dass der Bau weitergeht. Wer zweimal daneben
+ * lag, hat aufgehört.
  *
- * Die Belohnung ist nicht eine Wertung, sondern die Animation selbst: jedes
- * richtig abgelegte Teil fliegt tatsächlich ein und das Dach wächst weiter.
+ * Jetzt steht in jeder Runde **eine Frage mit zwei Bildern**: das Teil, das
+ * dran ist, und eines, das später kommt — beide groß als Querschnitt-Schema,
+ * das zeigt, wo das Teil im Dach sitzt. Damit ist die Entscheidung ein
+ * Blickvergleich und keine Vokabelprüfung, und die Trefferchance ist selbst
+ * beim Raten fifty-fifty.
  *
- * Nach zwei Fehlversuchen: „Zeig mir wie“ — es legt das nächste
- * Teil selbst ab und erklärt dabei, warum es dieses ist.
+ * **Falsch tippen hält niemanden auf.** Die richtige Karte leuchtet kurz auf,
+ * die Rückmeldung sagt, warum das andere Teil noch nicht dran ist — und dann
+ * wird trotzdem das richtige eingebaut. Das Dach wächst in jeder Runde, egal
+ * wie getippt wurde: Die Belohnung ist die Animation, nicht die Punktzahl, und
+ * ein Besucher, der die Reihenfolge nicht kennt, soll den fertigen Dachstuhl
+ * trotzdem sehen. Deshalb gibt es hier auch kein „Zeig mir wie“ mehr — es hat
+ * nur noch abgenommen, was ohnehin von selbst weitergeht.
+ *
+ * In der letzten Runde ist nur noch ein Teil übrig; dann steht auch nur eine
+ * Karte da. Das ist kein Sonderfall, sondern der Schlusstipp aufs fertige Dach.
  *
  * Hier hat der Fuß keine eigene Aktion: die Bühne ist die Handlung. Solange
  * das Dach nicht steht, trägt er nur das leise Überspringen (`uebungOffen`).
@@ -70,8 +55,15 @@ import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 
 const Dachstuhl3D = lazy(() => import('@/khpl/buehne/Dachstuhl3D'))
 
-const ABLAGE = 'm7-ablage'
-const HILFE_AB = 2
+/**
+ * Wie lange die Auflösung stehen bleibt, bevor das richtige Teil einfliegt.
+ *
+ * Ohne diese Pause ersetzt die nächste Frage die Karten in derselben
+ * Sekunde, in der getippt wurde — und wer danebenlag, sieht nie, welches Bild
+ * das richtige war. Die Pause ist genau der Moment, in dem Bild und Name
+ * zusammenfinden.
+ */
+const AUFLOESUNG_MS = 1100
 
 /**
  * Takt des Screens.
@@ -88,16 +80,19 @@ const HILFE_AB = 2
  */
 type Takt = 'zeigen' | 'zurueck' | 'bauen'
 
+/** Wie eine Karte gerade dasteht. `offen` = es ist noch nicht getippt. */
+type Stand = 'offen' | 'richtig' | 'falsch' | 'blass'
+
 /**
- * Anzeigereihenfolge der Zieh-Karten, einmal je Besuch gewürfelt.
+ * Die Reihenfolge, in der gewürfelt wird — einmal je Besuch.
  *
- * Ohne das standen sie in der Lösungsreihenfolge — die Frage „Was kommt als
- * Nächstes aufs Dach?“ war dann fünfmal hintereinander damit beantwortet, die
- * linke Karte zu nehmen, ohne sie zu lesen. Das ist die einzige `Abfrage:` des
- * ganzen Boards; sie muss nach dem Inhalt fragen, nicht nach der Position.
+ * Sie entscheidet zweierlei: **welches** der späteren Teile als Gegenkarte
+ * antritt und **auf welcher Seite** die richtige Karte steht. Ohne das wäre
+ * die Frage „Was kommt als Nächstes aufs Dach?“ fünfmal damit beantwortet,
+ * links zu tippen, ohne hinzusehen.
  *
- * Einmal beim Mounten, nicht bei jedem Rendern: sonst springen die Karten unter
- * dem Finger weg.
+ * Einmal beim Mounten, nicht bei jedem Rendern: sonst springen die Karten
+ * unter dem Finger weg.
  */
 function mische<T>(liste: T[]): T[] {
   const a = [...liste]
@@ -111,9 +106,9 @@ function mische<T>(liste: T[]): T[] {
 export function M7() {
   const gespeichert = useFortschritt().answers.m7
   const [gesetzt, setGesetzt] = useState<string[]>(() => gespeichert?.gesetzt ?? [])
-  const [fehler, setFehler] = useState(0)
   const [meldung, setMeldung] = useState<{ text: string; ok: boolean } | null>(null)
-  const [zieht, setZieht] = useState<string | null>(null)
+  /** Was in dieser Runde getippt wurde — gesetzt, solange die Auflösung steht. */
+  const [wahl, setWahl] = useState<string | null>(null)
 
   // Wer schon einmal hier war, hat die Vorführung gesehen — er steigt direkt
   // in die Abfrage ein. Alle anderen bekommen erst das ganze Dach zu sehen.
@@ -122,18 +117,26 @@ export function M7() {
   )
   const [gezeigt, setGezeigt] = useState('')
 
-  const sensoren = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-  )
+  const [mischung] = useState(() => mische(M7_SCHRITTE.map((s) => s.label)))
+  const rang = (schritt: Bauschritt) => mischung.indexOf(schritt.label)
 
-  const [reihenfolge] = useState(() => mische(M7_SCHRITTE.map((s) => s.label)))
-
-  // `dran` folgt der Bauordnung, die Anzeige der gewürfelten Reihenfolge.
+  // `dran` folgt der Bauordnung. Die Gegenkarte ist immer ein Teil, das
+  // **später** kommt — nur dann stimmt der `zufrueh`-Satz, der sie abweist.
   const dran = M7_SCHRITTE.find((s) => !gesetzt.includes(s.label))
-  const offen = reihenfolge
-    .map((label) => M7_SCHRITTE.find((s) => s.label === label))
-    .filter((s): s is Bauschritt => !!s && !gesetzt.includes(s.label))
+  const spaeter = M7_SCHRITTE.filter(
+    (s) => !gesetzt.includes(s.label) && s.label !== dran?.label,
+  )
+  const ablenker = [...spaeter].sort((a, b) => rang(a) - rang(b))[0]
   const fertig = dran === undefined
+
+  /** Die zwei Karten dieser Runde, in gewürfelter Seitenlage. */
+  const paar: Bauschritt[] = !dran
+    ? []
+    : !ablenker
+      ? [dran]
+      : rang(dran) < rang(ablenker)
+        ? [dran, ablenker]
+        : [ablenker, dran]
 
   /** Der Stand, den das Modell im Takt `bauen` zeigt. */
   const bauZielT = fertig
@@ -148,11 +151,6 @@ export function M7() {
   // beim Bauen wartet jemand auf das Ergebnis seiner eigenen Entscheidung.
   const dauer = takt === 'zeigen' ? 22 : takt === 'zurueck' ? 3 : 12
 
-  const gezogen = useMemo(
-    () => (zieht ? M7_SCHRITTE.find((s) => s.label === zieht) : undefined),
-    [zieht],
-  )
-
   /**
    * Was im Karten-Schema als „steht schon“ gezeichnet wird.
    *
@@ -165,32 +163,38 @@ export function M7() {
     [gesetzt],
   )
 
-  const setze = (schritt: Bauschritt) => {
-    const neu = [...gesetzt, schritt.label]
-    setGesetzt(neu)
-    setMeldung({ text: schritt.richtig, ok: true })
-    merkeAntwort('m7', { gesetzt: neu, fertig: neu.length === M7_SCHRITTE.length })
+  /**
+   * Nach der Auflösung wird **immer** das richtige Teil eingebaut — auch nach
+   * einem Fehltipp. Der Bau ist die Belohnung des Screens; ihn an die richtige
+   * Antwort zu koppeln hieße, ihn dem vorzuenthalten, für den er gemacht ist.
+   */
+  useEffect(() => {
+    if (wahl === null || !dran) return
+    const id = setTimeout(() => {
+      const neu = [...gesetzt, dran.label]
+      setGesetzt(neu)
+      merkeAntwort('m7', { gesetzt: neu, fertig: neu.length === M7_SCHRITTE.length })
+      setWahl(null)
+    }, AUFLOESUNG_MS)
+    return () => clearTimeout(id)
+  }, [wahl, dran, gesetzt])
+
+  const waehle = (schritt: Bauschritt) => {
+    if (wahl !== null || !dran) return
+    setWahl(schritt.label)
+    setMeldung(
+      schritt.label === dran.label
+        ? { text: dran.richtig, ok: true }
+        : // Der Doppelpunkt umgeht Artikel und Zahl: „Richtig wäre: Kehlbalken.“
+          // steht so neben „Richtig wäre: Sparrenpaare.“
+          { text: `${schritt.zufrueh} Richtig wäre: ${dran.name}.`, ok: false },
+    )
   }
 
-  const ablegen = (e: DragEndEvent) => {
-    setZieht(null)
-    if (e.over?.id !== ABLAGE) return
-    const schritt = M7_SCHRITTE.find((s) => s.label === e.active.id)
-    if (!schritt || !dran) return
-
-    if (schritt.label === dran.label) {
-      setze(schritt)
-      setFehler(0)
-    } else {
-      setFehler((n) => n + 1)
-      setMeldung({ text: schritt.zufrueh, ok: false })
-    }
-  }
-
-  const zeigMirWie = () => {
-    if (!dran) return
-    setze(dran)
-    setFehler(0)
+  const stand = (schritt: Bauschritt): Stand => {
+    if (wahl === null) return 'offen'
+    if (schritt.label === dran?.label) return 'richtig'
+    return schritt.label === wahl ? 'falsch' : 'blass'
   }
 
   return (
@@ -201,12 +205,14 @@ export function M7() {
         `zeigen` und `zurueck` läuft, gibt es nichts zu tun — eine
         Aufforderung, die man noch nicht befolgen kann, ist eine Falle.
       */
-      auftrag={takt === 'bauen' && !fertig ? 'Zieh das Teil an seinen Platz.' : null}
-      ansage={{
-        geste: 'ziehen-karte',
-        text: 'Jetzt baust du die zweite Hälfte selbst — in der Reihenfolge, in der es geht.',
-        haken: 'Was noch nicht dran ist, hält nicht.',
-      }}
+      auftrag={
+        takt === 'bauen' && !fertig ? 'Tipp an, was als Nächstes drankommt.' : null
+      }
+      // Antippen erklärt sich selbst (`komponenten/gesten.ts`): seit hier
+      // nichts mehr gezogen wird, wäre eine Ansage davor eine Erklärung für
+      // eine Geste, die es nicht gibt. Die Einordnung („gleich baust du sie
+      // selbst“) trägt der Text neben der Vorführung.
+      ansage={null}
       buehneInteraktiv
       interaktionOffen={!fertig}
       buehne={
@@ -250,91 +256,42 @@ export function M7() {
           {takt !== 'bauen' ? (
             <Vorfuehrung label={gezeigt} zurueck={takt === 'zurueck'} />
           ) : fertig ? null : (
-            <DndContext
-              sensors={sensoren}
-              onDragStart={(e: DragStartEvent) => setZieht(String(e.active.id))}
-              onDragCancel={() => setZieht(null)}
-              onDragEnd={ablegen}
-              // Das Panel ist ein Scroll-Container. dnd-kits Auto-Scroll hat
-              // ihn beim Ziehen in Randnähe mitgezogen — der Untergrund
-              // bewegte sich unter dem Finger, und die Karte schien zu
-              // springen.
-              autoScroll={false}
-              // Die Ablage sitzt über einer Fläche, deren Höhe sich beim
-              // Wechsel der Rückmeldung ändert. Ohne dauerndes Nachmessen
-              // rechnet dnd-kit mit einem veralteten Rechteck.
-              measuring={{ droppable: { strategy: MeasuringStrategy.Always } }}
-              accessibility={{
-                announcements: DND_ANSAGEN,
-                screenReaderInstructions: DND_ANLEITUNG,
-              }}
-            >
-              {/* Eine Karte statt vier: Ablage, Rückmeldung und Vorrat gehören zu
-                einer Handlung, und übereinandergestapelte Einzelkarten zerlegen
-                den Screen in Kästchen. */}
-              <div className="flex flex-col gap-2" data-wisch="aus">
-                <Ablage anzahl={gesetzt.length} gesamt={M7_SCHRITTE.length} />
+            // Eine Karte statt vier: Frage, Rückmeldung und Wahl gehören zu
+            // einer Handlung, und übereinandergestapelte Einzelkarten zerlegen
+            // den Screen in Kästchen.
+            <div className="flex flex-col gap-2.5">
+              <Frage anzahl={gesetzt.length} gesamt={M7_SCHRITTE.length} />
 
-                <Rueckmeldung
-                  ok={meldung ? meldung.ok : null}
-                  text={meldung ? meldung.text : null}
-                  testid="m7-meldung"
-                />
+              <Rueckmeldung
+                ok={meldung ? meldung.ok : null}
+                text={meldung ? meldung.text : null}
+                testid="m7-meldung"
+              />
 
-                <div className="flex flex-wrap gap-2">
-                  {offen.map((s) => (
-                    <Bauteilkarte key={s.label} schritt={s} gebaut={gebaut} />
-                  ))}
-                </div>
-
-                <div className="flex flex-wrap justify-start gap-2">
-                  <Button
-                    variant="leise"
-                    onClick={() => setTakt('zeigen')}
-                    data-testid="m7-nochmal-zeigen"
-                  >
-                    Noch mal zeigen
-                  </Button>
-                  {fehler >= HILFE_AB && (
-                    <Button
-                      variant="leise"
-                      onClick={zeigMirWie}
-                      data-testid="m7-zeig-mir-wie"
-                    >
-                      Zeig mir wie
-                    </Button>
-                  )}
-                </div>
+              <div
+                className={`grid gap-2.5 ${paar.length > 1 ? 'grid-cols-2' : 'grid-cols-1'}`}
+              >
+                {paar.map((s) => (
+                  <Teilkarte
+                    key={s.label}
+                    schritt={s}
+                    gebaut={gebaut}
+                    stand={stand(s)}
+                    onWaehle={() => waehle(s)}
+                  />
+                ))}
               </div>
 
-              {/*
-                Die Kopie am Finger. Sie liegt in einem eigenen Layer über dem
-                Screen, ohne Übergangszeit und ohne Layout um sich herum —
-                genau deshalb folgt sie dem Finger, statt ihm nachzulaufen.
-
-                **Und sie muss an `document.body`.** Das Panel trägt
-                `backdrop-filter` (siehe `kh-panel`), und ein Element mit
-                Backdrop-Filter ist der enthaltende Block für alles
-                `position: fixed` darunter. Bleibt die Overlay-Kopie im Panel,
-                rechnet sie ihre Koordinaten gegen dessen linke obere Ecke
-                statt gegen den Bildschirm: sie hängt schief unter dem Finger,
-                und — schlimmer — dnd-kit misst mit demselben verschobenen
-                Rechteck. Die Ablage wurde dann nie getroffen, egal wo man
-                loslässt.
-              */}
-              {createPortal(
-                <DragOverlay dropAnimation={null}>
-                  {gezogen && (
-                    <Kartenflaeche
-                      schritt={gezogen}
-                      gebaut={gebaut}
-                      className="scale-105 shadow-[0_18px_44px_rgba(0,0,0,0.65)]"
-                    />
-                  )}
-                </DragOverlay>,
-                document.body,
-              )}
-            </DndContext>
+              <div className="flex flex-wrap justify-start gap-2">
+                <Button
+                  variant="leise"
+                  onClick={() => setTakt('zeigen')}
+                  data-testid="m7-nochmal-zeigen"
+                >
+                  Noch mal zeigen
+                </Button>
+              </div>
+            </div>
           )}
         </Wechsel>
       }
@@ -376,7 +333,7 @@ export function M7() {
  *
  * Name **und** Ein-Satz-Erklärung dessen, was gerade einfliegt: drei
  * der fünf Begriffe kommen in M5 nie vor — die Vorführung ist die eine
- * Stelle, an der sie erklärt sind, bevor die Abfrage sie als Zieh-Karten
+ * Stelle, an der sie erklärt sind, bevor die Abfrage sie als Karten
  * abruft. Der Ausweg für den, der die Reihenfolge schon kennt, steht im Fuß
  * an der Primärposition, nicht hier.
  */
@@ -410,18 +367,12 @@ function Vorfuehrung({ label, zurueck }: { label: string; zurueck: boolean }) {
   )
 }
 
-function Ablage({ anzahl, gesamt }: { anzahl: number; gesamt: number }) {
-  const { setNodeRef, isOver } = useDroppable({ id: ABLAGE })
-
+/** Die Frage über den beiden Karten, mit dem Stand daneben. */
+function Frage({ anzahl, gesamt }: { anzahl: number; gesamt: number }) {
   return (
     <div
-      ref={setNodeRef}
-      data-testid="m7-ablage"
-      className={`flex min-h-[68px] items-center justify-between gap-3 rounded-kh border-2 border-dashed px-4 py-2.5 transition-colors ${
-        isOver
-          ? 'border-kh-signal bg-kh-signal/15'
-          : 'border-kh-line-strong bg-white/[0.04]'
-      }`}
+      data-testid="m7-frage"
+      className="flex items-center justify-between gap-3 rounded-kh border-2 border-kh-line-strong bg-white/[0.04] px-4 py-2.5"
     >
       <p className="text-[1.125rem] font-semibold text-kh-paper">
         Was kommt als Nächstes aufs Dach?
@@ -434,67 +385,78 @@ function Ablage({ anzahl, gesamt }: { anzahl: number; gesamt: number }) {
 }
 
 /**
- * Die Zieh-Karte am Platz. Sie trägt selbst **keine** Transformation mehr:
- * am Finger hängt die `DragOverlay`-Kopie, hier bleibt nur der blasse Umriss
- * zurück, damit sichtbar ist, woher das Teil kommt.
- */
-function Bauteilkarte({ schritt, gebaut }: { schritt: Bauschritt; gebaut: string[] }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
-    id: schritt.label,
-  })
-
-  return (
-    <div ref={setNodeRef} {...listeners} {...attributes} className="touch-none">
-      <Kartenflaeche
-        schritt={schritt}
-        gebaut={gebaut}
-        testid={`m7-teil-${schritt.label}`}
-        className={isDragging ? 'opacity-30' : ''}
-      />
-    </div>
-  )
-}
-
-/**
- * Das Aussehen einer Zieh-Karte — einmal am Platz, einmal als Kopie am Finger.
+ * Eine der beiden Karten, zwischen denen entschieden wird.
+ *
+ * **Das Bild ist die Karte.** Vorher saß dasselbe Schema als 44-px-Kachel
+ * neben dem Wort — erkennbar war darauf nichts, die Entscheidung lief also
+ * doch wieder über den Begriff. Jetzt nimmt der Querschnitt die volle
+ * Kartenbreite ein: was schon steht, blass; das Teil, um das es geht, orange.
+ * Zwei Bilder nebeneinander zu vergleichen kann jemand, der noch nie ein Dach
+ * von innen gesehen hat.
  *
  * Die Karten sind bewusst hell: sie sind auf diesem Screen das Einzige, was
  * man anfassen kann, und müssen sich vom dunklen Panel abheben wie ein
- * Werkzeug vom Tisch. Links das Schema mit dem Stand, den das Dach **gerade**
- * hat, und dem Teil darin orange — die Karte zeigt also nicht nur, was sie
- * ist, sondern auch, wo es hinkäme.
+ * Werkzeug vom Tisch.
  *
- * Unter dem Namen steht der `was`-Satz aus M5s Kartenmuster: ohne ihn
- * waren „Windrispenbänder“ und „Konterlattung“ nackte Vokabeln neben einer
- * 44-px-Zeichnung. Auf dem Handy hochkant entfällt der Satz (`max-sm:hidden`)
- * — dort zählt jedes Pixel Panelhöhe, und die Vorführung hat die Begriffe
- * bereits erklärt.
+ * Nach dem Tippen bleibt die Runde einen Moment stehen: Die richtige Karte
+ * bekommt den limettenen Rand und den Haken — auch dann, wenn daneben getippt
+ * wurde. Genau dafür ist die Pause da.
  */
-function Kartenflaeche({
+function Teilkarte({
   schritt,
   gebaut,
-  className = '',
-  testid,
+  stand,
+  onWaehle,
 }: {
   schritt: Bauschritt
   gebaut: string[]
-  className?: string
-  testid?: string
+  stand: Stand
+  onWaehle: () => void
 }) {
+  const zeichen = stand === 'richtig' ? 'ok' : stand === 'falsch' ? 'nein' : null
+
   return (
-    <div
-      data-testid={testid}
-      className={`flex min-h-[60px] cursor-grab touch-none items-center gap-2.5 rounded-kh bg-kh-paper py-1.5 pr-4 pl-2 text-[1.0625rem] font-semibold text-[#0E0D0B] active:cursor-grabbing ${className}`}
+    <button
+      type="button"
+      onClick={onWaehle}
+      disabled={stand !== 'offen'}
+      data-testid={`m7-teil-${schritt.label}`}
+      data-stand={stand}
+      className={`flex flex-col gap-2 rounded-kh border-4 bg-kh-paper p-2 text-left transition-[border-color,opacity,transform] duration-200 active:scale-[0.97] ${
+        stand === 'richtig'
+          ? 'border-kh-signal'
+          : stand === 'falsch'
+            ? 'border-kh-orange'
+            : stand === 'blass'
+              ? 'border-transparent opacity-35'
+              : 'border-transparent'
+      }`}
     >
-      <span className="grid size-11 shrink-0 place-items-center rounded-[10px] bg-[#0E0D0B] p-1">
-        <DachSchema hervor={schritt.label} gebaut={gebaut} className="size-full" />
+      <span className="relative block w-full rounded-[10px] bg-[#0E0D0B] p-1.5">
+        <DachSchema hervor={schritt.label} gebaut={gebaut} className="block w-full" />
+        {zeichen && (
+          <span
+            aria-hidden
+            className={`absolute top-1.5 right-1.5 grid size-7 place-items-center rounded-full ${
+              zeichen === 'ok' ? 'bg-kh-signal' : 'bg-kh-orange'
+            } text-[#0E0D0B]`}
+          >
+            {zeichen === 'ok' ? (
+              <Check className="size-4" strokeWidth={3.5} />
+            ) : (
+              <X className="size-4" strokeWidth={3.5} />
+            )}
+          </span>
+        )}
       </span>
-      <span className="min-w-0">
-        <span className="block">{schritt.name}</span>
-        <span className="block max-w-[30ch] text-[0.8125rem] leading-snug font-normal text-[#0E0D0B]/70 max-sm:hidden">
+      <span className="block px-1 pb-1 text-[#0E0D0B]">
+        <span className="block text-[1.0625rem] leading-tight font-semibold">
+          {schritt.name}
+        </span>
+        <span className="mt-1 block text-[0.8125rem] leading-snug font-normal text-[#0E0D0B]/70">
           {schritt.was}
         </span>
       </span>
-    </div>
+    </button>
   )
 }

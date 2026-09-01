@@ -295,9 +295,9 @@ export function DeinWeg({
             </section>
 
             {/*
-              Der Bildnachweis — **eine Lizenzpflicht, keine Geste.** Fünf der
-              sechs Bauteilfotos in A1 stehen unter CC BY bzw. CC BY-SA, und
-              diese Lizenzen verlangen die Namensnennung *im Medium selbst*,
+              Der Bildnachweis — **eine Lizenzpflicht, keine Geste.** Elf der
+              zwölf Bauteilfotos in A1 und A2 stehen unter CC BY bzw. CC BY-SA,
+              und diese Lizenzen verlangen die Namensnennung *im Medium selbst*,
               nicht nur in einer Datei im Repo. Das Sheet ist die einzige
               Meta-Fläche der App und damit der Ort dafür; ganz unten und
               leise, aus demselben Grund wie der Reset darüber.
@@ -316,9 +316,14 @@ export function DeinWeg({
                 Workman (CC BY-SA 3.0) · „KÖB Hackschnitzelheizung, Steuerung“ und
                 „Grundfos-Umwälzpumpe“ (Dornbirn) von Asurnipal (CC BY-SA 4.0) ·
                 „Trinkwasser-Zirkulationspumpe“ von wiDaki (CC BY-SA 3.0) · „Regelung
-                Vorlauftemperatur Fußbodenheizung“ von SchmiAlf (CC0 1.0). Die Ausschnitte
-                stehen unter derselben Lizenz wie ihr Original — Lizenztexte:
-                creativecommons.org/licenses.
+                Vorlauftemperatur Fußbodenheizung“ von SchmiAlf (CC0 1.0) · „Home oil
+                furnace“ von Versageek (CC BY 2.5) · „Heizoelkeller“ von Flux Garden (CC
+                BY-SA 2.5) · „Heizkreisverteiler“ von Tetris L (CC BY-SA 3.0) ·
+                „CentralHeatingPump“ von Mariegriffiths (CC BY-SA 3.0) · „Diaphragm
+                expansion tank, stopcock and drain valve“ von The RedBurn (CC BY-SA 4.0) ·
+                „Danfoss thermostatic radiator valve“ von Santeri Viinamäki (CC BY-SA
+                4.0). Die Ausschnitte stehen unter derselben Lizenz wie ihr Original —
+                Lizenztexte: creativecommons.org/licenses.
               </p>
             </section>
           </div>

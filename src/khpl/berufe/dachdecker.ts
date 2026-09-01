@@ -312,8 +312,8 @@ export const DACHDECKER: BerufDef = {
     aufgaben: [
       'Ziegel so verlegen, dass kein Tropfen durchkommt',
       'Folie und Dämmung unters Dach packen, damit keine Wärme entwischt',
-      'Ein Dachfenster einbauen — und zwar dicht',
-      'Oben im Team anpacken — einer allein deckt kein Dach',
+      'Ein Dachfenster einbauen',
+      'Immer im Team arbeiten',
     ],
     umgebung: {
       titel: ['Der Arbeitsplatz liegt', 'über der Straße.'],
@@ -324,8 +324,8 @@ export const DACHDECKER: BerufDef = {
   // Der Betrieb ist hier ausgetauscht, der Rest steht unverändert.
   auftrag: {
     etikett: 'Dein erster Auftrag',
-    titel: ['Bau heute', 'ein Dach.'],
-    text: 'Du bist Azubi in einem Dachdeckerbetrieb. Der Chef legt das Telefon weg und dreht sich zu dir um: altes Haus, das Dach muss neu. Er fragt, ob du mitkommst.',
+    titel: ['Heute baust du', 'ein Dach.'],
+    text: 'Du bist Azubi in einem Dachdeckerbetrieb. Der Chef legt das Telefon weg und dreht sich zu dir um: Er hat einen Kunden, bei dem ein altes Dach erneuert werden muss. Bist du dabei?',
     knopf: 'Auftrag annehmen',
   },
   graph: baueGraph(STEPS, {

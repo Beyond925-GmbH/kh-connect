@@ -377,18 +377,19 @@ export type BuehnenZustand =
       pfad: readonly KnotenId[]
     }
   /**
-   * A5 und A1.1 — der Blick über das Armaturenbrett, von innen.
+   * Der Blick über das Armaturenbrett, von innen. `licht: 'mittag'` war die
+   * Zäsur A5, `licht: 'nacht'` der Notdienst-Abstecher A1.1 — beide, solange
+   * es für die Screens kein Foto gab.
    *
-   * `licht: 'mittag'` ist die Zäsur: warmes Licht durch die Windschutzscheibe,
-   * **die erste Wärme des Tages**, noch bevor die Anlage läuft — eine leise
-   * Vorbereitung auf A6. `licht: 'nacht'` ist der Notdienst-Abstecher:
-   * derselbe Blick, dieselbe Scheibe, nur dass draußen nichts als Straße und
-   * ein einzelnes Fenster ist.
+   * **Seit dem 01.09. hat diese Szene keinen Aufrufer mehr:** A1.1 und A5
+   * tragen Fotos (`berufe/anlagenmechanik.ts`, `bilder`). Sie bleibt stehen,
+   * weil sie fertig ist und beim nächsten Transporter-Screen sofort trägt —
+   * wer sie ausbaut, nimmt `Transporter.tsx` und diesen Zweig zusammen.
    *
-   * Das iPad auf dem Armaturenbrett steht in beiden Fällen da. Es ist keine
-   * Requisite, sondern Arbeitsalltag — und der
-   * billigste Beleg dafür, dass dieses Handwerk kein Beruf von gestern ist.
-   * `technik: 0.85` wird damit nebenbei mit eingelöst.
+   * Das iPad auf dem Armaturenbrett stand in beiden Lichtlagen da. Es ist
+   * keine Requisite, sondern Arbeitsalltag — und der billigste Beleg dafür,
+   * dass dieses Handwerk kein Beruf von gestern ist. `technik: 0.85` löst
+   * jetzt der Text von A5 allein ein, das Foto zeigt den Laderaum.
    */
   | {
       szene: 'transporter'

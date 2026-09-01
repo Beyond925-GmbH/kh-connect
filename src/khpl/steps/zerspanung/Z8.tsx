@@ -1,6 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import { motion } from 'motion/react'
 import { StepFoto } from '@/khpl/buehne/Foto'
+import { auftritt } from '@/khpl/komponenten/auftritt'
 import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
 import { wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
 import { useStepNavigation } from '@/khpl/shell/StepFuss'
@@ -40,13 +41,21 @@ export function Z8() {
       interaktion={
         <ul className="grid grid-cols-1 gap-2.5 sm:grid-cols-3">
           {KARRIEREWEGE.map((weg, i) => (
-            <li key={weg.id} className="flex">
-              <motion.button
+            <motion.li
+              key={weg.id}
+              className="flex"
+              {...auftritt(18, { verzoegerung: i * 0.09, dauer: 0.42 })}
+            >
+              {/*
+                Der Auftritt sitzt auf der Zeile, nicht auf der Karte: die
+                Karte trägt aus `wahlflaeche` ein `transition-transform` und
+                `active:scale-*`. Beides auf einem Element hieß, dass CSS auf
+                jeden Frame, den Motion schreibt, noch 150 ms überblendet —
+                die Karte kriecht herauf und fällt am Ende den Rest. Ein
+                Element, ein Herr.
+              */}
+              <button
                 type="button"
-                initial={{ opacity: 0, transform: 'translateY(18px) scale(1)' }}
-                animate={{ opacity: 1, transform: 'translateY(0px) scale(1)' }}
-                whileTap={{ transform: 'translateY(0px) scale(0.96)' }}
-                transition={{ duration: 0.42, delay: i * 0.09, ease: [0.22, 1, 0.36, 1] }}
                 onClick={() => zumAbstecher(weg.id)}
                 data-testid={`z8-${weg.id}`}
                 className={`${wahlflaeche({ form: 'karte' })} min-h-[112px] overflow-hidden`}
@@ -70,8 +79,8 @@ export function Z8() {
                     aria-hidden
                   />
                 </span>
-              </motion.button>
-            </li>
+              </button>
+            </motion.li>
           ))}
         </ul>
       }

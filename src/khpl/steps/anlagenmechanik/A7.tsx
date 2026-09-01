@@ -314,23 +314,18 @@ export function A7() {
               */}
               {index === 0 && (
                 <Lage>
-                  Die Bauherrin — ihr gehört das Haus — steht neben dir im Keller. Sie hat
-                  die neue Anlage bezahlt, gesehen hat sie davon zwei Rohre und einen
-                  Kasten. Und jetzt fragt sie dich.
+                  Die Bauherrin (deine Auftraggeberin) steht neben dir im Keller. Sie hat
+                  die neue Anlage bezahlt und möchte jetzt auch wissen, wie das funktioniert:
                 </Lage>
               )}
 
-              <div className="kh-feld px-4 py-3" data-testid="a7-frage">
-                <p className="kh-etikett">
-                  Die Bauherrin fragt · {index + 1} von {FRAGEN.length}
-                </p>
-                <p className="mt-1 text-[1.125rem] leading-snug text-kh-paper">
+                <p className="border-l-4 pl-2 mt-1 text-[1.5rem] leading-snug text-kh-signal">
                   „{frage.frage}“
                 </p>
-              </div>
 
               {phase === 'frage' ? (
                 <ul className="flex flex-col gap-2">
+                  <p>Wie antwortest du?</p>
                   {frage.antworten.map((a) => (
                     <li key={a.id} className="flex">
                       <Wahlflaeche

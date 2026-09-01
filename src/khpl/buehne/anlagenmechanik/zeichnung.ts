@@ -182,8 +182,19 @@ export const RAHMEN = {
    * (`kamera`: Mindestausschnitt, kein Fenster).
    */
   raster: { x: 61, y: 144, b: 198, h: 104 },
-  /** A6 — Keller und Haus zusammen. Die Wärme läuft durch beides. */
-  inbetriebnahme: { x: 30, y: 12, b: 260, h: 238 },
+  /**
+   * A6 — Keller und Haus zusammen. Die Wärme läuft durch beides.
+   *
+   * Enger als der A3-Rahmen, obwohl beide dasselbe Haus zeigen: A3 braucht den
+   * Rand für die vier Verlustpfeile, die nach außen zeigen — hier steht nichts
+   * außerhalb der Dachkanten. Quer bleibt der Zeichnung neben dem breiten
+   * Füll-Panel ein schmaler Streifen (auf 1132 × 951 gemessen: 340 px), und in
+   * dem entscheidet allein die Breite über den Maßstab: jede Einheit Luft
+   * links und rechts kostet Haus. Der Rahmen umfasst deshalb genau die
+   * Dachkanten (`dachLinks`/`dachRechts`), den First und den Kellerboden —
+   * das Haus wird dadurch rund ein Siebtel größer, ohne dass etwas anschneidet.
+   */
+  inbetriebnahme: { x: 46, y: 20, b: 228, h: 216 },
   /**
    * A7 — der Keller, und darüber angeschnitten das Haus.
    *

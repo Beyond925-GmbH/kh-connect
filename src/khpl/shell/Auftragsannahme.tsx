@@ -271,13 +271,9 @@ export function Auftragsannahme() {
                   sie behauptet. „Tag 1“ wäre dabei kein Fortschrittszähler,
                   sondern der Anfang einer Geschichte. Eine Zeitangabe, die
                   den Tag als Pensum ausweist, bleibt draußen. */}
-              <span className="kh-etikett flex items-center gap-2">
-                <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
-                {inhalt.etikett}
-              </span>
               <h1 className="kh-plakat">
-                {inhalt.titel[0]}
-                <br />
+                {inhalt.titel[0] ? inhalt.titel[0] : ''}
+                {inhalt.titel[0] ? <br /> : null}
                 <span className="text-kh-orange">{inhalt.titel[1]}</span>
               </h1>
               <p className="text-[clamp(1.125rem,1.02rem+0.55vw,1.4rem)] leading-[1.45] text-kh-paper/85">

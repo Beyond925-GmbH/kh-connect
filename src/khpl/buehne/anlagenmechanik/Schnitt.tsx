@@ -104,6 +104,12 @@ export interface SchnittProps {
    * an einer Stelle liegt.
    */
   onAbgewiesen?: (knoten: KnotenId) => void
+  /**
+   * A4 — es ist noch nichts gezogen, und der Finger setzt weit weg von der
+   * Wärmepumpe auf: fast immer am Verteiler, also am Ende statt am Anfang.
+   * Die Zeichnung meldet es nur; **den Satz sagt der Step.**
+   */
+  onFalscherStart?: () => void
   /** A6 — die Wärme ist oben angekommen. Der Moment, für den der Tag gebaut ist. */
   onWaermeAngekommen?: () => void
 }
@@ -115,6 +121,7 @@ export function Schnitt({
   onVerlust,
   onPfad,
   onAbgewiesen,
+  onFalscherStart,
   onWaermeAngekommen,
 }: SchnittProps) {
   /*
@@ -151,6 +158,7 @@ export function Schnitt({
             onVerlust={onVerlust}
             onPfad={onPfad}
             onAbgewiesen={onAbgewiesen}
+            onFalscherStart={onFalscherStart}
             onWaermeAngekommen={onWaermeAngekommen}
           />
         )}

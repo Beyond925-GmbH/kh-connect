@@ -251,7 +251,7 @@ export function A1() {
           ? null
           : entscheiden
             ? 'Sag, woran es liegt.'
-            : 'Tipp an, was du prüfen willst.'
+            : 'Finde heraus, woran das liegt'
       }
       ansage={null}
       // Nur die Entscheidung braucht quer die breite Spalte (fünf

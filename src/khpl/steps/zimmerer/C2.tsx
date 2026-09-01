@@ -87,7 +87,7 @@ export function C2() {
   return (
     <StepShell
       id="C2"
-      auftrag={aufgeloest ? null : 'Schätz, wie weit die Ständer auseinanderstehen.'}
+      auftrag={aufgeloest ? null : 'Platziere den Ständer in gleichmäßigem Abstand'}
       /*
         Rate-Regler — mit einem Anker, der die Antwort nicht verrät.
 
@@ -182,9 +182,6 @@ export function C2() {
 function Schaetzung({ wert, onWert }: { wert: number; onWert: (n: number) => void }) {
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-[1.125rem] font-semibold text-kh-paper sm:text-[1.25rem]">
-        Ein Ständer steht. Wie weit steht der nächste?
-      </p>
 
       <span data-testid="c2-zahl" className="kh-zahl">
         {cm(wert)}

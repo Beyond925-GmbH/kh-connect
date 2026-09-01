@@ -129,8 +129,7 @@ export function C7() {
       }
       warum={
         <p>
-          Vier Uhr. Die Wände werden in der Halle fertig gebaut, damit ein Haus an einem
-          Tag steht und dicht ist. Heute ist es so weit.
+          Ganz schön viel hast du an einem tag geschafft!
         </p>
       }
       interaktion={
