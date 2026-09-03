@@ -41,3 +41,9 @@ dev-dist
 # Screenshots aus Abnahmelaeufen, wo Playwright sie ablegt
 /*.png
 tmp/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example

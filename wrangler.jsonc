@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kh-connect",
+  "compatibility_date": "2026-08-31",
+  "routes": [
+      { "pattern": "kh.beyond925.de", "custom_domain": true }
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "not_found_handling": "single-page-application"
+  }
+}

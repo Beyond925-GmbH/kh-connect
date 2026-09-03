@@ -11,8 +11,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm typecheck && pnpm lint && pnpm format:check",
-    "preview": "vite preview",
-    "pruefe:kamera": "jiti src/drei/kamera.pruefung.ts"
+    "preview": "pnpm run build && wrangler dev",
+    "pruefe:kamera": "jiti src/drei/kamera.pruefung.ts",
+    "deploy": "pnpm run build && wrangler deploy"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -32,6 +33,7 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.54.3",
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
@@ -42,6 +44,7 @@
     "prettier": "^3.9.6",
     "typescript": "~6.0.2",
     "vite": "^8.2.0",
-    "vite-plugin-pwa": "^1.3.0"
+    "vite-plugin-pwa": "^1.3.0",
+    "wrangler": "^4.128.0"
   }
 }
