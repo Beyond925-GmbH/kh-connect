@@ -34,6 +34,9 @@ export function Kamerasteuerung({
   const steuerung = useRef<ComponentRef<typeof OrbitControls>>(null)
   const [autoDrehen, setAutoDrehen] = useState(false)
   const [distanz, setDistanz] = useState(18)
+  // Die zuletzt eingepasste Distanz und ob der letzte Lauf frei war — damit
+  // eine Neueinpassung in der freien Ansicht den Blick des Besuchers behaelt.
+  const eingepasst = useRef<{ distanz: number; frei: boolean } | null>(null)
 
   // Die Kamera wird eingepasst, nicht gesetzt: aus Huelle, Blickrichtung und
   // Seitenverhaeltnis folgt die Distanz. Beim Drehen des iPads laeuft der
@@ -47,19 +50,38 @@ export function Kamerasteuerung({
 
   useEffect(() => {
     if (hoehe <= 0) return
-    const preset = KAMERA[ansicht ?? START_ANSICHT]
+    const s = steuerung.current
+    let preset = KAMERA[ansicht ?? START_ANSICHT]
+    // Verhaeltnis der aktuellen zur eingepassten Distanz — der Zoom des
+    // Besuchers, der die Neueinpassung ueberleben soll.
+    let zoom = 1
+    // Freie Ansicht, und der Besucher hat schon einen Blick: die Huelle
+    // waechst mit dem Baustand (M5, `huelleBeiT`) und die Leinwand aendert
+    // ihre Groesse — beides passt neu ein, keins davon darf die Kamera auf
+    // den Startblick zuruecksetzen. Eingepasst wird deshalb entlang der
+    // Richtung, in die gerade geschaut wird; nur Ziel und Distanz folgen der
+    // neuen Huelle.
+    const vorher = eingepasst.current
+    if (ansicht === null && vorher?.frei && s) {
+      const blick = kamera.position.clone().sub(s.target)
+      if (blick.lengthSq() > 1e-6) {
+        preset = { ...preset, richtung: [blick.x, blick.y, blick.z] }
+        zoom = blick.length() / vorher.distanz
+      }
+    }
     const lage = passeEin(preset, huelle, breite / hoehe, {
       links: sfL,
       rechts: sfR,
       oben: sfO,
       unten: sfU,
     })
-    kamera.position.set(...lage.position)
     const ziel = new THREE.Vector3(...lage.ziel)
+    kamera.position.set(...lage.position)
+    if (zoom !== 1) kamera.position.sub(ziel).multiplyScalar(zoom).add(ziel)
     kamera.lookAt(ziel)
     kamera.updateProjectionMatrix()
     setDistanz(lage.distanz)
-    const s = steuerung.current
+    eingepasst.current = { distanz: lage.distanz, frei: ansicht === null }
     if (s) {
       // Die Zoomgrenzen muessen VOR dem `update()` stehen, nicht erst im
       // naechsten Rendern: `update()` klemmt die Kamera sofort auf die noch
