@@ -2,43 +2,13 @@ import {
   AnimatePresence,
   motion,
   useMotionValue,
+  useReducedMotion,
   useTransform,
   type MotionValue,
 } from 'motion/react'
 
-/**
- * Der Kartenstapel aus A2 — **ein Foto in der Hand, zwei Richtungen.**
- *
- * **Was hier ersetzt wurde.** A2 war ein Raster aus sechs beschrifteten
- * Flächen: antippen, lesen, zurück, nächste antippen. Das ist dieselbe
- * Aufdeck-Geste wie in A1 (dort inzwischen mit Fotos) — und vor allem
- * verlangte es von einem Vierzehnjährigen, sich unter „Ausdehnungsgefäß“
- * etwas vorzustellen, bevor er darüber entscheidet. Ein Wort ist kein Ding.
- *
- * Jetzt liegt **ein Bauteil auf dem Tisch**: groß, fotografiert, mit Namen.
- * Links weg heißt *fliegt raus*, rechts weg heißt *bleibt*. Die Geste ist die
- * Entscheidung — man wirft etwas weg oder man behält es, und genau das tut
- * der Monteur im Keller auch.
- *
- * **Die Karte fliegt nicht sofort weg.** Nach dem Wisch federt sie zurück und
- * trägt einen Stempel mit dem eigenen Tipp; erst *Nächstes Teil* schiebt sie
- * in die gewählte Richtung aus dem Bild. Der Grund ist derselbe wie in A1
- * (`Den Takt wechselt immer ein Tap, nie ein Zähler`): Der Text zu dem Teil
- * steht unter der Karte, und ein Foto, das im selben Moment verschwindet, in
- * dem seine Erklärung erscheint, nimmt der Erklärung ihren Gegenstand.
- *
- * **Wischen ist der schöne Weg, nicht der einzige.** Unter der Karte stehen
- * zwei Flächen mit demselben Wortlaut. Sie sind der Weg für alles, was nicht
- * wischen kann oder will: Tastatur, Screenreader, ein Besucher, der am Stand
- * nur kurz antippt. Der Wisch trägt deshalb **keine** eigene Bedeutung, die
- * die Knöpfe nicht auch tragen.
- *
- * **Beide Richtungen sehen gleich aus.** Kein Rot links, kein Grün rechts:
- * hier wird geschätzt, und ein Tipp ist weder richtig noch falsch, bevor die
- * Auflösung steht (dieselbe Regel wie beim Echo in `A2.tsx`). Gelbgrün heißt
- * im ganzen System „geschafft“, Orange gehört dem Weiter-Knopf — die Stempel
- * sind deshalb Papierweiß auf dunklem Grund.
- */
+/** Ein Foto wird nach links oder rechts sortiert. Knöpfe bieten dieselbe
+ * Handlung ohne Ziehgeste. A2 zeigt die Rückmeldung und wechselt die Karte. */
 
 /** Die zwei Richtungen. `raus` ist links, `bleibt` ist rechts. */
 export type Los = 'raus' | 'bleibt'
@@ -85,29 +55,8 @@ export function KellerStapel({
     // ihn schöbe der Stapel den Text darunter an. Ist entschieden, ragt nichts
     // mehr — dann fällt auch der Platz weg.
     <div className={wahl ? '' : 'pb-3'}>
-      {/*
-        **Die Karte ist gedeckelt, flach und nach dem Tipp nur noch ein
-        Streifen.**
-
-        Quer ist die Textspalte rund 780 px breit; eine Karte in voller Breite
-        wäre fast 500 px hoch, und die beiden Knöpfe darunter lägen unter der
-        Scrollkante — die Entscheidung wäre nicht zu sehen, nur das Bild.
-        Gemessen (`tmp/sicht/a2-stapel.mjs`) trägt das Panel hochkant 385 px
-        und quer 445: Karte, Knöpfe, Lage und die Zeile darüber gehen darin
-        auf, sobald die Karte flach ist.
-
-        **Nach dem Tipp schrumpft sie**, denn dann steht darunter nicht mehr
-        eine Knopfreihe, sondern die Auflösung samt Weiter-Fläche — rund 250
-        px, die sonst niemand ohne Scrollen zu sehen bekäme. Weg ist das Foto
-        deshalb trotzdem nicht: Der Text redet über einen Gegenstand, und der
-        bleibt als Streifen mit seinem Namen stehen. Die Höhe ist in `rem`
-        angegeben und nicht als Seitenverhältnis, weil sich nur so von der
-        einen zur anderen **animieren** lässt.
-      */}
       <div
-        className={`relative mx-auto w-full max-w-[20rem] transition-[height] duration-300 ease-out landscape:max-w-[23rem] ${
-          wahl ? 'h-[5.5rem]' : 'h-[11.5rem] landscape:h-[15rem]'
-        }`}
+        className="relative mx-auto h-[10rem] w-full max-w-[20rem] landscape:h-[10rem] landscape:max-w-[23rem]"
         data-testid="a2-stapel"
       >
         {/* Nur solange noch entschieden wird: unter einem Streifen wäre der
@@ -147,6 +96,7 @@ function Karte({
   wahl: Los | null
   onWaehle: (los: Los) => void
 }) {
+  const reduziert = useReducedMotion() ?? false
   const x = useMotionValue(0)
   const drehung = useTransform(x, [-260, 260], [-8, 8])
   /*
@@ -174,18 +124,18 @@ function Karte({
         if (weit < -SCHWELLE || (weit < -24 && schnell < -TEMPO)) onWaehle('raus')
         else if (weit > SCHWELLE || (weit > 24 && schnell > TEMPO)) onWaehle('bleibt')
       }}
-      style={{ x, rotate: drehung }}
-      initial={{ opacity: 0, y: 16, scale: 0.96 }}
+      style={{ x, rotate: reduziert ? 0 : drehung }}
+      initial={{ opacity: 0, y: reduziert ? 0 : 8, scale: 1 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       // Sie fliegt in die Richtung, in die getippt wurde — auch wenn der Tipp
       // über die Knöpfe kam. Die Bewegung ist die Quittung.
       exit={{
-        x: wahl === 'raus' ? -520 : 520,
-        rotate: wahl === 'raus' ? -14 : 14,
+        x: reduziert ? 0 : wahl === 'raus' ? -260 : 260,
+        rotate: reduziert ? 0 : wahl === 'raus' ? -8 : 8,
         opacity: 0,
-        transition: { duration: 0.3, ease: 'easeIn' },
+        transition: { duration: 0.18, ease: 'easeIn' },
       }}
-      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
       className="absolute inset-0 z-10 overflow-hidden rounded-kh border-2 border-kh-line-strong bg-white/6 select-none"
     >
       {/*
@@ -213,8 +163,8 @@ function Karte({
   )
 }
 
-export const WORTE: Record<Los, string> = {
-  raus: 'Fliegt raus',
+const WORTE: Record<Los, string> = {
+  raus: 'Kommt raus',
   bleibt: 'Bleibt',
 }
 
@@ -242,8 +192,8 @@ function Stempel({
     <motion.span
       aria-hidden
       style={fest ? undefined : { opacity: deckkraft }}
-      initial={fest ? { opacity: 0, scale: 1.15 } : false}
-      animate={fest ? { opacity: 1, scale: 1 } : undefined}
+      initial={fest ? { opacity: 0 } : false}
+      animate={fest ? { opacity: 1 } : undefined}
       transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
       data-testid={fest ? `a2-stempel-${los}` : undefined}
       className={`kh-etikett absolute top-3 rounded-full border-2 border-kh-paper/70 bg-[#0E0D0B]/70 px-3 py-1.5 text-kh-paper backdrop-blur-[2px] ${

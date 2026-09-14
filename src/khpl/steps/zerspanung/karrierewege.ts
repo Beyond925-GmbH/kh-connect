@@ -1,124 +1,91 @@
 import type { StepId } from '@/khpl/flow/steps'
 
-/**
- * Die drei Karrierewege dieses Berufs (Z8.1–Z8.3).
- *
- * **Zerspanungsmechaniker:in ist ein Industrieberuf — die Prüfung macht die
- * IHK, nicht die Handwerkskammer.** Daran hängt fast jede Zahl auf diesen
- * Karten, und deshalb ist hier nichts aus den anderen Tagen kopiert:
- *
- *  - Der Aufstieg heißt **Industriemeister:in Metall**, nicht
- *    Handwerksmeister. Die NRW-Meisterprämie (2.500 €) gilt nur für
- *    bestandene **Handwerks**-Meisterprüfungen und kommt hier deshalb
- *    **nicht** vor — sie zu versprechen wäre falsch.
- *  - Die Technikerfachrichtung ist **Maschinenbautechnik**, nicht Holz-
- *    oder Versorgungstechnik.
- *  - Der Studien-Anker ist regional und geprüft unaufwendig: die
- *    Universität Paderborn bildet Maschinenbauer:innen aus.
- *
- * Der Hochschulzugang in NRW (§ 49 Abs. 4 HG NRW mit BBHZVO) unterscheidet
- * nicht nach Kammer: auch Industriemeister und staatlich geprüfte Techniker
- * dürfen jeden Studiengang an jeder Hochschule des Landes studieren, und
- * die Abschlussprüfung plus drei Jahre Beruf öffnen den fachgebundenen Weg.
- *
- * **Formulierungsregel wie überall:** was aus Gehaltsportalen oder
- * Anbieterlisten stammt, erscheint nur als Spanne oder mit „rund“, nie als
- * exakter Wert und nie als Versprechen. ⚠️ Kosten- und Gehaltsspannen sind
- * fachlich abzunehmen.
+/** Orientierung, keine Zusage zu Zulassung, Förderung oder Gehalt.
+ * DQR-Abgrenzung geprüft am 14.09.2026:
+ * https://www.dqr.de/dqr/de/der-dqr/faq/deutscher-qualifikationsrahmen-faq.html
+ * Hochschulzugang: MKW NRW, FAQ für beruflich Qualifizierte, Juli 2024:
+ * https://www.mkw.nrw/system/files/media/document/file/faqs-zum-hochschulzugang-fur-beruflich-qualifizierte-stand-juli-2024.pdf
  */
-
 export interface Karriereweg {
   id: StepId
-  /** Kartentitel in Z8 und Überschrift des Abstechers. */
   titel: string
-  /** Der eine Satz auf der Karte in Z8. */
   koeder: string
   abschnitte: { frage: string; antwort: string }[]
-  /** Der personalisierte Aufhänger auf dem CTA-Screen Z9. */
   aufhaenger: string
 }
 
 export const KARRIEREWEGE: Karriereweg[] = [
   {
     id: 'Z8.1',
-    titel: 'Industriemeister',
-    koeder: 'Die Schicht führen, Azubis ausbilden.',
+    titel: 'Industriemeister Metall',
+    koeder: 'Fertigung organisieren und ein Team führen.',
     abschnitte: [
       {
-        frage: 'Was ist das',
+        frage: 'Was machst du?',
         antwort:
-          'Industriemeister:in Metall — die nächste Stufe nach der Ausbildung. Geprüft wird bei der IHK, der Industrie- und Handelskammer. Du führst dann eine Schicht, teilst Aufträge und Leute ein und darfst selbst Azubis ausbilden.',
+          'Ein möglicher Weg ist die Weiterbildung zum Industriemeister oder zur Industriemeisterin Metall. Du organisierst die Fertigung und kannst Verantwortung für ein Team übernehmen.',
       },
       {
-        frage: 'Wie lange',
+        frage: 'Wie geht es weiter?',
         antwort:
-          'In Vollzeit rund ein halbes Jahr. Neben dem Beruf dauert es zwei bis zweieinhalb Jahre — viele lernen abends und samstags, nach der Schicht.',
+          'Auf deine Ausbildung kann eine Meisterweiterbildung folgen. Dauer und Voraussetzungen hängen vom Lehrgang und deinem bisherigen Weg ab. Die zuständige Kammer berät dich dazu.',
       },
       {
-        frage: 'Was es kostet',
+        frage: 'Was solltest du einplanen?',
         antwort:
-          'Kurs und Prüfung zusammen meist rund 6.000 bis 9.000 Euro — so viel wie ein gebrauchtes Auto. Das Aufstiegs-BAföG — Geld vom Staat für genau solche Weiterbildungen — übernimmt davon den größten Teil. Wer besteht, zahlt am Ende etwa ein Viertel selbst.',
-      },
-      {
-        frage: 'Was du verdienst',
-        antwort:
-          'Je nach Betrieb und Schicht meist rund 50.000 bis 65.000 Euro im Jahr. Das sind grob 4.000 bis 5.400 Euro im Monat, bevor Steuern und Abgaben abgehen. In der Metallindustrie wird gut bezahlt.',
+          'Kurs, Prüfung und Lebensunterhalt können Geld kosten. Lass dich zu Kosten und möglicher Förderung beraten. Dein späteres Gehalt hängt unter anderem von Aufgaben, Betrieb und Erfahrung ab.',
       },
     ],
     aufhaenger:
-      'Vielleicht wusstest du nicht, dass du mit dem Industriemeister an jeder Hochschule in NRW studieren darfst.',
+      'Wenn du später ein Team führen möchtest, frag am Stand nach der Meisterweiterbildung.',
   },
   {
     id: 'Z8.2',
     titel: 'Techniker',
-    koeder: 'Am Plan arbeiten statt an der Maschine.',
+    koeder: 'Fertigung planen und Technik weiterentwickeln.',
     abschnitte: [
       {
-        frage: 'Was ist das',
+        frage: 'Was machst du?',
         antwort:
-          'Staatlich geprüfte:r Techniker:in, Fachrichtung Maschinenbautechnik. Du legst fest, wie ein Teil gebaut wird: welches Werkzeug, wie das Teil festgehalten wird, welches Programm, wie lange ein Stück dauern darf. Du stehst dann nicht mehr an der Maschine — du planst für alle, die dort stehen.',
+          'Mit einer Weiterbildung in Maschinenbautechnik kannst du Fertigungsabläufe planen und technische Lösungen entwickeln. Je nach Betrieb arbeitest du auch weiter an Maschinen und mit dem Team in der Werkstatt.',
       },
       {
-        frage: 'Wie lange',
-        antwort: 'Zwei Jahre Fachschule in Vollzeit, drei bis vier neben dem Beruf.',
+        frage: 'Wie geht es weiter?',
+        antwort:
+          'Fachschulen bieten die Weiterbildung in Vollzeit oder neben dem Beruf an. Die Schule informiert dich über passende Fachrichtungen, Voraussetzungen, Dauer und Kosten.',
       },
       {
-        frage: 'Was es kostet',
+        frage: 'Ist das ein Studium?',
         antwort:
-          'An den staatlichen Fachschulen in NRW kostet der Unterricht nichts. Du zahlst nur ein paar Gebühren und dein Material.',
-      },
-      {
-        frage: 'Der Punkt, den kaum jemand kennt',
-        antwort:
-          'Der Abschluss zählt offiziell genauso viel wie ein Bachelor an der Uni. Er heißt sogar so: Bachelor Professional in Technik.',
+          'Der Technikerabschluss und der Bachelor liegen im Deutschen Qualifikationsrahmen auf Stufe 6. Es sind unterschiedliche Abschlüsse. Die Technikerweiterbildung verleiht keinen Hochschulabschluss.',
       },
     ],
     aufhaenger:
-      'Vielleicht wusstest du nicht, dass der Techniker offiziell auf Bachelor-Niveau steht.',
+      'Wenn du gern planst und technische Lösungen entwickelst, frag am Stand nach passenden Weiterbildungen.',
   },
   {
     id: 'Z8.3',
     titel: 'Studium',
-    koeder: 'Ja, das geht — auch ohne Abitur.',
+    koeder: 'Deine Berufserfahrung mit Theorie verbinden.',
     abschnitte: [
       {
-        frage: 'Warum erst eine Ausbildung?',
+        frage: 'Was könntest du studieren?',
         antwort:
-          'Weil sie den Weg nicht zumacht, sondern aufmacht. Wer in Nordrhein-Westfalen den Industriemeister oder den Techniker hat, darf sich an jeder Hochschule des Landes für jedes Fach einschreiben — ohne Abitur, ohne Aufnahmeprüfung.',
+          'Im Maschinenbau beschäftigst du dich damit, wie Maschinen und Bauteile entwickelt werden. Deine Erfahrung in der Fertigung hilft dir, die Theorie mit der Praxis zu verbinden.',
       },
       {
-        frage: 'Und ohne Meister?',
+        frage: 'Geht das ohne Abitur?',
         antwort:
-          'Auch dann. Mit bestandener Abschlussprüfung und drei Jahren im Beruf darfst du alles studieren, was zu deiner Ausbildung passt. Auch dafür brauchst du keine extra Prüfung.',
+          'Auch eine berufliche Qualifikation kann den Zugang zu einem Studium ermöglichen. Welche Voraussetzungen du erfüllst und wie die Zulassung abläuft, prüft die Hochschule für den gewünschten Studiengang.',
       },
       {
-        frage: 'Was dann',
+        frage: 'Wo fängst du an?',
         antwort:
-          'Maschinenbau — und das direkt vor der Haustür: An der Universität Paderborn kannst du das studieren. Wer heute Teile fertigt, rechnet dann aus, wie die Maschinen von morgen aussehen.',
+          'Die Studienberatung hilft dir, ein passendes Angebot zu finden. Dort kannst du auch nach Studienformen fragen, die sich mit einer Arbeit im Betrieb verbinden lassen.',
       },
     ],
     aufhaenger:
-      'Vielleicht wusstest du nicht, dass von der CNC-Maschine ein direkter Weg an die Uni führt — ohne Abitur.',
+      'Wenn dich ein Studium interessiert, lass dich zu passenden Studiengängen und zum Zugang beraten.',
   },
 ]
 
@@ -126,6 +93,5 @@ export function karriereweg(id: StepId): Karriereweg | undefined {
   return KARRIEREWEGE.find((k) => k.id === id)
 }
 
-/** Fällt zurück, wenn in Z8 nichts angesehen wurde. */
 export const AUFHAENGER_OHNE =
-  'Vielleicht hat dich heute etwas überrascht — zum Beispiel, wie winzig ein Hundertstel Millimeter ist.'
+  'Am Stand kannst du fragen, wie es nach der Ausbildung weitergeht.'

@@ -1,4 +1,5 @@
-import { baueGraph, type Angebot, type StepDef } from '@/khpl/flow/steps'
+import { type Angebot, type StepDef } from '@/khpl/flow/steps'
+import { baueMesseGraph } from '@/khpl/flow/messe'
 import type { BerufDef, StepBild } from './typen'
 
 /**
@@ -66,7 +67,7 @@ type ZimmererStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher'> & {
 const STEPS = [
   {
     id: 'C1',
-    titel: 'Der Stapel steht schon da',
+    titel: 'Dein Holz',
     kurz: 'Halle, Holzstapel',
     art: 'haupt',
     weiter: 'C2',
@@ -89,7 +90,7 @@ const STEPS = [
     // nahm dem Schätzen damit jeden Sinn. Der Titel nennt jetzt das Thema, nie
     // den gesuchten Wert; die ausgeschriebene Zahl ist als Titel der Auflösung
     // gewandert (C2.tsx).
-    titel: '',
+    titel: 'Der richtige Abstand',
     kurz: 'Abstand der Ständer',
     art: 'haupt',
     weiter: 'C3',
@@ -98,7 +99,7 @@ const STEPS = [
   },
   {
     id: 'C3',
-    titel: 'Eine Wand ist wie ein Sandwich',
+    titel: 'Baue die Wand',
     kurz: 'Die Schichten der Wand',
     art: 'haupt',
     weiter: 'C4',
@@ -116,7 +117,7 @@ const STEPS = [
   },
   {
     id: 'C4',
-    titel: 'Hier kommt das Fenster hin',
+    titel: 'Das Fenster einsetzen',
     kurz: 'Das Fenster',
     art: 'haupt',
     weiter: 'C5',
@@ -150,7 +151,7 @@ const STEPS = [
   },
   {
     id: 'C6',
-    titel: 'Am Haken',
+    titel: 'Die Wand versetzen',
     kurz: 'Kran, Versetzen',
     art: 'haupt',
     weiter: 'C7',
@@ -209,7 +210,7 @@ const STEPS = [
     id: 'C9',
     // Nicht 'CTA': `kurz` steht im Sheet und auf dem Weitermachen-Knopf des
     // Splash. „Weitermachen bei ‚CTA‘“ ist Board-Sprache, keine Besuchersprache.
-    titel: 'Dein nächster Schritt',
+    titel: 'Dein Einblick als Zimmerer',
     kurz: 'Dein nächster Schritt',
     art: 'haupt',
     weiter: null,
@@ -364,7 +365,7 @@ export const ZIMMERER: BerufDef = {
     text: 'Du bist Azubi in einer Zimmerei. Es ist morgens um 6 Uhr, und du kommst in die Halle. Jetzt werden die ersten Arbeitsschritte getan. ',
     knopf: 'Auftrag annehmen',
   },
-  graph: baueGraph(STEPS, {
+  graph: baueMesseGraph(STEPS, ['C1', 'C2', 'C3', 'C4', 'C6', 'C9'], {
     erster: 'C1',
     /**
      * Jede Einladung ist einzeln getextet — nie eine „Mehr erfahren“-Schablone.

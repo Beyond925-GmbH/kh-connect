@@ -2,7 +2,13 @@ import { useCallback } from 'react'
 import { step, type StepId } from '@/khpl/flow/steps'
 import { offeneAbstecher } from '@/khpl/flow/uebergaenge'
 import { Verzweigung } from '@/khpl/komponenten/Verzweigung'
-import { geheZu, useFortschritt, useGraph } from '@/khpl/store/fortschritt'
+import {
+  beendeKarriereSkip,
+  oeffneVertiefung,
+  geheZu,
+  useFortschritt,
+  useGraph,
+} from '@/khpl/store/fortschritt'
 
 /**
  * Verdrahtet den Fuß eines Steps mit dem Store. Jeder Step benutzt dieselben
@@ -16,10 +22,12 @@ export function useStepNavigation(id: StepId) {
 
   const weiter = useCallback(() => {
     const ziel = step(graph, id).weiter
-    if (ziel) geheZu(ziel)
-  }, [graph, id])
+    if (fortschritt.detourReturnTo && (!ziel || step(graph, ziel).art === 'haupt'))
+      beendeKarriereSkip()
+    else if (ziel) geheZu(ziel)
+  }, [graph, id, fortschritt.detourReturnTo])
 
-  const zumAbstecher = useCallback((ziel: StepId) => geheZu(ziel), [])
+  const zumAbstecher = useCallback((ziel: StepId) => oeffneVertiefung(ziel), [])
 
   return { fortschritt, offen, weiter, zumAbstecher }
 }

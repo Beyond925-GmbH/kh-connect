@@ -31,7 +31,7 @@ import { useStaffAusgang } from './staffAusgang'
  * hat den Trichter auf neun Taps bis zum ersten Handwerk gebracht. Was er
  * konnte, kann diese Liste besser: die Begründung steht auf der empfohlenen
  * Karte, die Alternativen liegen im selben Blick daneben statt einen Screen
- * später — und „Dicht dahinter“, das dort ein Nachsatz war, ist hier ein
+ * später — und „Auch interessant“, das dort ein Nachsatz war, ist hier ein
  * Etikett auf der Karte, die es meint.
  *
  * Der Kaltstart-Sonderfall des Vorschlags („ohne Aussage kein Vorschlag“)
@@ -64,7 +64,7 @@ export function Berufsliste() {
     : []
   const begruendung =
     gruende.length > 0
-      ? `Du magst ${gruende.map((m) => MERKMAL_TEXTE[m]).join(' — und ')}. Genau davon lebt dieser Beruf.`
+      ? `Du magst ${gruende.map((m) => MERKMAL_TEXTE[m]).join(' und ')}. Dazu könnte dieser Beruf passen.`
       : null
 
   return (
@@ -82,10 +82,10 @@ export function Berufsliste() {
           <h1 className="kh-titel">Vier Berufe</h1>
           <p className="text-[1.125rem] text-kh-mute landscape:text-[1rem]">
             {sitzung.aktiverBeruf
-              ? 'Wechsle, wann du willst — dein Fortschritt bleibt.'
+              ? 'Wähle einen Beruf. Dein Fortschritt bleibt gespeichert.'
               : empfohlen
-                ? 'Der erste passt am besten zu dir. Ansehen darfst du alle.'
-                : 'Such dir einen aus. Umentscheiden geht jederzeit.'}
+                ? 'Ein Vorschlag für den Anfang. Probiere aus, was dich interessiert.'
+                : 'Wähle einen Beruf und probiere ihn aus.'}
           </p>
         </div>
         {/* Die Dehnfuge trägt wie in der Step-Leiste die Staff-Geste. */}
@@ -156,7 +156,7 @@ function Karte({
   /** Warum ausgerechnet dieser — nur auf der empfohlenen Karte. */
   begruendung: string | null
   /**
-   * „Dicht dahinter“. Zimmerer und Dachdecker liegen im Merkmalsraum fast
+   * „Auch interessant“. Zimmerer und Dachdecker liegen im Merkmalsraum fast
    * deckungsgleich; drei Fragen trennen sie nicht sicher. Den Zweiten zu
    * benennen macht aus einem knappen Ergebnis eine ehrliche Auskunft.
    */
@@ -218,13 +218,15 @@ function Karte({
         <div className="relative flex min-w-0 flex-1 flex-col justify-end gap-2 p-6 max-sm:p-4 landscape:gap-1.5 landscape:p-4">
           <div className="flex flex-wrap items-center gap-1.5">
             {empfohlen && (
-              <span className={`${CHIP} bg-kh-orange text-[#0E0D0B]`}>Passt zu dir</span>
+              <span className={`${CHIP} bg-kh-orange text-[#0E0D0B]`}>
+                Unser Vorschlag
+              </span>
             )}
             {zweitbester && !aktiv && !angefangen && !fertig && (
               <span
                 className={`${CHIP} border border-kh-orange/45 bg-kh-orange/12 text-kh-orange`}
               >
-                Dicht dahinter
+                Auch interessant
               </span>
             )}
             {aktiv && (
@@ -255,7 +257,7 @@ function Karte({
                 className={`${CHIP} flex items-center gap-1 bg-kh-signal text-[#0E0D0B]`}
               >
                 <Check className="size-3.5" strokeWidth={3.5} aria-hidden />
-                geschafft
+                Angesehen
               </span>
             )}
             {angefangen && !fertig && !aktiv && (
@@ -269,7 +271,7 @@ function Karte({
                   strokeWidth={3.5}
                   aria-hidden
                 />
-                Angefangen — da weitermachen
+                Hier weitermachen
               </span>
             )}
             {bald && (

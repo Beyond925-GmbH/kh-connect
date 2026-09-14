@@ -1,3 +1,4 @@
+import './manometer.css'
 import { useEffect, useState } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import { Button } from '@/components/ui/button'
@@ -20,66 +21,16 @@ import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
 import { Fachwort } from './Fachwort'
 
-/**
- * A6 — Es läuft. **Der Signaturmoment.** Kein Rätsel, kein Test: die
- * Belohnung.
- *
- * **Die Übung ist klein und physisch:** der Druck steigt, der
- * Besucher hält im Zielfenster an. Ein Regler, ein Fenster, sofortiges
- * Feedback — klein genug, um nicht mit A4 zu konkurrieren, groß genug, um kein
- * Lesescreen zu sein.
- *
- * **Das Manometer ist das Bild dieses Screens:** die runde
- * Anzeige mit dem wandernden Zeiger hat sich als der Moment erwiesen, an dem
- * Besucher hängen bleiben — sie bekommt deshalb die Fläche. Groß und mittig,
- * mit Zielfenster, Sicherheitsventil-Marke und dem Wert auf dem Blatt; der
- * Regler darunter bleibt das einzige Bedienteil, Rückmeldung und Faustformel
- * ordnen sich unter (`Manometer` unten in dieser Datei). Die Übung selbst ist
- * unverändert klein — größer geworden ist nur die Uhr, nicht die Aufgabe.
- *
- * **Die Faustformel steht mit auf dem Screen**, weil sie erklärt, warum es
- * keinen festen Wert gibt: Gebäudehöhe in Metern geteilt durch 10, plus
- * 0,3 bar. Ein hohes Haus braucht mehr Druck, damit oben noch Wasser ankommt.
- * Zielfenster, Faustformel und Ansprechdruck sind zeitstabile Größen; die
- * Werte selbst stehen als `FUELLDRUCK`
- * und `SICHERHEITSVENTIL_BAR` in `buehne/anlagenmechanik/kanon.ts`.
- *
- * **Dann läuft es** — und die Wärme läuft **den Weg entlang, den der Besucher
- * in A4 gezogen hat**: `pfad` kommt aus `answers.a4` und nicht aus dieser
- * Datei. Ohne das ist A6 eine Animation, mit ihm ist es sein Haus. Kein
- * anderer der vier Tage hat eine Belohnung, die sich über den ganzen
- * Bildschirm ausbreitet.
- *
- * **Der Verlust aus A4 hat hier seine Folge, keine Note:** wer
- * einen verlustreichen Weg gebaut hat, sieht die Wärme sichtbar langsamer
- * loslaufen. Die Zeichnung rechnet ihn aus demselben `pfad` über
- * `druckverlust`; dieser Screen benutzt ihn nur für den Takt, an dem er die
- * letzte Zeile umschaltet — **keine Zahl, keine Einheit, kein Balken**.
- *
- * **Bewegungsgefühl: Fluss.** Lange, durchgehende Kurven, Verläufe, die an
- * einer Linie entlangwandern — die bewusste Gegenbewegung zu den
- * Rastersprüngen der Zerspanung und zur Pendelmasse des Zimmerers.
- */
-
-// ---------------------------------------------------------------------------
-// Der Regler — Spanne, Schritt, Startwert
-// ---------------------------------------------------------------------------
-
-/**
- * Die Spanne des Manometers. Sie beginnt unter dem Zielfenster (die Anlage ist
- * leer und wird gefüllt) und endet über dem Ansprechdruck des
- * Sicherheitsventils — sonst wäre der Fall „zu viel" gar nicht erreichbar, und
- * genau er ist die Hälfte der Lektion.
- */
+/** Druck sichtbar einstellen, mit konkreter Hilfe nach dem ersten Versuch. */
 const MIN_BAR = 0.8
 const MAX_BAR = 2.8
 /** Ein Zehntel bar. Feiner wäre auf einem Manometer keine ablesbare Größe. */
 const SCHRITT_BAR = 0.1
 
-/** Nach zwei Fehlversuchen bietet die App die Lösung an. */
-const HILFE_AB = 2
+/** Nach dem ersten Fehlversuch bietet die App die Lösung an. */
+const HILFE_AB = 1
 
-/** Mitte des Zielfensters — der Wert, auf den „Zeig mir wie" stellt. */
+/** Mitte des Zielfensters — der Wert, auf den „Zeige mir wie" stellt. */
 const MITTE_BAR = (FUELLDRUCK.min + FUELLDRUCK.max) / 2
 
 const bar = (n: number) => `${n.toFixed(1).replace('.', ',')} bar`
@@ -99,19 +50,19 @@ function bewerte(druck: number): Folge {
   if (druck < FUELLDRUCK.min) {
     return {
       treffer: false,
-      text: 'Zu wenig. Die Anlage zieht Luft, es gluckert in den Rohren — und oben im Haus wird es nicht warm.',
+      text: 'Schiebe den Regler nach rechts in den grünen Bereich.',
     }
   }
   if (druck > SICHERHEITSVENTIL_BAR) {
     return {
       treffer: false,
-      text: `Das Sicherheitsventil öffnet bei ${bar(SICHERHEITSVENTIL_BAR)} und lässt Wasser ab. Kein Defekt — das ist seine Aufgabe.`,
+      text: `Das Sicherheitsventil öffnet bei ${bar(SICHERHEITSVENTIL_BAR)} und lässt Wasser ab. Stelle den Regler zurück in den grünen Bereich.`,
     }
   }
   if (druck > FUELLDRUCK.max) {
     return {
       treffer: false,
-      text: 'Mehr als nötig. Beim Aufheizen dehnt sich das Wasser noch aus, und dann steht der Zeiger am Anschlag.',
+      text: 'Zu viel Druck. Schiebe den Regler nach links in den grünen Bereich.',
     }
   }
   return { treffer: true, text: TREFFER_TEXT }
@@ -181,18 +132,14 @@ export function A6() {
   return (
     <StepShell
       id="A6"
-      auftrag={laeuft ? null : 'Dreh auf, bis der Druck stimmt.'}
+      auftrag={laeuft ? null : 'Drehe auf, bis der Druck stimmt.'}
       ansage={{
         geste: 'ziehen-regler',
         text: 'Du füllst die Anlage und baust Druck auf — zum ersten Mal läuft sie.',
         haken: 'Zu wenig Druck, und oben kommt nichts an.',
       }}
       interaktionOffen={!laeuft}
-      // Das große Manometer braucht Breite: quer darf das Panel auf 52 rem
-      // wachsen, damit die Uhr nicht in einer schmalen Textspalte klemmt.
-      // Konstant, nicht nur beim Füllen — sonst spränge die Panelbreite genau
-      // in dem Moment, in dem der Screen die Bühne freigibt.
-      karteBreit
+      buehneInteraktiv
       buehne={
         <Schnitt
           zustand={{
@@ -208,18 +155,13 @@ export function A6() {
         />
       }
       warum={
-        laeuft ? undefined : (
-          /*
-            Ohne den Schlusssatz „Dreh auf, bis der Druck stimmt": er stand
-            wortgleich schon im Auftragsband — genau ein Anweisungssatz pro
-            Screen. Und „einstellen" statt „parametrieren": das Werkstatt-
-            wort fiele hier unerklärt.
-          */
+        <div className="space-y-3">
           <p>
-            Anlage füllen, entlüften, Druck aufbauen, Regelung einstellen, starten — die{' '}
-            <Fachwort id="inbetriebnahme">Inbetriebnahme</Fachwort>.
+            Anlage füllen, entlüften, Druck aufbauen, Regelung einstellen und starten: Das
+            heißt <Fachwort id="inbetriebnahme">Inbetriebnahme</Fachwort>.
           </p>
-        )
+          <Faustformel />
+        </div>
       }
       interaktion={
         /*
@@ -261,6 +203,7 @@ export function A6() {
                   Besucher ablesen muss, an einem Ort, und die Uhr bekommt die
                   volle Höhe des Panels. */}
               <Manometer
+                kompakt={!!folge && !folge.treffer}
                 druck={druck}
                 imFenster={imFenster}
                 reduziert={reduziert}
@@ -281,8 +224,6 @@ export function A6() {
                 text={folge ? folge.text : null}
                 testid="a6-rueckmeldung"
               />
-
-              <Faustformel />
             </div>
           )}
         </Wechsel>
@@ -317,7 +258,7 @@ export function A6() {
                     onClick={zeigMirWie}
                     data-testid="a6-zeig-mir-wie"
                   >
-                    Zeig mir wie
+                    Zeige mir wie
                   </Button>
                 )}
               </div>
@@ -373,41 +314,16 @@ const SKALA_FEIN = [0.5, 3.5]
  */
 const SKALA_BEZIFFERT = [1, 2, 3]
 
-/**
- * **Die Uhr, die den Screen trägt** (Abnahme, A6) — ein rundes Manometer mit
- * wanderndem Zeiger, so groß, wie das Panel es hergibt, und darunter der
- * Regler als einziges Bedienteil. Auf dem Blatt steht alles, was der Besucher
- * ablesen muss: das Zielfenster als heller Bogen, der Ansprechdruck des
- * Sicherheitsventils als Marke, der eingestellte Wert als Zahl.
- *
- * **Kein Rot**, obwohl am echten Manometer dort eine rote Marke sitzt: Rot
- * kommt im ganzen System nicht vor. Der Ansprechdruck steht
- * deshalb in Markenorange — und weil er auf diesem Screen keine Handlung ist,
- * bleibt er ein Strich und keine Fläche. Das Zielfenster bleibt weiß wie auf
- * der alten Leiste; Warnwestengelb gehört dem Treffer: Zeiger, Nabe und Zahl
- * wechseln darauf, sobald der Druck im Fenster steht — sofortiges Feedback
- * ohne zweiten Screen.
- *
- * Die Breite der Uhr ist je Ausrichtung doppelt gedeckelt: `26/30 rem`, damit
- * sie auf der Stele nicht ins Groteske wächst, und ein Anteil der
- * **Bildschirmhöhe** (hochkant `23vh`, quer `60vh`), damit die Spalte unter
- * ihr Platz behält. Der hochkante Deckel ist der wichtige — erst er greift
- * dort überhaupt (schmale Flächen erreichen die rem-Grenze nie), und er hält
- * das Panel unter der Höhe, ab der die `max-h-[72%]`-Reißleine der
- * `StepShell` die Rückmeldung unter die Scrollkante schöbe: wer „Anlage
- * starten" drückt, muss die Antwort ohne Scrollen sehen (Kommentar am
- * Einsatzort, nachgemessen auf 390 × 844). Quer bindet meist das rem-Maß;
- * der vh-Anteil fängt flache Handys ab. Dass die Bühne hinter dem hohen
- * Füll-Panel klein wird, ist der bewusste Handel dieses Screens — die
- * Kamera hält trotzdem das ganze Haus (`Haus.tsx`, `blickfeld`).
- */
+/** Dieselbe Messskala wie auf der Bühne, kompakt über dem Regler. */
 function Manometer({
+  kompakt,
   druck,
   imFenster,
   reduziert,
   onDruck,
   onGezogen,
 }: {
+  kompakt: boolean
   druck: number
   /** Der Druck steht im Zielfenster — Zeiger und Zahl wechseln die Farbe. */
   imFenster: boolean
@@ -417,7 +333,9 @@ function Manometer({
   onGezogen: () => void
 }) {
   return (
-    <div className="mx-auto flex w-full max-w-[min(26rem,23vh)] flex-col gap-2 landscape:max-w-[min(30rem,60vh)]">
+    <div
+      className={`mx-auto flex w-full flex-col gap-2 ${kompakt ? 'max-w-[min(13rem,21vh)]' : 'max-w-[min(16rem,27vh)]'}`}
+    >
       <div className="relative">
         {/* Zeichnung ohne eigene Vorlesestimme: Wert und Zielfenster stehen
             als echter Text auf dem Blatt, den Regler liest der Slider vor. */}
@@ -473,12 +391,7 @@ function Manometer({
             )
           })}
 
-          {/* Das Zielfenster — der helle Bogen, in dem der Zeiger stehen
-              bleiben soll. **Bewusst weiß, nicht warm** wie auf der kleinen
-              Uhr der Bühne: dort erzählt Warm die Temperaturgeschichte, hier
-              im Panel ist das Fenster die Aufgabe — und die trug schon auf
-              der alten Reglerleiste ein weißes Band, während Orange dem
-              Sicherheitsventil gehört. */}
+          {/* Der Zielbereich bleibt grün, auch wenn der Zeiger noch außerhalb steht. */}
           <path
             d={bogen(
               NABE.x,
@@ -488,7 +401,8 @@ function Manometer({
               winkel(FUELLDRUCK.max),
             )}
             fill="none"
-            className="stroke-white/40"
+            className="stroke-kh-signal"
+            data-testid="a6-zielbereich"
             strokeWidth={6}
             strokeLinecap="round"
           />
@@ -504,7 +418,7 @@ function Manometer({
           {/* Der Zeiger. Er fährt jeden Zehntelschritt weich an — mit
               reduzierter Bewegung steht er sofort. **Gedreht, nicht als Pfad
               interpoliert:** eine `d`-Animation zieht die Spitze über die
-              Sehne, und auf dem großen Sprung von „Zeig mir wie" (0,8 → 1,5)
+              Sehne, und auf dem großen Sprung von „Zeige mir wie" (0,8 → 1,5)
               schrumpft der Zeiger dabei sichtbar. Die Nabe ist der
               Drehpunkt (`transform-box: view-box`). */}
           <motion.g
@@ -538,7 +452,7 @@ function Manometer({
             Anzeige — in der unteren Hälfte, die der Zeiger nie überstreicht. */}
         <div className="pointer-events-none absolute inset-x-0 top-[56%] flex flex-col items-center gap-1">
           <span className="text-[0.9375rem] text-kh-mute">
-            Zielfenster {bar(FUELLDRUCK.min)} bis {bar(FUELLDRUCK.max)}
+            Ziel: {FUELLDRUCK.min.toFixed(1).replace('.', ',')}–{bar(FUELLDRUCK.max)}
           </span>
           <span
             data-testid="a6-druck"
@@ -570,6 +484,7 @@ function Manometer({
           onGezogen()
         }}
         data-testid="a6-regler"
+        data-im-fenster={imFenster}
         aria-label="Fülldruck der Anlage"
         className="kh-regler w-full"
       />
@@ -582,20 +497,13 @@ function Manometer({
           auf dem Blatt. */}
       <div className="flex justify-between text-[0.9375rem] text-kh-mute/70 tabular-nums">
         <span>{bar(MIN_BAR)}</span>
-        <span className="text-kh-orange">
-          Sicherheitsventil {bar(SICHERHEITSVENTIL_BAR)}
-        </span>
         <span>{bar(MAX_BAR)}</span>
       </div>
     </div>
   )
 }
 
-/**
- * Die Faustformel. Sie steht hier und nicht in einer Aha-Karte, weil sie die
- * Aufgabe erklärt, statt sie zu ergänzen: ohne sie ist das Zielfenster eine
- * gesetzte Zahl, mit ihr ist es eine, die man selbst ausrechnen könnte.
- */
+/** Freiwillige Erklärung im gemeinsamen Informationsdialog. */
 function Faustformel() {
   return (
     <motion.div
@@ -605,16 +513,14 @@ function Faustformel() {
       className="kh-feld px-3.5 py-2.5"
       data-testid="a6-faustformel"
     >
-      <p className="kh-etikett">Faustformel</p>
+      <p className="font-semibold">Warum braucht die Anlage Druck?</p>
       {/* „bar" bekommt seinen Körper-Anker: der Luftdruck, der ohnehin
           auf jedem liegt, ist ungefähr 1 bar. */}
       <p className="mt-1 text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-        Gebäudehöhe in Metern geteilt durch zehn, plus 0,3 bar — je höher das Haus, desto
-        mehr Druck, sonst kommt oben kein Wasser an. Für ein Einfamilienhaus landet man
-        damit bei {bar(FUELLDRUCK.min)} bis {bar(FUELLDRUCK.max)}; darüber öffnet
-        irgendwann das <Fachwort id="sicherheitsventil">Sicherheitsventil</Fachwort>. Zum
-        Anfassen: 1 bar ist ungefähr der Luftdruck, der gerade auf dir liegt — die Anlage
-        braucht nur ein bisschen mehr.
+        Der Druck bringt das Wasser bis in die oberen Stockwerke. Der grüne Bereich zeigt
+        die passende Einstellung für dieses Haus. Zu viel Druck lässt das{' '}
+        <Fachwort id="sicherheitsventil">Sicherheitsventil</Fachwort> ab. Für jedes Haus
+        wird die Einstellung vorher berechnet.
       </p>
     </motion.div>
   )

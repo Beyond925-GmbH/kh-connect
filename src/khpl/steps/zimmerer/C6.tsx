@@ -65,8 +65,8 @@ const Wandelement3D = lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))
 const HILFE_AB = 2
 
 /**
- * Die richtige Lage. Nach außen kommt die diffusionsoffene Holzfaserplatte,
- * nicht die glatte Innenbeplankung — und oben ist das Rähm, weil dort die Decke
+ * Die richtige Lage. Nach außen kommt die Holzfassade,
+ * nach innen die helle Zimmerwand — und oben ist das Rähm, weil dort die Decke
  * aufliegt und die Schwelle die Last in die Bodenplatte abträgt.
  */
 const RICHTIG: Elementlage = { aussenseite: 'holzfaser', oben: 'raehm' }
@@ -96,23 +96,21 @@ const ACHSEN = [
     optionen: [
       {
         wert: 'beplankung',
-        label: 'Die glatte Seite',
-        labelKurz: 'Die glatte Seite',
-        zusatz: 'sieht schon fertig aus',
-        kurz: 'sieht fertig aus',
+        label: 'Die helle Zimmerseite',
+        labelKurz: 'Zimmerseite',
+        zusatz: 'die Wand im Zimmer',
+        kurz: 'innen',
       },
       {
         wert: 'holzfaser',
-        label: 'Die raue Platte',
-        labelKurz: 'Die raue Platte',
-        zusatz: 'Holzfaser, dunkel',
-        kurz: 'Holzfaser, dunkel',
+        label: 'Die Holzfassade',
+        labelKurz: 'Holzfassade',
+        zusatz: 'die Bretter außen',
+        kurz: 'Bretter außen',
       },
     ],
-    warum:
-      'Dann läge die dichte Folie außen. Die Feuchte aus dem Raum bliebe in der Wand stehen — in fünf Jahren ist die Dämmung nass und das Holz faul.',
-    warumKurz:
-      'Dann läge die dichte Folie außen. In fünf Jahren ist die Dämmung nass und das Holz faul.',
+    warum: 'Die Fassade gehört nach außen. Die helle Zimmerwand zeigt nach innen.',
+    warumKurz: 'Die Fassade gehört nach außen.',
   },
   {
     id: 'oben',
@@ -120,23 +118,21 @@ const ACHSEN = [
     optionen: [
       {
         wert: 'raehm',
-        label: 'Rähm nach oben',
-        labelKurz: 'Rähm oben',
+        label: 'Oberes Holz nach oben',
+        labelKurz: 'Oberes Holz',
         zusatz: 'das obere Holz',
         kurz: 'das obere Holz',
       },
       {
         wert: 'schwelle',
-        label: 'Schwelle nach oben',
-        labelKurz: 'Schwelle oben',
+        label: 'Unteres Holz nach oben',
+        labelKurz: 'Unteres Holz',
         zusatz: 'das untere Holz',
         kurz: 'das untere Holz',
       },
     ],
-    warum:
-      'Dann hinge es auf dem Kopf. Der unterste Balken trägt die Last der ganzen Wand — er gehört nach unten. Und dein Fenster säße falsch.',
-    warumKurz:
-      'Verkehrt herum — das untere Holz trägt das Gewicht der Wand und gehört nach unten. Und dein Fenster säße falsch.',
+    warum: 'Die Wand steht auf dem Kopf. Orientiere dich am Fenster.',
+    warumKurz: 'Die Wand steht auf dem Kopf. Orientiere dich am Fenster.',
   },
 ] as const
 
@@ -230,7 +226,7 @@ export function C6() {
   const zeigMirWie = () => {
     uebernimm(RICHTIG)
     setMeldung({
-      text: 'Raue Platte nach außen, Rähm nach oben. Nach außen muss die Wand offen bleiben, und das Gewicht der Wand muss nach unten.',
+      text: 'Raue Platte nach außen, Oberes Holz nach oben. Nach außen muss die Wand offen bleiben, und das Gewicht der Wand muss nach unten.',
       ok: true,
     })
     setTakt('einweisen')
@@ -264,8 +260,8 @@ export function C6() {
         takt === 'fertig'
           ? null
           : takt === 'einweisen'
-            ? 'Schieb das Element über seinen Platz und lass es herunter.'
-            : 'Wähl aus, wie herum das Element stehen muss.'
+            ? 'Schiebe die Wand über ihren Platz und lasse sie herunter.'
+            : 'Wähle, wie herum die Wand stehen muss.'
       }
       /*
         Zwei Beats, zwei Gesten, zwei Ansagen. `StepShell` verschlüsselt sie an
@@ -341,8 +337,8 @@ export function C6() {
           // was zu tun ist, steht jetzt im Auftragsband. Übrig bleibt der
           // Grund, warum es überhaupt schwer ist.
           <p>
-            Den ganzen Vormittag lag das Element flach vor dir. Jetzt hängt es senkrecht —
-            und du musst es dir gedreht vorstellen, bevor es absetzt.
+            Deine Wand lag eben noch flach. Jetzt hängt sie am Kran, und du richtest sie
+            für ihren Platz am Haus aus.
           </p>
         )
       }
@@ -411,14 +407,16 @@ export function C6() {
                         gewaehlt={gewaehlt[achse.id] === o.wert}
                         onClick={() => waehle(achse.id, o.wert)}
                         data-testid={`c6-${achse.id}-${o.wert}`}
-                        className="min-h-[84px]"
+                        className="min-h-[64px] sm:min-h-[84px]"
                       >
                         <span className="text-[1.0625rem] leading-tight font-semibold">
                           {schmal ? o.labelKurz : o.label}
                         </span>
-                        <span className="text-[0.9375rem] leading-snug opacity-70">
-                          {schmal ? o.kurz : o.zusatz}
-                        </span>
+                        {!schmal && (
+                          <span className="text-[0.9375rem] leading-snug opacity-70">
+                            {o.zusatz}
+                          </span>
+                        )}
                       </Wahlflaeche>
                     ))}
                   </div>
@@ -446,7 +444,7 @@ export function C6() {
           // Nur Beat 1 hat eine Aktion im Fuß. In Beat 2 ist die Bühne die
           // Handlung — siehe oben.
           //
-          // „Zeig mir wie“ steht **neben** „So absetzen“ und nicht in der
+          // „Zeige mir wie“ steht **neben** „So absetzen“ und nicht in der
           // scrollenden Fläche (wie in C4): im Hochformat läge
           // es dort unter zwei Optionsgruppen und der Rückmeldung, also
           // womöglich unter der Scrollkante — ausgerechnet das Angebot nach
@@ -469,7 +467,7 @@ export function C6() {
                       onClick={zeigMirWie}
                       data-testid="c6-zeig-mir-wie"
                     >
-                      Zeig mir wie
+                      Zeige mir wie
                     </Button>
                   </motion.div>
                 )}

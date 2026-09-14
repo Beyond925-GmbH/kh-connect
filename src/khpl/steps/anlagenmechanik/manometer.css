@@ -1,0 +1,9 @@
+/* Grün bezeichnet den Zielbereich, nicht eine beliebige Reglerstellung. */
+[data-testid='a6-regler'][data-im-fenster='false']::-webkit-slider-thumb {
+  background: #e6e8ed;
+  box-shadow: none;
+}
+[data-testid='a6-regler'][data-im-fenster='false']::-moz-range-thumb {
+  background: #e6e8ed;
+  box-shadow: none;
+}

@@ -1,4 +1,5 @@
-import { baueGraph, type Angebot, type StepDef } from '@/khpl/flow/steps'
+import { type Angebot, type StepDef } from '@/khpl/flow/steps'
+import { baueMesseGraph } from '@/khpl/flow/messe'
 import type { BerufDef, StepBild } from './typen'
 
 /**
@@ -76,7 +77,7 @@ type ZimmererStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher'> & {
 const STEPS = [
   {
     id: 'M1',
-    titel: 'Der erste Termin',
+    titel: 'Die Baustelle prüfen',
     kurz: 'Anfrage & Ortstermin',
     art: 'haupt',
     weiter: 'M2',
@@ -121,7 +122,7 @@ const STEPS = [
   },
   {
     id: 'M4',
-    titel: 'Balken zuschneiden',
+    titel: 'Einen Balken zuschneiden',
     kurz: 'Material vorbereiten',
     art: 'haupt',
     weiter: 'M5',
@@ -130,7 +131,7 @@ const STEPS = [
   },
   {
     id: 'B4.1',
-    titel: 'Beladen',
+    titel: 'Den Transporter beladen',
     kurz: 'Lagerhalle, Beladen',
     art: 'abstecher',
     weiter: 'M5',
@@ -139,7 +140,7 @@ const STEPS = [
   },
   {
     id: 'M5',
-    titel: 'Dach bauen',
+    titel: 'Den Unterbau aufrichten',
     kurz: 'Dach aufrichten I',
     art: 'haupt',
     weiter: 'M6',
@@ -166,7 +167,7 @@ const STEPS = [
   },
   {
     id: 'M7',
-    titel: 'Jetzt du',
+    titel: 'Den Dachstuhl ergänzen',
     kurz: 'Dach aufrichten II',
     art: 'haupt',
     weiter: 'M8',
@@ -223,7 +224,7 @@ const STEPS = [
   },
   {
     id: 'M10',
-    titel: 'Dein nächster Schritt',
+    titel: 'Dein Einblick ins Dachhandwerk',
     // Nicht 'CTA': `kurz` steht im Sheet und auf dem Weitermachen-Knopf des
     // Splash. „Weitermachen bei ‚CTA‘“ ist Board-Sprache, keine Besuchersprache.
     kurz: 'Dein nächster Schritt',
@@ -328,7 +329,7 @@ export const DACHDECKER: BerufDef = {
     text: 'Du bist Azubi in einem Dachdeckerbetrieb. Der Chef legt das Telefon weg und dreht sich zu dir um: Er hat einen Kunden, bei dem ein altes Dach erneuert werden muss. Bist du dabei?',
     knopf: 'Auftrag annehmen',
   },
-  graph: baueGraph(STEPS, {
+  graph: baueMesseGraph(STEPS, ['M1', 'M4', 'B4.1', 'M5', 'M7', 'M10'], {
     erster: 'M1',
     /**
      * Jeder Abstecher ist einzeln getextet — nie eine generische

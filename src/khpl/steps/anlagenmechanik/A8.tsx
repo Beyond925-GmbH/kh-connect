@@ -66,8 +66,8 @@ export function A8() {
         // wortgleich schon im Auftragsband — und M9, das Vorbild dieses
         // Screens, endet ebenfalls bei „alle offen".
         <p>
-          Dreieinhalb Jahre Ausbildung, dann bist du Geselle. Danach drei Wege — alle drei
-          offen.
+          Dreieinhalb Jahre Ausbildung, dann bist du Geselle. Danach kannst du dich
+          weiterentwickeln. Diese Wege sind Beispiele.
         </p>
       }
       interaktion={

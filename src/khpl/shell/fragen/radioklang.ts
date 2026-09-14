@@ -1,28 +1,10 @@
 import type { RadioStil } from '@/khpl/match/fragen'
 
 /**
- * Der Klang des Baustellenradios — komplett synthetisiert, keine Dateien.
- *
- * **Warum Synthese statt Aufnahmen.** Der Medienbestand hat keine einzige
- * Tonspur, Stock-Musik brächte Lizenz- und GEMA-Fragen an einen Messestand,
- * und der Kiosk muss offline laufen. Fünf generische Vier-Takt-Loops aus
- * Oszillatoren und Rauschen sind dagegen frei, ein paar Kilobyte Code — und
- * „generisch“ ist hier kein Mangel, sondern die Aufgabe: es soll klingen wie
- * *irgendein* Sender dieser Richtung, leise unter dem Messelärm.
- *
- * **Leise ist Pflicht.** `LAUTSTAERKE` ist bewusst weit unten: das Radio ist
- * eine Beilage zum Screen, keine Beschallung des Standes.
- *
- * **iOS-Regel:** Audio startet nur nach einer Geste. `entsperre()` wird darum
- * direkt im Pointer-Handler der Station aufgerufen — dort erzeugt es den
- * `AudioContext` und weckt ihn; die Effekte danach dürfen dann spielen.
- *
- * **Einmal und nie wieder.** Das Radio ist der Auftakt, kein Soundtrack: nach
- * `zerstoere()` ist das Gerät *tot* und macht keinen Ton mehr — auch wenn die
- * Station noch einen Frame lang steht oder jemand danach wieder aufs Band
- * fasst. Dazu räumt es sich selbst ab, sobald die Seite in den Hintergrund
- * geht oder verlassen wird (`visibilitychange`, `pagehide`): ein Kiosk, der
- * aus einem versteckten Tab weitertönt, ist ein spukender Kiosk.
+ * Fünf leise, synthetische 4/4-Muster, ohne zusätzliche Audiodateien.
+ * Der Sitzungsspieler besitzt die Instanz über Bildschirmwechsel hinweg.
+ * Er entsperrt sie per Nutzergeste und baut sie bei Pause/Reset ab.
+ * Auch ein Hintergrundwechsel beendet diese Instanz endgültig.
  */
 
 /** Summen-Pegel des Radios. Eine Beilage, keine Beschallung. */
@@ -135,12 +117,13 @@ export class Radioklang {
   private rauschen_: { quelle: AudioBufferSourceNode; pegel: GainNode } | null = null
   private takt: { timer: number; stil: RadioStil; bpm: number } | null = null
   private naechsterTakt = 0
+  private musikquellen = new Set<AudioScheduledSourceNode>()
 
   /**
    * Muss aus einer Nutzergeste heraus laufen (Pointer-Handler): erzeugt den
    * Kontext und weckt ihn. Alles Spätere darf dann aus Effekten kommen.
    */
-  entsperre() {
+  async entsperre() {
     if (this.tot) return
     if (!this.ctx) {
       this.ctx = new AudioContext()
@@ -156,7 +139,21 @@ export class Radioklang {
       document.addEventListener('visibilitychange', this.beimVerlassen)
       window.addEventListener('pagehide', this.beimVerlassen)
     }
-    if (this.ctx.state === 'suspended') void this.ctx.resume()
+    if (this.ctx.state === 'suspended') await this.ctx.resume()
+  }
+
+  /** Sanft vom aktuellen Pegel zum Ziel, auch bei schnellen Fragenwechseln. */
+  lautstaerke(anteil: number, sekunden = 0.8) {
+    if (!this.ctx || !this.summe || this.tot) return
+    const pegel = this.summe.gain
+    const jetzt = this.ctx.currentTime
+    const aktuell = pegel.value
+    pegel.cancelScheduledValues(jetzt)
+    pegel.setValueAtTime(aktuell, jetzt)
+    pegel.linearRampToValueAtTime(
+      LAUTSTAERKE * Math.max(0, Math.min(1, anteil)),
+      jetzt + Math.max(0, sekunden),
+    )
   }
 
   /**
@@ -225,7 +222,7 @@ export class Radioklang {
   }
 
   /**
-   * Beim Verlassen der Station: Gerät ausbauen, Decoder freigeben — und
+   * Bei Pause oder Sitzungsende: Gerät ausbauen, Ressourcen freigeben — und
    * endgültig. Ein einmal zerstörter Radioklang lässt sich nicht wiederbeleben.
    */
   zerstoere() {
@@ -244,6 +241,24 @@ export class Radioklang {
       window.clearInterval(this.takt.timer)
       this.takt = null
     }
+    // Auch die bereits vorausgeplanten Töne des alten Senders beenden.
+    for (const quelle of this.musikquellen) {
+      quelle.stop()
+      quelle.disconnect()
+    }
+    this.musikquellen.clear()
+  }
+
+  private merkeMusikquelle(quelle: AudioScheduledSourceNode) {
+    this.musikquellen.add(quelle)
+    quelle.addEventListener(
+      'ended',
+      () => {
+        this.musikquellen.delete(quelle)
+        quelle.disconnect()
+      },
+      { once: true },
+    )
   }
 
   private planeTakt(stil: RadioStil, bpm: number, start: number) {
@@ -278,6 +293,7 @@ export class Radioklang {
     pegel.gain.exponentialRampToValueAtTime(0.001, t + 0.16)
     osz.connect(pegel).connect(this.summe)
     osz.start(t)
+    this.merkeMusikquelle(osz)
     osz.stop(t + 0.2)
   }
 
@@ -294,6 +310,7 @@ export class Radioklang {
     pegel.gain.exponentialRampToValueAtTime(0.001, t + 0.13)
     quelle.connect(filter).connect(pegel).connect(this.summe)
     quelle.start(t)
+    this.merkeMusikquelle(quelle)
     quelle.stop(t + 0.15)
   }
 
@@ -310,6 +327,7 @@ export class Radioklang {
     pegel.gain.exponentialRampToValueAtTime(0.001, t + dauer)
     quelle.connect(filter).connect(pegel).connect(this.summe)
     quelle.start(t)
+    this.merkeMusikquelle(quelle)
     quelle.stop(t + dauer + 0.02)
   }
 
@@ -328,6 +346,7 @@ export class Radioklang {
     pegel.gain.linearRampToValueAtTime(0, t + dauer)
     osz.connect(filter).connect(pegel).connect(this.summe)
     osz.start(t)
+    this.merkeMusikquelle(osz)
     osz.stop(t + dauer + 0.05)
   }
 
@@ -359,6 +378,7 @@ export class Radioklang {
       osz.frequency.value = f
       osz.connect(ziel)
       osz.start(t)
+      this.merkeMusikquelle(osz)
       osz.stop(t + dauer + 0.05)
     }
   }

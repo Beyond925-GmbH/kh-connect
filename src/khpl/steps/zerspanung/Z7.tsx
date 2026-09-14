@@ -91,9 +91,8 @@ export function Z7() {
       buehne={<StepFoto id="Z7" />}
       warum={
         <p>
-          Halb drei. Deine Maschine läuft weiter — die Spätschicht übernimmt sie, mit
-          deiner Korrektur und deinem Stichprobenplan: wann sie nachmessen muss. Das alles
-          passt in zwei Sätze.
+          Halb drei. Die Spätschicht übernimmt die Maschine. Bei der Übergabe bespricht
+          das Team die letzten Messwerte und die nächste Kontrolle.
         </p>
       }
       interaktion={
@@ -108,7 +107,7 @@ export function Z7() {
             data-testid="z7-uebergabe"
             className="kh-titel-klein text-kh-orange"
           >
-            „Läuft sauber. Korrektur ist drin, Stichprobe alle vierzig.“
+            „Wie läuft die Serie? Wann ist die nächste Kontrolle?“
           </motion.p>
 
           <motion.div

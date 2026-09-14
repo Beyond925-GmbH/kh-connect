@@ -1,200 +1,240 @@
-import { Suspense, lazy, useState } from 'react'
-import { motion } from 'motion/react'
+import { lazy, Suspense, useState } from 'react'
+import { Check, RotateCcw } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
-import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
-import { Wechsel } from '@/khpl/komponenten/Wechsel'
-import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { useSchmal } from '@/khpl/shell/schmal'
+import { StepFuss } from '@/khpl/shell/StepFuss'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
-import { Begriff } from './Begriff'
-
-/**
- * C3 — Eine Wand ist ein Sandwich. **Die geführte Hälfte des Lernpaars.**
- *
- * Fünf Schichten, eine Karte je Schicht, in fester Reihenfolge, mit je einem
- * Satz. Ein Tap, die Schicht legt sich auf. **Man kann nichts falsch machen** —
- * genau wie M5 beim Dachdecker, und aus demselben Grund: erst mitmachen, dann
- * können.
- *
- * **Hier wird nichts abgefragt.** Die Abfrage kommt in C6, nach der Zäsur, und
- * in anderer Form — nicht „in welcher Reihenfolge“, sondern „welche Seite kommt
- * nach außen“. Das ist das Lernpaar dieses Tages.
- *
- * **Die Karte trägt einen Querschnitt, nicht nur einen Namen.** „Dampfbremse“
- * ist für jemanden mit fünfzehn kein Wort, sondern ein Rätsel; die kleine
- * Zeichnung beantwortet *wo sitzt das*, bevor der Name gelesen ist. Dieselbe
- * Begründung wie bei `DachSchema` in M5 — nur ist die Achse hier der Aufbau
- * und nicht die Zeit.
- *
- * Schichtenfolge und Prinzip sind fachlich abgesichert (WBA Weimar; Prinzip
- * nach DIN 4108-3).
- *
- * ⚠️ **Vorbehalt, und er steht auf dem Screen:** Es gibt Bauweisen ohne
- * separate Dampfbremsfolie — dann übernimmt die OSB-Beplankung die Funktion —
- * und feuchtevariable Bahnen. Der Screen zeigt den Regelfall und sagt nicht
- * „immer“.
- *
- * `answers.c3` `{ gelegt: string[]; fertig: boolean }`
- */
-
+import { WANDSCHICHTEN, gueltigerAufbau, type WandschichtId } from './materialien'
 const Wandelement3D = lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))
-
-// ---------------------------------------------------------------------------
-// Text — gebündelt oben in der Datei.
-// ---------------------------------------------------------------------------
-
-interface Schicht {
-  id: string
-  name: string
-  /** Der eine Satz auf der Karte. */
-  was: string
-  /**
-   * Derselbe Satz fürs Handy hochkant, wo die Karte zugleich das Tippziel ist
-   * und in die Scrollfläche passen muss. Nur dort nötig, wo `was` über drei
-   * Zeilen läuft — sonst bleibt es beim einen Satz.
-   */
-  wasKurz?: string
-  /**
-   * Relative Dicke im Querschnitt-Schema. Schematisch, **kein Maß** — die
-   * Zeichnung soll zeigen, dass eine Dämmebene dick und eine Folie dünn ist,
-   * nicht wie dick genau.
-   */
-  dicke: number
-  /**
-   * Farbe im Querschnitt-Schema — dieselbe, die die Schicht auf der 3D-Bühne
-   * trägt (`buehne/zimmerer/element.tsx` bzw. `kulissen.tsx`; von dort nicht
-   * importierbar, das ist der three-Chunk). Bühnen-lokal, kein neuer
-   * Tokensatz: fünf gleich helle Blöcke lasen sich als Platzhalter
-   * (Abnahme-Befund), fünf Bühnenfarben lesen sich als dieselbe Wand.
-   */
-  farbe: string
-}
-
-/**
- * Von innen nach außen. Die belegte Schichtenfolge nennt sechs Ebenen; die
- * Installationsebene steht hier im Satz der Innenbeplankung statt auf einer
- * eigenen Karte — fünf Karten sind die Übung, sechs wären eine Liste.
- */
-const SCHICHTEN: Schicht[] = [
-  {
-    id: 'innen',
-    name: 'Innenbeplankung',
-    was: 'Die Platte, die im fertigen Zimmer die Wand ist — an so eine hängst du deine Poster. Dahinter bleibt meist noch etwas Platz für Kabel und Steckdosen, damit später niemand durch die Folie bohrt.',
-    wasKurz:
-      'Die Platte, die im fertigen Zimmer die Wand ist — an so eine hängst du deine Poster. Dahinter bleibt Platz für Kabel und Steckdosen.',
-    dicke: 2,
-    farbe: '#DDD8CF', // Gipsplatte auf der Bühne
-  },
-  {
-    id: 'dampfbremse',
-    name: 'Dampfbremse',
-    was: 'Kommt auf die warme Innenseite, direkt vor die Dämmung. Sie hält die feuchte Luft aus dem Zimmer aus der Wand heraus.',
-    dicke: 1,
-    farbe: '#7FA9B5', // die blaugraue Bahn auf der Bühne
-  },
-  {
-    id: 'daemmung',
-    name: 'Ständerwerk mit Dämmung',
-    // Ohne „im Gefach": das Fachwort trüge hier nichts Neues und stünde ohne
-    // Glossar-Chip mitten im Satz.
-    was: 'Das tragende Skelett — und zwischen den Ständern die Dämmung. Hier steckt die Wärme des Hauses drin.',
-    dicke: 7,
-    farbe: '#D8C48F', // die Gefachdämmung auf der Bühne
-  },
-  {
-    id: 'holzfaser',
-    name: 'Holzfaserplatte',
-    was: 'Kommt ganz außen drauf und lässt Wasserdampf durch. Feuchtigkeit, die doch in die Wand kommt, muss hier wieder raus.',
-    dicke: 3,
-    farbe: '#B58C4C', // die Holzfaserplatte auf der Bühne
-  },
-  {
-    id: 'fassade',
-    name: 'Fassade',
-    was: 'Was man von der Straße sieht: Putz oder Holz. Das entscheiden die Leute, denen das Haus gehört — die vier Schichten davor entscheidet die Physik.',
-    dicke: 2,
-    farbe: '#A8814A', // die Hauswand in C7 (kulissen.tsx)
-  },
-]
+const KARTENFOLGE = ['holzfaser', 'innen', 'fassade', 'daemmung', 'dampfbremse']
 
 export function C3() {
-  // Handy hochkant: Panel und Bühne teilen sich 844 px. Die Schichtkarte ist
-  // hier zugleich das Tippziel und muss ganz ins Bild — also trägt der Screen
-  // dort weniger Text (s. `shell/schmal.ts`).
   const schmal = useSchmal()
   const gespeichert = useFortschritt().answers.c3
-  const [gelegt, setGelegt] = useState<string[]>(() => gespeichert?.gelegt ?? [])
-
-  // `fertig` als Alias der Undefined-Prüfung, nicht als Längenvergleich: nur so
-  // verengt TypeScript `dran` im Else-Zweig auf `Schicht` (aliased discriminant).
-  const dran: Schicht | undefined = SCHICHTEN[gelegt.length]
-  const danach: Schicht | undefined = SCHICHTEN[gelegt.length + 1]
-  const fertig = dran === undefined
-
-  const legen = () => {
-    if (!dran) return
-    const neu = [...gelegt, dran.id]
+  const [gelegt, setGelegt] = useState<WandschichtId[]>(() =>
+    gueltigerAufbau(gespeichert?.gelegt ?? []),
+  )
+  const [versuche, setVersuche] = useState(gespeichert?.versuche ?? 0)
+  const [meldung, setMeldung] = useState('')
+  const [fehler, setFehler] = useState(false)
+  const [erkunden, setErkunden] = useState(false)
+  const [abstand, setAbstand] = useState(0)
+  const [winkel, setWinkel] = useState(0)
+  const [auswahl, setAuswahl] = useState<WandschichtId | null>(null)
+  const fertig = gelegt.length === WANDSCHICHTEN.length
+  const ausgewaehlt = WANDSCHICHTEN.find((s) => s.id === auswahl)
+  const legen = (id: WandschichtId) => {
+    if (fertig || gelegt.includes(id)) return
+    const dran = WANDSCHICHTEN[gelegt.length]
+    if (id !== dran.id) {
+      const n = versuche + 1
+      setVersuche(n)
+      setFehler(true)
+      setMeldung(`Noch nicht. ${dran.hinweis}`)
+      merkeAntwort('c3', { gelegt, fertig: false, versuche: n })
+      return
+    }
+    const neu = [...gelegt, id]
     setGelegt(neu)
-    merkeAntwort('c3', { gelegt: neu, fertig: neu.length >= SCHICHTEN.length })
+    setFehler(false)
+    setMeldung(`${dran.name} eingebaut.`)
+    merkeAntwort('c3', {
+      gelegt: neu,
+      fertig: neu.length === WANDSCHICHTEN.length,
+      versuche,
+    })
   }
-
+  const ansichtZurueck = () => {
+    setAbstand(0)
+    setWinkel(0)
+    setAuswahl(null)
+  }
+  const neuBauen = () => {
+    setGelegt([])
+    setMeldung('')
+    setFehler(false)
+    setErkunden(false)
+    ansichtZurueck()
+    merkeAntwort('c3', { gelegt: [], fertig: false, versuche })
+  }
   return (
     <StepShell
       id="C3"
-      auftrag={fertig ? null : 'Tipp die Schichten an, von innen nach außen.'}
-      // Angetippt, nicht gezogen — also keine Ansage.
+      auftrag={
+        fertig || meldung || erkunden ? null : 'Baue die Wand vom Zimmer nach draußen.'
+      }
       ansage={null}
       buehneInteraktiv
       interaktionOffen={!fertig}
       buehne={
-        <Suspense fallback={<Dachstuhl3DFallback text="Das Element liegt bereit" />}>
-          <Wandelement3D zustand="schichten" schichten={gelegt.length} />
+        <Suspense fallback={<Dachstuhl3DFallback text="Die Wand liegt bereit" />}>
+          <Wandelement3D
+            zustand="schichten"
+            schichten={gelegt.length}
+            schichtAbstand={abstand}
+            schichtWinkel={winkel}
+            ausgewaehlteSchicht={auswahl}
+            onSchicht={erkunden ? setAuswahl : undefined}
+            onSchichtDrehen={erkunden ? setWinkel : undefined}
+          />
         </Suspense>
       }
       warum={
-        // Eine Fassung statt zweier, ein Fachwort statt dreier.
-        // Die Schichten heißen jetzt nach ihrer Aufgabe; wie sie im Betrieb
-        // heißen, steht auf den Karten darunter, eine nach der anderen.
-        fertig ? undefined : (
-          <p>
-            Innen eine Folie, die keine feuchte Luft ins Holz lässt. Außen eine Platte,
-            die trotzdem noch atmet. Die Folie heißt{' '}
-            <Begriff id="dampfbremse">Dampfbremse</Begriff>.
-          </p>
-        )
+        <p>
+          Eine Beispielwand aus fünf Teilen. Die Platten, die Folie und die Dämmung haben
+          verschiedene Aufgaben.
+        </p>
       }
       interaktion={
-        <Wechsel takt={fertig ? 'steht' : dran.id}>
-          {fertig ? (
-            <Prinzip />
-          ) : (
-            <div className="flex flex-col items-start gap-2">
-              <Schichtkarte
-                schicht={dran}
-                nummer={gelegt.length + 1}
-                gesamt={SCHICHTEN.length}
-                gelegt={gelegt.length}
-                onLegen={legen}
-                schmal={schmal}
-              />
-              {danach && (
-                <p
-                  data-testid="c3-danach"
-                  className="pl-1 text-[0.9375rem] text-kh-paper/45"
-                >
-                  Danach: {danach.name}
-                </p>
-              )}
+        <div className="flex flex-col gap-3">
+          <p
+            role="status"
+            aria-live="polite"
+            className={
+              !erkunden && (meldung || fertig)
+                ? `text-[1rem] leading-snug ${fehler ? 'text-kh-paper' : 'text-kh-signal'}`
+                : 'sr-only'
+            }
+          >
+            {meldung || (fertig ? 'Deine Wand ist aufgebaut.' : '')}
+          </p>
+          {!fertig && !erkunden && (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {KARTENFOLGE.map((id) => {
+                const s = WANDSCHICHTEN.find((x) => x.id === id)!
+                const liegt = gelegt.includes(s.id)
+                return (
+                  <button
+                    type="button"
+                    key={id}
+                    onClick={() => legen(s.id)}
+                    disabled={liegt}
+                    data-testid={`c3-material-${id}`}
+                    className={`flex min-h-[48px] items-center gap-3 rounded-kh border-2 p-1.5 text-left sm:block sm:p-2 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-kh-signal ${liegt ? 'border-kh-signal/50 opacity-50' : 'border-kh-line bg-white/5'}`}
+                  >
+                    <Materialprobe id={s.id} farbe={s.farbe} />
+                    <span className="flex min-h-7 items-center gap-1 text-[1rem] font-semibold sm:mt-2">
+                      {liegt && <Check className="size-4 shrink-0" />}
+                      {s.name}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           )}
-        </Wechsel>
-      }
-      aha={
-        <AhaKarte sichtbar={fertig} eyebrow="Ist die Dampfbremse eine Folie gegen Regen?">
-          Nein. Sie hält Luftfeuchte aus dem Zimmer aus der Dämmung heraus. Von außen muss
-          die Wand offen sein, sonst trocknet sie nie wieder.
-        </AhaKarte>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              aria-expanded={erkunden}
+              onClick={() => {
+                setErkunden(!erkunden)
+                if (erkunden) ansichtZurueck()
+                else setAbstand(0.8)
+              }}
+              className="min-h-[44px] w-fit text-left text-[1rem] underline underline-offset-4"
+              data-testid="c3-erkunden"
+            >
+              {erkunden ? 'Erkundung schließen' : 'Die Wand erkunden'}
+            </button>
+            {erkunden && (
+              <Button
+                variant="leise"
+                onClick={ansichtZurueck}
+                aria-label="Ansicht zurücksetzen"
+                title="Ansicht zurücksetzen"
+                className="ml-auto min-h-[44px] min-w-[44px] px-2"
+              >
+                <RotateCcw className="size-5" />
+              </Button>
+            )}
+            <span
+              className="shrink-0 text-[1rem] font-semibold text-kh-signal"
+              aria-label={`${gelegt.length} von 5 Schichten eingebaut`}
+            >
+              {gelegt.length} / 5
+            </span>
+          </div>
+          {erkunden && (
+            <div
+              className="flex flex-col gap-2 rounded-kh border border-kh-line p-2 sm:gap-3 sm:p-3"
+              data-testid="c3-erkundung"
+            >
+              <label className="text-[1rem]">
+                Schichten auseinanderziehen
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={abstand}
+                  onChange={(e) => setAbstand(Number(e.target.value))}
+                  className="kh-regler w-full sm:mt-2"
+                />
+              </label>
+              <label className="text-[1rem]">
+                Ansicht drehen
+                <input
+                  type="range"
+                  min="-180"
+                  max="180"
+                  step="1"
+                  value={Math.round((winkel * 180) / Math.PI)}
+                  onChange={(e) => setWinkel((Number(e.target.value) * Math.PI) / 180)}
+                  className="kh-regler w-full sm:mt-2"
+                />
+              </label>
+              {schmal ? (
+                <label className="text-[1rem]">
+                  Schicht ansehen
+                  <select
+                    value={auswahl ?? ''}
+                    onChange={(e) =>
+                      setAuswahl(
+                        WANDSCHICHTEN.find((s) => s.id === e.target.value)?.id ?? null,
+                      )
+                    }
+                    className="mt-1 min-h-[44px] w-full rounded-kh border border-kh-line bg-kh-ink px-3 text-[1rem] text-kh-paper"
+                  >
+                    <option value="">Schicht auswählen</option>
+                    {WANDSCHICHTEN.filter((s) => gelegt.includes(s.id)).map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {WANDSCHICHTEN.filter((s) => gelegt.includes(s.id)).map((s) => (
+                    <button
+                      type="button"
+                      key={s.id}
+                      onClick={() => setAuswahl(s.id)}
+                      aria-pressed={auswahl === s.id}
+                      className={`min-h-[44px] rounded-kh border px-3 py-2 text-[0.9375rem] ${auswahl === s.id ? 'border-kh-signal text-kh-signal' : 'border-kh-line'}`}
+                    >
+                      {s.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <p role="status" className="text-[1rem] leading-snug">
+                {ausgewaehlt
+                  ? `${ausgewaehlt.fachwort}: ${ausgewaehlt.zweck}`
+                  : gelegt.length
+                    ? 'Wähle eine Schicht im Modell oder in der Auswahl.'
+                    : 'Baue zuerst ein Teil ein. Danach kannst du es hier untersuchen.'}
+              </p>
+            </div>
+          )}
+          {fertig && !erkunden && (
+            <Button variant="leise" onClick={neuBauen} data-testid="c3-neu-bauen">
+              Noch einmal bauen
+            </Button>
+          )}
+        </div>
       }
       fuss={
         <StepFuss
@@ -207,141 +247,50 @@ export function C3() {
   )
 }
 
-/**
- * Die Karte für die nächste Schicht — die ganze Übung von C3. Sie ist **selbst
- * der Knopf**: ein Kasten mit Zeichnung und Text und daneben ein
- * „Auflegen“-Button hätte zwei Ziele für eine Handlung.
- *
- * **Und weil sie der Knopf ist, trägt sie Limette:** das antippbare Objekt
- * bekommt die Handlungs-Affordanz. Orange bleibt dem
- * Querschnitt-Schema (`Wandschnitt`) vorbehalten — dort heißt es „diese
- * Schicht wird gerade behandelt", eine Lese-Info, keine Handlung.
- */
-function Schichtkarte({
-  schicht,
-  nummer,
-  gesamt,
-  gelegt,
-  onLegen,
-  schmal,
-}: {
-  schicht: Schicht
-  nummer: number
-  gesamt: number
-  gelegt: number
-  onLegen: () => void
-  /** Handy hochkant: der kürzere Satz, damit die Karte ganz im Bild steht. */
-  schmal: boolean
-}) {
-  return (
-    <motion.button
-      type="button"
-      onClick={onLegen}
-      data-testid="c3-legen"
-      whileTap={{ scale: 0.975 }}
-      className="flex w-full items-center gap-3.5 rounded-kh border-2 border-kh-signal/60 bg-kh-signal/10 p-3 text-left"
-    >
-      <span className="grid size-[76px] shrink-0 place-items-center rounded-kh bg-black/35 p-2 sm:size-[86px]">
-        <Wandschnitt bis={gelegt} hervor={nummer - 1} />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="kh-etikett block text-kh-paper/45">
-          Schicht {nummer} von {gesamt} · Tippen zum Auflegen
-        </span>
-        <span className="kh-titel-klein mt-0.5 block text-kh-signal">{schicht.name}</span>
-        <span className="mt-1 block text-[1rem] leading-snug text-kh-paper/80">
-          {schmal ? (schicht.wasKurz ?? schicht.was) : schicht.was}
-        </span>
-      </span>
-    </motion.button>
-  )
-}
-
-/**
- * Der Querschnitt als Schema: innen links, außen rechts. Was schon liegt, ist
- * in seiner Bühnenfarbe gefüllt; was gerade drankommt, leuchtet orange; was
- * noch fehlt, ist ein Umriss.
- *
- * Die Breiten sind schematisch (`Schicht.dicke`) und tragen bewusst keine
- * Maßbeschriftung — die Zeichnung beantwortet *wo sitzt das*, die Zahlen dazu
- * hat niemand belegt. Namen stehen auf den Karten; im Schlusstakt rahmen
- * „innen“/„außen“ das Schema, denn genau diese Achse ist die Pointe.
- */
-function Wandschnitt({ bis, hervor }: { bis: number; hervor: number }) {
-  const LUFT = 0.7
-  const gesamt =
-    SCHICHTEN.reduce((s, x) => s + x.dicke, 0) + LUFT * (SCHICHTEN.length - 1)
-  let x = 0
-
+function Materialprobe({ id, farbe }: { id: WandschichtId; farbe: string }) {
   return (
     <svg
-      viewBox={`0 0 ${gesamt} 12`}
-      className="size-full"
-      preserveAspectRatio="none"
+      viewBox="0 0 160 55"
+      className="h-8 w-16 shrink-0 rounded sm:h-12 sm:w-full"
       aria-hidden
     >
-      {SCHICHTEN.map((s, i) => {
-        const links = x
-        x += s.dicke + LUFT
-        const liegt = i < bis
-        const aktiv = i === hervor
-        return (
-          <rect
-            key={s.id}
-            x={links}
-            y={0}
-            width={s.dicke}
-            height={12}
-            rx={0.4}
-            fill={aktiv ? 'var(--color-kh-orange)' : liegt ? s.farbe : 'transparent'}
-            fillOpacity={aktiv ? 1 : liegt ? 0.95 : 0}
-            stroke={aktiv ? 'var(--color-kh-orange)' : 'var(--color-kh-paper)'}
-            strokeOpacity={aktiv ? 1 : liegt ? 0.4 : 0.25}
-            strokeWidth={0.25}
+      <rect width="160" height="55" rx="5" fill={farbe} />
+      {id === 'fassade' &&
+        [20, 40, 60, 80, 100, 120, 140].map((x) => (
+          <path key={x} d={`M${x} 0v55`} stroke="#67482D" strokeWidth="2" />
+        ))}
+      {id === 'dampfbremse' && (
+        <>
+          <path d="M0 38L160 12M0 45L160 19" stroke="#D1E1E3" strokeWidth="3" />
+          <path d="M120 0v55" stroke="#466C78" strokeWidth="8" />
+        </>
+      )}
+      {id === 'daemmung' && (
+        <>
+          <path d="M25 0v55M135 0v55" stroke="#9F733D" strokeWidth="12" />
+          {[12, 25, 38].map((y) => (
+            <path
+              key={y}
+              d={`M35 ${y}q12 -12 24 0t24 0t24 0`}
+              fill="none"
+              stroke="#B39B64"
+              strokeWidth="3"
+            />
+          ))}
+        </>
+      )}
+      {id === 'holzfaser' &&
+        [8, 20, 32, 44].map((y) => (
+          <path
+            key={y}
+            d={`M10 ${y}l30 4m9 -7l42 5m8 -3l44 5`}
+            stroke="#825F30"
+            strokeWidth="2"
           />
-        )
-      })}
+        ))}
+      {id === 'innen' && (
+        <path d="M12 12h136v31H12z" fill="none" stroke="#F8F5EC" strokeWidth="3" />
+      )}
     </svg>
-  )
-}
-
-/**
- * Der Schlusstakt. Der eine Satz, um den der Screen gebaut ist, steht in Anton
- * und nicht als sechste Zeile Fließtext — und darunter, was er kostet, wenn man
- * ihn umdreht.
- *
- * Der letzte Satz zeigt nach vorn: die Abfrage kommt in C6, und wer das hier
- * behält, hat sie halb gelöst.
- */
-function Prinzip() {
-  return (
-    <div className="flex flex-col gap-2.5">
-      {/* „innen“/„außen“ sind funktionale Achsen-Etiketten, keine Fachwerte —
-          sie beschriften die Leserichtung des Schemas, um die es im Satz
-          darunter geht. */}
-      <span className="flex h-[54px] w-full max-w-[22rem] items-center gap-2.5 rounded-kh bg-black/35 px-3 py-2">
-        <span className="kh-etikett shrink-0 text-kh-paper/50">innen</span>
-        <span className="h-full min-w-0 flex-1">
-          <Wandschnitt bis={SCHICHTEN.length} hervor={-1} />
-        </span>
-        <span className="kh-etikett shrink-0 text-kh-paper/50">außen</span>
-      </span>
-
-      <p className="kh-titel-klein text-kh-signal">Innen dichter als außen.</p>
-
-      <p className="text-[1.0625rem] leading-[1.45] text-kh-paper/90">
-        Nach außen hin muss jede Schicht offener sein als die davor. Andersherum bleibt
-        die Feuchte in der Wand stehen — und zwar da, wo niemand hinsieht.
-      </p>
-
-      <p className="text-[1rem] leading-snug text-kh-mute">
-        So ist es meistens. Es gibt auch Wände ohne eigene Folie — dann übernehmen die
-        Platten diese Aufgabe.
-      </p>
-
-      <p className="text-[1.0625rem] leading-snug text-kh-paper/70">
-        Merk dir die Reihenfolge. Am Kran brauchst du sie wieder.
-      </p>
-    </div>
   )
 }

@@ -1,127 +1,88 @@
-import { motion } from 'motion/react'
+import type { Ref } from 'react'
+import { ArrowRight, Check, CircleHelp } from 'lucide-react'
 import type { Frage } from '@/khpl/match/fragen'
 
-/**
- * Die Bildfrage: drei Motive, eines antippen.
- *
- * **Das Bild ist die Antwort, der Satz die Unterschrift.** Die Kacheln füllen
- * den Screen randlos aus — quer als drei Spalten, hochkant als drei Bänder.
- * Es gibt keine Wahlfläche neben dem Bild und keinen Rahmen darum: wer eine
- * dritte Fläche baut („Bild + Text + Knopf“), hat wieder ein Formular mit
- * Illustration.
- *
- * **Quittung wie überall im Trichter:** der Tap ist die Entscheidung. Die
- * gewählte Kachel bekommt die Signalkante und wächst leicht, die anderen
- * fallen in Grau zurück — dieselbe Sprache wie `Wahlflaeche`, nur auf
- * Fotografie übersetzt.
- */
 export function Bildwahl({
   frage,
   gewaehlt,
   onWahl,
+  titelRef,
 }: {
   frage: Frage
   gewaehlt: string | null
   onWahl: (antwortId: string) => void
+  titelRef?: Ref<HTMLHeadingElement>
 }) {
+  const neutral = frage.antworten.find((a) => a.neutral)
   return (
-    <div className="flex h-full min-h-0 flex-col gap-4 landscape:gap-5">
-      <header className="flex shrink-0 flex-col gap-1.5">
-        <span className="kh-etikett flex items-center gap-2">
-          <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
-          {frage.etikett}
-        </span>
-        {/* Eine Stufe unter `kh-plakat`: die Plakatgröße nähme hochkant den
-            Bändern ein Drittel ihrer Höhe weg — hier ist das Bild der Star. */}
-        <h1 className="font-display text-[clamp(1.8rem,1.2rem+2.6vw,3.2rem)] leading-[0.96] text-balance uppercase">
+    <div className="flex h-full min-h-0 flex-col gap-4">
+      <header className="shrink-0">
+        <p className="kh-etikett">{frage.etikett}</p>
+        <h1
+          ref={titelRef}
+          tabIndex={-1}
+          className="mt-2 font-display text-[clamp(1.8rem,1.2rem+2.6vw,3.2rem)] leading-tight uppercase outline-none"
+        >
           {frage.frage}
         </h1>
       </header>
-
-      <div className="grid min-h-0 flex-1 grid-rows-3 gap-2.5 landscape:grid-cols-3 landscape:grid-rows-1 landscape:gap-3">
-        {frage.antworten.map((a, i) => {
-          const ist = gewaehlt === a.id
-          const gedaempft = Boolean(gewaehlt) && !ist
-          return (
-            /*
-              Zwei Elemente, zwei Aufgaben — und das ist keine Kosmetik.
-
-              Vorher lagen **Auftritt und Quittung auf derselben Kachel**:
-              Motion schrieb je Frame ein `transform` in den Stil, und
-              daneben stand `transition-[transform,opacity,filter]`. Damit
-              startet jeder dieser Frames eine neue 300-ms-CSS-Überblendung
-              auf den gerade geschriebenen Wert — die Kachel läuft dem
-              Animationswert dauerhaft hinterher. Gemessen: nach 400 ms
-              (Motion ist fertig) stand sie noch bei 23 von 26 px, und die
-              restlichen 23 px fielen danach in 300 ms auf einmal. Das ist
-              das Zucken, das man sieht: erst kriecht die Kachel, dann
-              springt sie.
-
-              Der Auftritt gehört deshalb dem Rahmen (Motion, transform +
-              opacity), die Quittung der Kachel darin (CSS). Kein Element
-              hat noch zwei Herren.
-            */
-            <motion.div
-              key={a.id}
-              initial={{ opacity: 0, transform: 'translateY(26px)' }}
-              animate={{ opacity: 1, transform: 'translateY(0px)' }}
-              transition={{
-                duration: 0.4,
-                delay: 0.08 * i,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className={`flex min-h-0 ${ist ? 'z-10' : ''}`}
-            >
+      <div
+        data-scroll
+        className="grid min-h-0 flex-1 auto-rows-[minmax(96px,1fr)] grid-rows-3 gap-3 overflow-y-auto p-1 landscape:grid-cols-3 landscape:grid-rows-1"
+      >
+        {frage.antworten
+          .filter((a) => !a.neutral)
+          .map((a) => {
+            const aktiv = gewaehlt === a.id
+            return (
               <button
+                key={a.id}
                 type="button"
                 data-testid={`antwort-${a.id}`}
                 onClick={() => onWahl(a.id)}
-                aria-pressed={ist}
-                className={`group relative min-h-0 min-w-0 flex-1 overflow-hidden rounded-kh-lg text-left transition-[transform,opacity,filter] duration-300 ${
-                  ist
-                    ? 'scale-[1.015] ring-4 ring-kh-signal'
-                    : gedaempft
-                      ? 'scale-[0.99] opacity-35 grayscale'
-                      : 'active:scale-[0.985]'
-                }`}
+                aria-pressed={aktiv}
+                aria-disabled={gewaehlt !== null}
+                className={`relative min-h-24 overflow-hidden rounded-kh-lg text-left transition-opacity duration-150 focus-visible:outline-4 focus-visible:outline-kh-paper ${aktiv ? 'ring-4 ring-kh-orange' : gewaehlt ? 'opacity-40' : ''}`}
               >
                 <img
                   src={a.bild}
                   alt=""
                   draggable={false}
-                  // `eager`: alle drei Motive stehen beim Auftritt im Bild.
-                  // Lädt eines davon erst während der Bewegung nach, blitzt es
-                  // mitten in der Animation auf — und genau das liest sich als
-                  // Ruckeln, obwohl die Bewegung selbst sauber läuft.
                   loading="eager"
-                  decoding="async"
-                  className={`absolute inset-0 size-full object-cover transition-transform duration-500 ${
-                    ist ? 'scale-105' : ''
-                  }`}
-                  style={a.fokus ? { objectPosition: a.fokus } : undefined}
+                  className="absolute inset-0 size-full object-cover"
+                  style={{ objectPosition: a.fokus }}
                 />
-                {/* Der Fuß trägt die Unterschrift — steil genug, dass Barlow 600
-                    auch auf einem hellen Motiv steht. */}
-                <div
+                <span
                   aria-hidden
-                  className="absolute inset-0 bg-gradient-to-t from-[#0E0D0B]/85 via-[#0E0D0B]/25 to-transparent"
+                  className="absolute inset-0 bg-gradient-to-t from-[#0E0D0B] via-[#0E0D0B]/25 to-transparent"
                 />
-                <span className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-4 landscape:p-5">
-                  <span className="text-[clamp(1.0625rem,0.95rem+0.5vw,1.375rem)] leading-tight font-semibold text-kh-paper drop-shadow-[0_1px_8px_rgba(0,0,0,0.7)]">
+                <span className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-3 p-4">
+                  <span className="text-[clamp(1.0625rem,0.95rem+0.5vw,1.375rem)] leading-snug font-semibold text-kh-paper">
                     {a.text}
                   </span>
-                  <span
-                    aria-hidden
-                    className={`mb-1 size-3 shrink-0 rounded-full transition-colors ${
-                      ist ? 'bg-kh-signal' : 'bg-kh-orange'
-                    }`}
-                  />
+                  {aktiv ? (
+                    <Check className="size-6 shrink-0 text-kh-orange" aria-hidden />
+                  ) : (
+                    <ArrowRight className="size-6 shrink-0 text-kh-orange" aria-hidden />
+                  )}
                 </span>
               </button>
-            </motion.div>
-          )
-        })}
+            )
+          })}
       </div>
+      {neutral && (
+        <button
+          type="button"
+          data-testid="antwort-offen"
+          onClick={() => onWahl(neutral.id)}
+          aria-pressed={gewaehlt === neutral.id}
+          aria-disabled={gewaehlt !== null}
+          className="flex min-h-14 shrink-0 items-center justify-center gap-3 rounded-kh border-2 border-kh-line-strong bg-white/5 px-4 text-lg font-semibold text-kh-paper focus-visible:outline-4 focus-visible:outline-kh-paper"
+        >
+          <CircleHelp className="size-5" aria-hidden />
+          {neutral.text}
+        </button>
+      )}
     </div>
   )
 }

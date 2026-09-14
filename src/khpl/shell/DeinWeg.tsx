@@ -260,7 +260,7 @@ export function DeinWeg({
               {fragtReset ? (
                 <div className="mt-2 rounded-kh border border-kh-line-strong p-3">
                   <p className="text-[0.9375rem] text-kh-mute">
-                    Löscht Helm, Antworten und den Fortschritt in{' '}
+                    Löscht Ausrüstung, Antworten und den Fortschritt in{' '}
                     <strong className="font-semibold text-kh-paper">allen vier</strong>{' '}
                     Berufen. Das lässt sich nicht rückgängig machen.
                   </p>

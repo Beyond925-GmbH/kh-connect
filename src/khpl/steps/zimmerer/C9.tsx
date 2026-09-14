@@ -1,187 +1,92 @@
-import { ChevronLeft, LayoutGrid, RotateCcw } from 'lucide-react'
-import { motion } from 'motion/react'
+import { lazy, Suspense } from 'react'
+import { Check, ChevronLeft, LayoutGrid } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Logo } from '@/components/ui/logo'
-import { useStepBild } from '@/khpl/buehne/Foto'
+import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { useStand } from '@/khpl/stand'
 import { StepShell } from '@/khpl/shell/StepShell'
 import {
   beendeKarriereSkip,
-  setzeZurueck,
   useFortschritt,
   zeigeBerufe,
+  oeffneVertiefung,
 } from '@/khpl/store/fortschritt'
-import { AUFHAENGER_OHNE, karriereweg } from './karrierewege'
+import { tatsaechlicheTaten } from './rueckblick'
+const Wandelement3D = lazy(() => import('@/khpl/buehne/zimmerer/Wandelement3D'))
 
-/**
- * C9 — Dein nächster Schritt. Der CTA und der Endpunkt dieses Tages.
- *
- * **Unverändert nach dem Muster des gebauten Tages.**
- * Zweiteilig: erst der personalisierte Aufhänger, der aufgreift, was in C8
- * angesehen wurde — genau die `XYZ`-Logik des Boards —, dann der eigentliche
- * Aufruf, groß. Der Name kommt aus `public/stand.json` und fällt ohne
- * Konfiguration auf „Sprich jetzt mit uns am Stand“ zurück, nie auf einen
- * Platzhalter im Klartext.
- *
- * **Der ganze Screen ist orange.** Die Website schließt jede Seite mit einer
- * vollflächigen orangen Zone ab; an dieser Stelle endet die Rolle und spricht
- * wieder die Kreishandwerkerschaft. Deshalb steht hier auch das Logo, das die
- * App sonst nur auf dem Splash zeigt. **Genau ein orange gefülltes Feld pro
- * Screen** — hier ist es die ganze Fläche, und `text-[#0E0D0B]` darauf ist die
- * einzige erlaubte Ausnahme von der Farbregel.
- *
- * **Der Aufhänger liest `answers.c8`, nicht `answers.m9`.** `m9` gehört dem
- * Dachdecker; die Trennung ist in `store/fortschritt.ts` im Zimmerer-Abschnitt
- * dokumentiert und in `C8x.tsx` begründet.
- *
- * Wer im Karriere-Skip bis hierher durchgeht, bekommt zusätzlich **[ Zurück zu
- * deinem Tag ]** — der Skip bleibt ein Abstecher, auch wenn er bis ans Ende
- * führt. „Noch einen Beruf“ ist der Weg nach vorn: wer einen ganzen Tag
- * durchgespielt hat, ist der Besucher mit der höchsten Wahrscheinlichkeit,
- * einen zweiten anzufangen. „Von vorn“ daneben ist der Knopf des Standpersonals
- * für den nächsten Besucher, nicht der des Besuchers.
- */
 export function C9() {
   const fortschritt = useFortschritt()
   const stand = useStand()
-
-  const angesehen = fortschritt.answers.c8?.angesehen ?? []
-  const zuletzt = angesehen[angesehen.length - 1]
-  const aufhaenger = (zuletzt && karriereweg(zuletzt)?.aufhaenger) || AUFHAENGER_OHNE
   const imSkip = fortschritt.detourReturnTo !== null
-
+  const taten = tatsaechlicheTaten(fortschritt.answers)
   return (
     <StepShell
       id="C9"
       auftrag={null}
       ansage={null}
+      buehneInteraktiv
       interaktionOffen={false}
-      buehne={<Abschlussfeld />}
+      buehne={
+        <Suspense fallback={<Dachstuhl3DFallback text="Deine Wand am Haus" />}>
+          <Wandelement3D
+            zustand="haus"
+            ausschnitt={fortschritt.answers.c4?.ausschnitt}
+            deinElement
+          />
+        </Suspense>
+      }
       interaktion={
         <div className="flex flex-col gap-4">
-          <motion.p
-            initial={{ opacity: 0, transform: 'translateY(12px)' }}
-            animate={{ opacity: 1, transform: 'translateY(0px)' }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            data-testid="c9-aufhaenger"
-            className="text-[clamp(1.05rem,0.95rem+0.7vw,1.35rem)] leading-[1.4] text-kh-paper/80"
-          >
-            {aufhaenger}
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, transform: 'translateY(16px)' }}
-            animate={{ opacity: 1, transform: 'translateY(0px)' }}
-            transition={{ duration: 0.55, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            data-testid="c9-cta"
-            className="flex flex-col gap-1"
-          >
-            {/* Der eine Satz, um den es auf diesem Screen geht — in Anton, so
-                groß wie der Titel darüber. */}
-            <p className="kh-titel text-kh-orange">
-              {stand.name
-                ? `Sprich jetzt mit ${stand.name} am Stand.`
-                : 'Sprich jetzt mit uns am Stand.'}
+          <div>
+            <p className="kh-etikett text-kh-mute">Dein Einblick ins Zimmererhandwerk</p>
+            <p className="kh-titel-klein mt-1 text-kh-signal">
+              {taten.length
+                ? 'Das hast du selbst gemacht.'
+                : 'Vom Holz bis zur Hauswand.'}
             </p>
-            {stand.rolle && (
-              <p className="mt-1 text-[clamp(1rem,0.95rem+0.3vw,1.2rem)] text-kh-paper/65">
-                {stand.rolle}
-              </p>
-            )}
-          </motion.div>
+          </div>
+          {taten.length > 0 && (
+            <ul className="flex flex-col gap-2" data-testid="c9-rueckblick">
+              {taten.map((tat) => (
+                <li
+                  key={tat}
+                  className="flex items-start gap-2 text-[1.0625rem] leading-snug"
+                >
+                  <Check aria-hidden className="mt-0.5 size-5 shrink-0 text-kh-signal" />
+                  {tat}
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="text-[1.0625rem] leading-snug">
+            {stand.name
+              ? `Probiere das Handwerk mit ${stand.name} am Stand aus.`
+              : 'Probiere das Handwerk mit uns am Stand aus.'}
+          </p>
+          {stand.rolle && <p className="text-[1rem] text-kh-mute">{stand.rolle}</p>}
+          <button
+            type="button"
+            onClick={() => oeffneVertiefung('C8')}
+            className="min-h-[44px] w-fit text-left text-[1rem] underline underline-offset-4"
+            data-testid="c9-karriere"
+          >
+            Was kommt nach der Ausbildung?
+          </button>
         </div>
       }
       fuss={
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* Das Logo steht im angehefteten Fuß und nicht unten im Inhalt: dort
-              läge es unter dem Auslauf-Verlauf des Panels — ausgerechnet auf
-              dem einen Screen, auf dem wieder die Kreishandwerkerschaft
-              spricht und nicht die Rolle. */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="mr-auto"
-          >
-            <Logo className="h-9 w-auto" />
-          </motion.div>
-          {imSkip ? (
-            <Button
-              variant="neben"
-              onClick={beendeKarriereSkip}
-              data-testid="c9-zurueck-zum-tag"
-            >
-              <ChevronLeft className="size-5" strokeWidth={2.25} />
-              Zurück zu deinem Tag
-            </Button>
-          ) : null}
-          <Button variant="neben" onClick={setzeZurueck} data-testid="c9-neu-starten">
-            <RotateCcw className="size-5" strokeWidth={2.25} />
-            Von vorn
-          </Button>
-          {!imSkip && (
-            <Button variant="weiter" onClick={zeigeBerufe} data-testid="c9-noch-einen">
-              <LayoutGrid className="size-5" strokeWidth={2.25} />
-              Noch einen Beruf
+        <div className="flex flex-wrap justify-end gap-3">
+          {imSkip && (
+            <Button variant="neben" onClick={beendeKarriereSkip}>
+              <ChevronLeft className="size-5" />
+              Zurück zum Beruf
             </Button>
           )}
+          <Button variant="weiter" onClick={zeigeBerufe} data-testid="c9-noch-einen">
+            <LayoutGrid className="size-5" />
+            Zurück zu den Berufen
+          </Button>
         </div>
       }
     />
-  )
-}
-
-/**
- * Das Abschlussfeld: die Markenzone, und darin das Motiv aus
- * `berufe/zimmerer.ts` (`C9`).
- *
- * ⚠️ **Das Motiv ist ein Platzhalter aus dem eigenen Ordner** (`gallery-2`,
- * Begründung dort): hochkant blieb sonst zwischen Silhouette und Panel rund
- * ein Drittel Bildhöhe reines Orange (Abnahme-Befund), und das Argument des
- * gebauten Tages gilt unverändert — eine leere Farbfläche fordert niemanden
- * auf, mit einem Menschen zu sprechen. Der Medienbedarf für ein eigenes
- * C9-Motiv bleibt gemeldet.
- */
-function Abschlussfeld() {
-  const bild = useStepBild('C9')
-
-  return (
-    <div className="relative size-full overflow-hidden bg-kh-orange">
-      {bild && (
-        <img
-          src={bild.src}
-          alt=""
-          aria-hidden
-          style={{ objectPosition: bild.pos }}
-          className="size-full object-cover"
-        />
-      )}
-      {/* Eine Lage Orange, nicht zwei: `multiply` trägt die Markenzone und
-          behält die Zeichnung des Fotos. Der Verlauf nach unten legt den Grund
-          fest, auf dem das dunkle Panel steht. */}
-      <div className="absolute inset-0 bg-kh-orange mix-blend-multiply" aria-hidden />
-      <div className="absolute inset-0 bg-kh-orange/15" aria-hidden />
-      <div
-        className="absolute inset-0 bg-gradient-to-t from-[#0E0D0B]/75 via-transparent to-[#0E0D0B]/25"
-        aria-hidden
-      />
-      {/* Die Paderborner Silhouette trägt an ihrer Unterkante eine Standlinie;
-          die Maske lässt sie in den Grund auslaufen, statt sie als waagerechte
-          Kante quer durch den halben Screen zu ziehen. */}
-      <motion.img
-        src="/brand/kh-pb-lippe.png"
-        alt=""
-        aria-hidden
-        initial={{ opacity: 0, transform: 'translateY(24px)' }}
-        animate={{ opacity: 0.18, transform: 'translateY(0px)' }}
-        transition={{ duration: 1.1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        style={{
-          maskImage: 'linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%)',
-          WebkitMaskImage:
-            'linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%)',
-        }}
-        className="absolute inset-x-0 top-[5%] mx-auto h-[38%] w-auto max-w-none object-contain brightness-0"
-      />
-    </div>
   )
 }

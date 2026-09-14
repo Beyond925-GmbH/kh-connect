@@ -62,14 +62,14 @@ const START_MM = MAX_MM - 600
  */
 const TOLERANZ_MM = 30
 
-/** Nach zwei Fehlversuchen bietet die App die Lösung an. */
-const HILFE_AB = 2
+/** Nach dem ersten Fehlversuch bietet die App eine konkrete Hilfe an. */
+const HILFE_AB = 1
 
 type Phase = Zuschnitt3DProps['phase']
 
 const mm = (n: number) => `${(n / 1000).toFixed(2).replace('.', ',')} m`
 
-const TREFFER_TEXT = 'Passt. Nummer drauf — das ist jetzt dein Sparren.'
+const TREFFER_TEXT = 'Passt. Diesen Balken baust du später ins Dach ein.'
 
 export function M4() {
   const gespeichert = useFortschritt().answers.m4
@@ -114,12 +114,11 @@ export function M4() {
   return (
     <StepShell
       id="M4"
-      auftrag={geloest ? null : 'Zieh die Schnittlinie auf das Maß aus dem Plan.'}
+      auftrag={geloest ? null : 'Ziehe die Schnittlinie auf das Maß im Plan.'}
       ansage={{
         geste: 'ziehen-frei',
         text: 'Jetzt schneidest du einen Balken zu, der später ins Dach kommt.',
-        haken:
-          'Zu kurz geschnitten, und der Balken ist hin — dann taugt er nur noch als Brennholz.',
+        haken: 'Vergleiche die Schnittlinie und den Winkel mit dem Plan.',
       }}
       buehneInteraktiv
       interaktionOffen={!geloest}
@@ -174,15 +173,23 @@ export function M4() {
                   {mm(laenge)}
                 </span>
                 <span className="text-[1.0625rem] text-kh-mute max-sm:text-[0.9375rem]">
-                  {/* Auf dem Handy einzeilig — der Nachsatz stand dort als
-                      zweite Zeile, und genau die schob die Winkelwahl unter
-                      die Scrollkante. */}
-                  <span className="sm:hidden">Zieh die Linie am Balken aufs Maß.</span>
-                  <span className="max-sm:hidden">
-                    Zieh die Schnittlinie auf das Maß — direkt am Balken.
-                  </span>
+                  Deine Einstellung
                 </span>
               </div>
+
+              <input
+                type="range"
+                aria-label="Schnittposition"
+                min={MIN_MM}
+                max={MAX_MM}
+                step={10}
+                value={laenge}
+                onChange={(event) => {
+                  setLaenge(Number(event.target.value))
+                  setErgebnis(null)
+                }}
+                className="h-7 w-full accent-kh-signal"
+              />
 
               <div className="flex shrink-0 flex-col gap-1.5 max-sm:gap-1">
                 <p className="text-[1.0625rem] text-kh-mute max-sm:text-[0.9375rem]">
@@ -280,8 +287,8 @@ export function M4() {
       }
       aha={
         <AhaKarte sichtbar={geloest} eyebrow="Schneidet das heute noch jemand von Hand?">
-          Den Zuschnitt macht meist eine Maschine, nach genau dem Plan, den du gezeichnet
-          hast. Von Hand kommt, was sie nicht kann — mehr, als man denkt.
+          Viele Holzteile werden maschinell zugeschnitten. Besondere Anpassungen übernimmt
+          das Team von Hand.
         </AhaKarte>
       }
       fuss={
@@ -292,7 +299,7 @@ export function M4() {
           // widerspräche sich, und ein lauter Weiter-Knopf spränge mitten aus
           // dem Finale. Die Animation dauert ~4 s (reduzierte Bewegung: 0 s),
           // und der Schnitt ist zu diesem Zeitpunkt schon gespeichert.
-          ohneWeiter={phase === 'saegen' || phase === 'verladen' ? true : undefined}
+          ohneWeiter={false}
           uebungOffen={!geloest}
           aktion={
             einstellbar ? (
@@ -306,7 +313,7 @@ export function M4() {
                     onClick={zeigMirWie}
                     data-testid="m4-zeig-mir-wie"
                   >
-                    Zeig mir wie
+                    Zeige mir wie
                   </Button>
                 )}
               </div>
@@ -346,27 +353,30 @@ function bewerte(laenge: number, winkel: Winkel | null): Rueckmeldung {
   // Nur ein *gewählter* falscher Winkel ist ein Fehler. Ein noch gar nicht
   // gewählter ist keiner — der fehlt bloß, und das sagt der eigene Zweig.
   const auchWinkel =
-    winkel !== null && winkel !== ZIEL_WINKEL ? ' Und der Winkel stimmt auch nicht.' : ''
+    winkel !== null && winkel !== ZIEL_WINKEL ? ' Prüfe auch den Winkel im Plan.' : ''
   if (ab < -TOLERANZ_MM) {
     const cm = Math.round(-ab / 10)
     return {
       treffer: false,
-      text: `${cm} Zentimeter zu kurz. Der Balken ist hin — abgesägtes Holz bekommst du nicht zurück.${auchWinkel}`,
+      text: `${cm} Zentimeter zu kurz. Verschiebe die Linie für den nächsten Versuch nach rechts.${auchWinkel}`,
     }
   }
   if (ab > TOLERANZ_MM) {
     return {
       treffer: false,
-      text: `Zu lang lässt sich kürzen. Kostet dich Zeit, nicht Material — noch mal.${auchWinkel}`,
+      text: `Noch zu lang. Verschiebe die Linie nach links bis zum Maß im Plan.${auchWinkel}`,
     }
   }
   if (winkel === null) {
-    return { treffer: false, text: 'Die Länge sitzt. Fehlt noch der Winkel am First.' }
+    return {
+      treffer: false,
+      text: 'Die Länge passt. Wähle noch den Winkel aus dem Plan.',
+    }
   }
   if (winkel !== ZIEL_WINKEL) {
     return {
       treffer: false,
-      text: 'Der Winkel stimmt nicht. Oben am First bleibt eine Lücke, und der Sparren liegt nicht richtig an.',
+      text: 'Der Winkel passt noch nicht. Wähle den Winkel, den der Plan zeigt.',
     }
   }
   return { treffer: true, text: TREFFER_TEXT }

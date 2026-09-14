@@ -1,4 +1,5 @@
-import { baueGraph, type Angebot, type StepDef } from '@/khpl/flow/steps'
+import { type Angebot, type StepDef } from '@/khpl/flow/steps'
+import { baueMesseGraph } from '@/khpl/flow/messe'
 import type { BerufDef, StepBild } from './typen'
 
 /**
@@ -71,7 +72,7 @@ const STEPS = [
   },
   {
     id: 'Z2',
-    titel: 'Fest, sonst fliegt es',
+    titel: 'Das Rohteil einspannen',
     kurz: 'Einrichten',
     art: 'haupt',
     weiter: 'Z3',
@@ -80,7 +81,7 @@ const STEPS = [
   },
   {
     id: 'Z3',
-    titel: 'Die Sprache der Maschine',
+    titel: 'Die Maschine steuern',
     kurz: 'Programm',
     art: 'haupt',
     weiter: 'Z4',
@@ -98,7 +99,7 @@ const STEPS = [
   },
   {
     id: 'Z4',
-    titel: 'Das erste Teil entscheidet',
+    titel: 'Das erste Teil prüfen',
     kurz: 'Erstes Teil',
     art: 'haupt',
     weiter: 'Z5',
@@ -116,7 +117,7 @@ const STEPS = [
   },
   {
     id: 'Z6',
-    titel: 'Jetzt macht sie es 200-mal',
+    titel: 'Die Serie kontrollieren',
     kurz: 'Serie',
     art: 'haupt',
     weiter: 'Z7',
@@ -182,7 +183,7 @@ const STEPS = [
   },
   {
     id: 'Z9',
-    titel: 'Dein nächster Schritt',
+    titel: 'Dein Einblick in die Zerspanung',
     kurz: 'Dein nächster Schritt',
     art: 'haupt',
     weiter: null,
@@ -315,7 +316,7 @@ export const ZERSPANUNGSMECHANIKER: BerufDef = {
     text: 'Du bist Azubi in der Zerspanung. Es ist sechs Uhr, die Hallenbeleuchtung geht gerade an und deine Maschine ist noch kalt. Der Ausbilder legt dir eine Zeichnung hin: 200 Bolzen für ein Getriebe müssen gefertigt werden. Bis du dabei?',
     knopf: 'Schicht übernehmen',
   },
-  graph: baueGraph(STEPS, {
+  graph: baueMesseGraph(STEPS, ['Z2', 'Z3', 'Z4', 'Z6', 'Z9'], {
     erster: 'Z1',
     /** Jeder Abstecher einzeln getextet — nie eine Schablone. */
     angebote: {

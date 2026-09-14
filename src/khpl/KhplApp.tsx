@@ -8,6 +8,7 @@ import { Fragen } from '@/khpl/shell/Fragen'
 import { Helmwahl } from '@/khpl/shell/Helmwahl'
 import { KioskGuard } from '@/khpl/shell/KioskGuard'
 import { Splash } from '@/khpl/shell/Splash'
+import { SitzungsmusikSteuerung } from '@/khpl/shell/Sitzungsmusik'
 import { Zustimmung } from '@/khpl/shell/Zustimmung'
 import { Platzhalter } from '@/khpl/steps/Platzhalter'
 import {
@@ -53,6 +54,13 @@ export function KhplApp() {
       {bildschirm === 'bald' && angesehen && <BerufBald id={angesehen} />}
       {bildschirm === 'intro' && <Auftragsannahme />}
       {bildschirm === 'step' && berufId && <Step beruf={berufId} id={currentStepId} />}
+      <SitzungsmusikSteuerung
+        className={
+          bildschirm === 'step' || bildschirm === 'intro'
+            ? 'fixed right-3 top-[76px] z-30 sm:right-5'
+            : 'fixed right-[76px] top-4 z-30'
+        }
+      />
       <Zustimmung />
     </KioskGuard>
   )

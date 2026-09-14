@@ -1,4 +1,5 @@
-import { baueGraph, type Angebot, type StepDef } from '@/khpl/flow/steps'
+import { type Angebot, type StepDef } from '@/khpl/flow/steps'
+import { baueMesseGraph } from '@/khpl/flow/messe'
 import type { BerufDef, StepBild } from './typen'
 
 /**
@@ -62,7 +63,7 @@ type AnlagenmechanikStep = Omit<StepDef, 'id' | 'weiter' | 'eltern' | 'abstecher
 const STEPS = [
   {
     id: 'A1',
-    titel: 'Es gibt kein warmes Wasser mehr',
+    titel: 'Die Störung finden',
     kurz: 'Störungsdienst',
     art: 'haupt',
     weiter: 'A2',
@@ -80,7 +81,7 @@ const STEPS = [
   },
   {
     id: 'A2',
-    titel: 'Vierzig Jahre Keller',
+    titel: 'Was bleibt im Keller?',
     kurz: 'Alter Keller',
     art: 'haupt',
     weiter: 'A3',
@@ -116,7 +117,7 @@ const STEPS = [
     // Die frühere Pointe („Der kürzeste Weg ist nicht der richtige") nahm dem
     // Haken der Ansage das Wort vorweg — er sagt denselben Satz. Die Headline
     // nennt jetzt die Tätigkeit; die Pointe bleibt der Übung.
-    titel: 'Leitung verlegen',
+    titel: 'Eine Leitung verlegen',
     kurz: 'Weg der Rohre',
     art: 'haupt',
     weiter: 'A5',
@@ -143,7 +144,7 @@ const STEPS = [
   },
   {
     id: 'A6',
-    titel: 'Es läuft',
+    titel: 'Den Druck einstellen',
     kurz: 'Erster Start',
     art: 'haupt',
     weiter: 'A7',
@@ -152,7 +153,7 @@ const STEPS = [
   },
   {
     id: 'A7',
-    titel: 'Jetzt bist du dran',
+    titel: 'Die Anlage erklären',
     kurz: 'Übergabe, Feierabend',
     art: 'haupt',
     weiter: 'A8',
@@ -200,7 +201,7 @@ const STEPS = [
   },
   {
     id: 'A9',
-    titel: 'Dein nächster Schritt',
+    titel: 'Dein Einblick in die Anlagenmechanik',
     // Nicht „CTA“: `kurz` steht im Sheet und auf dem Weitermachen-Knopf des
     // Splash — Board-Sprache gehört nicht vor den Besucher.
     kurz: 'Dein nächster Schritt',
@@ -392,7 +393,7 @@ export const ANLAGENMECHANIKER: BerufDef = {
     text: 'Du bist Azubi in einem SHK-Betrieb — Sanitär, Heizung, Klima. Sieben Uhr, der Transporter ist gepackt. Der Chef gibt dir einen Zettel: erst zu Frau Osei, da kommt kein warmes Wasser mehr. Danach die Große — Ölkessel raus, Wärmepumpe rein.',
     knopf: 'Einsteigen',
   },
-  graph: baueGraph(STEPS, {
+  graph: baueMesseGraph(STEPS, ['A1', 'A2', 'A4', 'A6', 'A7', 'A9'], {
     erster: 'A1',
     /**
      * Jeder Abstecher ist einzeln getextet — nie eine „Mehr

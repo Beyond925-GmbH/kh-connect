@@ -35,7 +35,10 @@ export function M9() {
       interaktionOffen={false}
       buehne={<StepFoto id="M9" />}
       warum={
-        <p>Drei Jahre Ausbildung, dann Geselle. Danach drei Wege — alle drei offen.</p>
+        <p>
+          Drei Jahre Ausbildung, dann Geselle. Danach kannst du dich weiterentwickeln.
+          Diese Wege sind Beispiele.
+        </p>
       }
       interaktion={
         // Kein `h-full justify-center` mehr: die Karten hingen dadurch in der

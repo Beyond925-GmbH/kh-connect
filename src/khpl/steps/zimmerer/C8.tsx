@@ -49,8 +49,8 @@ export function C8() {
       buehne={<StepFoto id="C8" />}
       warum={
         <p>
-          Drei Jahre Ausbildung, dann bist du Geselle — fertig ausgebildet. Danach drei
-          Wege, alle drei offen.
+          Drei Jahre Ausbildung, dann bist du Geselle — fertig ausgebildet. Danach kannst
+          du dich weiterentwickeln. Diese Wege sind Beispiele.
         </p>
       }
       interaktion={

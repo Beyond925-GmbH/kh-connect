@@ -241,7 +241,7 @@ export function C4() {
         Ist der Rahmen drin, wird sie `null` — dann rückt die Rückmeldung an
         ihre Stelle. Der Kasten bewegt sich nicht, er füllt sich um.
       */
-      auftrag={geloest ? null : 'Wähl den Rahmen, der in die Öffnung passt.'}
+      auftrag={geloest ? null : 'Wähle den Rahmen, der in die Öffnung passt.'}
       /*
         Antippen erklärt sich selbst (`gesten.ts`). Das ist eine Entscheidung
         und keine Lücke — genau dafür ist die Angabe erforderlich.
@@ -330,7 +330,7 @@ export function C4() {
                 data-testid="c4-aufrichten-zeile"
                 className="kh-titel-klein text-kh-orange"
               >
-                So sieht das aus, wenn es steht. Merk dir, wo das Fenster ist.
+                Die Wand steht. Am Fenster erkennst du später, wo oben ist.
               </motion.p>
             </div>
           )}
@@ -438,11 +438,11 @@ function Planmass() {
  */
 function fehlertext(breiteMm: number): string {
   if (beurteile(breiteMm) === 'zu-gross') {
-    return 'Passgenau heißt: geht nicht rein. Er setzt oben auf und bleibt liegen. Nachschneiden kostet Zeit — um elf steht der Lkw.'
+    return 'Der Rahmen ist zu groß. Rundum muss etwas Platz bleiben. Probiere den kleineren.'
   }
   // „Zu breit zum Abdichten", nicht „fürs Dichtband": ein zweiter, hier
   // unerklärbarer Fachbegriff neben „Dichtstoff" — und
   // `Rueckmeldung` kann keinen Glossar-Chip tragen.
   const f = fuge(breiteMm)
-  return `${f} mm Luft je Seite — er fällt durch. So einen breiten Spalt kriegst du nicht mehr dicht: Wand wieder aufmachen, neues Holz einbauen, eine Stunde weg.`
+  return `${f} mm Luft je Seite — er fällt durch. Der Spalt ist zu breit. Probiere einen größeren Rahmen.`
 }

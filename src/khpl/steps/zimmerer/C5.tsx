@@ -71,7 +71,7 @@ const FRAGEN = [
     // das Gewicht hängt am Aufbau. Der Kleinwagen ist der Körper-Anker:
     // Tonnen fühlt niemand, Autos hat jeder gesehen.
     antwort:
-      '70 bis 125 Kilo je Quadratmeter. Deine Wand ist acht Meter breit und drei hoch — grob eineinhalb bis drei Tonnen am Haken. So viel wie ein bis zwei Kleinwagen.',
+      'So eine Wand kann so viel wiegen wie ein bis zwei Kleinwagen. Deshalb hilft ein Kran.',
   },
   {
     id: 'hochkant',
@@ -79,7 +79,7 @@ const FRAGEN = [
     // Grund sind die zulässigen Transportmaße auf der Straße, und der Kran
     // hebt direkt vom Anhänger.
     antwort:
-      'Flach liegend wäre die Ladung zu breit für die Straße. Hochkant passt sie — und der Kran hebt sie direkt vom Anhänger an ihren Platz.',
+      'Hochkant passt die Wand auf den Anhänger. Der Kran hebt sie später direkt herunter.',
   },
   {
     id: 'regen',
@@ -89,7 +89,7 @@ const FRAGEN = [
     // ohne Zuschreibung wäre der Satz eine Behauptung über den Beruf, mit ihr
     // ist er die Auskunft eines Menschen.
     antwort:
-      'Ein Zimmerer, den wir gefragt haben: „Der Kran steht da. Man kann nicht sagen, wir fahren heim, weil’s regnet. Aber abends sieht man, was man geschafft hat.“',
+      'Die Wand wird beim Transport geschützt. Auf der Baustelle stimmen sich alle über Wetter und Sicherheit ab.',
   },
 ] as const
 
@@ -144,10 +144,9 @@ export function C5() {
       warum={
         <>
           <p>
-            Das Element wird aufgestellt, auf den{' '}
-            <Begriff id="innenlader">Innenlader</Begriff> gefahren, gesichert. Elf Uhr,
-            der Laster rollt vom Hof. Bis zur Baustelle sitzt du und tust nichts. Wenn die
-            Wände in der Halle fertig gebaut werden, ist die Fahrt die Pause.
+            Deine markierte Wand kommt auf den{' '}
+            <Begriff id="innenlader">Innenlader</Begriff> und wird gesichert. Jetzt geht
+            es zur Baustelle.
           </p>
           <motion.p
             initial={{ opacity: 0 }}
@@ -158,7 +157,7 @@ export function C5() {
             // überlesen soll.
             className="kh-titel-klein mt-4 text-kh-orange"
           >
-            Der halbe Tag ist damit vorbei.
+            Gleich kommt deine Wand an den Kran.
           </motion.p>
         </>
       }
@@ -173,8 +172,7 @@ export function C5() {
               sobald eine Antwort offen ist. */}
           {!antwort && (
             <p className="px-1 text-[1rem] text-kh-paper/55">
-              Drei Fragen, die auf so einer Fahrt aufkommen. Tipp an, was dich
-              interessiert.
+              Mehr über den Transport. Wähle, was dich interessiert.
             </p>
           )}
 

@@ -7,16 +7,15 @@ Das Designsystem heißt **„Baustelle“** und steht in [`src/index.css`](./src
 Es hat die Website-Übersetzung abgelöst, die vorher hier stand — siehe
 [Designsystem](#designsystem-baustelle).
 
-**The app is implemented.** `src/khpl/` holds the KHPL Connect flow — splash,
-in-fiction intro and the days of all four trades — built on the design system
-below. See [Der Flow](#der-flow-srckhpl).
+Die Messefassung priorisiert kurze Spielaufträge und eigenes Ausprobieren.
+Vor der ersten Berufswahl stehen eine freiwillige Helm- und Werkzeugwahl, das Baustellenradio und zwei Bildfragen.
+Die Senderwahl startet Musik. Während der beiden Bildfragen wird sie schrittweise
+leiser und pausiert bei der Berufswahl. Der globale Musikschalter setzt sie auf Wunsch
+mit voller Lautstärke fort.
+Jeder Beruf enthält vier bis fünf Hauptspiele; Erklärungen und weitere Aufgaben
+bleiben über „Mehr erfahren“ erreichbar. Berufswechsel behalten den Fortschritt.
 
-**Seit dem Umbau auf vier Berufe** liegt davor ein Trichter (Helm → Fragen →
-Vorschlag → Berufsliste), und der Tagesablauf ist Daten statt Konstanten.
-**Alle vier** Berufe haben inzwischen einen begehbaren Tag: Dachdecker
-(M1–M10 plus sieben B-Abstecher), Zimmerer (C1–C9 plus sechs Abstecher),
-Zerspanung (Z1–Z9 plus sechs) und Anlagenmechanik (A1–A9 plus sechs). Siehe
-[Vier Berufe](#vier-berufe-srckhplberufe).
+[Umsetzung von Marias Feedback und Prüfhinweise](docs/maria-feedback.md).
 
 > ⚠️ **Der Dachdecker-Tag ist aus einem Zimmerer-Tag hervorgegangen.** Der
 > Ablauf trägt den Dachdecker, aber **Teile der Fachrecherche darunter sind
@@ -28,10 +27,15 @@ Zerspanung (Z1–Z9 plus sechs) und Anlagenmechanik (A1–A9 plus sechs). Siehe
 ```bash
 pnpm install
 pnpm dev             # http://localhost:5173
-pnpm build           # prueft nebenbei die Buendel-Budgets, s. u.
+pnpm build           # TypeScript und Produktionsbuild
 pnpm check           # typecheck + lint + format:check
+pnpm test:logik      # Berufswege, neutrale Antworten, Wandaufbau
+pnpm test:e2e        # Browsertests mit installiertem Google Chrome
 pnpm format          # prettier --write .
 ```
+
+Die lokale Vorschau läuft auf Port 5173. Playwright verwendet einen eigenen
+Testserver auf Port 5175, damit das Testende die Vorschau nicht beendet.
 
 ## Der Flow (`src/khpl/`)
 
@@ -46,14 +50,14 @@ berufe/              Ein Beruf ist Daten: Graph, Merkmale, Medien, Motive,
                      zerspanung.ts und anlagenmechanik.ts tragen inzwischen
                      alle vier einen Graphen; `graph: null` bleibt im Typ für
                      einen Beruf, der angekündigt, aber nicht gebaut ist.
-match/               Merkmale, die vier Fragen, die Helm-Optionen und das
+match/               Merkmale, die zwei Bildfragen und das
                      Matching (portiert aus `kh-connect`, samt seiner Regeln).
 flow/steps.ts        Die *Form* eines Step-Graphen plus `baueGraph` — die
                      Rechenregeln, die für jeden Beruf gelten. Die Daten
                      stehen in `berufe/`.
 flow/uebergaenge.ts  `wegzustand` (✓ ● ○) und die offenen Abstecher. Die
                      Buttontexte liegen am Graphen des Berufs.
-store/fortschritt.ts localStorage v2: Fortschritt **je Beruf**, dazu Helm und
+store/fortschritt.ts localStorage v3: Fortschritt **je Beruf**, dazu Helm und
                      Fragen an der Sitzung. 30-Minuten-Verfall,
                      Zurück-Historie, Hochwassermarke, Karriere-Skip.
 shell/               StepShell (Bühne · Fachtext · Interaktion · Aha · Fuß —

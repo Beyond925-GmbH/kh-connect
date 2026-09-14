@@ -12,7 +12,7 @@ import type { Fortschritt } from '@/khpl/store/fortschritt'
  *
  * Kein Score, kein Prozentwert, keine Note — die Aufzählung dessen, was der
  * Besucher getan hat, mit **zwei Fassungen je Eintrag**. Wer die Übung gelöst
- * hat, liest „ein Fenster eingeschnitten“; wer weitergegangen ist, „an einem
+ * hat, liest „einen passenden Fensterrahmen eingesetzt“; wer weitergegangen ist, „an einem
  * Element Maß genommen“. Beides ist wahr, keines ist ein Tadel. Am Messestand
  * steht vielleicht jemand daneben, und sich vor Publikum dumm zu fühlen ist das
  * Gegenteil des Ziels.
@@ -56,8 +56,8 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'C1',
     tat: {
-      erledigt: 'dein Holz aus dem Stapel gesucht',
-      gesehen: 'nach Stückliste gearbeitet',
+      erledigt: 'dein Holz gewählt und markiert',
+      gesehen: 'dein Holz kennengelernt',
       geloest: (f) => !!f.answers.c1?.gefunden,
     },
   },
@@ -80,7 +80,7 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'C4',
     tat: {
-      erledigt: 'ein Fenster eingeschnitten',
+      erledigt: 'einen passenden Fensterrahmen eingesetzt',
       gesehen: 'an einem Element Maß genommen',
       geloest: (f) => !!f.answers.c4?.getroffen,
     },
@@ -127,11 +127,7 @@ export function C7() {
           />
         </Suspense>
       }
-      warum={
-        <p>
-          Ganz schön viel hast du an einem tag geschafft!
-        </p>
-      }
+      warum={<p>Ganz schön viel hast du an einem Tag geschafft!</p>}
       interaktion={
         <motion.div
           initial="aus"

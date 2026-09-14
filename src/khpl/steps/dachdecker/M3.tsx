@@ -66,8 +66,8 @@ export function M3() {
         // liest ein Anfänger sie als Prüfung statt als Ausblick. Dafür ist
         // „Parallel stimmst du Termine ab“ zu „Danach müssen …“ gekürzt.
         <p>
-          Unterschrieben. Jetzt wird gezeichnet: jedes Holz mit Länge, Winkel und eigener
-          Nummer — du musst noch keins davon lesen können. Diese Zeichnung heißt{' '}
+          Vor dem Bau bekommt jedes Holz seinen Platz im Plan. Dazu gehören Länge, Winkel
+          und eine eigene Nummer. Diese Zeichnung heißt{' '}
           <Begriff id="abbundplan">Abbundplan</Begriff>. Danach müssen Kunde, Kran und
           Gerüst alle am selben Tag Zeit haben.
         </p>

@@ -33,9 +33,9 @@ export function Z8() {
         // 3,5 Jahre: Verordnung über die Berufsausbildung in den
         // industriellen Metallberufen (42 Monate), zeitstabil.
         <p>
-          Dreieinhalb Jahre Ausbildung, dann die Prüfung bei der IHK, der Industrie- und
-          Handelskammer. Danach bist du Facharbeiter:in — und danach fängt es erst an.
-          Drei Wege, alle drei offen.
+          Nach der Ausbildung kannst du dich weiterentwickeln. Der Industriemeister Metall
+          ist ein Weg über die Industrie- und Handelskammer, kurz IHK.
+          Zerspanungsmechaniker arbeiten in Industrie und Handwerk.
         </p>
       }
       interaktion={

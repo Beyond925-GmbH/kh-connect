@@ -1,6 +1,9 @@
 import { useMemo, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { useFortschritt } from '@/khpl/store/fortschritt'
+import { HolzKontext } from './holz'
+import type { WandschichtId } from '@/khpl/steps/zimmerer/materialien'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { SZENE_FARBEN } from '@/dachstuhl/bauteil-texte'
 import { FOV } from '@/drei/kamera'
 import { useTapErkennung } from '@/drei/useTapErkennung'
@@ -22,6 +25,7 @@ import {
 } from './kulissen'
 import type { Blickfang, HakenSteuerung, ZugEingabe } from './kulissen'
 import {
+  EigeneHoelzer,
   FensterElement,
   Holzstapel,
   Sandwichaufbau,
@@ -148,6 +152,13 @@ export interface Elementlage {
 }
 
 export interface Wandelement3DProps {
+  holzWahl?: boolean
+  onHolzWahl?: (id: string) => void
+  schichtAbstand?: number
+  schichtWinkel?: number
+  ausgewaehlteSchicht?: string | null
+  onSchicht?: (id: WandschichtId) => void
+  onSchichtDrehen?: (winkel: number) => void
   /** Welcher der sieben Zustände gezeigt wird. Das ist die Hauptachse. */
   zustand: Elementzustand
   /** Kamera. Ohne Angabe aus `zustand` abgeleitet. */
@@ -339,6 +350,8 @@ function waehleBlickfang(
 
 export default function Wandelement3D(props: Wandelement3DProps) {
   const { zustand, blick, licht } = props
+  const holzId = useFortschritt().answers.c1?.holzId
+  const schichtZug = useRef<{ x: number; winkel: number; id: number } | null>(null)
   const gezeigterBlick =
     blick ?? (zustand === 'haken' || zustand === 'haus' ? 'untersicht' : 'draufsicht')
   // Der Bruch sitzt bei C5, aber *hinter* ihm: bis dahin Halle und Kunstlicht,
@@ -353,6 +366,7 @@ export default function Wandelement3D(props: Wandelement3DProps) {
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
     [],
   )
+  const [bereit, setBereit] = useState(false)
   const [kontextWeg, setKontextWeg] = useState(false)
   const [neustart, setNeustart] = useState(0)
 
@@ -366,12 +380,25 @@ export default function Wandelement3D(props: Wandelement3DProps) {
 
   const zeigerAb = (e: ReactPointerEvent<HTMLDivElement>) => {
     tap.merken(e)
+    if (zustand === 'schichten' && props.onSchichtDrehen && e.isPrimary) {
+      schichtZug.current = {
+        x: e.clientX,
+        winkel: props.schichtWinkel ?? 0,
+        id: e.pointerId,
+      }
+    }
     if (einweisenAktiv && e.isPrimary) {
       zug.current = { id: e.pointerId, x: e.clientX, y: e.clientY }
       e.currentTarget.setPointerCapture(e.pointerId)
     }
   }
   const zeigerZieht = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (schichtZug.current && Math.abs(e.clientX - schichtZug.current.x) > 5) {
+      e.currentTarget.setPointerCapture(schichtZug.current.id)
+      const winkel =
+        schichtZug.current.winkel + (e.clientX - schichtZug.current.x) * 0.008
+      props.onSchichtDrehen?.(Math.atan2(Math.sin(winkel), Math.cos(winkel)))
+    }
     const z = zug.current
     if (!z || z.id !== e.pointerId) return
     eingabe.current.dx += e.clientX - z.x
@@ -380,6 +407,7 @@ export default function Wandelement3D(props: Wandelement3DProps) {
     z.y = e.clientY
   }
   const zeigerAuf = (e: ReactPointerEvent<HTMLDivElement>) => {
+    schichtZug.current = null
     if (zug.current?.id === e.pointerId) zug.current = null
     if (zustand === 'haken' && !einweisenAktiv && props.lage == null && tap.istTap(e)) {
       steuerung.current?.halteAn()
@@ -388,6 +416,7 @@ export default function Wandelement3D(props: Wandelement3DProps) {
 
   const stehend = zustand === 'fenster' && props.aufrichtenZeigen === true
   const fang = waehleBlickfang(zustand, gezeigterBlick, stehend)
+  if (zustand === 'schichten') fang.huelle = huelle([-5, 0, -5], [5, 4.8, 4])
   const hintergrund = SZENE_FARBEN.dunkel.hintergrund
   // Ab C5 trägt das Element den Ausschnitt sichtbar weiter. Die Steps geben
   // ihn aus `answers.c4` mit — *dein* Fenster, nicht irgendeins. Der
@@ -403,6 +432,8 @@ export default function Wandelement3D(props: Wandelement3DProps) {
     <div
       className="relative size-full touch-none select-none"
       data-buehne="wandelement"
+      data-bereit={bereit}
+      aria-busy={!bereit}
       data-zustand={zustand}
       data-blick={gezeigterBlick}
       data-licht={gezeigtesLicht}
@@ -412,137 +443,153 @@ export default function Wandelement3D(props: Wandelement3DProps) {
       onPointerUp={zeigerAuf}
       onPointerCancel={zeigerAuf}
     >
-      <Canvas
-        key={neustart}
-        style={{ touchAction: 'none', width: '100%', height: '100%' }}
-        dpr={[1, 1.75]}
-        gl={{ antialias: true, alpha: false }}
-        camera={{ fov: FOV, near: 0.1, far: 120, position: [8, 9, 8] }}
-        onCreated={({ gl }) => {
-          const leinwand = gl.domElement
-          leinwand.addEventListener('webglcontextlost', (e) => {
-            e.preventDefault()
-            setKontextWeg(true)
-          })
-          leinwand.addEventListener('webglcontextrestored', () => {
-            setKontextWeg(false)
-            setNeustart((n) => n + 1)
-          })
-        }}
-      >
-        <color attach="background" args={[hintergrund]} />
-        <fog attach="fog" args={[hintergrund, 10, 40]} />
-        <Licht licht={gezeigtesLicht} />
-        <Kamerafahrt blickfang={fang} sichtfeld={sichtfeld} reduziert={reduziert} />
-        <Bereitmeldung onBereit={props.onBereit} />
+      <HolzKontext.Provider value={holzId}>
+        <Canvas
+          key={neustart}
+          style={{ touchAction: 'none', width: '100%', height: '100%' }}
+          dpr={[1, 1.75]}
+          gl={{ antialias: true, alpha: false }}
+          camera={{ fov: FOV, near: 0.1, far: 120, position: [8, 9, 8] }}
+          onCreated={({ gl }) => {
+            const leinwand = gl.domElement
+            leinwand.addEventListener('webglcontextlost', (e) => {
+              e.preventDefault()
+              setKontextWeg(true)
+              setBereit(false)
+            })
+            leinwand.addEventListener('webglcontextrestored', () => {
+              setKontextWeg(false)
+              setNeustart((n) => n + 1)
+            })
+          }}
+        >
+          <BuehneBereit onBereit={setBereit} />
+          <color attach="background" args={[hintergrund]} />
+          <fog attach="fog" args={[hintergrund, 10, 40]} />
+          <Licht licht={gezeigtesLicht} />
+          <Kamerafahrt blickfang={fang} sichtfeld={sichtfeld} reduziert={reduziert} />
+          <Bereitmeldung onBereit={props.onBereit} />
 
-        {zustand === 'stapel' && (
-          <group>
-            <Halle />
-            <Holzstapel
-              gesuchteNummer={props.gesuchteNummer}
-              hinweis={props.hinweisZeigen}
-              schonGefunden={props.holzGefunden}
-              onHolz={props.onHolz}
-            />
-          </group>
-        )}
+          {zustand === 'stapel' && (
+            <group>
+              <Halle />
+              {props.holzWahl ? (
+                <EigeneHoelzer onWahl={props.onHolzWahl} />
+              ) : (
+                <Holzstapel
+                  gesuchteNummer={props.gesuchteNummer}
+                  hinweis={props.hinweisZeigen}
+                  schonGefunden={props.holzGefunden}
+                  onHolz={props.onHolz}
+                />
+              )}
+            </group>
+          )}
 
-        {zustand === 'staenderwerk' && (
-          <group>
-            <Halle mitAuflage />
-            <FlachAufDemTisch>
-              <Staenderwerk
-                achsmassCm={props.achsmassCm}
-                aufgeloest={props.aufgeloest}
-                reduziert={reduziert}
-              />
-            </FlachAufDemTisch>
-          </group>
-        )}
+          {zustand === 'staenderwerk' && (
+            <group>
+              <Halle mitAuflage />
+              <FlachAufDemTisch>
+                <Staenderwerk
+                  achsmassCm={props.achsmassCm}
+                  aufgeloest={props.aufgeloest}
+                  reduziert={reduziert}
+                />
+              </FlachAufDemTisch>
+            </group>
+          )}
 
-        {zustand === 'schichten' && (
-          <group>
-            <Halle mitAuflage />
-            <FlachAufDemTisch>
-              <Sandwichaufbau schichten={props.schichten} reduziert={reduziert} />
-            </FlachAufDemTisch>
-          </group>
-        )}
+          {zustand === 'schichten' && (
+            <group>
+              <Halle mitAuflage />
+              <group rotation={[0, props.schichtWinkel ?? 0, 0]}>
+                <FlachAufDemTisch>
+                  <Sandwichaufbau
+                    schichten={props.schichten}
+                    reduziert={reduziert}
+                    abstand={props.schichtAbstand}
+                    ausgewaehlt={props.ausgewaehlteSchicht}
+                    onSchicht={props.onSchicht}
+                  />
+                </FlachAufDemTisch>
+              </group>
+            </group>
+          )}
 
-        {zustand === 'fenster' && (
-          <group>
-            {/* Ohne die kamerazugewandte Stützenreihe: der Blick nach oben
+          {zustand === 'fenster' && (
+            <group>
+              {/* Ohne die kamerazugewandte Stützenreihe: der Blick nach oben
                 (aufgerichtet) ist schräg, und die Reihe schnitte das Element
                 mittig durch (Abnahme-Befund C4). */}
-            <Halle mitAuflage ohneVordereStuetzen tischTiefe={5.6} />
-            <FensterElement
-              ausschnitt={props.ausschnitt}
-              angebote={props.rahmenangebote}
-              gewaehlt={props.gewaehlterRahmen}
-              urteil={props.rahmenurteil}
-              gesetzt={props.rahmenSitzt}
-              onRahmen={props.onRahmen}
-              onProbeEnde={props.onProbeEnde}
-              aufrichtenZeigen={props.aufrichtenZeigen}
-              onAufrichtenEnde={props.onAufrichtenEnde}
-              marke={props.deinElement ?? false}
-              reduziert={reduziert}
-            />
-          </group>
-        )}
+              <Halle mitAuflage ohneVordereStuetzen tischTiefe={5.6} />
+              <FensterElement
+                ausschnitt={props.ausschnitt}
+                angebote={props.rahmenangebote}
+                gewaehlt={props.gewaehlterRahmen}
+                urteil={props.rahmenurteil}
+                gesetzt={props.rahmenSitzt}
+                onRahmen={props.onRahmen}
+                onProbeEnde={props.onProbeEnde}
+                aufrichtenZeigen={props.aufrichtenZeigen}
+                onAufrichtenEnde={props.onAufrichtenEnde}
+                marke={props.deinElement ?? false}
+                reduziert={reduziert}
+              />
+            </group>
+          )}
 
-        {zustand === 'verladen' && (
-          <group>
-            {/* Ohne die kamerazugewandte Stützenreihe: unter dem schrägen
+          {zustand === 'verladen' && (
+            <group>
+              {/* Ohne die kamerazugewandte Stützenreihe: unter dem schrägen
                 Blick der Zäsur stand sie als Vordergrund vor dem Gespann und
                 las sich ohne Bodenkontakt als Renderfehler (Abnahme-Befund
                 C5). `mitTor`: nach der Abfahrt bleibt sonst nur strukturloses
                 Braun zurück — Rückwand und offenes Tor machen die leere Halle
                 als Raum lesbar. */}
-            <Halle ohneVordereStuetzen mitTor />
-            {/* x = −2,8 zentriert das Gespann in der Kamerahülle (±7,6 m):
+              <Halle ohneVordereStuetzen mitTor />
+              {/* x = −2,8 zentriert das Gespann in der Kamerahülle (±7,6 m):
                 der Anhänger trägt die Ladung um x = 0, der Transporter ragt
                 bis fast +10 — unverschoben lief der Innenlader rechts aus
                 dem Bild (Abnahme-Befund C5). */}
-            <group position={[-2.8, 0, 3.0]}>
-              <Verladung
+              <group position={[-2.8, 0, 3.0]}>
+                <Verladung
+                  ausschnitt={spaeterAusschnitt}
+                  marke={spaeteMarke}
+                  abfahrt={props.abfahrt}
+                  onAbfahrtEnde={props.onAbfahrtEnde}
+                  reduziert={reduziert}
+                />
+              </group>
+            </group>
+          )}
+
+          {zustand === 'haken' && (
+            <group>
+              <Baustelle zielMarke />
+              {einweisenAktiv && <Zielgeist />}
+              <AmHaken
+                lage={props.lage}
+                onLage={props.onLage}
+                einweisen={props.einweisen}
+                abgesetzt={props.abgesetzt}
+                onAbgesetzt={props.onAbgesetzt}
                 ausschnitt={spaeterAusschnitt}
                 marke={spaeteMarke}
-                abfahrt={props.abfahrt}
-                onAbfahrtEnde={props.onAbfahrtEnde}
+                steuerung={steuerung}
+                eingabe={eingabe}
                 reduziert={reduziert}
               />
             </group>
-          </group>
-        )}
+          )}
 
-        {zustand === 'haken' && (
-          <group>
-            <Baustelle zielMarke />
-            {einweisenAktiv && <Zielgeist />}
-            <AmHaken
-              lage={props.lage}
-              onLage={props.onLage}
-              einweisen={props.einweisen}
-              abgesetzt={props.abgesetzt}
-              onAbgesetzt={props.onAbgesetzt}
-              ausschnitt={spaeterAusschnitt}
-              marke={spaeteMarke}
-              steuerung={steuerung}
-              eingabe={eingabe}
-              reduziert={reduziert}
-            />
-          </group>
-        )}
-
-        {zustand === 'haus' && (
-          <group>
-            <Baustelle />
-            <Haus ausschnitt={spaeterAusschnitt} marke={spaeteMarke} />
-          </group>
-        )}
-      </Canvas>
+          {zustand === 'haus' && (
+            <group>
+              <Baustelle />
+              <Haus ausschnitt={spaeterAusschnitt} marke={spaeteMarke} />
+            </group>
+          )}
+        </Canvas>
+      </HolzKontext.Provider>
 
       {/* Der Schein, in dem das Modell steht — sonst ist die Leinwand ein
           einfarbiges Rechteck (s. `Hallenlicht`). */}
@@ -557,4 +604,14 @@ export default function Wandelement3D(props: Wandelement3DProps) {
       )}
     </div>
   )
+}
+
+/** Erst nach dem Kameraaufbau ist die Bühne zum Betrachten bereit. */
+function BuehneBereit({ onBereit }: { onBereit: (bereit: boolean) => void }) {
+  const bilder = useRef(0)
+  useFrame(() => {
+    bilder.current += 1
+    if (bilder.current === 3) onBereit(true)
+  })
+  return null
 }

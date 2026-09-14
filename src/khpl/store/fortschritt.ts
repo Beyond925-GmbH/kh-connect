@@ -99,6 +99,7 @@ export interface Antworten {
   /** B4.1 — korrekt verladene Teile. */
   b41?: { geladen: string[]; fertig: boolean }
   /** M7 — wie weit die Reihenfolge-Abfrage kam. */
+  m5?: { gesetzt: string[]; fertig: boolean; versuche: number }
   m7?: { gesetzt: string[]; fertig: boolean }
   /** M9 — angesehene Karrierewege, in Reihenfolge des Öffnens. */
   m9?: { angesehen: StepId[] }
@@ -108,11 +109,11 @@ export interface Antworten {
   // -------------------------------------------------------------------------
 
   /** C1 — das gesuchte Holz aus dem Stapel gefunden, mit Zahl der Versuche. */
-  c1?: { gefunden: boolean; versuche: number }
+  c1?: { gefunden: boolean; versuche: number; holzId?: string }
   /** C2 — geschätztes Achsmaß in Zentimetern, und ob 62,5 schon stand. */
   c2?: { schaetzung: number; aufgeloest: boolean }
   /** C3 — welche Schichten der Wand schon liegen, von innen nach außen. */
-  c3?: { gelegt: string[]; fertig: boolean }
+  c3?: { gelegt: string[]; fertig: boolean; versuche?: number }
   /**
    * C4 — Fensterausschnitt getroffen, mit Zahl der Versuche. `abweichungMm` ist
    * **optional**: alte localStorage-Stände und der Fehlversuch-Zweig kennen es
@@ -276,7 +277,7 @@ export interface Fortschritt {
 }
 
 export interface Sitzung {
-  version: 2
+  version: 3
   /**
    * Welcher Screen zuletzt lief. Damit überlebt die **Stelle** einen Reload,
    * nicht nur der Fortschritt (siehe `Bildschirm`).
@@ -321,7 +322,7 @@ function leererFortschritt(graph: StepGraph): Fortschritt {
 
 function leereSitzung(): Sitzung {
   return {
-    version: 2,
+    version: 3,
     bildschirm: 'splash',
     angesehenerBeruf: null,
     aktiverBeruf: null,
@@ -385,6 +386,14 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   if (b41 && stringListe(b41.geladen)) {
     a.b41 = { geladen: stringListe(b41.geladen) as string[], fertig: !!b41.fertig }
   }
+  const m5 = q.m5 as Antworten['m5']
+  if (m5 && stringListe(m5.gesetzt)) {
+    a.m5 = {
+      gesetzt: stringListe(m5.gesetzt) as string[],
+      fertig: !!m5.fertig,
+      versuche: Number.isFinite(m5.versuche) ? m5.versuche : 0,
+    }
+  }
   const m7 = q.m7 as Antworten['m7']
   if (m7 && stringListe(m7.gesetzt)) {
     a.m7 = { gesetzt: stringListe(m7.gesetzt) as string[], fertig: !!m7.fertig }
@@ -403,6 +412,8 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   const c1 = q.c1 as Antworten['c1']
   if (c1 && typeof c1.versuche === 'number') {
     a.c1 = { gefunden: !!c1.gefunden, versuche: c1.versuche }
+    if (typeof c1.holzId === 'string' && ['hell', 'warm', 'dunkel'].includes(c1.holzId))
+      a.c1.holzId = c1.holzId
   }
   const c2 = q.c2 as Antworten['c2']
   if (c2 && typeof c2.schaetzung === 'number' && Number.isFinite(c2.schaetzung)) {
@@ -410,7 +421,11 @@ function pruefeAntworten(graph: StepGraph, roh: unknown): Antworten {
   }
   const c3 = q.c3 as Antworten['c3']
   if (c3 && stringListe(c3.gelegt)) {
-    a.c3 = { gelegt: stringListe(c3.gelegt) as string[], fertig: !!c3.fertig }
+    a.c3 = {
+      gelegt: stringListe(c3.gelegt) as string[],
+      fertig: !!c3.fertig,
+      versuche: Number.isFinite(c3.versuche) ? c3.versuche : 0,
+    }
   }
   const c4 = q.c4 as Antworten['c4']
   if (c4 && typeof c4.versuche === 'number') {
@@ -620,7 +635,7 @@ function lade(): Sitzung | null {
     const daten: unknown = JSON.parse(roh)
     if (typeof daten !== 'object' || daten === null) return null
     const s = daten as Partial<Sitzung>
-    if (s.version !== 2) return null
+    if (s.version !== 3) return null
     if (typeof s.updatedAt !== 'number') return null
 
     const berufe: Partial<Record<BerufId, Fortschritt>> = {}
@@ -640,7 +655,7 @@ function lade(): Sitzung | null {
     const angesehen = istBerufId(s.angesehenerBeruf) ? s.angesehenerBeruf : null
 
     return {
-      version: 2,
+      version: 3,
       bildschirm: stimmigerBildschirm(pruefeBildschirm(s.bildschirm), aktiv, angesehen),
       angesehenerBeruf: angesehen,
       aktiverBeruf: aktiv,
@@ -682,7 +697,10 @@ function pruefeHelm(roh: unknown): HelmWahl | null {
   if (typeof roh !== 'object' || roh === null) return null
   const h = roh as Partial<HelmWahl>
   if (typeof h.farbe !== 'string' || typeof h.werkzeug !== 'string') return null
-  return { farbe: h.farbe, werkzeug: h.werkzeug }
+  return {
+    farbe: h.farbe,
+    werkzeug: h.werkzeug,
+  }
 }
 
 function pruefeGesten(roh: unknown): Geste[] {
@@ -738,6 +756,7 @@ function vergiss(neuerBildschirm: Bildschirm) {
   // zählt als eigener. Die Cookie-Entscheidung bleibt davon unberührt: sie
   // liegt am Gerät (`lib/analytik.ts`) und überlebt jeden Reset.
   neueAnalytikSitzung()
+  if (typeof window !== 'undefined') window.dispatchEvent(new Event('khpl:sitzung-neu'))
   sitzung = { ...leereSitzung(), bildschirm: neuerBildschirm }
   hatWiedereinstieg = false
   sichere()
@@ -851,7 +870,9 @@ function marke(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId {
  */
 function skipStand(graph: StepGraph, alt: Fortschritt, ziel: StepId): StepId | null {
   if (alt.detourReturnTo === null) return null
-  return graph.karriereBereich.includes(ziel) ? alt.detourReturnTo : null
+  return graph.karriereBereich.includes(ziel) || step(graph, ziel).art === 'abstecher'
+    ? alt.detourReturnTo
+    : null
 }
 
 // ---------------------------------------------------------------------------
@@ -1173,6 +1194,20 @@ export function springeZuBesuchtem(ziel: StepId) {
       currentStepId: ziel,
       visited: [...alt.visited, ziel],
       detourReturnTo: skipStand(graph, alt, ziel),
+    }
+  })
+}
+
+/** Freiwillige Information öffnen, ohne die Stelle im Spiel zu verlieren. */
+export function oeffneVertiefung(ziel: StepId) {
+  aendereFortschritt((alt, graph) => {
+    if (!istStepId(graph, ziel) || step(graph, ziel).art !== 'abstecher') return alt
+    return {
+      ...alt,
+      currentStepId: ziel,
+      detourReturnTo: alt.detourReturnTo ?? alt.currentStepId,
+      visited: [...alt.visited, ziel],
+      branchesTaken: [...new Set([...alt.branchesTaken, ziel])],
     }
   })
 }

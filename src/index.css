@@ -455,3 +455,21 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Klare Texthierarchie: Titel vor Auswahl; die Aufgabe bleibt auf Spielseiten führend. */
+[data-testid='helmwahl'] h1,
+[data-testid='fragen'] h1,
+[data-testid='berufsliste'] h1 {
+  font-size: clamp(1.8rem, 2rem + 1.6vw, 3rem);
+  line-height: 1.12;
+  text-transform: none;
+}
+[data-testid='step'] h1 {
+  line-height: 1.15;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-testid='step'] *,
+  [data-testid='helmwahl'] * {
+    scroll-behavior: auto;
+  }
+}

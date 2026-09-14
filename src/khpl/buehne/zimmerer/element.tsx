@@ -16,6 +16,10 @@ import {
   ELEMENT_HOEHE_M,
   PLATTENBREITE_CM,
 } from './kanon'
+import { HolzMarke } from './Holzidentitaet'
+import { HolzKontext, HOLZWAHL, gewaehltesHolz } from './holz'
+import { useContext } from 'react'
+import type { WandschichtId } from '@/khpl/steps/zimmerer/materialien'
 import type { Fensterausschnitt } from './Wandelement3D'
 
 /**
@@ -253,6 +257,8 @@ export function Rahmenteile({
   daemmung?: boolean
   loch?: Loch | null
 }) {
+  const holzId = useContext(HolzKontext)
+  const eigenesX = X0 + PLATTENBREITE_CM / 100
   const sichtbar = loch
     ? staender.filter((x) => x < loch.x1 - 0.18 || x > loch.x2 + 0.18)
     : staender
@@ -300,7 +306,19 @@ export function Rahmenteile({
         farbe={FARBE_KVH}
       />
       {sichtbar.map((x) => (
-        <Staenderprofil key={x} x={x} />
+        <group key={x}>
+          <Staenderprofil
+            x={x}
+            farbe={
+              Math.abs(x - eigenesX) < 0.02 && holzId
+                ? gewaehltesHolz(holzId).farbe
+                : undefined
+            }
+          />
+          {Math.abs(x - eigenesX) < 0.02 && (
+            <HolzMarke position={[x, 0.6, TRAG.bis + 0.018]} gross={0.65} />
+          )}
+        </group>
       ))}
       {gefache}
       {loch && (
@@ -332,13 +350,57 @@ export function Rahmenteile({
   )
 }
 
-/** Die Signalmarke: ab C4 ist es *dein* Element. */
+/** Die persönliche Markierung bleibt außen auf der Wand sichtbar. */
 function DeineMarke() {
-  return (
+  const holzId = useContext(HolzKontext)
+  return holzId ? (
+    <HolzMarke position={[X0 + 0.7, 0.42, 0.09]} gross={1.7} />
+  ) : (
     <mesh position={[X0 + 0.7, 0.42, 0.012]}>
       <boxGeometry args={[0.5, 0.14, 0.02]} />
       <meshBasicMaterial color={SIGNAL_MARKE} />
     </mesh>
+  )
+}
+
+export function EigeneHoelzer({ onWahl }: { onWahl?: (id: string) => void }) {
+  const gewaehlt = useContext(HolzKontext)
+  return (
+    <group>
+      {HOLZWAHL.map((holz, i) => (
+        <group
+          key={holz.id}
+          position={[
+            (i - 1) * 2.8,
+            TISCH_OBEN + 0.22 + (gewaehlt === holz.id ? 0.15 : 0),
+            -0.7,
+          ]}
+        >
+          <mesh
+            onClick={(e) => {
+              e.stopPropagation()
+              onWahl?.(holz.id)
+            }}
+          >
+            <boxGeometry args={[1, 0.38, 3.1]} />
+            <meshStandardMaterial color={holz.farbe} roughness={0.85} />
+          </mesh>
+          {[0, 1, 2, 3].map((k) => (
+            <mesh key={k} position={[-0.32 + k * 0.2, 0.195, 0]}>
+              <boxGeometry args={[0.012, 0.006, 2.9]} />
+              <meshStandardMaterial color="#71522E" />
+            </mesh>
+          ))}
+          <HolzKontext.Provider value={holz.id}>
+            <HolzMarke
+              position={[0, 0.202, 0.9]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              gross={1.2}
+            />
+          </HolzKontext.Provider>
+        </group>
+      ))}
+    </group>
   )
 }
 
@@ -371,6 +433,7 @@ export function Tafel({
         ) : null,
       )}
       <Rahmenteile daemmung={schichten >= 4} loch={loch} />
+      {komplett && <Fassadenplatte loch={loch} />}
       {loch && komplett && (
         <group>
           {/* Laibung: das Wechselholz zeigt sich in der Öffnung */}
@@ -670,6 +733,7 @@ export function Staenderwerk({
   aufgeloest?: boolean
   reduziert: boolean
 }) {
+  const holzId = useContext(HolzKontext)
   const beweglich = useRef<THREE.Group>(null)
   const platte1 = useRef<THREE.Group>(null)
   const platte2 = useRef<THREE.Group>(null)
@@ -701,9 +765,12 @@ export function Staenderwerk({
     if (!aufgeloest) {
       t0.current = null
       g.position.x += (zielX - g.position.x) * Math.min(1, dt * 14)
-      if (platte1.current) platte1.current.visible = false
+      if (platte1.current) {
+        platte1.current.visible = true
+        platte1.current.position.z = -0.04
+      }
       if (platte2.current) platte2.current.visible = false
-      if (kante.current) kante.current.visible = false
+      if (kante.current) kante.current.visible = true
       regen.current.forEach((r) => {
         if (r) r.visible = false
       })
@@ -745,7 +812,8 @@ export function Staenderwerk({
     <group>
       <Rahmenteile staender={[X0 + 0.04, B / 2 - 0.04, referenzX]} />
       <group ref={beweglich} position={[zielX, 0, 0]}>
-        <Staenderprofil x={0} />
+        <Staenderprofil x={0} farbe={holzId ? gewaehltesHolz(holzId).farbe : undefined} />
+        <HolzMarke position={[0, 0.6, TRAG.bis + 0.018]} gross={0.65} />
       </group>
       {uebrige.map((x, i) => (
         <group
@@ -797,38 +865,71 @@ export function Staenderwerk({
 // C3 — die Schichten legen sich auf
 // ---------------------------------------------------------------------------
 
-/** Kartenversatz je Schicht: innen ragt am +x-Ende treppig hervor. */
-const FAECHER = [0.9, 0.6, 0.3, 0, -0.3]
+/** Die Holzfassade bleibt auch an Fenster, Kran und Haus dieselbe Oberfläche. */
+function Fassadenplatte({ loch = null }: { loch?: Loch | null }) {
+  return (
+    <group>
+      <Platte slot={{ mitte: 0.035, dicke: 0.07 }} farbe="#A8814A" loch={loch} />
+      {Array.from({ length: 18 }, (_, n) => {
+        const x = X0 + ((n + 0.5) * B) / 18
+        const bereiche =
+          loch && x > loch.x1 && x < loch.x2
+            ? [
+                [0, loch.y1],
+                [loch.y2, H],
+              ]
+            : [[0, H]]
+        return bereiche.map(([unten, oben], i) => (
+          <Kasten
+            key={`${n}-${i}`}
+            x={x}
+            y={(unten + oben) / 2}
+            z={0.073}
+            dx={0.022}
+            dy={oben - unten}
+            dz={0.005}
+            farbe="#67482D"
+          />
+        ))
+      })}
+    </group>
+  )
+}
 
-/**
- * Die fünf Karten des Steps (Innenbeplankung · Dampfbremse · Ständerwerk mit
- * Dämmung · Holzfaserplatte · Fassade) auf die Geometrie-Schichten (gips ·
- * installation · dampfbremse · tragwerk · holzfaser) übersetzt: die erste
- * Karte nennt die Installationsebene in ihrem Satz mit und deckt deshalb zwei
- * Lagen auf; die Fassade hat keine eigene Geometrie — sie ist Sache des
- * Bauherrn, sagt die Karte selbst.
- */
-const KARTE_ZU_LAGEN = [0, 2, 3, 4, 5, 5] as const
+/** C3: fünf Lernbauteile mit einer eigenen sichtbaren Fassadenlage. */
+const AUFBAU_LAGEN = [
+  ...SCHICHTEN,
+  { id: 'fassade', dicke: 0.07, farbe: '#A8814A' },
+] as const
+const AUFBAU_SLOTS = [...SLOTS, { von: 0, bis: 0.07, mitte: 0.035, dicke: 0.07 }]
+const KARTE_ZU_LAGEN = [0, 2, 3, 4, 5, 6] as const
+const LAGEN_KARTEN: WandschichtId[] = [
+  'innen',
+  'innen',
+  'dampfbremse',
+  'daemmung',
+  'holzfaser',
+  'fassade',
+]
 
-/**
- * Die geführte Hälfte des Lernpaars: je gelegter Karte schiebt sich die
- * zugehörige Lage von der Seite in ihren Slot. Das Tragwerk steht schon (aus
- * C2); seine Karte bringt die Gefachdämmung mit. Der Treppenversatz hält alle
- * Kanten sichtbar — eine Wand von genau oben wäre ein Rechteck.
- */
 export function Sandwichaufbau({
   schichten = 0,
   reduziert,
+  abstand = 0,
+  ausgewaehlt,
+  onSchicht,
 }: {
   schichten?: number
   reduziert: boolean
+  abstand?: number
+  ausgewaehlt?: string | null
+  onSchicht?: (id: WandschichtId) => void
 }) {
-  const zeiten = useRef<(number | null)[]>(Array(SCHICHTEN.length).fill(null))
+  const zeiten = useRef<(number | null)[]>(Array(AUFBAU_LAGEN.length).fill(null))
   const gruppen = useRef<(THREE.Group | null)[]>([])
   const lagen = KARTE_ZU_LAGEN[klemm(Math.round(schichten), 0, KARTE_ZU_LAGEN.length - 1)]
-
-  useFrame(({ clock }) => {
-    for (let i = 0; i < SCHICHTEN.length; i++) {
+  useFrame(({ clock }, dt) => {
+    for (let i = 0; i < AUFBAU_LAGEN.length; i++) {
       if (i < lagen && zeiten.current[i] === null) zeiten.current[i] = clock.elapsedTime
       if (i >= lagen) zeiten.current[i] = null
       const g = gruppen.current[i]
@@ -838,47 +939,51 @@ export function Sandwichaufbau({
         g.visible = false
         continue
       }
-      const u = reduziert ? 1 : glatt((clock.elapsedTime - start) / 0.6)
-      g.visible = u > 0
-      g.position.x = FAECHER[i] + (1 - u) * 5.5
+      const u = reduziert ? 1 : glatt((clock.elapsedTime - start) / 0.45)
+      g.visible = true
+      g.position.x = (5 - i) * 0.13 + (1 - u) * 3
+      const ziel = i * abstand * 0.38
+      g.position.z = reduziert ? ziel : THREE.MathUtils.damp(g.position.z, ziel, 14, dt)
     }
   })
-
   return (
     <group>
-      <Rahmenteile />
-      {SLOTS.map((slot, i) => (
+      {schichten < 3 && <Rahmenteile />}
+
+      {AUFBAU_SLOTS.map((slot, i) => (
         <group
-          key={SCHICHTEN[i].id}
+          key={AUFBAU_LAGEN[i].id}
           ref={(el) => {
             gruppen.current[i] = el
           }}
           visible={false}
+          onClick={(e) => {
+            if (onSchicht && e.delta < 5) {
+              e.stopPropagation()
+              onSchicht(LAGEN_KARTEN[i])
+            }
+          }}
         >
           {i === 3 ? (
-            // Die Tragwerks-Karte: die Gefachdämmung zwischen den Ständern.
-            <group>
-              {STAENDER_MITTEN.slice(0, -1).map((x, k) => {
-                const bis = STAENDER_MITTEN[k + 1] - 0.05
-                const von = x + 0.05
-                if (bis - von < 0.08) return null
-                return (
-                  <Kasten
-                    key={x}
-                    x={(von + bis) / 2}
-                    y={H / 2}
-                    z={TRAG.mitte}
-                    dx={bis - von}
-                    dy={H - 0.26}
-                    dz={TRAG.dicke - 0.05}
-                    farbe={FARBE_DAEMMUNG}
-                  />
-                )
-              })}
-            </group>
+            <Rahmenteile daemmung />
+          ) : i === 5 ? (
+            <Fassadenplatte />
           ) : (
-            <Platte slot={slot} farbe={SCHICHTEN[i].farbe} />
+            <Platte slot={slot} farbe={AUFBAU_LAGEN[i].farbe} />
           )}
+          {i === 2 && (
+            <mesh position={[0, H / 2, slot.mitte + slot.dicke / 2 + 0.002]}>
+              <boxGeometry args={[0.05, H, 0.005]} />
+              <meshStandardMaterial color="#D1E1E3" />
+            </mesh>
+          )}
+          {ausgewaehlt === LAGEN_KARTEN[i] && (
+            <mesh position={[0, H / 2, slot.mitte]}>
+              <boxGeometry args={[B + 0.04, H + 0.04, slot.dicke + 0.04]} />
+              <meshBasicMaterial color="#D5F255" wireframe />
+            </mesh>
+          )}
+          {i === 5 && <HolzMarke position={[X0 + 0.75, 0.45, 0.09]} gross={1.4} />}
         </group>
       ))}
     </group>

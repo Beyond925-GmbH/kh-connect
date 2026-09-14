@@ -51,7 +51,7 @@ const TATEN: { id: StepId; tat: Tat }[] = [
   {
     id: 'M1',
     tat: {
-      erledigt: 'ein Dach aufgemessen',
+      erledigt: 'drei Stellen auf der Baustelle angesehen',
       gesehen: 'einen Ortstermin mitgemacht',
       geloest: (f) => !!f.answers.m1?.ausgewertet,
     },

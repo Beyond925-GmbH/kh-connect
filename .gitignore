@@ -47,3 +47,7 @@ tmp/
 .dev.vars*
 !.dev.vars.example
 !.env.example
+
+# Browser regression artifacts
+/test-results/
+/playwright-report/

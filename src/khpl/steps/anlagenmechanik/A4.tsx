@@ -175,7 +175,7 @@ export function A4() {
         Die alte Fassung trug „Wärmepumpe" und „Verteiler" in der Aufforderung
         selbst — zwei Chips in dem einen Satz, den jeder lesen muss.
       */
-      auftrag={fertig ? null : 'Zieh die Leitung von der Pumpe zum Verteiler.'}
+      auftrag={fertig ? null : 'Ziehe die Leitung von der Pumpe zum Verteiler.'}
       /*
         **Die Referenz-Ansage der Anwendung** (`komponenten/Ansage.tsx`).
 
@@ -194,7 +194,7 @@ export function A4() {
       ansage={{
         geste: 'ziehen-frei',
         text: 'Du verlegst die Leitung selbst — mit dem Finger, quer durch den Keller. Fang rechts an der Wärmepumpe an.',
-        haken: 'Der kürzeste Weg ist nicht immer der beste.',
+        haken: 'Führe die Leitung um die Wand, mit möglichst wenigen Kurven.',
       }}
       buehneInteraktiv
       interaktionOffen={!fertig}
@@ -370,8 +370,8 @@ function Verlustbalken({
       <div className="flex items-end justify-between gap-3">
         <p className="min-w-0 flex-1 text-[0.9375rem] leading-[1.4] text-kh-mute">
           {schmal
-            ? 'Wie viel ein Bogen kostet, hängt am Rohr. Deshalb ein Balken und keine Zahl.'
-            : 'Jeder Bogen kostet Druck — wie viel genau, hängt davon ab, wie dick das Rohr ist und wie schnell das Wasser fließt. Deshalb steht hier ein Balken und keine Zahl.'}
+            ? 'Verlege die Leitung mit möglichst wenigen Kurven.'
+            : 'Verlege die Leitung mit möglichst wenigen Kurven.'}
         </p>
         {/*
           **Steht immer da, auch wenn noch nichts gezogen ist.** Vorher tauchte

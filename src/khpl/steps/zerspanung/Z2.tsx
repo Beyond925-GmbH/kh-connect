@@ -1,252 +1,148 @@
 import { useState } from 'react'
-import { motion } from 'motion/react'
-import { Button } from '@/components/ui/button'
 import { StepFoto } from '@/khpl/buehne/Foto'
-import { DREHZAHL, WASCHMASCHINE } from '@/khpl/buehne/zerspanung/kanon'
-import { AhaKarte } from '@/khpl/komponenten/AhaKarte'
-import { RATEN_HAKEN } from '@/khpl/komponenten/gesten'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
 import { Wahlflaeche } from '@/khpl/komponenten/Wahlflaeche'
-import { Wechsel } from '@/khpl/komponenten/Wechsel'
 import { StepFuss } from '@/khpl/shell/StepFuss'
 import { StepShell } from '@/khpl/shell/StepShell'
 import { merkeAntwort, useFortschritt } from '@/khpl/store/fortschritt'
-import { Begriff } from './Begriff'
 
-/**
- * Z2 — Fest, sonst fliegt es. **Die Maschine einrichten** (Rüsten), in zwei
- * Beats:
- *
- *  1. *Spannen* — drei Spannmittel, eines passt zu rundem Stangenmaterial.
- *     Ein Fehlgriff kostet keinen Punkt, sondern zeigt seine Folge in der
- *     Welt: ein Teil, das sich durchdreht, oder eines, das gar nicht
- *     stillhalten soll.
- *  2. *Drehzahl schätzen* — **der eine Schätzmoment dieses Tages**
- *     (Mechanismus 3, wie M2 und C2). Der Anker ist ein Gerät, das jeder
- *     kennt: der Schleudergang der Waschmaschine.
- *
- * **Fachlich:** die Auflösung „rund 2.500 U/min“ ist abgeleitet, nicht
- * gesetzt — Hartmetall auf Baustahl schneidet mit rund 200 m/min, bei Ø 25
- * sind das n = 200.000 / (π · 25) ≈ 2.546 (Herleitung in
- * `buehne/zerspanung/kanon.ts`). 200 m/min sind 12 km/h: Radfahrtempo.
- *
- * **`answers.z2`** `{ gespannt, versuche, schaetzung, aufgeloest }`.
- */
-
-const SPANNMITTEL = [
+const HALTER = [
   {
     id: 'schraubstock',
-    label: 'Maschinenschraubstock',
-    zeile: 'Zwei gerade Backen pressen zu.',
-    folge:
-      'Zwei gerade Backen auf einem runden Teil: Sie berühren es nur an zwei schmalen Linien. Beim ersten Span dreht sich die Stange durch — Kratzer im Metall, gespannt ist nichts.',
+    name: 'Zwei gerade Backen',
+    hilfe: 'Hier liegt die runde Stange nur an zwei Stellen an.',
   },
-  {
-    id: 'futter',
-    label: 'Dreibackenfutter',
-    zeile: 'Drei Backen greifen von außen rund.',
-    folge: '',
-  },
+  { id: 'futter', name: 'Drei Backen rundherum', hilfe: '' },
   {
     id: 'pratzen',
-    label: 'Spannpratzen',
-    zeile: 'Klammern drücken aufs Maschinenbett.',
-    folge:
-      'Solche Klammern halten flache Platten fest, die stillliegen sollen. Dein Teil soll sich aber drehen — mitsamt dem, was es festhält. Dafür sind Klammern nicht gebaut.',
+    name: 'Klammern auf einer Platte',
+    hilfe: 'Die Klammern halten eine Platte fest. Unsere Stange soll sich drehen.',
   },
 ] as const
 
-const RICHTIG = 'futter'
-
-/** Spanne des Reglers. Weit genug, dass die echte Zahl überraschen kann. */
-const MIN = 200
-const MAX = 6000
-const SCHRITT = 100
-
-const uMin = (n: number) => n.toLocaleString('de-DE')
-
 export function Z2() {
   const gespeichert = useFortschritt().answers.z2
-  const [gespannt, setGespannt] = useState(() => !!gespeichert?.gespannt)
-  const [versuche, setVersuche] = useState(() => gespeichert?.versuche ?? 0)
-  const [daneben, setDaneben] = useState<string | null>(null)
-  const [schaetzung, setSchaetzung] = useState(() => gespeichert?.schaetzung ?? MIN)
-  const [aufgeloest, setAufgeloest] = useState(() => !!gespeichert?.aufgeloest)
-
-  const spanne = (id: string) => {
-    if (id === RICHTIG) {
-      setDaneben(null)
-      setGespannt(true)
-      merkeAntwort('z2', { gespannt: true, versuche, schaetzung, aufgeloest })
-      return
-    }
+  const [fertig, setFertig] = useState(!!gespeichert?.gespannt)
+  const [fehler, setFehler] = useState<string | null>(null)
+  const [versuche, setVersuche] = useState(gespeichert?.versuche ?? 0)
+  function waehle(id: string) {
+    if (fertig) return
+    const ok = id === 'futter'
     const n = versuche + 1
     setVersuche(n)
-    setDaneben(id)
-    merkeAntwort('z2', { gespannt: false, versuche: n, schaetzung, aufgeloest })
+    setFertig(ok)
+    setFehler(ok ? null : HALTER.find((h) => h.id === id)!.hilfe)
+    merkeAntwort('z2', { gespannt: ok, versuche: n, schaetzung: 0, aufgeloest: ok })
   }
-
-  const aufloesen = () => {
-    setAufgeloest(true)
-    merkeAntwort('z2', { gespannt: true, versuche, schaetzung, aufgeloest: true })
-  }
-
-  const takt = aufgeloest ? 'aufgeloest' : gespannt ? 'drehzahl' : 'spannen'
-  const fehlgriff = SPANNMITTEL.find((s) => s.id === daneben)
-
   return (
     <StepShell
       id="Z2"
-      auftrag={
-        aufgeloest
-          ? null
-          : gespannt
-            ? 'Schätz, wie schnell sich das Futter gleich dreht.'
-            : 'Wähl aus, womit du das Rohteil spannst.'
-      }
-      // Die Ansage kommt erst mit dem Regler — im Spann-Beat gäbe es noch
-      // nichts zu ziehen, und eine Ansage vor der falschen Übung wäre eine
-      // Irreführung.
-      ansage={
-        gespannt && !aufgeloest
-          ? {
-              geste: 'ziehen-regler',
-              text: 'Du legst fest, wie schnell sich das Futter mit dem Rohteil dreht.',
-              haken: RATEN_HAKEN,
-            }
-          : null
-      }
-      interaktionOffen={!aufgeloest}
+      auftrag={fertig ? null : 'Wähle den Halter für die runde Stange.'}
+      ansage={null}
+      interaktionOffen={!fertig}
       buehne={<StepFoto id="Z2" />}
-      warum={
-        <>
-          <p>
-            <Begriff id="ruesten">Rüsten</Begriff> heißt: alles, was vor dem ersten Span
-            passiert. Spannen, Werkzeuge messen, Programm laden.
-          </p>
-          <p>
-            Zuletzt stellst du den <Begriff id="nullpunkt">Nullpunkt</Begriff> ein — den
-            Punkt, von dem aus die Maschine jedes Maß rechnet.
-          </p>
-        </>
-      }
       interaktion={
-        <Wechsel takt={takt}>
-          {takt === 'spannen' ? (
-            <div className="flex flex-col gap-3">
-              <div className="grid gap-2 landscape:grid-cols-3">
-                {SPANNMITTEL.map((s) => (
-                  <Wahlflaeche
-                    key={s.id}
-                    onClick={() => spanne(s.id)}
-                    data-testid={`z2-spannmittel-${s.id}`}
-                    className="flex-col items-start gap-0.5 py-2.5"
-                  >
-                    <span className="font-semibold">{s.label}</span>
-                    <span className="text-[0.9375rem] text-kh-mute">{s.zeile}</span>
-                  </Wahlflaeche>
-                ))}
-              </div>
-              <Rueckmeldung
-                ok={fehlgriff ? false : null}
-                text={fehlgriff ? fehlgriff.folge : null}
-                testid="z2-rueckmeldung"
-              />
-            </div>
-          ) : takt === 'drehzahl' ? (
-            <div className="flex flex-col gap-3">
-              <Rueckmeldung
-                ok
-                text="Drei Backen, ein Griff, alles mittig — das Futter setzt ein rundes Teil von ganz allein genau in die Mitte."
-                testid="z2-gespannt"
-              />
-              <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-                <span data-testid="z2-schaetzung" className="kh-zahl">
-                  {uMin(schaetzung)}
+        <div className="flex flex-col gap-3">
+          <p className="text-kh-paper/80">
+            Die Stange muss mittig sitzen, damit sie sich gleichmäßig drehen kann.
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {HALTER.map((h) => (
+              <Wahlflaeche
+                key={h.id}
+                onClick={() => waehle(h.id)}
+                disabled={fertig}
+                gewaehlt={fertig && h.id === 'futter'}
+                data-testid={`z2-spannmittel-${h.id}`}
+                className={`min-h-[150px] flex-col justify-center px-2 ${fehler && h.id === 'futter' ? 'ring-2 ring-kh-signal' : ''}`}
+              >
+                <HalterBild art={h.id} />
+                <span className="text-center text-[0.9375rem] leading-tight">
+                  {h.name}
                 </span>
-                <span className="text-[1.0625rem] text-kh-mute">
-                  Umdrehungen je Minute
-                </span>
-              </div>
-              <input
-                type="range"
-                min={MIN}
-                max={MAX}
-                step={SCHRITT}
-                value={schaetzung}
-                onChange={(e) => setSchaetzung(Number(e.target.value))}
-                data-testid="z2-regler"
-                aria-label="Geschätzte Drehzahl"
-                className="kh-regler w-full"
-              />
-              <p className="text-[0.9375rem] text-kh-mute">
-                Zum Vergleich: der Schleudergang deiner Waschmaschine schafft{' '}
-                {uMin(WASCHMASCHINE)}.
-              </p>
-            </div>
-          ) : (
-            <Aufloesung schaetzung={schaetzung} />
+              </Wahlflaeche>
+            ))}
+          </div>
+          <Rueckmeldung
+            ok={fertig ? true : fehler ? false : null}
+            text={
+              fertig
+                ? 'Sitzt mittig! Die drei Backen halten die Stange von allen Seiten.'
+                : fehler
+            }
+          />
+          {fehler && (
+            <p className="text-kh-signal">
+              Tipp: Suche drei Backen, die rund um die Stange greifen.
+            </p>
           )}
-        </Wechsel>
-      }
-      aha={
-        <AhaKarte sichtbar={aufgeloest} eyebrow="Warum ist die Tür aus Panzerglas?">
-          Bei dieser Drehzahl wird ein schlecht gespanntes Teil zum Geschoss. Deshalb ist
-          die Tür verriegelt, solange sich etwas dreht — und deshalb ist Spannen der
-          wichtigste Handgriff des Rüstens.
-        </AhaKarte>
+          {fertig && (
+            <details className="kh-feld p-3">
+              <summary className="min-h-11 cursor-pointer py-2">
+                Wie heißt der Halter?
+              </summary>
+              <p>
+                Das ist ein Dreibackenfutter. Es hält das runde Teil beim Drehen fest.
+              </p>
+            </details>
+          )}
+        </div>
       }
       fuss={
         <StepFuss
           id="Z2"
-          uebungOffen={!aufgeloest}
-          aktion={
-            takt === 'drehzahl' ? (
-              <Button variant="aktion" onClick={aufloesen} data-testid="z2-aufloesen">
-                Und jetzt die echte Zahl
-              </Button>
-            ) : null
-          }
-          geschafft={aufgeloest ? 'Gerüstet' : null}
+          uebungOffen={!fertig}
+          geschafft={fertig ? 'Stange eingespannt' : null}
         />
       }
     />
   )
 }
 
-function Aufloesung({ schaetzung }: { schaetzung: number }) {
+function HalterBild({ art }: { art: string }) {
   return (
-    <motion.div
-      initial="aus"
-      animate="an"
-      variants={{ an: { transition: { staggerChildren: 0.45 } } }}
-      className="flex flex-col gap-3"
-    >
-      <motion.div variants={TAKT}>
-        <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-          <span data-testid="z2-echt" className="kh-zahl text-kh-orange">
-            rund {uMin(DREHZAHL)}
-          </span>
-          <span className="text-[1.0625rem] text-kh-mute">Umdrehungen je Minute</span>
-        </div>
-        <p className="mt-1.5 text-[1rem] text-kh-mute">
-          Du hast {uMin(schaetzung)} gesagt — die Waschmaschine schafft beim Schleudern{' '}
-          {uMin(WASCHMASCHINE)}.
-        </p>
-      </motion.div>
-      <motion.p
-        variants={TAKT}
-        className="text-[1.0625rem] leading-[1.45] text-kh-paper/90"
-      >
-        Die Zahl ist nicht nach Gefühl gewählt, sie ist gerechnet: Außen am Teil saust der
-        Stahl ungefähr in Fahrradtempo an der Schneide vorbei. Daraus rechnet man die
-        Drehzahl aus — für jedes dickere oder dünnere Teil neu.
-      </motion.p>
-    </motion.div>
+    <svg viewBox="0 0 120 105" className="h-24 w-full" aria-hidden="true">
+      {art === 'futter' ? (
+        <>
+          <circle
+            cx="60"
+            cy="52"
+            r="45"
+            fill="#3b4148"
+            stroke="#acb4bd"
+            strokeWidth="3"
+          />
+          {[0, 120, 240].map((r) => (
+            <rect
+              key={r}
+              x="49"
+              y="9"
+              width="22"
+              height="29"
+              rx="3"
+              fill="#e4e7eb"
+              transform={`rotate(${r} 60 52)`}
+            />
+          ))}
+        </>
+      ) : art === 'schraubstock' ? (
+        <>
+          <rect x="9" y="14" width="25" height="75" rx="3" fill="#aeb6bf" />
+          <rect x="86" y="14" width="25" height="75" rx="3" fill="#aeb6bf" />
+        </>
+      ) : (
+        <>
+          <rect x="8" y="70" width="104" height="20" rx="3" fill="#69727d" />
+          <path
+            d="M22 72V32H46M98 72V32H74"
+            fill="none"
+            stroke="#d2d7de"
+            strokeWidth="12"
+          />
+        </>
+      )}
+      <circle cx="60" cy="52" r="20" fill="#dfad68" stroke="#ffe0ae" strokeWidth="3" />
+      <circle cx="60" cy="52" r="3" fill="#483822" />
+    </svg>
   )
-}
-
-const TAKT = {
-  aus: { opacity: 0, transform: 'translateY(12px)' },
-  an: { opacity: 1, transform: 'translateY(0px)' },
 }

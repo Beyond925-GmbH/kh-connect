@@ -1,15 +1,8 @@
 import { BERUFE } from '@/khpl/berufe/registry'
 import { useSitzung } from '@/khpl/store/fortschritt'
-import { FRAGEN } from './fragen'
+import { signaleAusAntworten } from './fragen'
 import { werkzeug } from './helm'
-import {
-  FRAGEN_GEWICHT,
-  baueBesucherVektor,
-  ranke,
-  zitierbareMerkmale,
-  type Signal,
-  type Treffer,
-} from './matching'
+import { baueBesucherVektor, ranke, zitierbareMerkmale, type Treffer } from './matching'
 import type { MerkmalId } from './merkmale'
 
 export interface Match {
@@ -25,39 +18,12 @@ export interface Match {
   merkmale: MerkmalId[]
 }
 
-/**
- * Die Rangfolge aus dem, was der Besucher im Trichter gesagt hat.
- *
- * **Warum der Zweitplatzierte mitkommt.** Zimmerer und Dachdecker liegen im
- * Merkmalsraum dicht beieinander — beide draußen, beide oben, beide auf
- * demselben Dach. Ein Vorschlag, der nur den Sieger nennt, behauptet in genau
- * diesem Fall eine Trennschärfe, die die vier Fragen nicht haben. Wird der
- * Zweite mitgenannt, liest sich dasselbe Ergebnis als ehrlich statt als falsch
- * — und der Knopf „alle vier ansehen“ bekommt einen Grund.
- */
+/** Gewähltes Werkzeug und Bildantworten geben eine unverbindliche Reihenfolge. */
 export function useMatch(): Match {
   const sitzung = useSitzung()
-
-  const signale: Signal[] = []
-
-  const w = werkzeug(sitzung.helm?.werkzeug)
-  // `zitierbar: false`: dass jemand zur Rohrzange greift, ist ein Indiz und
-  // keine Aussage. Im Vorschlag als „du magst Technik“ zu erscheinen, hat es
-  // sich nicht verdient.
-  if (w) signale.push({ gewichte: w.gewichte, zitierbar: false })
-
-  for (const frage of FRAGEN) {
-    const antwortId = sitzung.gefragt[frage.id]
-    if (!antwortId) continue
-    const antwort = frage.antworten.find((a) => a.id === antwortId)
-    if (!antwort) continue
-    signale.push({
-      gewichte: antwort.gewichte,
-      faktor: FRAGEN_GEWICHT,
-      zitierbar: true,
-    })
-  }
-
+  const signale = signaleAusAntworten(sitzung.gefragt)
+  const gewaehlt = werkzeug(sitzung.helm?.werkzeug)
+  if (gewaehlt) signale.push({ gewichte: gewaehlt.gewichte, faktor: 1, zitierbar: false })
   const besucher = baueBesucherVektor(signale)
   const rangfolge = ranke(besucher, BERUFE)
 

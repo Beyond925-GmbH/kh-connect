@@ -12,7 +12,19 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { motion } from 'motion/react'
-import { Check, X } from 'lucide-react'
+import {
+  Check,
+  X,
+  Hammer,
+  BrickWall,
+  Drill,
+  Fence,
+  Layers,
+  Square,
+  Wrench,
+  Construction,
+  MoveVertical,
+} from 'lucide-react'
 import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import { DND_ANLEITUNG, DND_ANSAGEN } from '@/khpl/komponenten/dndDeutsch'
 import { Rueckmeldung } from '@/khpl/komponenten/Rueckmeldung'
@@ -59,13 +71,13 @@ const TEILE: Teil[] = [
     // Vorher „Sparren und Pfetten, nummeriert". Beide Wörter kennt der
     // Besucher an dieser Stelle noch nicht, und die Karte muss ohne Glossar
     // lesbar sein — sie ist die Aufgabe, nicht der Lehrstoff.
-    text: 'Das nummerierte Holz fürs Dach',
+    text: 'Balken',
     mit: true,
     grund: 'Das Dach selbst. Zuletzt geladen ist zuerst gebraucht.',
   },
   {
     id: 'ziegel',
-    text: 'Dachziegel',
+    text: 'Ziegel',
     mit: false,
     // Vorher: „Die bringt der Dachdecker mit." Das ging, solange der Tag dem
     // Zimmerer gehörte. Jetzt ist der Besucher selbst der Dachdecker, und die
@@ -77,7 +89,7 @@ const TEILE: Teil[] = [
   },
   {
     id: 'anker',
-    text: 'Schrauben und Metallwinkel',
+    text: 'Schrauben, Winkel',
     mit: true,
     grund: 'Ohne Schrauben und Winkel ist ein Dachstuhl nur ein Stapel Holz.',
   },
@@ -85,37 +97,37 @@ const TEILE: Teil[] = [
     id: 'daemmung',
     text: 'Dämmung',
     mit: false,
-    grund: 'Kommt, wenn das Dach dicht ist. Heute nicht.',
+    grund: 'Für den heutigen Aufbau des Holzgerüsts brauchen wir noch keine Dämmung.',
   },
   {
     id: 'psa',
-    text: 'Gurte und Geländer gegen Absturz',
+    text: 'Gurte, Geländer',
     mit: true,
     grund: 'Kommt zuerst runter und wird zuerst aufgebaut. Vor dem ersten Sparren.',
   },
   {
     id: 'fenster',
-    text: 'Dachfenster',
+    text: 'Fenster',
     mit: false,
-    grund: 'Erst wenn die Sparren stehen — sonst liegt Glas im Weg.',
+    grund: 'Die Dachfenster werden bei einem späteren Arbeitsschritt eingebaut.',
   },
   {
     id: 'werkzeug',
-    text: 'Akkuschrauber, Säge, Werkzeugkiste',
+    text: 'Werkzeug',
     mit: true,
-    grund: 'Klar.',
+    grund: 'Mit dem Werkzeug verbindest du die Hölzer.',
   },
   {
     id: 'mischer',
     text: 'Betonmischer',
     mit: false,
-    grund: 'Das ist der Job der Maurer, nicht eurer.',
+    grund: 'Heute bauen wir mit Holz. Beton brauchen wir dafür nicht.',
   },
   {
     id: 'leiter',
     text: 'Leiter',
     mit: true,
-    grund: 'Auch für den Weg nach oben braucht es einen Weg nach oben.',
+    grund: 'Die Leiter gehört zum vorgesehenen Zugang zur Arbeitsstelle.',
   },
 ]
 
@@ -166,6 +178,10 @@ export function B41() {
     const teil = TEILE.find((t) => t.id === e.active.id)
     if (!teil) return
 
+    pruefeTeil(teil)
+  }
+
+  const pruefeTeil = (teil: Teil) => {
     setLetzte({ teil, ok: teil.mit })
     if (teil.mit) {
       // Die neue Liste wird hier berechnet und nicht im Updater von
@@ -183,11 +199,11 @@ export function B41() {
   return (
     <StepShell
       id="B4.1"
-      auftrag={fertig ? null : 'Zieh auf den Anhänger, was morgen gebraucht wird.'}
+      auftrag={fertig ? null : 'Belade den Anhänger für den Dachstuhl.'}
       ansage={{
         geste: 'ziehen-karte',
-        text: 'Du belädst den Anhänger für morgen früh — allein aus dem Kopf.',
-        haken: 'Was du vergisst, fehlt um sieben auf der Baustelle.',
+        text: 'Du wählst das Material für den Aufbau des Dachstuhls.',
+        haken: 'Du kannst die Karten auch antippen, um sie zu laden.',
       }}
       buehneInteraktiv
       interaktionOffen={!fertig}
@@ -223,6 +239,11 @@ export function B41() {
         >
           <div className="flex flex-col gap-2 max-sm:gap-1.5" data-wisch="aus">
             <Ladefortschritt geladen={geladen.length} fertig={fertig} />
+            {!fertig && (
+              <p className="text-sm text-kh-mute">
+                Tippe die Dinge an oder ziehe sie auf den Anhänger.
+              </p>
+            )}
 
             <Rueckmeldung
               ok={letzte ? letzte.ok : null}
@@ -240,6 +261,7 @@ export function B41() {
                     teil={t}
                     geladen={geladen.includes(t.id)}
                     abgelehnt={abgelehnt.includes(t.id)}
+                    onLaden={() => pruefeTeil(t)}
                   />
                 </li>
               ))}
@@ -395,9 +417,7 @@ function Ladefortschritt({ geladen, fertig }: { geladen: number; fertig: boolean
           „Zieh auf den Anhänger“ stand wortgleich schon im Auftragsband — die
           Zeile sagt jetzt, warum die Wahl zählt, ohne Höhe zu kosten. */}
       <p className="flex flex-wrap items-baseline gap-x-2.5 text-[1.0625rem] font-medium text-kh-paper max-sm:text-[1rem]">
-        {fertig
-          ? 'Vollständig. Alles drauf, was heute gebraucht wird.'
-          : 'Was du vergisst, fehlt morgen früh auf der Baustelle.'}
+        {fertig ? 'Vollständig. Alles drauf, was heute gebraucht wird.' : 'Geladen:'}
         <span className="font-display text-[1.5rem] leading-none text-kh-paper/60 tabular-nums">
           {geladen}/{NOETIG}
         </span>
@@ -420,10 +440,12 @@ function Hallenteil({
   teil,
   geladen,
   abgelehnt,
+  onLaden,
 }: {
   teil: Teil
   geladen: boolean
   abgelehnt: boolean
+  onLaden: () => void
 }) {
   const erledigt = geladen || abgelehnt
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -432,20 +454,23 @@ function Hallenteil({
   })
 
   return (
-    <div
+    <button
+      type="button"
+      onClick={onLaden}
+      disabled={erledigt}
       ref={setNodeRef}
       {...listeners}
       {...attributes}
       data-testid={`b41-${teil.id}`}
       // Die Karte selbst bleibt liegen und verblasst nur — bewegt wird die
       // Kopie im `DragOverlay` (s. dort).
-      className={isDragging ? 'opacity-30' : undefined}
+      className={`w-full ${isDragging ? 'opacity-30' : ''}`}
     >
       <Karte
         teil={teil}
         zustand={geladen ? 'geladen' : abgelehnt ? 'abgelehnt' : 'offen'}
       />
-    </div>
+    </button>
   )
 }
 
@@ -454,6 +479,18 @@ function Hallenteil({
  * greifbar; was verladen ist, trägt die Signalfarbe; was abgelehnt wurde,
  * verblasst und wird durchgestrichen.
  */
+const TEIL_ICONS: Record<string, typeof Hammer> = {
+  sparren: Hammer,
+  ziegel: BrickWall,
+  anker: Wrench,
+  psa: Fence,
+  daemmung: Layers,
+  werkzeug: Drill,
+  fenster: Square,
+  leiter: MoveVertical,
+  mischer: Construction,
+}
+
 function Karte({
   teil,
   zustand,
@@ -464,12 +501,13 @@ function Karte({
   /** Die Kopie im Drag-Overlay — leicht vergrößert, mit Schatten. */
   gegriffen?: boolean
 }) {
+  const Icon = TEIL_ICONS[teil.id] ?? Hammer
   return (
     <div
       // Unterhalb `sm` eine Stufe kompakter: neun Karten in zwei Spalten
       // müssen mit dem 62-%-Panel auskommen, ohne unter die Kante zu rutschen.
       // 44 px Mindesthöhe bleiben — die Karten sind die Greifziele der Übung.
-      className={`flex min-h-[54px] touch-none items-center gap-2 rounded-kh border-2 px-3 py-1.5 text-left text-[0.9375rem] leading-tight max-sm:min-h-[44px] max-sm:gap-1.5 max-sm:px-2.5 max-sm:py-1 max-sm:text-[0.875rem] max-sm:leading-[1.2] ${
+      className={`relative flex min-h-[54px] touch-none items-center gap-2 rounded-kh border-2 px-3 py-1.5 text-left text-[0.9375rem] leading-tight max-sm:h-[76px] max-sm:flex-col max-sm:justify-center max-sm:gap-1 max-sm:px-1 max-sm:py-1 max-sm:text-[0.9375rem] max-sm:text-center max-sm:leading-[1.2] ${
         gegriffen ? 'scale-105 shadow-[0_16px_40px_rgba(0,0,0,0.6)]' : ''
       } ${
         zustand === 'geladen'
@@ -479,16 +517,25 @@ function Karte({
             : 'cursor-grab border-transparent bg-kh-paper font-semibold text-[#0E0D0B] active:cursor-grabbing'
       }`}
     >
+      <Icon className="size-6 shrink-0 text-kh-orange max-sm:size-5" aria-hidden />
       {zustand === 'geladen' && (
-        <Check className="size-4 shrink-0 text-kh-signal" strokeWidth={3.5} />
+        <Check
+          className="size-4 shrink-0 text-kh-signal max-sm:absolute max-sm:right-1 max-sm:top-1"
+          strokeWidth={3.5}
+        />
       )}
-      {zustand === 'abgelehnt' && <X className="size-4 shrink-0" strokeWidth={3} />}
+      {zustand === 'abgelehnt' && (
+        <X
+          className="size-4 shrink-0 max-sm:absolute max-sm:right-1 max-sm:top-1"
+          strokeWidth={3}
+        />
+      )}
       {/* `break-words`: hochkant stehen die neun Karten dreispaltig, und in
           104 px Breite passt „Akkuschrauber“ nicht in eine Zeile. Ohne
           Umbruch im Wort lief das Label über die Kartenkante und wurde
           gekappt — sichtbar blieb „Akkuschraube“. Das Werkzeug gehört zu den
           fünf richtigen Teilen; ein halbes Wort ist hier keine Kosmetik. */}
-      <span className="min-w-0 break-words hyphens-auto">{teil.text}</span>
+      <span className="min-w-0 hyphens-none">{teil.text}</span>
     </div>
   )
 }

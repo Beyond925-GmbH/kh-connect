@@ -1,6 +1,8 @@
+import { Dialog } from '@base-ui/react/dialog'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowLeft, ChevronLeft, LayoutGrid, Info } from 'lucide-react'
 import { motion } from 'motion/react'
+import { offeneAbstecher, einladung } from '@/khpl/flow/uebergaenge'
 import { step, type StepId } from '@/khpl/flow/steps'
 import { beruf as berufDef } from '@/khpl/berufe/registry'
 import { Ansage } from '@/khpl/komponenten/Ansage'
@@ -19,69 +21,18 @@ import {
   geheZurueck,
   setzeZurueck,
   springeZuBesuchtem,
-  starteKarriereSkip,
   useAktiverBeruf,
   useBesuchteBerufe,
   useFortschritt,
   useGraph,
   zeigeBerufe,
+  oeffneVertiefung,
 } from '@/khpl/store/fortschritt'
 import { kannVerlaufZurueck, verlaufZurueck } from '@/khpl/store/verlauf'
 
-/**
- * Der Step-Screen — das Arbeitspferd. Rendert jeden Step, Haupt wie Abstecher,
- * aus denselben Slots:
- *
- *   Bühne · Titel · Warum · **Auftrag** · Interaktion · Fuß
- *
- * ---
- *
- * **Was sich mit der Vereinfachung geändert hat, und warum**
- *
- * Der Screen trug bis zu dreizehn Elemente gleichzeitig: Zurück, Rail,
- * Staff-Fläche, Karriere-Link, Titel, Bühne (oft selbst die Interaktion),
- * Klappgriff, Fachtext mit Chip-Popovern, Interaktion, Rückmeldung, einen
- * zeitgesteuerten Einwurf oben rechts, Überspringen und die Primärhandlung.
- * Dazu die Abstecher-Wahl beim Weitergehen. Das ist zu viel für jemanden, der
- * im Stehen an einem Messestand davor steht.
- *
- * Drei Änderungen, in dieser Reihenfolge wichtig:
- *
- *  1. **Es gibt jetzt einen Platz für die Aufgabe** (`Auftragsband`). Vorher
- *     stand die Anweisung auf jedem Screen woanders — im letzten Halbsatz des
- *     Fachtexts, in einer Komponente, die genau einmal existierte, auf der
- *     Bühne, oder gar nicht. `auftrag` ist deshalb eine **erforderliche**
- *     Angabe: `null` ist eine Entscheidung („dieser Screen wird gelesen“),
- *     Weglassen ist keine mehr.
- *  2. **Der Fachtext ist nicht mehr der Standardinhalt des Panels.** Auf
- *     Übungs-Steps trägt der Auftrag den Screen; auf Lese-Steps steht der
- *     Fachtext offen da (`WarumBereich`). So ist das Panel im Ruhezustand rund
- *     drei Zeilen hoch statt 62–84 % des Screens, und die Bühne bekommt den
- *     Rest — ohne dass jemand einen Griff finden muss.
- *  3. **Der Einwurf steht als eigene Klappzeile unter dem Fachtext.** Er meldet
- *     sich nicht mehr auf einer Uhr in einer eigenen Bildschirmecke, während
- *     gearbeitet wird — jede Aha-Karte ist eine eigenständige, gleich
- *     aussehende Zeile, die auf Tipp aufgeht (`Warum.tsx`).
- *
- * **Was ersatzlos entfallen ist:** der Klappgriff samt `buehnePlatz`,
- * `einklappbar` und den Höhendeckeln 62 % / 84 %, sowie `EinwurfBuehne` mit
- * ihrem Takt (4 s, dann 15/22/15/31 s). Der Klappgriff behandelte das Symptom
- * eines Panels, das zu groß war; ist es das nicht mehr, braucht es ihn nicht.
- *
- * **Was bewusst geblieben ist:**
- *
- *  - **Der Titel steht auf der Bühne**, nicht im Panel. Das ist der Trick, an
- *    dem hängt, dass das Foto zum Screen gehört statt hinter ihn.
- *  - **Die Überlaufmessung** unten. Sie ist fehlerträchtig genug, dass ihre
- *    heutige Fassung eine Geschichte hat (`scrollHeight` zählt Antons
- *    Oberlängen mit, deshalb wird am letzten Kind gemessen). Sie zu löschen,
- *    um eine Zeilenzahl zu treffen, wäre ein schlechter Tausch. Sie umfasst
- *    jetzt nur noch die Interaktion — der Auftrag scrollt nie weg.
- *  - **`karteBreit`.** Es regelt die Spaltenbreite quer, nicht die Höhe, und
- *    war nie Teil des Problems.
- *  - **Wisch-Navigation gibt es weiterhin nicht.** Sie kollidierte mit jeder
- *    Zieh-Übung; eine Geste, die mal geht und mal nicht, ist schlimmer als
- *    keine.
+/** Gemeinsame Spielansicht: Auftrag und Handlung im Panel, freiwillige
+ * Erklärungen im Dialog. Berufswechsel und Fortschritt bleiben erreichbar.
+ * Die Bühne erhält den nach Abzug des Panels verfügbaren Kamerabereich.
  */
 
 export interface AnsageDaten {
@@ -133,14 +84,11 @@ export function StepShell({
   /**
    * Der frühere `fachtext`. Höchstens 40 Wörter, drei Sätze.
    *
-   * **Wird auf Übungs-Steps derzeit nicht angezeigt** (siehe `leseStep`
-   * unten) — deklariert bleibt er trotzdem, die Anzeige ist eine
-   * Shell-Entscheidung, keine Inhaltsfrage. Auf Lese-Steps ist er der
-   * Hauptinhalt und steht offen da.
+   * Auf Spielseiten unter „Mehr erfahren“, auf reinen Leseseiten direkt sichtbar.
    */
   warum?: React.ReactNode
   interaktion?: React.ReactNode
-  /** Wie `warum`: auf Übungs-Steps derzeit nicht angezeigt. */
+  /** Freiwillige Zusatzinformation im selben Dialog wie `warum`. */
   aha?: React.ReactNode
   fuss?: React.ReactNode
   /**
@@ -177,7 +125,7 @@ export function StepShell({
    * deklariert und tauchen beim Wiederbesuch eines gelösten Steps auf (der
    * mountet mit `auftrag === null` und zählt damit als Lese-Step).
    */
-  const [leseStep] = useState(() => auftrag === null)
+  const [leseStep] = useState(() => auftrag === null && interaktion == null)
   const flaeche = useRef<HTMLElement>(null)
   // Das Panel. Der Messer rechnet daraus aus, wie viel Fläche dem 3D-Modell
   // bleibt.
@@ -244,8 +192,10 @@ export function StepShell({
   const aktiver = berufId ? berufDef(berufId) : null
   const imSkip = fortschritt.detourReturnTo !== null
   const kannZurueck = fortschritt.visited.length > 1
-  const offen = interaktionOffen ?? interaktion != null
-  const skipSichtbar = !imSkip && !offen && graph.karriereSkipAuf.includes(id)
+  void interaktionOffen
+  const [infoOffen, setInfoOffen] = useState(false)
+  const extras = offeneAbstecher(graph, id, fortschritt)
+  const hatInfo = !!(warum || aha || extras.length)
 
   const zurueck = useCallback(() => {
     // Der ←-Knopf geht über den **Browser-Verlauf** zurück, nicht selbst durch
@@ -267,16 +217,16 @@ export function StepShell({
    * Spalte erzeugt dort nur Rand.
    */
   const spaltenbreite = buehneInteraktiv
-    ? 'landscape:max-w-[38rem]'
+    ? 'landscape:max-w-[34rem]'
     : karteBreit
       ? 'landscape:max-w-[52rem]'
       : 'landscape:max-w-[44rem]'
 
   const ueberlagerung = (
-    // `pt-[72px]` hält die Leiste frei. Ohne das schiebt ein inhaltsschwerer
+    // `pt-[80px]` hält die Leiste frei. Ohne das schiebt ein inhaltsschwerer
     // Step sein Panel so hoch, dass der Titel unter Rail und Zurück-Button
     // verschwindet.
-    <div className="pointer-events-none absolute inset-0 flex flex-col justify-end gap-3 p-4 pt-[72px] sm:p-6 sm:pt-[72px] landscape:gap-4 landscape:p-7 landscape:pt-[72px]">
+    <div className="pointer-events-none absolute inset-0 flex flex-col justify-end gap-3 p-4 pt-[80px] sm:p-6 sm:pt-[80px] landscape:gap-4 landscape:p-7 landscape:pt-[80px]">
       {/*
         Der Titel steht auf dem Bild, nicht im Panel. Solange die Überschrift
         in derselben Fläche saß wie Text und Knopf, war jeder Screen ein
@@ -298,7 +248,7 @@ export function StepShell({
           </span>
         )}
         <h1 className="kh-titel drop-shadow-[0_2px_18px_rgba(0,0,0,0.65)]">
-          {def.titel}
+          {def.titel || def.kurz}
         </h1>
       </motion.header>
 
@@ -365,8 +315,58 @@ export function StepShell({
         )}
 
         {fuss && (
-          <div className="shrink-0 border-t border-kh-line pt-2.5 landscape:pt-3">
-            {fuss}
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-kh-line pt-2.5 landscape:pt-3">
+            {hatInfo && (
+              <Dialog.Root open={infoOffen} onOpenChange={setInfoOffen}>
+                <Dialog.Trigger
+                  data-testid="mehr-themen"
+                  className="mr-auto flex min-h-11 items-center gap-2 text-sm text-kh-mute"
+                >
+                  <Info className="size-4" aria-hidden />
+                  Mehr erfahren
+                </Dialog.Trigger>
+                <Dialog.Portal>
+                  <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/70" />
+                  <Dialog.Popup
+                    className="fixed left-1/2 top-1/2 z-[51] max-h-[85svh] w-[min(36rem,94vw)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-kh-lg border border-kh-line-strong bg-kh-raised p-5 outline-none"
+                    data-testid="mehr-themen-liste"
+                  >
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <Dialog.Title className="text-xl font-semibold">
+                        Mehr zum Beruf
+                      </Dialog.Title>
+                      <Dialog.Close className="min-h-11 rounded-kh-pill border border-kh-line px-4 text-sm">
+                        Schließen
+                      </Dialog.Close>
+                    </div>
+                    <Dialog.Description className="sr-only">
+                      Zusätzliche Erklärungen und Themen. Dein Fortschritt bleibt
+                      erhalten.
+                    </Dialog.Description>
+                    <WarumBereich warum={warum}>{aha}</WarumBereich>
+                    {extras.length > 0 && (
+                      <div className="mt-4 flex flex-col gap-2 border-t border-kh-line pt-4">
+                        {extras.map((ziel) => (
+                          <button
+                            key={ziel}
+                            type="button"
+                            data-testid={`abstecher-${ziel}`}
+                            onClick={() => {
+                              setInfoOffen(false)
+                              oeffneVertiefung(ziel)
+                            }}
+                            className="min-h-12 rounded-kh border border-kh-line-strong px-4 py-2 text-left text-base"
+                          >
+                            {einladung(graph, ziel)}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </Dialog.Popup>
+                </Dialog.Portal>
+              </Dialog.Root>
+            )}
+            <div className="contents">{fuss}</div>
           </div>
         )}
       </motion.div>
@@ -428,7 +428,7 @@ export function StepShell({
                 onClick={zurueck}
                 data-testid="zurueck"
                 aria-label="Einen Schritt zurück"
-                className={`grid size-[60px] shrink-0 place-items-center rounded-kh-pill bg-black/35 text-kh-paper backdrop-blur-md transition-transform active:scale-90 ${
+                className={`grid size-[44px] shrink-0 place-items-center rounded-kh-pill bg-black/35 text-kh-paper backdrop-blur-md transition-transform active:scale-90 ${
                   kannZurueck ? '' : 'invisible'
                 }`}
               >
@@ -459,18 +459,18 @@ export function StepShell({
                   stehen mit `gap-2` enger beieinander als am Rest der Leiste
                   und lesen sich damit als ein Block. */}
               <div className="flex shrink-0 items-center gap-2">
-                {skipSichtbar && (
-                  <button
-                    type="button"
-                    onClick={starteKarriereSkip}
-                    data-testid="karriere-skip"
-                    className="flex h-[52px] shrink-0 items-center gap-1 rounded-kh-pill bg-black/35 px-4 text-[1rem] font-medium text-kh-paper/75 backdrop-blur-md transition-transform active:scale-95"
-                  >
-                    Karriere-Wege
-                    <ChevronRight className="size-5" strokeWidth={2} />
-                  </button>
-                )}
-                <NeustartKnopf />
+                <button
+                  type="button"
+                  onClick={zeigeBerufe}
+                  data-testid="zurueck-zu-berufen"
+                  className="flex min-h-[48px] items-center justify-center gap-2 rounded-kh-pill border border-kh-line-strong bg-kh-ink/90 px-3 text-sm font-semibold text-kh-paper"
+                >
+                  <LayoutGrid className="size-5 shrink-0" aria-hidden />
+                  <span className="max-w-[7rem] leading-tight sm:max-w-none">
+                    Zurück zu den Berufen
+                  </span>
+                </button>
+                <NeustartKnopf className="max-sm:hidden" />
               </div>
             </header>
           )}
@@ -534,6 +534,15 @@ function RueckkehrLeiste({ ziel }: { ziel: StepId }) {
           Zurück zu deinem Tag
           <span className="text-kh-paper/50"> — {step(graph, ziel).titel}</span>
         </span>
+      </button>
+      <button
+        type="button"
+        onClick={zeigeBerufe}
+        data-testid="zurueck-zu-berufen"
+        className="ml-auto flex min-h-12 items-center gap-2 rounded-kh-pill bg-kh-ink/90 px-3 text-sm font-semibold"
+      >
+        <LayoutGrid className="size-5" aria-hidden />
+        Zurück zu den Berufen
       </button>
       {/* Auch der Abstecher ist ein Screen, auf dem jemand stehen bleiben
           kann — der Reset fehlt hier so wenig wie in der normalen Leiste. */}

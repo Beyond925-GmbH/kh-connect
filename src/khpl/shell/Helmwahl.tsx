@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 import {
   ArrowRight,
   Drill,
@@ -47,6 +47,7 @@ const ICONS: Record<WerkzeugIcon, typeof Hammer> = {
 }
 
 export function Helmwahl() {
+  const reduziert = useReducedMotion()
   const sitzung = useSitzung()
   const [farbe, setFarbe] = useState(sitzung.helm?.farbe ?? HELM_FARBEN[0].id)
   const [werkzeug, setWerkzeug] = useState(sitzung.helm?.werkzeug ?? '')
@@ -60,10 +61,7 @@ export function Helmwahl() {
     }
   }, [])
 
-  // Auch ohne Werkzeug speichern: die Farbe ist reiner Ausdruck, aber sie
-  // reist mit — die Höhenstation zieht **diesen** Helm am Maßband hoch, und
-  // ein weißer Ersatzhelm dort würde die Wahl von eben dementieren.
-  // `werkzeug: ''` ist im Matching wirkungslos (`werkzeug('')` → null).
+  // Farbe und Werkzeug bleiben freiwillig. Ohne Werkzeug entsteht kein Signal.
   const weiter = () => {
     merkeHelm({ farbe, werkzeug })
     zeigeFragen()
@@ -124,7 +122,7 @@ export function Helmwahl() {
         <div className="flex h-[38%] max-sm:h-[26%] min-h-0 shrink-0 flex-col items-center justify-center gap-3 landscape:h-auto landscape:w-[36%] landscape:flex-none">
           <motion.div
             key={farbe}
-            initial={{ scale: 0.9, opacity: 0, rotate: -4 }}
+            initial={reduziert ? false : { scale: 0.9, opacity: 0, rotate: -4 }}
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
             transition={{ type: 'spring', stiffness: 420, damping: 22 }}
             className="flex h-full w-full items-center justify-center landscape:h-auto landscape:max-w-[23rem]"
@@ -165,7 +163,7 @@ export function Helmwahl() {
             data-scroll
             className="-mx-2.5 flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-2.5"
           >
-            <div className="m-auto flex w-full flex-col gap-8 py-2.5 max-sm:gap-6 landscape:gap-6">
+            <div className="m-auto flex w-full flex-col gap-8 py-2.5 max-sm:gap-5 landscape:gap-6">
               <header className="flex shrink-0 flex-col gap-1.5">
                 <span className="kh-etikett flex items-center gap-2">
                   <span aria-hidden className="h-[3px] w-7 rounded-full bg-kh-orange" />
@@ -226,15 +224,17 @@ export function Helmwahl() {
                         gewaehlt={gewaehlt}
                         data-testid={`werkzeug-${w.id}`}
                         onClick={() => setWerkzeug(gewaehlt ? '' : w.id)}
-                        className="min-h-[9rem] max-sm:min-h-[7.25rem] landscape:min-h-[104px]"
+                        className="min-h-[9rem] max-sm:min-h-[6.5rem] max-sm:py-2 landscape:min-h-[104px]"
                       >
                         <Icon
-                          className={`size-11 landscape:size-9 ${gewaehlt ? '' : 'text-kh-paper/70'}`}
+                          className={`size-11 max-sm:size-9 landscape:size-9 ${gewaehlt ? '' : 'text-kh-paper/70'}`}
                           strokeWidth={1.75}
                           aria-hidden
                         />
-                        <span className="text-[1.0625rem] leading-tight font-semibold landscape:text-[0.9375rem]">
-                          {w.name}
+                        <span className="text-[1.0625rem] leading-tight font-semibold max-sm:text-base landscape:text-[0.9375rem]">
+                          {w.name
+                            .replace('Akkuschrauber', 'Akku\u00adschrauber')
+                            .replace('Messschieber', 'Mess\u00adschieber')}
                         </span>
                       </Wahlflaeche>
                     )

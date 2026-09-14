@@ -1,35 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { motion } from 'motion/react'
-import { ArrowRight, RadioTower } from 'lucide-react'
+import { motion, useReducedMotion } from 'motion/react'
+import { ArrowRight, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { Antwortmoeglichkeit, Frage } from '@/khpl/match/fragen'
-import { useSitzung } from '@/khpl/store/fortschritt'
-import { Radioklang } from './radioklang'
+import { pausiere, spiele, useSitzungsmusik } from '../musik-store'
 
-/**
- * Das Baustellenradio. Ein Frequenzband, fünf Sender, ein Regler.
- *
- * **Warum ein Radio, und warum zuerst.** Die Station ist die persönliche im
- * Trichter (`fragen.ts`, `musik`) und eröffnet ihn: die erste Frage der App
- * ist eine, auf die jeder sofort eine Antwort hat. Gewichte trägt sie keine —
- * ihre Arbeit ist Bindung und Bedienlehre.
- *
- * **Der Sender färbt den Screen.** Jede Richtung bringt ihr Bühnenlicht mit
- * (`sender.farbe`): ein Farbwash über dem Motiv, Pegel, Anzeige und Marke im
- * selben Ton — und der Pegel wippt im Takt des Senders (`sender.bpm`). Das
- * Signal-Gelbgrün bleibt hier deshalb ungenutzt; die Rückmeldung dieses
- * Screens ist der Sender selbst.
- *
- * **Er klingt — genau einmal.** `radioklang.ts` spielt je Sender eine leise
- * synthetische Loop und zwischen den Sendern Bandrauschen — erst nach dem
- * ersten Griff (iOS-Gestenregel, und ein Kiosk, der ungefragt tönt, wäre auch
- * sonst falsch). Der Weiter-Knopf baut den Klang ab, bevor der Screen wechselt.
- *
- * **Und nur beim ersten Durchgang.** Ein Reload setzt den Trichter auf die
- * erste Station zurück, und das ist diese — wer die Frage schon beantwortet
- * hat, bekommt den Regler wieder, aber stumm. Das Radio ist der Auftakt, keine
- * Hintergrundmusik, die einem beim Neuladen hinterherläuft.
- */
+/** Das Frequenzband steuert dasselbe Radio wie der globale Musikschalter. */
 
 const BAND_MIN = 87
 const BAND_MAX = 108
@@ -53,13 +29,15 @@ export function Radio({
   frage: Frage
   onFertig: (antwortId: string) => void
 }) {
-  // Start im Rauschen zwischen zwei Sendern: das lädt zum Drehen ein, ohne
-  // einen vorzuschlagen — und liegt außerhalb jeder Fangzone.
-  const [mhz, setMhz] = useState(95.4)
+  const musik = useSitzungsmusik()
+  const reduziert = useReducedMotion()
+  const [mhz, setMhz] = useState(() =>
+    musik.an
+      ? (frage.antworten.find((a) => a.sender?.stil === musik.stil)?.sender?.mhz ?? 95.4)
+      : 95.4,
+  )
   const [beruehrt, setBeruehrt] = useState(false)
-  const [ziehend, setZiehend] = useState(false)
   const band = useRef<HTMLDivElement>(null)
-  const klang = useRef<Radioklang | null>(null)
 
   // Der Stand für `raste`: ein schneller Tipp feuert down und up im selben
   // Frame, bevor React neu gerendert hat — ein Handler, der den State aus
@@ -75,36 +53,38 @@ export function Radio({
     null
   const sender = eingestellt?.sender ?? null
 
-  // Der Ton gehört dem ersten Durchgang: eine schon beantwortete Station
-  // bleibt stumm (siehe Kopf). Einmal beim Aufbau festgehalten — die Antwort
-  // fällt in dieser Station, sie darf sie nicht mitten im Griff verstummen
-  // lassen.
-  const gefragt = useSitzung().gefragt
-  const [stumm] = useState(() => frage.id in gefragt)
+  // Ein Senderwechsel am globalen Schalter erscheint auch auf dem Frequenzband.
+  const letzterStil = useRef(musik.stil)
+  useEffect(() => {
+    if (letzterStil.current === musik.stil && !musik.an) return
+    letzterStil.current = musik.stil
+    const neu = frage.antworten.find((a) => a.sender?.stil === musik.stil)?.sender
+    if (neu) {
+      mhzJetzt.current = neu.mhz
+      setMhz(neu.mhz)
+    }
+  }, [musik.stil, musik.an, frage.antworten])
 
-  // Muss in der Geste selbst laufen, nicht im Effekt danach — iOS zählt nur
-  // den Handler-Stack als Erlaubnis, Ton zu machen.
-  const entsperreKlang = () => {
-    if (stumm) return
-    klang.current ??= new Radioklang()
-    klang.current.entsperre()
+  const waehleFrequenz = (wert: number) => {
+    stelle(wert)
+    const neu = frage.antworten.find(
+      (a) => a.sender && Math.abs(a.sender.mhz - wert) <= RAST_MHZ,
+    )?.sender
+    if (neu && (!musik.an || musik.stil !== neu.stil)) void spiele(neu.stil)
   }
 
-  useEffect(() => {
-    const k = klang.current
-    if (!k || !beruehrt) return
-    if (sender) k.sender(sender.stil, sender.bpm)
-    else k.rauschen()
-  }, [beruehrt, sender])
-
-  // Verlassen der Station (weiter oder überspringen) räumt den Klang ab.
-  useEffect(
-    () => () => {
-      klang.current?.zerstoere()
-      klang.current = null
-    },
-    [],
-  )
+  const schalteMusik = () => {
+    if (musik.an) {
+      pausiere()
+      return
+    }
+    const ziel =
+      sender ?? frage.antworten.find((a) => a.sender?.stil === musik.stil)?.sender
+    if (!ziel) return
+    stelle(ziel.mhz)
+    setBeruehrt(true)
+    void spiele(ziel.stil)
+  }
 
   const drehe = (clientX: number) => {
     const el = band.current
@@ -115,7 +95,6 @@ export function Radio({
   }
 
   const raste = () => {
-    setZiehend(false)
     const f = mhzJetzt.current
     let nah: number | null = null
     for (const a of frage.antworten) {
@@ -125,7 +104,7 @@ export function Radio({
         nah = a.sender.mhz
       }
     }
-    if (nah !== null) stelle(nah)
+    if (nah !== null) waehleFrequenz(nah)
   }
 
   return (
@@ -138,14 +117,14 @@ export function Radio({
           src={frage.buehne}
           alt=""
           draggable={false}
-          className={`absolute inset-0 size-full object-cover transition-[opacity,filter] duration-500 ${
+          className={`absolute inset-0 size-full object-cover transition-opacity duration-200 motion-reduce:transition-none ${
             eingestellt ? 'opacity-100' : 'opacity-40 blur-[2px]'
           }`}
         />
         {/* Das Bühnenlicht: ein Farbwash von oben in der Senderfarbe. */}
         <div
           aria-hidden
-          className="absolute inset-0 transition-opacity duration-500"
+          className="absolute inset-0 transition-opacity duration-200 motion-reduce:transition-none"
           style={{
             opacity: sender ? 1 : 0,
             background: `radial-gradient(110% 80% at 50% 0%, ${sender?.farbe ?? '#000000'}59, transparent 62%)`,
@@ -156,7 +135,9 @@ export function Radio({
         {!eingestellt && (
           <motion.div
             aria-hidden
-            animate={{ opacity: [0.1, 0.22, 0.13, 0.24, 0.1] }}
+            animate={{
+              opacity: reduziert || !musik.an ? 0.13 : [0.1, 0.22, 0.13, 0.24, 0.1],
+            }}
             transition={{ duration: 0.9, repeat: Infinity, ease: 'linear' }}
             className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.14)_0px,rgba(255,255,255,0.14)_1px,transparent_1px,transparent_4px)]"
           />
@@ -190,7 +171,7 @@ export function Radio({
                   <span
                     key={i}
                     className={`w-[5px] origin-bottom rounded-full ${
-                      sender ? 'animate-eq' : 'bg-white/15'
+                      sender && musik.an && !reduziert ? 'animate-eq' : 'bg-white/15'
                     }`}
                     style={{
                       height: `${h * 100}%`,
@@ -207,7 +188,7 @@ export function Radio({
                 {sender ? (
                   <motion.div
                     key={eingestellt?.id}
-                    initial={{ opacity: 0, transform: 'translateY(8px)' }}
+                    initial={false}
                     animate={{ opacity: 1, transform: 'translateY(0px)' }}
                     transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
                   >
@@ -217,15 +198,15 @@ export function Radio({
                     >
                       {sender.name}
                     </div>
-                    <p className="truncate text-[1rem] font-medium text-kh-paper/85">
+                    <p className="text-[1rem] leading-snug font-medium text-kh-paper/85">
                       {eingestellt?.text}
                     </p>
                   </motion.div>
                 ) : (
                   <div>
                     <div className="kh-titel-klein text-kh-mute">Rauschen</div>
-                    <p className="truncate text-[1rem] text-kh-mute">
-                      Dreh weiter, bis ein Sender steht.
+                    <p className="text-[1rem] leading-snug text-kh-mute">
+                      Tippe auf einen Sender.
                     </p>
                   </div>
                 )}
@@ -263,9 +244,7 @@ export function Radio({
               } catch {
                 // Ohne Capture dreht es trotzdem, nur nicht über den Rand hinaus.
               }
-              entsperreKlang()
               setBeruehrt(true)
-              setZiehend(true)
               drehe(e.clientX)
             }}
             onPointerMove={(e) => {
@@ -274,16 +253,23 @@ export function Radio({
             onPointerUp={raste}
             onPointerCancel={raste}
             onKeyDown={(e) => {
-              if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-                entsperreKlang()
-                setBeruehrt(true)
-                stelle(Math.min(BAND_MAX, mhzJetzt.current + 0.1))
-              }
-              if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-                entsperreKlang()
-                setBeruehrt(true)
-                stelle(Math.max(BAND_MIN, mhzJetzt.current - 0.1))
-              }
+              if (e.target !== e.currentTarget) return
+              const delta =
+                e.key === 'ArrowRight' || e.key === 'ArrowUp'
+                  ? 0.1
+                  : e.key === 'ArrowLeft' || e.key === 'ArrowDown'
+                    ? -0.1
+                    : 0
+              if (!delta && e.key !== 'Home' && e.key !== 'End') return
+              e.preventDefault()
+              setBeruehrt(true)
+              waehleFrequenz(
+                e.key === 'Home'
+                  ? BAND_MIN
+                  : e.key === 'End'
+                    ? BAND_MAX
+                    : Math.min(BAND_MAX, Math.max(BAND_MIN, mhzJetzt.current + delta)),
+              )
             }}
           >
             {/* Drei Etagen, damit nichts kollidiert: Sendernamen über dem
@@ -327,16 +313,17 @@ export function Radio({
                     type="button"
                     data-testid={`antwort-${a.id}`}
                     aria-label={`${s.name}, ${komma(s.mhz)} Megahertz`}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onPointerUp={(e) => e.stopPropagation()}
                     onClick={() => {
-                      entsperreKlang()
                       setBeruehrt(true)
-                      stelle(s.mhz)
+                      waehleFrequenz(s.mhz)
                     }}
-                    className="absolute -top-10 bottom-0 flex -translate-x-1/2 flex-col items-center"
+                    className="absolute -top-10 bottom-0 flex min-w-11 -translate-x-1/2 flex-col items-center rounded focus-visible:outline-2 focus-visible:outline-kh-orange"
                     style={{ left: `${anteil(s.mhz) * 100}%` }}
                   >
                     <span
-                      className="flex h-8 items-center text-[0.8125rem] font-semibold tracking-[0.1em] whitespace-nowrap uppercase transition-[color,opacity]"
+                      className="flex h-8 items-center text-[0.6875rem] font-semibold tracking-[0.02em] sm:text-[0.8125rem] sm:tracking-[0.1em] whitespace-nowrap uppercase transition-[color,opacity]"
                       style={{ color: s.farbe, opacity: aktiv ? 1 : 0.65 }}
                     >
                       {s.name}
@@ -355,15 +342,13 @@ export function Radio({
               {/* Die Nadel. Bis zum ersten Griff pulsiert der Knauf. */}
               <div
                 aria-hidden
-                className={`absolute -top-2 -bottom-1 -translate-x-1/2 ${
-                  ziehend ? '' : 'transition-[left] duration-300 ease-out'
-                }`}
+                className="pointer-events-none absolute -top-2 -bottom-1 -translate-x-1/2"
                 style={{ left: `${anteil(mhz) * 100}%` }}
               >
                 <div className="mx-auto h-full w-[3px] rounded-full bg-kh-orange shadow-[0_0_14px_rgba(255,122,26,0.6)]" />
                 <div
                   className={`absolute -bottom-4 left-1/2 size-8 -translate-x-1/2 rounded-full border-4 border-[#0E0D0B] bg-kh-orange ${
-                    beruehrt ? '' : 'animate-puls'
+                    beruehrt || reduziert ? '' : 'animate-puls'
                   }`}
                 />
               </div>
@@ -371,28 +356,57 @@ export function Radio({
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center justify-end gap-3">
-          {eingestellt ? (
-            <Button
-              variant="weiter"
-              size="lg"
-              onClick={() => {
-                // Erst still, dann weiter: das Abräumen erst im Unmount ließe
-                // die Loop über die Ausblende des Screens hinweg laufen.
-                klang.current?.zerstoere()
-                onFertig(eingestellt.id)
-              }}
-              data-testid="radio-weiter"
+        <div className="flex shrink-0 flex-col gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <button
+              type="button"
+              data-testid="radio-musik-umschalten"
+              aria-pressed={musik.an}
+              disabled={musik.startet}
+              onClick={schalteMusik}
+              className="flex min-h-12 items-center gap-2 rounded-kh border border-white/35 bg-kh-ink/80 px-4 font-semibold text-kh-paper focus-visible:outline-4 focus-visible:outline-kh-orange disabled:opacity-60"
             >
-              Der läuft bei mir
-              <ArrowRight className="size-5" strokeWidth={2.5} />
-            </Button>
-          ) : (
-            <span className="flex h-12 items-center gap-2 text-[0.9375rem] font-medium text-kh-mute">
-              <RadioTower className="size-4" strokeWidth={2} />
-              Stell einen Sender ein
+              {musik.an ? (
+                <VolumeX className="size-5" aria-hidden />
+              ) : (
+                <Volume2 className="size-5" aria-hidden />
+              )}
+              {musik.startet
+                ? 'Musik startet'
+                : musik.an
+                  ? 'Musik ausschalten'
+                  : 'Musik einschalten'}
+            </button>
+            <span className="text-sm text-kh-paper/80">
+              {musik.an ? 'Läuft bei den nächsten Fragen weiter.' : 'Musik ist aus.'}
             </span>
+          </div>
+          {musik.fehler && (
+            <p role="status" className="text-sm text-kh-paper">
+              {musik.fehler}
+            </p>
           )}
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              data-testid="radio-ueberspringen"
+              onClick={() => onFertig('offen')}
+              className="min-h-12 rounded-kh px-2 font-semibold text-kh-paper/80 underline underline-offset-4 focus-visible:outline-4 focus-visible:outline-kh-orange"
+            >
+              Überspringen
+            </button>
+            {eingestellt && (
+              <Button
+                variant="weiter"
+                size="lg"
+                onClick={() => onFertig(eingestellt.id)}
+                data-testid="radio-weiter"
+              >
+                Weiter
+                <ArrowRight className="size-5" strokeWidth={2.5} aria-hidden />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </div>
