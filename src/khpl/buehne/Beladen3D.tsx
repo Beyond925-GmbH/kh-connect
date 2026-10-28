@@ -51,15 +51,15 @@ const HUELLE: Huelle = {
 /**
  * Hochkant zählt der Anhänger, nicht der Lkw: die Rückmeldung der Übung ist,
  * dass die gezogenen Sachen auf der Ladefläche liegen — und auf 390 px Breite
- * machte das volle 14-m-Gespann daraus eine 65-px-Miniatur. Die Hülle endet
- * deshalb vor dem Kofferaufbau; die Transporter-Front schneidet rechts an,
- * wie es die Hüllen-Doku für die Langseite ohnehin erlaubt (bewusste
- * Inszenierung).
+ * machte das volle 14-m-Gespann daraus eine 65-px-Miniatur. Der Ausschnitt
+ * bleibt deshalb gleich breit, rückt aber 1,8 m nach vorn: hinten schneidet
+ * nur das leere Anhängerende an, während Transporter und Requisiten bis
+ * x ≈ 7,6 vollständig im Rahmen stehen.
  */
 const HUELLE_HOCHKANT: Huelle = {
-  min: [-4.2, 0, -1.6],
-  max: [6.6, 2.45, 1.6],
-  mitte: [1.2, 1.2, 0],
+  min: [-2.4, 0, -1.6],
+  max: [8.4, 2.45, 1.6],
+  mitte: [3.0, 1.2, 0],
 }
 
 /**

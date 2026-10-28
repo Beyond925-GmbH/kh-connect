@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import type { Huelle } from '@/dachstuhl/mass'
 import type { Ansicht, Sichtfeld } from './kamera'
-import { KAMERA, START_ANSICHT, passeEin } from './kamera'
+import { KAMERA, START_ANSICHT, fuelleHochkant, passeEin } from './kamera'
 
 /**
  * Bewusst ohne Azimut-Limit: ein Dachstuhl ist von allen Seiten interessant,
@@ -18,6 +18,7 @@ export function Kamerasteuerung({
   huelle,
   attraktor,
   sichtfeld,
+  hochkantFuellung,
   gesperrt = false,
 }: {
   ansicht: Ansicht | null
@@ -25,6 +26,8 @@ export function Kamerasteuerung({
   attraktor: boolean
   /** Verdeckte Anteile der Leinwand — s. `Sichtfeld` in `kamera.ts`. */
   sichtfeld?: Sichtfeld
+  /** Seitlicher Hüllenanteil im Hochformat; erlaubt einen bewusst engeren Ausschnitt. */
+  hochkantFuellung?: number
   /** Haelt die freie Drehung an, ohne die Ansicht zu wechseln — z. B. waehrend der Fahrt (M5). */
   gesperrt?: boolean
 }) {
@@ -69,7 +72,11 @@ export function Kamerasteuerung({
         zoom = blick.length() / vorher.distanz
       }
     }
-    const lage = passeEin(preset, huelle, breite / hoehe, {
+    const aspect = breite / hoehe
+    const rahmen = hochkantFuellung
+      ? fuelleHochkant(huelle, aspect, hochkantFuellung)
+      : huelle
+    const lage = passeEin(preset, rahmen, aspect, {
       links: sfL,
       rechts: sfR,
       oben: sfO,
@@ -98,7 +105,7 @@ export function Kamerasteuerung({
       s.target.copy(ziel)
       s.update()
     }
-  }, [ansicht, huelle, kamera, breite, hoehe, sfL, sfR, sfO, sfU])
+  }, [ansicht, huelle, kamera, breite, hoehe, sfL, sfR, sfO, sfU, hochkantFuellung])
 
   // Attraktor-Modus: nach 8 s ohne Eingabe dreht das Modell von selbst weiter.
   useEffect(() => {

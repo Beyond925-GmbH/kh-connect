@@ -204,8 +204,8 @@ export function Radio({
                   </motion.div>
                 ) : (
                   <div>
-                    <div className="kh-titel-klein text-kh-mute">Rauschen</div>
-                    <p className="text-[1rem] leading-snug text-kh-mute">
+                    <div className="kh-titel-klein text-kh-paper/75">Rauschen</div>
+                    <p className="text-[1rem] leading-snug text-kh-paper/70">
                       Tippe auf einen Sender.
                     </p>
                   </div>
@@ -214,7 +214,7 @@ export function Radio({
             </div>
             <span
               className={`shrink-0 font-display text-[2rem] leading-[0.9] tabular-nums transition-colors landscape:text-[2.4rem] ${
-                sender ? '' : 'text-kh-mute'
+                sender ? '' : 'text-kh-paper/75'
               }`}
               style={sender ? { color: sender.farbe } : undefined}
               data-testid="radio-frequenz"

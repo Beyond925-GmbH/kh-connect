@@ -15,7 +15,7 @@
  * Kamera es aus; diese Datei belegt, dass sie richtig rechnet.
  */
 
-import { KAMERA, FOV, passeEin } from './kamera'
+import { KAMERA, FOV, fuelleHochkant, passeEin } from './kamera'
 import type { Ansicht, Sichtfeld } from './kamera'
 import { berechneMasse } from '../dachstuhl/mass'
 import { STANDARD_PARAMETER } from '../dachstuhl/parameter'
@@ -40,12 +40,44 @@ for (const x of [h.min[0], h.max[0]])
   for (const y of [h.min[1], h.max[1]])
     for (const z of [h.min[2], h.max[2]]) ecken.push([x, y, z])
 
+let fehler = 0
+
+// M5/M7 zeigen im Hochformat Dachstuhl und Gespann. Die komplette breite
+// Hülle bindet dort an der Bildschirmbreite, obwohl über der Karte deutlich
+// mehr Höhe frei ist. Die Portraitfüllung darf seitlich begrenzt anschneiden,
+// muss Landschaft aber exakt unverändert lassen.
+const mitGespann = {
+  min: masse.huelle.min,
+  max: [masse.huelle.max[0], masse.huelle.max[1], masse.huelle.max[2] + 3] as V3,
+  mitte: masse.huelle.mitte,
+}
+const handyAspect = 390 / 844
+const handySichtfeld: Sichtfeld = { links: 0.06, rechts: 0.06, oben: 0.06, unten: 0.45 }
+const vollHochkant = passeEin(KAMERA.iso, mitGespann, handyAspect, handySichtfeld)
+const gefuelltHochkant = passeEin(
+  KAMERA.iso,
+  fuelleHochkant(mitGespann, handyAspect, 0.75),
+  handyAspect,
+  handySichtfeld,
+)
+const querUnveraendert = fuelleHochkant(mitGespann, 1024 / 768, 0.75) === mitGespann
+const portraitNaeher = gefuelltHochkant.distanz < vollHochkant.distanz * 0.82
+if (!querUnveraendert || !portraitNaeher) {
+  console.log(
+    `FEHL M5/M7/handy-fuellung     distanz ${vollHochkant.distanz.toFixed(2)} -> ${gefuelltHochkant.distanz.toFixed(2)}, quer ${querUnveraendert ? 'gleich' : 'veraendert'}`,
+  )
+  fehler++
+} else {
+  console.log(
+    `ok   M5/M7/handy-fuellung     distanz ${vollHochkant.distanz.toFixed(2)} -> ${gefuelltHochkant.distanz.toFixed(2)}, quer gleich`,
+  )
+}
+
 const tanVoll = (aspect: number) => {
   const tv = Math.tan(((FOV / 2) * Math.PI) / 180)
   return { tanH: tv * aspect, tanV: tv }
 }
 
-let fehler = 0
 const faelle: { ansicht: Ansicht; aspect: number; sf?: Sichtfeld; name: string }[] = []
 for (const ansicht of ['iso', 'front', 'seite', 'oben', 'traufe'] as Ansicht[]) {
   for (const [aspect, wie] of [

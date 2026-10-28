@@ -1,5 +1,7 @@
 import { defineConfig } from '@playwright/test'
 
+const baseURL = 'http://127.0.0.1:5175'
+
 export default defineConfig({
   testDir: './tests',
   timeout: 45_000,
@@ -8,7 +10,16 @@ export default defineConfig({
   workers: 1,
   reporter: 'list',
   use: {
-    baseURL: 'http://127.0.0.1:5175',
+    baseURL,
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: baseURL,
+          localStorage: [{ name: 'khpl-analytik', value: 'anonym' }],
+        },
+      ],
+    },
     viewport: { width: 1024, height: 768 },
     channel: 'chrome',
     reducedMotion: 'reduce',
@@ -17,7 +28,7 @@ export default defineConfig({
   },
   webServer: {
     command: 'pnpm dev --host 127.0.0.1 --port 5175 --strictPort',
-    url: 'http://127.0.0.1:5175',
+    url: baseURL,
     reuseExistingServer: true,
     timeout: 60_000,
   },

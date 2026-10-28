@@ -269,6 +269,46 @@
   border-top: 1px solid rgb(255 255 255 / 0.14);
 }
 
+/* Auf schmalen Screens macht ein Textsignal den inneren Scrollbereich
+   erkennbar. Es belegt keinen Platz und kann den festen Fuß daher nicht
+   verschieben. */
+.kh-scroll-hinweis {
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+  bottom: 0.45rem;
+  left: 50%;
+  display: flex;
+  min-height: 2rem;
+  transform: translateX(-50%);
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgb(255 255 255 / 0.24);
+  border-radius: var(--radius-kh-pill);
+  background: rgb(14 13 11 / 0.94);
+  box-shadow: 0 2px 12px rgb(0 0 0 / 0.42);
+  padding: 0.3rem 0.7rem;
+  color: rgb(251 247 240 / 0.92);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* Sekundär bleibt sekundär: keine Füllung und kein Signalfarben-Rahmen.
+   Der Text trägt unter Hallenlicht aber deutlich stärker als kh-mute. */
+.kh-step-fuss [data-testid='mehr-themen'],
+.kh-step-fuss [data-testid='weiter'][aria-label='Aufgabe überspringen'] {
+  color: rgb(251 247 240 / 0.82);
+}
+
+@media (min-width: 40rem) {
+  .kh-scroll-hinweis {
+    display: none;
+  }
+}
+
 /* Ein Kaestchen im Panel — Aufgabe, Liste, Auswertung. */
 @utility kh-feld {
   background-color: rgb(255 255 255 / 0.05);

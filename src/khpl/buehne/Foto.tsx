@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type CSSProperties } from 'react'
 import { cn } from '@/lib/utils'
 import type { StepId } from '@/khpl/flow/steps'
 import type { StepBild } from '@/khpl/berufe/typen'
@@ -34,16 +34,37 @@ import { useAktiverBeruf } from '@/khpl/store/fortschritt'
 export function Foto({
   src,
   pos = 'center',
+  portraitPos,
+  portraitFit = 'cover',
   className,
 }: {
   src: string
   pos?: string
+  portraitPos?: string
+  portraitFit?: 'cover' | 'contain'
   className?: string
 }) {
   const [geladen, setGeladen] = useState(false)
+  const bildStil = {
+    '--foto-position': pos,
+    '--foto-position-portrait': portraitPos ?? pos,
+    filter: 'saturate(1.12) contrast(1.06)',
+  } as CSSProperties
 
   return (
     <div className={cn('relative size-full overflow-hidden bg-kh-surface', className)}>
+      {portraitFit === 'contain' && (
+        <img
+          src={src}
+          alt=""
+          aria-hidden
+          style={bildStil}
+          className={cn(
+            'absolute inset-0 hidden size-full scale-110 object-cover blur-xl portrait:block',
+            geladen ? 'opacity-35' : 'opacity-0',
+          )}
+        />
+      )}
       <img
         src={src}
         alt=""
@@ -55,9 +76,10 @@ export function Foto({
         fetchPriority="high"
         decoding="async"
         onLoad={() => setGeladen(true)}
-        style={{ objectPosition: pos, filter: 'saturate(1.12) contrast(1.06)' }}
+        style={bildStil}
         className={cn(
-          'size-full scale-[1.01] object-cover transition-opacity duration-700',
+          'relative z-[1] size-full scale-[1.01] object-cover [object-position:var(--foto-position)] transition-opacity duration-700 portrait:[object-position:var(--foto-position-portrait)]',
+          portraitFit === 'contain' && 'portrait:scale-100 portrait:object-contain',
           geladen ? 'opacity-100' : 'opacity-0',
         )}
       />
@@ -90,5 +112,12 @@ export function useStepBild(id: StepId): StepBild | undefined {
 export function StepFoto({ id }: { id: StepId }) {
   const b = useStepBild(id)
   if (!b) return null
-  return <Foto src={b.src} pos={b.pos} />
+  return (
+    <Foto
+      src={b.src}
+      pos={b.pos}
+      portraitPos={b.portraitPos}
+      portraitFit={b.portraitFit}
+    />
+  )
 }

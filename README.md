@@ -203,7 +203,8 @@ sagt der Screen „Sprich jetzt mit uns am Stand“, nie `[Name]`.
 
 - **Staff-Ausgang:** fünf schnelle Taps in die Ecke **oben links**, auf jedem
   Screen. Öffnet „Neu starten / App neu laden“.
-- **Idle:** 60 s → „Bist du noch da?“, weitere 15 s → zurück auf den Splash.
+- **Idle:** 120 s → „Bist du noch da?“, weitere 120 s → zurück auf den Splash.
+  Rückblick- und Vertiefungsseiten bekommen bis zu sechs Minuten Ruhezeit.
   Der Fortschritt wird dabei **nicht** gelöscht; das erledigt die
   30-Minuten-Frist. Die Mittagspause (M6) bekommt die dreifache Geduld.
 - **`?demo=dachstuhl`** öffnet weiterhin den 3D-Prototyp.
@@ -265,7 +266,7 @@ mehr.
 ### Der Trichter
 
 ```
-S0 Splash → S1 Dein Helm → S2 Vier Fragen → S3 Vorschlag
+S0 Splash → S1 Dein Helm → S2 Drei Fragen → S3 Vorschlag
                                               ↘ S4 Berufsliste → Auftrag → Steps
 ```
 

@@ -116,6 +116,31 @@ export interface Kameralage {
 }
 
 /**
+ * Verkleinert die waagerechte Kamerahülle im Hochformat, damit ein sehr
+ * breites Motiv die freie Höhe besser nutzt. Die gezeichnete Geometrie bleibt
+ * unverändert; nur der Ausschnitt darf an den Seiten anschneiden.
+ */
+export function fuelleHochkant(huelle: Huelle, aspect: number, anteil: number): Huelle {
+  if (aspect >= 1) return huelle
+  const s = Math.max(0.05, Math.min(1, anteil))
+  if (s >= 1) return huelle
+  const quer = (wert: number, mitte: number) => mitte + (wert - mitte) * s
+  return {
+    min: [
+      quer(huelle.min[0], huelle.mitte[0]),
+      huelle.min[1],
+      quer(huelle.min[2], huelle.mitte[2]),
+    ],
+    max: [
+      quer(huelle.max[0], huelle.mitte[0]),
+      huelle.max[1],
+      quer(huelle.max[2], huelle.mitte[2]),
+    ],
+    mitte: huelle.mitte,
+  }
+}
+
+/**
  * Die halbe Oeffnung, in die eingepasst wird — in Steigungen (Weltmass je
  * Meter Tiefe), nicht in Winkeln.
  *

@@ -49,6 +49,10 @@ export interface StepBild {
   src: string
   /** `object-position`, z. B. `'50% 40%'`. Ohne Angabe: mittig. */
   pos?: string
+  /** Eigener Bildmittelpunkt für schmale Hochformat-Bühnen. */
+  portraitPos?: string
+  /** `contain` bewahrt im Hochformat bewusst das ganze Motiv. */
+  portraitFit?: 'cover' | 'contain'
 }
 
 export interface BerufMedien {

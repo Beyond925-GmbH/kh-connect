@@ -250,6 +250,7 @@ export function Helmwahl() {
               size="sm"
               onClick={zeigeFragen}
               data-testid="helm-ueberspringen"
+              className="text-kh-paper/80 underline underline-offset-4"
             >
               Überspringen
             </Button>

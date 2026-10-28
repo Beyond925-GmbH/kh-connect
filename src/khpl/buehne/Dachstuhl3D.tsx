@@ -366,6 +366,10 @@ export default function Dachstuhl3D({
         ansicht={ansicht}
         attraktor={attraktor}
         sichtfeld={sichtfeld}
+        // M5/M7 brauchen auf dem Handy keinen vollständigen Hofplan: ein
+        // begrenzter Seitenanschnitt macht den Dachaufbau in der freien Höhe
+        // lesbar. M8 behält sein vollständiges Feierabendbild.
+        hochkantFuellung={kulisse && !attraktor ? 0.75 : undefined}
         dpr={null}
         // Immer der Dunkel-Zweig. Die Bühne muss denselben Grund haben wie das
         // Panel davor — eine hell ausgeleuchtete 3D-Fläche zwischen fünfzehn

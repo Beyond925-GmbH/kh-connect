@@ -1349,7 +1349,7 @@ function Rasterfeld({
               x={start.x}
               y={start.y - 17}
               textAnchor="middle"
-              fontSize={7.5}
+              fontSize={9.5}
               fontWeight={700}
               className="fill-kh-signal"
               stroke="#0E0D0B"
@@ -1634,7 +1634,7 @@ function Verlustpfeil({
         x={x + dx * 0.55 + qx * 11}
         y={y + dy * 0.55 + qy * 11 + 3}
         textAnchor="middle"
-        fontSize={7}
+        fontSize={9}
         fill={gefunden ? WARM.linie : KALT.linie}
         stroke="#0E0D0B"
         strokeWidth={2.4}

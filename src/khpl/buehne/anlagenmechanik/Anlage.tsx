@@ -429,7 +429,7 @@ function Pruefpunkt({
         x={punkt.lx}
         y={punkt.ly}
         textAnchor={punkt.anker}
-        fontSize={7}
+        fontSize={9}
         fill={geprueft || ursache ? farbe : KALT.linie}
         // Dunkler Saum statt einer Plakette: Die Namen liegen zwangsläufig über
         // Leitungen, und ein Kasten je Name zerschnitte die Zeichnung in sechs

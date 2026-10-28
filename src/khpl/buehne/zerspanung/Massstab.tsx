@@ -42,129 +42,277 @@ const X = { rand: 10, text: 26, pille: 186, spalt: 274 } as const
 /** Die Spaltgrafik: zwei Stahlblöcke, dazwischen die erlaubte Luft. */
 const BLOCK = { breite: 64, hoehe: 18 } as const
 
+/** Schmale Querform: Die drei Stufen stehen untereinander in der Restspalte. */
+const SCHMAL = {
+  breite: 228,
+  hoehe: 492,
+  oben: 8,
+  takt: 160,
+  band: 152,
+  text: 20,
+  pille: 20,
+  spalt: 142,
+  blockBreite: 68,
+  blockHoehe: 17,
+} as const
+
 export function Massstab({ zustand }: { zustand: MassstabZustand }) {
   return (
     <Bild testid="massstab-buehne">
-      {() => (
-        <svg
-          viewBox={`0 0 ${BREITE} ${HOEHE}`}
-          preserveAspectRatio="xMidYMid meet"
-          className="size-full"
-        >
-          <defs>
-            {/* Der Stahl der Blöcke: hell an der Oberkante, dunkel unten —
+      {(seiten) =>
+        seiten < 0.85 ? (
+          <SchmalerMassstab zustand={zustand} />
+        ) : (
+          <svg
+            viewBox={`0 0 ${BREITE} ${HOEHE}`}
+            preserveAspectRatio="xMidYMid meet"
+            className="size-full"
+          >
+            <defs>
+              {/* Der Stahl der Blöcke: hell an der Oberkante, dunkel unten —
                 dieselbe Lichtrichtung wie auf dem Foto darunter. */}
-            <linearGradient id="mass-stahl" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#39434c" />
-              <stop offset="55%" stopColor={STAHL.flaeche} />
-              <stop offset="100%" stopColor="#1b2127" />
-            </linearGradient>
-            {/* Schnittschraffur, wie auf jeder technischen Zeichnung. Sie
+              <linearGradient id="mass-stahl" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#39434c" />
+                <stop offset="55%" stopColor={STAHL.flaeche} />
+                <stop offset="100%" stopColor="#1b2127" />
+              </linearGradient>
+              {/* Schnittschraffur, wie auf jeder technischen Zeichnung. Sie
                 macht aus zwei Rechtecken zwei angeschnittene Werkstücke. */}
-            <pattern
-              id="mass-schraffur"
-              width="6"
-              height="6"
-              patternUnits="userSpaceOnUse"
-              patternTransform="rotate(45)"
-            >
-              <line x1="0" y1="0" x2="0" y2="6" stroke={STAHL.linie} strokeWidth="0.6" />
-            </pattern>
-            {/* Die Glut im Spalt. Ohne sie ist der Hundertstel-Spalt ein
+              <pattern
+                id="mass-schraffur"
+                width="6"
+                height="6"
+                patternUnits="userSpaceOnUse"
+                patternTransform="rotate(45)"
+              >
+                <line
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="6"
+                  stroke={STAHL.linie}
+                  strokeWidth="0.6"
+                />
+              </pattern>
+              {/* Die Glut im Spalt. Ohne sie ist der Hundertstel-Spalt ein
                 Strich, den man übersieht — mit ihr glimmt er. */}
-            <filter id="mass-glut" x="-60%" y="-400%" width="220%" height="900%">
-              <feGaussianBlur stdDeviation="2.2" />
-            </filter>
-            {/* Das Blatt selbst: es liegt auf dem Foto und muss decken. */}
-            <linearGradient id="mass-blatt" x1="0" y1="0" x2="0.4" y2="1">
-              <stop offset="0%" stopColor="#161c22" stopOpacity="0.965" />
-              <stop offset="100%" stopColor="#0c1014" stopOpacity="0.965" />
-            </linearGradient>
-          </defs>
+              <filter id="mass-glut" x="-60%" y="-400%" width="220%" height="900%">
+                <feGaussianBlur stdDeviation="2.2" />
+              </filter>
+              {/* Das Blatt selbst: es liegt auf dem Foto und muss decken. */}
+              <linearGradient id="mass-blatt" x1="0" y1="0" x2="0.4" y2="1">
+                <stop offset="0%" stopColor="#161c22" stopOpacity="0.965" />
+                <stop offset="100%" stopColor="#0c1014" stopOpacity="0.965" />
+              </linearGradient>
+            </defs>
 
-          {/* **Das Blatt.** Erste Fassung setzte die drei Stufen einzeln aufs
+            {/* **Das Blatt.** Erste Fassung setzte die drei Stufen einzeln aufs
               Foto — die Überschrift stand dann auf einem Messschieber und war
               nicht zu lesen, und durch die halbdurchsichtigen Zeilen lief das
               Werkzeug hindurch. Eine deckende Grundplatte darunter ist das,
               was in echt auch dazwischen liegt: ein Blatt auf der Werkbank. */}
-          <rect
-            x={4}
-            y={2}
-            width={BREITE - 8}
-            height={HOEHE - 4}
-            rx={8}
-            fill="url(#mass-blatt)"
-            stroke={STAHL.linieMatt}
-            strokeWidth={1}
-          />
+            <rect
+              x={4}
+              y={2}
+              width={BREITE - 8}
+              height={HOEHE - 4}
+              rx={8}
+              fill="url(#mass-blatt)"
+              stroke={STAHL.linieMatt}
+              strokeWidth={1}
+            />
 
-          {/* Die Überschrift der rechten Spalte — ohne sie sind die drei
+            {/* Die Überschrift der rechten Spalte — ohne sie sind die drei
               Blockpaare nur Grafik. Sie steht über der Leiter, nicht in ihr. */}
-          <text
-            x={X.spalt + BLOCK.breite}
-            y={19}
-            textAnchor="end"
-            fill={STAHL.linie}
-            fontSize={8}
-            letterSpacing="0.12em"
-          >
-            ERLAUBTE LUFT
-          </text>
+            <text
+              x={X.spalt + BLOCK.breite}
+              y={19}
+              textAnchor="end"
+              fill={STAHL.linie}
+              fontSize={10}
+              letterSpacing="0.12em"
+            >
+              ERLAUBTE LUFT
+            </text>
 
-          {STUFEN.map((stufe, i) => {
-            const y = OBEN + i * TAKT
-            const ihre = zustand.platziert.filter((p) => p.stufe === stufe.id)
-            const belegt = ihre.length > 0
+            {STUFEN.map((stufe, i) => {
+              const y = OBEN + i * TAKT
+              const ihre = zustand.platziert.filter((p) => p.stufe === stufe.id)
+              const belegt = ihre.length > 0
 
-            return (
-              <motion.g
-                key={stufe.id}
-                initial={false}
-                animate={{ opacity: belegt ? 1 : 0.5 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              >
-                <rect
-                  x={X.rand}
-                  y={y}
-                  width={BREITE - 2 * X.rand}
-                  height={BAND}
-                  rx={6}
-                  fill="#ffffff"
-                  fillOpacity={belegt ? 0.055 : 0.025}
-                  stroke={belegt ? STAHL.linie : STAHL.linieMatt}
-                  strokeWidth={1.2}
-                />
-
-                <text
-                  x={X.text}
-                  y={y + 24}
-                  fill={STAHL.glanz}
-                  fontSize={14}
-                  fontWeight={700}
-                  letterSpacing="0.02em"
+              return (
+                <motion.g
+                  key={stufe.id}
+                  initial={false}
+                  animate={{ opacity: belegt ? 1 : 0.72 }}
+                  transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  {stufe.name}
-                </text>
-                <text x={X.text} y={y + 40} fill={STAHL.linie} fontSize={9}>
-                  {`${stufe.zahl} · ${stufe.anker}`}
-                </text>
-
-                {ihre.map((p, j) => (
-                  <Pille
-                    key={p.kurz}
-                    kurz={p.kurz}
-                    y={pillenHoehe(y, j, ihre.length)}
-                    hell={p.kurz === zustand.zuletzt}
+                  <rect
+                    x={X.rand}
+                    y={y}
+                    width={BREITE - 2 * X.rand}
+                    height={BAND}
+                    rx={6}
+                    fill="#ffffff"
+                    fillOpacity={belegt ? 0.055 : 0.025}
+                    stroke={belegt ? STAHL.linie : STAHL.linieMatt}
+                    strokeWidth={1.2}
                   />
-                ))}
 
-                <Spalt y={y + BAND / 2} breite={stufe.spalt} />
-              </motion.g>
-            )
-          })}
-        </svg>
-      )}
+                  <text
+                    x={X.text}
+                    y={y + 24}
+                    fill={STAHL.glanz}
+                    fontSize={16}
+                    fontWeight={700}
+                    letterSpacing="0.02em"
+                  >
+                    {stufe.name}
+                  </text>
+                  <text x={X.text} y={y + 42} fill={STAHL.linie} fontSize={10.5}>
+                    {`${stufe.zahl} · ${stufe.anker}`}
+                  </text>
+
+                  {ihre.map((p, j) => (
+                    <Pille
+                      key={p.kurz}
+                      kurz={p.kurz}
+                      y={pillenHoehe(y, j, ihre.length)}
+                      hell={p.kurz === zustand.zuletzt}
+                    />
+                  ))}
+
+                  <Spalt y={y + BAND / 2} breite={stufe.spalt} />
+                </motion.g>
+              )
+            })}
+          </svg>
+        )
+      }
     </Bild>
+  )
+}
+
+/**
+ * Bei einer breiten Karte bleibt rechts eine hohe, schmale Spalte. Die
+ * waagerechte Leiter würde darin auf Briefmarkengröße schrumpfen; diese
+ * Fassung nutzt die Höhe und hält Schrift sowie Spaltgrafik in Lesgröße.
+ */
+function SchmalerMassstab({ zustand }: { zustand: MassstabZustand }) {
+  return (
+    <svg
+      viewBox={`0 0 ${SCHMAL.breite} ${SCHMAL.hoehe}`}
+      preserveAspectRatio="xMidYMid meet"
+      className="size-full"
+    >
+      <defs>
+        <linearGradient id="mass-stahl-schmal" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#39434c" />
+          <stop offset="55%" stopColor={STAHL.flaeche} />
+          <stop offset="100%" stopColor="#1b2127" />
+        </linearGradient>
+        <pattern
+          id="mass-schraffur-schmal"
+          width="6"
+          height="6"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(45)"
+        >
+          <line x1="0" y1="0" x2="0" y2="6" stroke={STAHL.linie} strokeWidth="0.6" />
+        </pattern>
+        <filter id="mass-glut-schmal" x="-60%" y="-400%" width="220%" height="900%">
+          <feGaussianBlur stdDeviation="2.2" />
+        </filter>
+        <linearGradient id="mass-blatt-schmal" x1="0" y1="0" x2="0.4" y2="1">
+          <stop offset="0%" stopColor="#161c22" stopOpacity="0.965" />
+          <stop offset="100%" stopColor="#0c1014" stopOpacity="0.965" />
+        </linearGradient>
+      </defs>
+
+      <rect
+        x={2}
+        y={2}
+        width={SCHMAL.breite - 4}
+        height={SCHMAL.hoehe - 4}
+        rx={8}
+        fill="url(#mass-blatt-schmal)"
+        stroke={STAHL.linieMatt}
+        strokeWidth={1}
+      />
+
+      {STUFEN.map((stufe, i) => {
+        const y = SCHMAL.oben + i * SCHMAL.takt
+        const ihre = zustand.platziert.filter((p) => p.stufe === stufe.id)
+        const belegt = ihre.length > 0
+
+        return (
+          <motion.g
+            key={stufe.id}
+            initial={false}
+            animate={{ opacity: belegt ? 1 : 0.72 }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <rect
+              x={8}
+              y={y}
+              width={SCHMAL.breite - 16}
+              height={SCHMAL.band}
+              rx={6}
+              fill="#ffffff"
+              fillOpacity={belegt ? 0.055 : 0.025}
+              stroke={belegt ? STAHL.linie : STAHL.linieMatt}
+              strokeWidth={1.2}
+            />
+
+            <text
+              x={SCHMAL.text}
+              y={y + 30}
+              fill={STAHL.glanz}
+              fontSize={17}
+              fontWeight={700}
+              letterSpacing="0.02em"
+            >
+              {stufe.name}
+            </text>
+            <text x={SCHMAL.text} y={y + 50} fill={STAHL.linie} fontSize={11.5}>
+              {`${stufe.zahl} · ${stufe.anker}`}
+            </text>
+
+            <text
+              x={SCHMAL.spalt + SCHMAL.blockBreite}
+              y={y + 75}
+              textAnchor="end"
+              fill={STAHL.linie}
+              fontSize={9}
+              letterSpacing="0.1em"
+            >
+              ERLAUBTE LUFT
+            </text>
+
+            {ihre.map((p, j) => (
+              <Pille
+                key={p.kurz}
+                kurz={p.kurz}
+                x={SCHMAL.pille}
+                y={y + 98 + j * 22}
+                hell={p.kurz === zustand.zuletzt}
+              />
+            ))}
+
+            <Spalt
+              y={y + 113}
+              breite={stufe.spalt}
+              x={SCHMAL.spalt}
+              blockBreite={SCHMAL.blockBreite}
+              blockHoehe={SCHMAL.blockHoehe}
+              stahl="url(#mass-stahl-schmal)"
+              schraffur="url(#mass-schraffur-schmal)"
+              glut="url(#mass-glut-schmal)"
+            />
+          </motion.g>
+        )
+      })}
+    </svg>
   )
 }
 
@@ -179,18 +327,28 @@ function pillenHoehe(y: number, j: number, anzahl: number): number {
  * Kästchen — die Namen sind unterschiedlich lang, und ein Rahmen, dessen
  * Breite man in SVG schätzen muss, sitzt irgendwann daneben.
  */
-function Pille({ kurz, y, hell }: { kurz: string; y: number; hell: boolean }) {
+function Pille({
+  kurz,
+  x = X.pille,
+  y,
+  hell,
+}: {
+  kurz: string
+  x?: number
+  y: number
+  hell: boolean
+}) {
   return (
     <motion.g
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
-      <circle cx={X.pille} cy={y - 3} r={2.8} fill={WARM.linie} />
+      <circle cx={x} cy={y - 3} r={2.8} fill={WARM.linie} />
       <text
-        x={X.pille + 9}
+        x={x + 9}
         y={y}
-        fontSize={10}
+        fontSize={11}
         fontWeight={hell ? 700 : 500}
         fill={hell ? STAHL.glanz : STAHL.linie}
       >
@@ -212,8 +370,26 @@ function Pille({ kurz, y, hell }: { kurz: string; y: number; hell: boolean }) {
  * Hundertstel-Spalt bei dieser Blattgröße unsichtbar; gestaffelt zeigt er
  * die Größenordnung, um die es geht.
  */
-function Spalt({ y, breite }: { y: number; breite: number }) {
-  const oben = y - breite / 2 - BLOCK.hoehe
+function Spalt({
+  y,
+  breite,
+  x = X.spalt,
+  blockBreite = BLOCK.breite,
+  blockHoehe = BLOCK.hoehe,
+  stahl = 'url(#mass-stahl)',
+  schraffur = 'url(#mass-schraffur)',
+  glut = 'url(#mass-glut)',
+}: {
+  y: number
+  breite: number
+  x?: number
+  blockBreite?: number
+  blockHoehe?: number
+  stahl?: string
+  schraffur?: string
+  glut?: string
+}) {
+  const oben = y - breite / 2 - blockHoehe
   const unten = y + breite / 2
 
   const bloecke = [oben, unten]
@@ -222,26 +398,20 @@ function Spalt({ y, breite }: { y: number; breite: number }) {
     <g>
       {bloecke.map((oy) => (
         <g key={oy}>
+          <rect x={x} y={oy} width={blockBreite} height={blockHoehe} fill={stahl} />
           <rect
-            x={X.spalt}
+            x={x}
             y={oy}
-            width={BLOCK.breite}
-            height={BLOCK.hoehe}
-            fill="url(#mass-stahl)"
-          />
-          <rect
-            x={X.spalt}
-            y={oy}
-            width={BLOCK.breite}
-            height={BLOCK.hoehe}
-            fill="url(#mass-schraffur)"
+            width={blockBreite}
+            height={blockHoehe}
+            fill={schraffur}
             opacity={0.28}
           />
           <rect
-            x={X.spalt}
+            x={x}
             y={oy}
-            width={BLOCK.breite}
-            height={BLOCK.hoehe}
+            width={blockBreite}
+            height={blockHoehe}
             fill="none"
             stroke={STAHL.linie}
             strokeWidth={1}
@@ -249,18 +419,18 @@ function Spalt({ y, breite }: { y: number; breite: number }) {
         </g>
       ))}
       <rect
-        x={X.spalt}
+        x={x}
         y={y - breite / 2}
-        width={BLOCK.breite}
+        width={blockBreite}
         height={breite}
         fill={WARM.linie}
-        filter="url(#mass-glut)"
+        filter={glut}
         opacity={0.85}
       />
       <rect
-        x={X.spalt}
+        x={x}
         y={y - breite / 2}
-        width={BLOCK.breite}
+        width={blockBreite}
         height={breite}
         fill={WARM.linie}
       />

@@ -118,7 +118,7 @@ export default function DachstuhlDemo() {
 
   return (
     <div
-      className="fixed inset-0 overflow-hidden bg-kh-page"
+      className="fixed inset-0 overflow-hidden bg-kh-ink text-kh-paper"
       onPointerDown={(e) => tap.merken(e)}
     >
       <Szene
@@ -148,16 +148,16 @@ export default function DachstuhlDemo() {
       />
 
       {kontextWeg && (
-        <div className="absolute inset-0 z-30 grid place-items-center bg-kh-page/90">
-          <div className="rounded-kh bg-kh-surface px-6 py-5 text-center">
+        <div className="absolute inset-0 z-30 grid place-items-center bg-kh-ink/90">
+          <div className="rounded-kh border border-kh-line bg-kh-surface px-6 py-5 text-center text-kh-paper">
             <p className="kh-h3 text-kh-orange">3D-Ansicht wird neu geladen</p>
-            <p className="mt-2 max-w-xs text-sm text-kh-grey">
+            <p className="mt-2 max-w-xs text-sm text-kh-paper/75">
               Die Grafikausgabe des Geräts wurde zurückgesetzt. Das Modell baut sich
               gleich von selbst wieder auf.
             </p>
             <button
               type="button"
-              className="mt-4 rounded-kh bg-kh-orange px-4 py-2 text-sm text-kh-page"
+              className="mt-4 rounded-kh bg-kh-orange px-4 py-2 text-sm font-semibold text-kh-ink"
               onClick={() => window.location.reload()}
             >
               Seite neu laden
@@ -166,33 +166,43 @@ export default function DachstuhlDemo() {
         </div>
       )}
 
-      <div className="pointer-events-none absolute top-4 left-4 z-20 max-w-xs">
-        <p className="text-sm tracking-wide text-kh-grey uppercase">
-          Dachstuhl · Beweis-Prototyp
+      <div
+        className={`pointer-events-none absolute top-4 left-4 z-20 max-w-xs rounded-kh border px-4 py-3 shadow-lg backdrop-blur-md ${
+          dunkel
+            ? 'border-kh-line bg-kh-surface/90 text-kh-paper'
+            : 'border-black/10 bg-kh-paper/90 text-kh-raised'
+        }`}
+      >
+        <p className="text-sm tracking-wide uppercase">Dachstuhl · Beweis-Prototyp</p>
+        <p className={`kh-h3 ${dunkel ? 'text-kh-orange' : 'text-kh-orange-deep'}`}>
+          {phase}
         </p>
-        <p className="kh-h3 text-kh-orange">{phase}</p>
-        <p className="mt-1 text-sm text-kh-grey/80">
+        <p className="mt-1 text-sm opacity-80">
           {masse.nPaare} Sparrenpaare · Achsmaß {(masse.e * 100).toFixed(1)} cm ·
           Firsthöhe {masse.yFirstOK.toFixed(2)} m · {masse.aDachGrundriss.toFixed(0)} m²
           über dem Grundriss
         </p>
       </div>
 
-      <BauteilKarte auswahl={auswahl} onSchliessen={() => setAuswahl(null)} />
+      <div className="contents text-kh-paper">
+        <BauteilKarte auswahl={auswahl} onSchliessen={() => setAuswahl(null)} />
+      </div>
 
       {!debug.aktiv && (
-        <DebugLeiste
-          ansicht={ansicht}
-          onAnsicht={setAnsicht}
-          pausiert={pausiert}
-          onPausiert={setPausiert}
-          onSpringe={(t) => {
-            setPausiert(true)
-            springe(t)
-          }}
-          reglerRef={regler}
-          phase={phase}
-        />
+        <div className="contents text-kh-paper [&_.bg-kh-orange]:text-kh-ink [&_input[type=range]]:bg-kh-raised">
+          <DebugLeiste
+            ansicht={ansicht}
+            onAnsicht={setAnsicht}
+            pausiert={pausiert}
+            onPausiert={setPausiert}
+            onSpringe={(t) => {
+              setPausiert(true)
+              springe(t)
+            }}
+            reglerRef={regler}
+            phase={phase}
+          />
+        </div>
       )}
 
       {debug.perf && <Fpsanzeige />}
@@ -220,7 +230,7 @@ function Fpsanzeige() {
     return () => cancelAnimationFrame(id)
   }, [])
   return (
-    <div className="absolute top-4 right-4 z-20 rounded-kh bg-kh-surface px-3 py-1 text-sm text-kh-grey tabular-nums">
+    <div className="absolute top-4 right-4 z-20 rounded-kh border border-kh-line bg-kh-surface/90 px-3 py-1 text-sm text-kh-paper tabular-nums backdrop-blur-md">
       {fps} fps
     </div>
   )

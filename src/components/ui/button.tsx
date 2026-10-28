@@ -34,7 +34,9 @@ const buttonVariants = cva(
     'font-semibold tracking-[0.01em]',
     'transition-[transform,box-shadow,background-color,border-color,color] duration-100',
     'outline-none select-none',
-    'disabled:pointer-events-none disabled:opacity-40',
+    // Deaktiviert bleibt klar lesbar. Auf der Stele bedeuteten 40 % bei
+    // konturierten Knöpfen fast "nicht gerendert" statt "noch nicht möglich".
+    'disabled:pointer-events-none disabled:opacity-[0.58]',
     '[&_svg]:shrink-0',
   ].join(' '),
   {

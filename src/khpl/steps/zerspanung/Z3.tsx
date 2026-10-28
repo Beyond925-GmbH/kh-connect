@@ -123,7 +123,7 @@ export function Z3() {
           </ol>
           <svg
             viewBox="0 0 350 180"
-            className="max-h-40 w-full rounded-kh bg-black/30 max-sm:max-h-28"
+            className="max-h-40 w-full rounded-kh bg-black/30 max-sm:max-h-36"
             role="img"
             aria-label={
               fertig
@@ -158,7 +158,14 @@ export function Z3() {
               stroke="#ffe3b9"
               strokeWidth="2"
             />
-            <text x="175" y="169" textAnchor="middle" fill="#e7ebee" fontSize="13">
+            <text
+              x="175"
+              y="168"
+              textAnchor="middle"
+              fill="#e7ebee"
+              fontSize="15"
+              fontWeight="600"
+            >
               {anzahl >= 2
                 ? 'Die Oberfläche ist abgedreht.'
                 : 'Deine Stange dreht sich in der Maschine.'}

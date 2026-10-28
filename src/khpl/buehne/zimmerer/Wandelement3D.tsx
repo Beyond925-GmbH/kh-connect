@@ -9,6 +9,7 @@ import { FOV } from '@/drei/kamera'
 import { useTapErkennung } from '@/drei/useTapErkennung'
 import { useSichtfeld } from '@/khpl/shell/SichtfeldKontext'
 import { Hallenlicht } from '@/khpl/buehne/Hallenlicht'
+import { Dachstuhl3DFallback } from '@/khpl/buehne/Dachstuhl3DFallback'
 import {
   AmHaken,
   Baustelle,
@@ -594,6 +595,12 @@ export default function Wandelement3D(props: Wandelement3DProps) {
       {/* Der Schein, in dem das Modell steht — sonst ist die Leinwand ein
           einfarbiges Rechteck (s. `Hallenlicht`). */}
       <Hallenlicht sichtfeld={sichtfeld} />
+
+      {!bereit && !kontextWeg && (
+        <div className="pointer-events-none absolute inset-0 z-20" aria-hidden>
+          <Dachstuhl3DFallback text="Die Holzkonstruktion wird geladen" />
+        </div>
+      )}
 
       {kontextWeg && (
         <div className="absolute inset-0 z-30 grid place-items-center bg-kh-ink/90">

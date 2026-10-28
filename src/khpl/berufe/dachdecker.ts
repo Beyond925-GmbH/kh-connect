@@ -285,10 +285,25 @@ export const DACHDECKER: BerufDef = {
     // lesbar. MEDIEN-INVENTAR führt genau das als Ausschlusskriterium und hat
     // aus demselben Grund schon zwei andere Motive aussortiert.
     'B4.1': { src: '/medien/schritte/b41-lagerhalle.webp', pos: '50% 50%' },
-    'B5.1': { src: '/medien/schritte/b51-team.webp', pos: '50% 45%' },
+    // Im Hochformat liegen die beiden Arbeiter weiter auseinander, als ein
+    // `cover`-Ausschnitt breit ist. `contain` hält beide im Bild; der dunkle
+    // Bühnenraum darunter trägt Titel und Lesekarte wie eine Werkbankfläche.
+    'B5.1': {
+      src: '/medien/schritte/b51-team.webp',
+      pos: '50% 45%',
+      portraitPos: '50% 0%',
+      portraitFit: 'contain',
+    },
     M6: { src: '/medien/schritte/m6-pause.webp', pos: '50% 45%' },
     M8: { src: '/medien/schritte/m8-feierabend.webp', pos: '50% 55%' },
-    M9: { src: '/medien/schritte/m9-karriere.webp', pos: '50% 45%' },
+    // Hochkant bleibt das ganze Motiv erhalten: Die Person sitzt sonst genau
+    // hinter der Karrierekarte und verschwindet vollständig.
+    M9: {
+      src: '/medien/schritte/m9-karriere.webp',
+      pos: '50% 45%',
+      portraitPos: '50% 0%',
+      portraitFit: 'contain',
+    },
     'B9.1': { src: '/medien/schritte/b91-meister.webp', pos: '50% 40%' },
     'B9.2': { src: '/medien/schritte/b92-techniker.webp', pos: '50% 40%' },
     'B9.3': { src: '/medien/schritte/b93-studium.webp', pos: '50% 40%' },

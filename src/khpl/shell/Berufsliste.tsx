@@ -190,7 +190,7 @@ function Karte({
         onClick={() => betreteBeruf(beruf.id)}
         data-testid={`beruf-${beruf.id}`}
         className={`relative flex min-w-0 flex-1 overflow-hidden rounded-kh-lg border-2 text-left transition-transform active:scale-[0.98] ${
-          empfohlen ? 'border-kh-orange' : 'border-kh-line'
+          empfohlen ? 'border-kh-orange' : 'border-kh-line-strong'
         }`}
       >
         {/*
@@ -300,7 +300,7 @@ function Karte({
             {!bald && (
               <ArrowRight
                 aria-hidden
-                className={`size-8 shrink-0 landscape:size-6 ${empfohlen ? 'text-kh-orange' : 'text-kh-paper/50'}`}
+                className={`size-8 shrink-0 landscape:size-6 ${empfohlen ? 'text-kh-orange' : 'text-kh-paper/75'}`}
                 strokeWidth={2.5}
               />
             )}

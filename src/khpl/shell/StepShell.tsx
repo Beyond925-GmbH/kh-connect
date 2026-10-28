@@ -1,6 +1,6 @@
 import { Dialog } from '@base-ui/react/dialog'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ChevronLeft, LayoutGrid, Info } from 'lucide-react'
+import { ArrowLeft, ArrowUp, ChevronLeft, LayoutGrid, Info } from 'lucide-react'
 import { motion } from 'motion/react'
 import { offeneAbstecher, einladung } from '@/khpl/flow/uebergaenge'
 import { step, type StepId } from '@/khpl/flow/steps'
@@ -306,16 +306,30 @@ export function StepShell({
                 zerschnittenen Zeile scharf über den Schleier und die Kante
                 liest sich als Fehler statt als „da kommt noch was“. */}
             {ueberlauf && (
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#0E0D0B] to-transparent"
-              />
+              <>
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-[#0E0D0B] to-transparent"
+                />
+                {/* Auf schmalen Touchscreens reicht ein Verlauf nicht als
+                    Aufforderung. Der Hinweis liegt nur optisch über der
+                    Scrollfläche, bleibt aus der Lesereihenfolge heraus und
+                    verschwindet mit `ueberlauf` an der unteren Kante. */}
+                <div
+                  data-testid="scroll-hinweis"
+                  aria-hidden
+                  className="kh-scroll-hinweis"
+                >
+                  <ArrowUp className="size-4" strokeWidth={2.5} />
+                  Nach oben wischen
+                </div>
+              </>
             )}
           </div>
         )}
 
         {fuss && (
-          <div className="flex shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-kh-line pt-2.5 landscape:pt-3">
+          <div className="kh-step-fuss flex shrink-0 flex-wrap items-center justify-end gap-x-3 gap-y-2 border-t border-kh-line pt-2.5 landscape:pt-3">
             {hatInfo && (
               <Dialog.Root open={infoOffen} onOpenChange={setInfoOffen}>
                 <Dialog.Trigger

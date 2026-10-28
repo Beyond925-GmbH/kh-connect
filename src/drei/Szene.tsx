@@ -79,6 +79,7 @@ export function Szene({
   deinSparren = false,
   steuerungGesperrt = false,
   kameraHuelle,
+  hochkantFuellung,
 }: {
   masse: DachstuhlMasse
   einheiten: Einheit[]
@@ -113,6 +114,8 @@ export function Szene({
    * `huelleBeiT`. Licht und Kulisse rechnen weiter mit `masse.huelle`.
    */
   kameraHuelle?: Huelle
+  /** Seitlicher Hüllenanteil für einen engeren Portraitausschnitt. */
+  hochkantFuellung?: number
 }) {
   const hintergrund = (dunkel ? SZENE_FARBEN.dunkel : SZENE_FARBEN.hell).hintergrund
   const mitte = useRef(new THREE.Vector3(...masse.huelle.mitte))
@@ -175,6 +178,7 @@ export function Szene({
         huelle={huelle}
         attraktor={attraktor}
         sichtfeld={sichtfeld}
+        hochkantFuellung={hochkantFuellung}
         gesperrt={steuerungGesperrt}
       />
       {darstellung === 'riss' ? (

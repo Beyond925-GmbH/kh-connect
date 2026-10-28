@@ -17,41 +17,36 @@ import { cn } from '@/lib/utils'
  */
 export function BerufBild({ beruf, className }: { beruf: BerufDef; className?: string }) {
   const [gefallen, setGefallen] = useState(false)
+  const [geladen, setGeladen] = useState(false)
 
-  if (gefallen) {
-    return (
-      <div
-        aria-hidden
-        className={cn('grid size-full place-items-center bg-kh-raised', className)}
-      >
-        {/* 12 % war schon auf dem vollen Motiv leise; seit die Karten der
-            angekündigten Berufe zusätzlich auf 55 % Deckkraft stehen, blieb
-            davon nichts übrig — eine Karte ohne Bild und ohne sichtbaren
-            Ersatz sieht aus, als fehle sie. */}
+  return (
+    <div aria-hidden className={cn('relative size-full bg-kh-raised', className)}>
+      {/* Der typografische Ersatz liegt schon während des Ladens unter dem
+          Foto. So wird aus einem langsamen Bild kein schwarzes Loch in der
+          Berufsliste. Bei einem Fehler bleibt genau derselbe Zustand stehen. */}
+      <div className="absolute inset-0 grid place-items-center">
         <span className="font-display text-[clamp(2.5rem,8vw,5rem)] leading-none text-kh-paper/35">
           {beruf.kurz.slice(0, 2).toUpperCase()}
         </span>
       </div>
-    )
-  }
-
-  return (
-    <img
-      src={beruf.medien.karte}
-      alt=""
-      aria-hidden
-      // `eager`, nicht `lazy`: dieses Motiv steht an jeder seiner drei
-      // Stellen (Berufsliste, Vorschlag, „bald“) von Anfang an im Bild, und
-      // die Fläche darum fährt beim Auftritt herauf. Ein Bild, das erst
-      // während dieser Bewegung eintrifft, blitzt mitten hinein — der Screen
-      // sieht dann unruhig aus, obwohl die Animation selbst sauber läuft.
-      loading="eager"
-      decoding="async"
-      onError={() => setGefallen(true)}
-      // Wie in `Foto`: die Pexels-Motive sind neutral abgestimmt und sehen
-      // neben Anton-Versalien und Warnfarben ausgewaschen aus.
-      style={{ filter: 'saturate(1.12) contrast(1.06)' }}
-      className={cn('size-full object-cover', className)}
-    />
+      {!gefallen && (
+        <img
+          src={beruf.medien.karte}
+          alt=""
+          aria-hidden
+          // `eager`, nicht `lazy`: dieses Motiv steht an jeder seiner drei
+          // Stellen (Berufsliste, Vorschlag, „bald“) von Anfang an im Bild.
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          onLoad={() => setGeladen(true)}
+          onError={() => setGefallen(true)}
+          // Wie in `Foto`: die Pexels-Motive sind neutral abgestimmt und sehen
+          // neben Anton-Versalien und Warnfarben ausgewaschen aus.
+          style={{ filter: 'saturate(1.12) contrast(1.06)' }}
+          className={`absolute inset-0 size-full object-cover transition-opacity duration-500 ${geladen ? 'opacity-100' : 'opacity-0'}`}
+        />
+      )}
+    </div>
   )
 }

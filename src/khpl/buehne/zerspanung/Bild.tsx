@@ -37,7 +37,7 @@ export function Bild({
 }
 
 /** Luft zwischen Zeichnung und Panelkante. */
-const LUFT_ZUM_PANEL = 14
+const LUFT_ZUM_PANEL = 16
 
 /** Oberkante der Bühne — darüber schwebt die Leiste. */
 const UNTER_DER_LEISTE = 76
@@ -47,9 +47,6 @@ const RAND = 12
 
 /** Quer: Luft zur Screenkante rechts, oben und unten — als Anteil. */
 const QUER_RAND = { seite: 0.03, hoehe: 0.07 } as const
-
-/** Quer: so viel Breite behält die Zeichnung mindestens. */
-const QUER_MINDEST_BREITE = 0.3
 
 function useRahmen() {
   const flaeche = useRef<HTMLDivElement>(null)
@@ -68,12 +65,13 @@ function useRahmen() {
       ?.getBoundingClientRect()
 
     if (f.width > f.height) {
-      const links = Math.min(
-        panel
-          ? Math.max(0, panel.right - f.left + LUFT_ZUM_PANEL)
-          : f.width * QUER_MINDEST_BREITE,
-        f.width * (1 - QUER_RAND.seite - QUER_MINDEST_BREITE),
-      )
+      // Das Panel ist hier die harte Kante. Die frühere Mindestbreite der
+      // Zeichnung deckelte `links` und ließ den Rahmen bei breiten Karten
+      // unter das Panel rutschen. Schmale Restflächen behandelt die jeweilige
+      // Zeichnung über ihr Seitenverhältnis.
+      const links = panel
+        ? Math.max(0, panel.right - f.left + LUFT_ZUM_PANEL)
+        : f.width * 0.3
       const breite = f.width - links - f.width * QUER_RAND.seite
       const hoehe = f.height * (1 - 2 * QUER_RAND.hoehe)
       setRahmen({
